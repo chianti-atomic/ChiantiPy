@@ -1,0 +1,12 @@
+[chianti]
+#           wavelength - angstrom, nm, kev
+wavelength:  angstrom
+#           flux - energy, photon
+flux:  energy
+#           abundfile - any file in $XUVTOP/abundance
+abundfile:  sun_photospheric_1998_grevesse
+#           ioneqfile - any file in $XUVTOP/ioneq
+ioneqfile:  chianti
+#    to use use gui dialogs to make selection, set to true,
+#    to make selections from the shell set to false
+gui:	false

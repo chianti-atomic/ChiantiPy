@@ -1,0 +1,8 @@
+include images/*.png
+include chiantirc
+include LICENSE
+include LICENSE.fortranformat
+include README
+include VERSION
+include QuickStart.ipynb
+exclude core/PNe.py

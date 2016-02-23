@@ -255,7 +255,7 @@ class ion(_ionTrails, _specTrails):
         #
         #   gauss laguerre n=12
         #
-#        ngl=12
+        ngl=12
         xgl=np.asarray([0.115722117358021,0.611757484515131,1.512610269776419,2.833751337743509
             ,4.599227639418353,6.844525453115181,9.621316842456871,13.006054993306350
             ,17.116855187462260,22.151090379396983,28.487967250983992,37.099121044466926], 'float64')
@@ -418,8 +418,8 @@ class ion(_ionTrails, _specTrails):
             #
             #  need to replicate neaev
             ntrans=len(easplom['deryd'])
-#            nsplom=easplom['splom'].shape[1]
-#            x=0.25*np.arange(nsplom)
+            nsplom=easplom['splom'].shape[1]
+            x=0.25*np.arange(nsplom)
             eaev=self.DiParams['eaev']
             if len(eaev) ==1:
                 for itrans in range(ntrans):
@@ -428,7 +428,7 @@ class ion(_ionTrails, _specTrails):
             totalCross = np.zeros_like(energy)
             ntrans = omega.shape[0]
             for itrans in range(ntrans):
-#                lvl1 = self.Easplom['lvl1'][itrans]
+                lvl1 = self.Easplom['lvl1'][itrans]
                 #  the collision strengths have already by divided by the
                 #   statistical weight of the ground level 2j+1
                 cross = eaev[itrans]*const.bohrCross*omega[itrans]/(energy/const.ryd2Ev)
@@ -1332,6 +1332,8 @@ class ion(_ionTrails, _specTrails):
                 # for proton rates
                 l1=self.Psplups["lvl1"][isplups]-1
                 l2=self.Psplups["lvl2"][isplups]-1
+                fmult1 = self.Elvlc['mult'][l1]
+                fmult2 = self.Elvlc['mult'][l2]
                 ttype=self.Psplups["ttype"][isplups]
                 cups=self.Psplups["cups"][isplups]
                 nspl=self.Psplups["nspl"][isplups]
@@ -1443,13 +1445,13 @@ class ion(_ionTrails, _specTrails):
                 ekt = (de*1.57888e+5)/temp
                 fmult1 = float(self.Elvlc["mult"][l1])
                 fmult2 = float(self.Elvlc["mult"][l2])
-                dexRate[isplups] = const.collision*ups[isplups]/(fmult2*np.sqrt(temp))
-                exRate[isplups] = const.collision*ups[isplups]*np.exp(-ekt)/(fmult1*np.sqrt(temp))
+                dexRate[isplups] = ups[isplups]
+                exRate[isplups] = (fmult1/fmult2)*ups[isplups]*np.exp(-ekt)
         #
         ups=np.where(ups > 0.,ups,0.)
         #
         if prot:
-            self.PUpsilon = {'upsilon':ups, 'temperature':temperature, 'exRate':exRate, 'dexRate':dexRate}
+            self.PUpsilon = {'temperature':temperature, 'exRate':exRate, 'dexRate':dexRate}
         elif diel:
             self.DielUpsilon = {'upsilon':ups, 'temperature':temperature, 'exRate':exRate}
         else:
@@ -1682,14 +1684,12 @@ class ion(_ionTrails, _specTrails):
             useEm = 1
         #
         if self.Em.any() > 0.:
-            ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ $'
+            ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ '
         else:
             ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
         #
         xlabel = 'Wavelength ('+self.Defaults['wavelength'] +')'
         #
-#        lvl1 = []
-#        lvl2 = []
         if self.NTempDen == 1:
             aspectrum = np.zeros_like(wavelength)
             if not 'errorMessage' in self.Intensity.keys():
@@ -2528,8 +2528,6 @@ class ion(_ionTrails, _specTrails):
             if eDensity[0] == eDensity[-1]:
                 ndens = 1
         #
-#        print(' ndens = %5i ntemp = %5i'%(ndens, ntemp))
-        #
         #
         ylabel='Population'
         title=self.Spectroscopic
@@ -2554,8 +2552,8 @@ class ion(_ionTrails, _specTrails):
                     pl.loglog(temperature[good],pop[good,lvl-1])
                 skip=3
                 if good.sum() == ntemp:
-                    start=divmod(lvl, int(ntemp))[1]
-                    for itemp in range(start, ntemp, ntemp//skip):
+                    start=divmod(lvl,ntemp)[1]
+                    for itemp in range(start,ntemp,ntemp//skip):
                         pl.text(temperature[itemp],pop[itemp,lvl-1],str(lvl))
                 else:
                     newtemp=[]
@@ -2580,7 +2578,7 @@ class ion(_ionTrails, _specTrails):
 #                pl.loglog(eDensity,pop[:,lvl-1])
 #                skip=min(3, ndens)
 #                start=divmod(lvl,ndens)[1]
-#                for idens in range(start,ndens,ndens/skip):
+#                for idens in range(start,ndens,ndens//skip):
 #                    pl.text(eDensity[idens],pop[idens,lvl-1],str(lvl))
             toppops = np.zeros((top, ndens), 'float64')
             for ilvl in range(top):
@@ -2621,7 +2619,7 @@ class ion(_ionTrails, _specTrails):
 #                pl.loglog(temperature,pop[:,lvl-1])
 #                skip = min(3, ntemp)
 #                start=divmod(lvl,ntemp)[1]
-#                for itemp in range(start,ntemp,ntemp/skip):
+#                for itemp in range(start,ntemp,ntemp//skip):
 #                    pl.text(temperature[itemp],pop[itemp,lvl-1],str(lvl))
             toppops = np.zeros((top, ntemp), 'float64')
             for ilvl in range(top):
@@ -3445,65 +3443,6 @@ class ion(_ionTrails, _specTrails):
             integrated = intensity.sum(axis=0)
         Intensity = {'intensity':intensity, 'integrated':integrated,'ionS':ionS, 'wvl':wvl, 'lvl1':lvl1, 'lvl2':lvl2, 'pretty1':pretty1, 'pretty2':pretty2,  'obs':obs, 'avalue':avalue, 'em':em}
         self.Intensity = Intensity
-        #
-        # ---------------------------------------------------------------------------
-        #
-    def boundBoundLoss1(self,  wvlRange = None,  allLines=1):
-        """
-        Calculate  the summed radiative loss rate for all lines of the specified ion.
-
-        wvlRange, a 2 element tuple, list or array determines the wavelength range
-
-        units:  ergs cm^-3 s^-1
-
-        includes elemental abundance and ionization fraction.
-        """
-        # emiss ={"wvl":wvl, "emiss":em, "plotLabels":plotLabels}
-        #
-        em = self.Em
-        if hassattr(self, 'Intensity'):
-            intensity = self.Intensity
-        else:
-            self.intensity()
-            intensity = self.Intensity()
-#        self.emiss(wvlRange = wvlRange, allLines=allLines)
-#        emiss = self.Emiss
-#        if 'errorMessage'  in emiss.keys():
-            self.Intensity = {'errorMessage': self.Spectroscopic+' no lines in this wavelength region'}
-            return
-#        em = emiss['emiss']
-#        wvl = emiss['wvl']
-#        eDensity = self.EDensity
-#        if hasattr(self, 'Abundance'):
-#            ab=self.Abundance
-#        else:
-#            self.Abundance = io.abundanceRead()
-#            ab=self.Abundance
-#        if hasattr(self, 'IoneqOne'):
-#            thisIoneq=self.IoneqOne
-#        else:
-#            self.ioneqOne()
-#            thisIoneq=self.IoneqOne
-#        try:
-#            nwvl, ntempden = em.shape
-#            intensity = np.zeros((ntempden, nwvl),'Float64')
-#            if thisIoneq.size == 1:
-#                thisIoneq = np.ones(ntempden, 'float64')*thisIoneq
-#            for it in range(ntempden):
-#                if self.Defaults['flux'] != 'energy':
-#                    intensity[it] = 4.*const.pi*(const.planck*const.light*1.e+8/wvl)*ab*thisIoneq[it]*em[:, it]
-#                else:
-#                    intensity[it] = 4.*const.pi*ab*thisIoneq[it]*em[:, it]/eDensity[it]
-        loss = intensity.sum(axis=1)
-#        except:
-#            nwvl=len(em)
-#            ntempden=1
-#            if self.Defaults['flux'] != 'energy':
-#                intensity = 4.*const.pi*(const.planck*const.light*1.e+8/wvl)*ab*thisIoneq*em
-#            else:
-#                intensity = 4.*const.pi*ab*thisIoneq*em
-#            loss = intensity.sum()
-        self.BoundBoundLoss = {'rate':loss, 'wvlRange':wvlRange, 'temperature':self.Temperature, 'eDensity':self.EDensity}
         #
         # ---------------------------------------------------------------------------
         #

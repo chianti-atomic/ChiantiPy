@@ -15,16 +15,16 @@ class continuum:
     The top level class for continuum calculations.
 
     includes methods for the calculation of the free-free and free-bound continua.
-    
-    can specify the abundance file with abund='cosmic_1973_allen', for example (the .ioneq suffix should not be included)
     '''
-    def __init__(self, ionStr,  temperature, density=0, abundance=0, abundanceName=0, em=0, verbose=0):
+    def __init__(self, ionStr,  temperature, abundance=0, abundanceName=0, em=0, verbose=0):
         nameDict = util.convertName(ionStr)
         self.Z = nameDict['Z']
         self.Ion = nameDict['Ion']
         self.IonStr = ionStr
         self.Dielectronic = 0
         self.Defaults = chdata.Defaults
+        self.AbundanceName = self.Defaults['abundfile']
+        self.IoneqName = self.Defaults['ioneqfile']
         #
         #  ip in eV, reading Ip of next lower level, needed for freeBound
 
@@ -33,7 +33,7 @@ class continuum:
                 print(' for %s this is the neutral ions an does not produce a continuum'%(ionStr))
             return 
         #  the Ip is only relevant to the free-free methods
-        self.Ip = ip[self.Z-1, self.Ion-1]
+#        self.Ip = ip[self.Z-1, self.Ion-1]
         self.Ipr = ip[self.Z-1, self.Ion-2]
         #
         if type(temperature) == float and temperature > 0.:
@@ -41,8 +41,6 @@ class continuum:
         elif type(temperature) == list or type(temperature) == tuple or type(temperature) == np.ndarray:
             temperature = np.asarray(temperature, 'float64')
             self.Temperature = temperature
-        if type(density) != int:
-            self.Density = np.asarray(density,'float64')
         #
         if abundance:
             self.Abundance = abundance
@@ -136,8 +134,8 @@ class continuum:
         #  Ipr 
         #
         # for the ionization potential, must use that of the recombined ion
-        Ipr = ip[self.Z-1, self.Ion-2]
-        ipcm = self.Ip/const.invCm2Ev
+#        Ipr = ip[self.Z-1, self.Ion-2]
+#        ipcm = self.Ip/const.invCm2Ev
         iprcm = self.Ipr/const.invCm2Ev
         #for i in range(nlvls):
             #print(' lvl %5i ecm %12.3e Ip-wvl %12.4f  Ipr-wvl %12.4f '%(i, ecm[i], 1.e+8/(ipcm-ecm[i]), 1.e+8/(iprcm-ecm[i])))
@@ -561,7 +559,7 @@ class continuum:
         #wecm=1.e+8/(ipcm-ecm)
         #
         # sometime the rFblvl file does not exist
-        if fblvl.has_key('mult') and rFblvl.has_key('mult'):
+        if 'mult' in fblvl.keys() and 'mult' in rFblvl.keys():
             #
             nlvls = len(fblvl['lvl'])
             # pqn = principle quantum no. n
@@ -662,7 +660,7 @@ class continuum:
             self.FreeFree = {'errorMessage':' no non-zero values of ioneq'}
             return
         #
-        if type(gIoneq) == types.FloatType:
+        if type(gIoneq) == float:
             # only one temperature specified
             if gIoneq == 0.:
                 ffRate = np.zeros(wvl.size)
@@ -818,7 +816,7 @@ class continuum:
             errorMessage = ' temperature undefined in continuum.itoh'
             print(errorMessage)
             return {'errorMessage':errorMessage}
-        if type(self.Temperature) == types.FloatType:
+        if type(self.Temperature) == float:
             nTemp = 1
         else:
             nTemp = self.Temperature.size

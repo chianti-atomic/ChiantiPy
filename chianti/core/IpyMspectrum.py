@@ -14,18 +14,23 @@ import chianti.Gui as chgui
 from ._IonTrails import _ionTrails
 from ._SpecTrails import _specTrails
 
-from IPython import version_info
-
-
-from IPython import ipyparallel
-  
-#try:
+#from IPython import version_info
+#if version_info[0] < 4:
     #from IPython import parallel
-##    from chianti import mputil
-    #import chianti.ipymputil as mputil
-#except:
-    #print(' your version of IPython does not support multiprocessing \n you will not be able to use ipymspectrum')
+#else:
+    #import ipyparallel as parallel
 #
+# *************************************
+# to make ChianitPy work under IPython versions 2.x and 3.x
+# comment out the next line
+# and remove the comment before 'from IPython import parallel'
+# in the following line
+# ***************************************
+from ipyparallel import Client
+
+# *****************************************
+
+    #
 defaults = chdata.Defaults
     #
     #
@@ -82,8 +87,8 @@ class ipymspectrum(_ionTrails, _specTrails):
         #
         t1 = datetime.now()
         #
-        rcAll = parallel.Client()
-        all_engines = rcAll[:]
+        rcAll = Client()
+#        all_engines = rcAll[:]
         lbvAll = rcAll.load_balanced_view()
         #
         #
@@ -215,11 +220,16 @@ class ipymspectrum(_ionTrails, _specTrails):
         #
         for ijk in range(len(list(lbvAll.results.values()))):
             out = list(lbvAll.results.values())[ijk]
+            if type(out) != list:
+                print(' a problem has occured - this can be caused by')
+                print('running Python3 and not using ipcluster3')
+                return
             ionS = out[0]
+            if verbose:
+                print(' collecting calculation for %s'%(ionS))
             ionsCalculated.append(ionS)
             calcType = out[1]
             if verbose:
-                print(' collecting calculation for %s'%(ionS))
                 print(' processing %s results'%(calcType))
             #
             if calcType == 'ff':
@@ -387,4 +397,7 @@ def doAll(inpt):
                 thisIon.twoPhoton(wavelength, em=em)
                 outList.append(thisIon.TwoPhoton)
         return outList
+#        else:
+#            outList=[ionS,  calcType, 'error in calculating line emissivity']
+#            return outList
 

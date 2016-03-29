@@ -4,7 +4,7 @@ _IonTrails
 import copy
 import time
 import numpy as np
-import pylab as pl
+import matplotlib.pyplot as plt
 import chianti.util as util
 import chianti.io as io
 import chianti.Gui as chGui
@@ -19,275 +19,6 @@ class _ionTrails():
         return
         #
         # -------------------------------------------------------------------------------------
-        #
-#    def gofnt(self,wvlRange=0,top=10, verbose=0):
-#        """
-#        Calculate the 'so-called' G(T) function.
-#
-#        Given as a function of both temperature and eDensity.
-#
-#        Only the top( set by 'top') brightest lines are plotted.
-#        the G(T) function is returned in a dictionary self.Gofnt
-#        """
-#        #
-#        #self.emiss={"wvl":wvl,"emiss":em,"units":units,"plotLabels":plotLabels}
-#        #
-#        #
-#        #
-#        if not hasattr(self, 'Intensity'):
-#            try:
-#                self.intensity()
-#            except:
-#                print(' intensities not calculated and emiss() is unable to calculate them')
-#                print(' perhaps the temperature and/or eDensity are not set')
-#                return
-#        #
-#        # everything in self.Intensity should be a numpy array
-#        #
-#         #
-#            #
-#        #
-#        #
-##        if hasattr(self, 'Abundance'):
-##            ab=self.Abundance
-##        else:
-##            self.Abundance = io.abundanceRead()
-##            ab=self.Abundance
-##        if not hasattr(self, 'Abundance'):
-##            self.Abundance = io.abundanceRead()
-#        #
-#        fontsize=12
-#        #
-##        emiss=em["emiss"]
-##        wvl=em["wvl"]
-##        pretty1 = em['pretty1']
-##        pretty2 = em['pretty2']
-##        lvl1 = em['lvl1']
-##        lvl2 = em['lvl2']
-#        #
-#        intens = copy.deepcopy(self.Intensity)
-#        intensity = intens['intensity']
-#        ionS = intens['ionS']        
-#        ionSet = set(ionS)
-#        ionNum = len(ionSet)
-#        wvl = intens['wvl']
-#        lvl1 = intens['lvl1']
-#        lvl2 = intens['lvl2']
-#        pretty1 = intens['pretty1']
-#        pretty2 = intens['pretty2']
-#        obs = intens['obs']
-#        avalue = intens['avalue']
-#        #
-#        temperature=self.Temperature
-#        eDensity=self.EDensity
-##        plotLabels=em["plotLabels"]
-##        xLabel=plotLabels["xLabel"]
-##        yLabel=plotLabels["yLabel"]
-#        #
-#        # find which lines are in the wavelength range if it is set
-#        #
-#        #
-#        if type(wvlRange) != type(1):
-#            igvl=util.between(wvl,wvlRange)
-#        else:
-#            igvl=range(len(wvl))
-#        nlines=len(igvl)
-#        if nlines ==0:
-#            print(' no lines in selected interval')
-#            return
-#        # find the top most intense lines
-#        #
-#        if top > nlines:
-#            top=nlines
-#        maxEmiss=np.zeros(nlines,'Float64')
-#        for iline in range(nlines):
-#            maxEmiss[iline] = intensity[:, igvl[iline]].max()
-#        for iline in range(nlines):
-#            if maxEmiss[iline] >= maxEmiss.max():
-#                maxAll = intensity[:, igvl[iline]]
-##                maxIndex = igvl[iline]
-##        print ' maxIndex, maxAll = ', maxIndex,  maxAll
-##        line=range(nlines)
-#        igvlsort=np.take(igvl,np.argsort(maxEmiss))
-#        topLines=igvlsort[-top:]
-#        maxWvl='%5.3f' % wvl[topLines[-1]]
-##        maxline=topLines[-1]
-#        #
-#        # need to make sure there are no negative values before plotting
-#        good = np.where(intensity > 0.)
-#        emissMin = intensity[good].min()
-#        bad = np.where(intensity <= 0.)
-#        emiss[bad] = emissMin
-#        #
-#        topLines=topLines[wvl[topLines].argsort()]
-#        #
-#        #
-#        ntemp=self.Temperature.size
-#        #
-#        ndens=self.EDensity.size
-#        #
-#        ylabel = 'Emissivity relative to '+maxWvl
-#        title = self.Spectroscopic
-#        #
-#        #
-#        if ndens==1 and ntemp==1:
-#            print(' only a single temperature and eDensity')
-#            return
-#        elif ndens == 1:
-#            xlabel='Temperature (K)'
-#            ngofnt = temperature.size
-#            xvalues=temperature
-#            outTemperature=temperature
-#            outDensity=np.zeros(ntemp,'Float64')
-#            outDensity.fill(eDensity)
-#            desc_str=' at Density = %10.2e' % eDensity
-#        elif ntemp == 1:
-#            xvalues=eDensity
-#            ngofnt = eDensity.size
-#            outTemperature=np.zeros(ndens,'Float64')
-#            outTemperature.fill(temperature)
-#            outDensity=eDensity
-#            xlabel=r'$\rm{Electron Density (cm}^{-3}\rm{)}$'
-#            desc_str=' at Temperature = %10.2e' % temperature
-#        else:
-#            outTemperature=temperature
-#            outDensity=eDensity
-#            xlabel='Temperature (K)'
-#            xvalues=temperature
-#            ngofnt = temperature.size
-#            desc_str=' for variable Density'
-#            #
-#        #
-#        # put all actual plotting here
-#        #
-#        pl.ion()
-##        if chInteractive:
-##            pl.ion()
-##        else:
-##            pl.ioff()
-#        #
-#        pl.figure()
-#        ax = pl.subplot(111)
-#        nxvalues=len(xvalues)
-#        #  maxAll is an array
-##        print ' emiss = ', np.max(emiss[top-1]), np.max(emiss[0])
-##        print ' maxAll = ', maxAll
-##        ymax = np.max(1.2*emiss[top-1]/maxAll)
-#        ymax = 1.2
-##        print ' ymax = ', ymax
-#        ymin = ymax  #  np.min(emiss[0]/maxAll)  # was originally  = ymax
-#        for iline in range(top):
-#            tline=topLines[iline]
-#            pl.loglog(xvalues,intensity[tline]/maxAll)
-#            if np.min(intensity[:, tline]/maxAll) < ymin:
-#                ymin = np.min(intensity[:, tline]/maxAll)
-#            skip=2
-#            start=divmod(iline,nxvalues)[1]
-#            for ixvalue in range(start,nxvalues,nxvalues/skip):
-#                pl.text(xvalues[ixvalue],intensity[:, tline,ixvalue]/maxAll[ixvalue],str(wvl[tline]))
-#        pl.xlim(xvalues.min(),xvalues.max())
-#        pl.ylim(ymin, ymax)
-##       yl=pl.ylim()
-##       pl.ylim(yl[0],1.2)
-#        pl.xlabel(xlabel,fontsize=fontsize)
-#        pl.ylabel(ylabel,fontsize=fontsize)
-#        if ndens == ntemp and ntemp > 1:
-#            pl.text(0.07, 0.5,title, horizontalalignment='left', verticalalignment='center', fontsize=fontsize,  transform = ax.transAxes)
-#            #
-#            ax2 = pl.twiny()
-#            xlabelDen=r'Electron Density (cm$^{-3}$)'
-#            pl.xlabel(xlabelDen, fontsize=fontsize)
-#            pl.loglog(eDensity,intensity[:, topLines[top-1]]/maxAll, visible=False)
-#            ax2.xaxis.tick_top()
-#        else:
-#            pl.ylim(ymin, ymax)
-#            pl.title(title+desc_str,fontsize=fontsize)
-#        pl.draw()
-#        #
-#        time.sleep(0.5)
-#        #
-##        print ' topLInes = ', wvl[topLines]
-##        wvlChoices = []
-##        for iline in range(top):
-##            tline = topLines[iline]
-##            wvlChoices.append('%12.4f %4i %4i %s - %s'%(wvl[tline], lvl1[tline], lvl2[tline], pretty1[tline], pretty2[tline]))
-##        gline = chGui.gui.selectorDialog(wvlChoices,label='Select line(s)')
-#        #
-#        selectTags = []
-#        for itop in topLines:
-#            if ionNum == 1:
-#                selectTags.append(str(wvl[itop]))
-#            else:
-#                selectTags.append(ionS[itop]+ ' '+ str(wvl[itop]))
-#        gline = chGui.gui.selectorDialog(selectTags,label='Select line(s)')
-#
-#        gline_idx=gline.selectedIndex
-#        #
-#        #
-##        gAbund=self.Abundance
-#        #
-##        try:
-##            thisIoneq=self.IoneqOne
-##        except:
-##            self.ioneqOne()
-##            thisIoneq=self.IoneqOne
-##        if verbose:
-##            print(' abundance = %10.2e '%(gAbund))
-##            print(' index  temperature  ion fraction')
-##            for it,  anioneq in enumerate(thisIoneq):
-##                print (' %5i %10.2e %10.2e '%(it, outTemperature[it], anioneq))
-#        #        gioneq=np.where(thisIoneq > 0.)
-#        #        y2=interpolate.splrep(np.log(self.IoneqAll['ioneqTemperature'][gioneq]),np.log(thisIoneq[gioneq]),s=0)  #allow smoothing,s=0)
-#        #        gIoneq=interpolate.splev(np.log(temperature),y2)   #,der=0)
-##        gIoneq=self.IoneqOne/eDensity
-#        #
-#        #
-#        #
-#        # plot the desired ratio
-#        pl.figure()
-#        g_line = topLines[gline_idx]#  [0]
-#        ##        print ' g_line = ',g_line
-#        #
-#        gofnt=np.zeros(ngofnt,'float64')
-#        for aline in g_line:
-#            gofnt += intensity[:, aline].squeeze()
-#            gofnt += intensity[:, aline].squeeze()
-#        self.Gofnt={'temperature':outTemperature,'eDensity':outDensity,'gofnt':gofnt, 'index':g_line, 'wvl':wvl[g_line]}
-#        #
-#        pl.loglog(xvalues,gofnt)
-#        pl.xlim(xvalues.min(),xvalues.max())
-#        pl.xlabel(xlabel,fontsize=fontsize)
-#        pl.ylabel('Gofnt',fontsize=fontsize)
-#        if ionNum == 1:
-#            newTitle = '%9s'%(self.Spectroscopic) + '%12.3f %4i %4i %s - %s'%(wvl[g_line[0]], lvl1[g_line[0]], lvl2[g_line[0]], pretty1[g_line[0]], pretty2[g_line[0]])
-#            if len(g_line) > 1:
-#                newTitle +='\n'
-#            for igl in g_line[1:]:
-#                newTitle += ' ' + '%12.3f %4i %4i %s - %s'%(wvl[igl], lvl1[igl], lvl2[igl], pretty1[igl], pretty2[igl])
-#                if igl != g_line[-1]:
-#                    newTitle +='\n'
-#    #        pl.annotate(newTitle, xytext=(0.3, 0.3), textcoords='figure_fraction')
-#        else:
-#            newTitle = 'newTitle'
-#        pl.annotate(newTitle, xy=(-10, 10),
-#                xycoords='axes points',
-#                horizontalalignment='right', verticalalignment='bottom')  #,fontsize=20)
-#        if ndens == ntemp and ntemp > 1:
-##            newTitle +' '+str(wvl[g_line])+' '+desc_str
-#            pl.text(0.07, 0.5,newTitle, horizontalalignment='left', verticalalignment='center', fontsize=fontsize,  transform = ax.transAxes)
-#            #
-#            ax2 = pl.twiny()
-##            xlabel=r'Electron Density (cm$^{-3}$)'
-#            pl.xlabel(xlabelDen, fontsize=fontsize)
-#            pl.loglog(eDensity,gofnt, visible=False)
-#            ax2.xaxis.tick_top()
-#        else:
-#            pl.title(newTitle, fontsize=fontsize)
-#        #pl.ioff()
-#        #pl.show()
-##        return
-        #
-        # ---------------------------------------------------------------------------
         #
     def intensityList(self, index=-1,  wvlRange=None, wvlRanges=None,   top=10, relative=0, outFile=0 ):
         '''
@@ -537,7 +268,7 @@ class _ionTrails():
             top = wvl.size
         # must follow setting top
         #
-        pl.figure()
+        plt.figure()
         ylabel = 'intensity'
         if relative:
             intensity = intensity/intensity[-1]
@@ -547,7 +278,7 @@ class _ionTrails():
         #
         ymin = 10.**(np.log10(intensity[0].min()).round(0)-0.5 )
         #
-        pl.ion()
+        plt.ion()
 #        if chInteractive:
 #            pl.ion()
 #        else:
@@ -557,17 +288,17 @@ class _ionTrails():
             xx=[wvl[idx], wvl[idx]]
             if linLog == 'lin':
                 yy=[0., intensity[idx]]
-                pl.plot(xx, yy)
+                plt.plot(xx, yy)
             else:
                 yy=[ymin/10., intensity[idx]]
-                pl.semilogy(xx, yy)
-        pl.xlabel(xlabel)
-        pl.ylabel(ylabel)
-        pl.title(title+tstr+dstr)
+                plt.semilogy(xx, yy)
+        plt.xlabel(xlabel)
+        plt.ylabel(ylabel)
+        plt.title(title+tstr+dstr)
         if wvlRange:
-            pl.axis([wvlRange[0], wvlRange[1], ymin, intensity.max()])
+            plt.axis([wvlRange[0], wvlRange[1], ymin, intensity.max()])
         if plotFile:
-            pl.savefig(plotFile)
+            plt.savefig(plotFile)
         #
 #        idx = np.argsort(wvl)
 #        self.Intens['wvlTop'] = wvl[idx]
@@ -724,7 +455,7 @@ class _ionTrails():
         #
         # put all actual plotting here
         #
-        pl.ion()
+        plt.ion()
 #        if chInteractive:
 #            pl.ion()
 #        else:
@@ -733,12 +464,12 @@ class _ionTrails():
         #  maxAll is an array
         ymax = np.max(intensity[:, topLines[0]]/maxAll)
         ymin = ymax
-        pl.figure()
-        ax = pl.subplot(111)
+        plt.figure()
+        ax = plt.subplot(111)
         nxvalues=len(xvalues)
         for iline in range(top):
             tline=topLines[iline]
-            pl.loglog(xvalues,intensity[:, tline]/maxAll)
+            plt.loglog(xvalues,intensity[:, tline]/maxAll)
             if np.min(intensity[:, tline]/maxAll) < ymin:
                 ymin = np.min(intensity[:, tline]/maxAll)
             if np.max(intensity[:, tline]/maxAll) > ymax:
@@ -750,24 +481,24 @@ class _ionTrails():
                     text = '%10.4f'%(wvl[tline])
                 else:
                     text = '%s %10.4f'%(ionS[tline], wvl[tline])
-                pl.text(xvalues[ixvalue], intensity[ixvalue, tline]/maxAll[ixvalue], text)
-        pl.xlim(xvalues.min(),xvalues.max())
+                plt.text(xvalues[ixvalue], intensity[ixvalue, tline]/maxAll[ixvalue], text)
+        plt.xlim(xvalues.min(),xvalues.max())
 #        pl.ylim(ymin, ymax)
-        pl.xlabel(xlabel,fontsize=fontsize)
-        pl.ylabel(ylabel,fontsize=fontsize)
+        plt.xlabel(xlabel,fontsize=fontsize)
+        plt.ylabel(ylabel,fontsize=fontsize)
         if ndens == ntemp and ntemp > 1:
-            pl.text(0.07, 0.5,title, horizontalalignment='left', verticalalignment='center', fontsize=fontsize,  transform = ax.transAxes)
+            plt.text(0.07, 0.5,title, horizontalalignment='left', verticalalignment='center', fontsize=fontsize,  transform = ax.transAxes)
             #
-            ax2 = pl.twiny()
+            ax2 = plt.twiny()
             xlabelDen=r'Electron Density (cm$^{-3}$)'
-            pl.xlabel(xlabelDen, fontsize=fontsize)
-            pl.loglog(eDensity,intensity[:, topLines[top-1]]/maxAll, visible=False)
+            plt.xlabel(xlabelDen, fontsize=fontsize)
+            plt.loglog(eDensity,intensity[:, topLines[top-1]]/maxAll, visible=False)
             ax2.xaxis.tick_top()
-            pl.ylim(ymin/1.2, 1.2*ymax)
+            plt.ylim(ymin/1.2, 1.2*ymax)
         else:
-            pl.ylim(ymin/1.2, 1.2*ymax)
-            pl.title(title+desc_str,fontsize=fontsize)
-        pl.draw()
+            plt.ylim(ymin/1.2, 1.2*ymax)
+            plt.title(title+desc_str,fontsize=fontsize)
+        plt.draw()
         #  need time to let matplotlib finish plotting
         time.sleep(0.5)
         #
@@ -805,12 +536,12 @@ class _ionTrails():
         #
         # plot the desired ratio
         #  maxAll is an array
-        pl.figure()
-        ax = pl.subplot(111)
-        pl.loglog(xvalues,numIntens/denIntens)
-        pl.xlim(xvalues.min(),xvalues.max())
-        pl.xlabel(xlabel,fontsize=fontsize)
-        pl.ylabel('Ratio ('+self.Defaults['flux']+')',fontsize=fontsize)
+        plt.figure()
+        ax = plt.subplot(111)
+        plt.loglog(xvalues,numIntens/denIntens)
+        plt.xlim(xvalues.min(),xvalues.max())
+        plt.xlabel(xlabel,fontsize=fontsize)
+        plt.ylabel('Ratio ('+self.Defaults['flux']+')',fontsize=fontsize)
         if ionNum == 1:
             desc = ionS[0]
         else:
@@ -827,11 +558,11 @@ class _ionTrails():
             else:
                 desc += ' ' + ionS[topLines[aline]] + ' ' + str(wvl[topLines[aline]]) 
         if ndens == ntemp and ntemp > 1:
-            pl.text(0.07, 0.5,desc, horizontalalignment='left', verticalalignment='center', fontsize=fontsize,  transform = ax.transAxes)
+            plt.text(0.07, 0.5,desc, horizontalalignment='left', verticalalignment='center', fontsize=fontsize,  transform = ax.transAxes)
             #
-            ax2 = pl.twiny()
+            ax2 = plt.twiny()
             xlabelDen=r'Electron Density (cm$^{-3}$)'
-            pl.xlabel(xlabelDen, fontsize=fontsize)
+            plt.xlabel(xlabelDen, fontsize=fontsize)
             pl.loglog(eDensity,numIntens/denIntens, visible=False)
             ax2.xaxis.tick_top()
         else:

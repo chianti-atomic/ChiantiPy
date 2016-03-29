@@ -1,6 +1,6 @@
 from datetime import datetime
 import numpy as np
-import pylab as pl
+import matplotlib.pyplot as plt
 np.seterr(over='ignore')
 #import chianti.core as ch
 import chianti
@@ -289,9 +289,9 @@ class radLoss(_specTrails):
         temp = self.RadLoss['temperature']
         rate = self.RadLoss['rate']
         pl.loglog(temp, rate)
-        pl.xlabel('Temperature (K)',fontsize=fontsize)
-        pl.ylabel(r'erg  s$^{-1}$  ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$',fontsize=fontsize)
+        plt.xlabel('Temperature (K)',fontsize=fontsize)
+        plt.ylabel(r'erg  s$^{-1}$  ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$',fontsize=fontsize)
 #            title = 'Radiative loss rate,  minAbund = %6.1e'%(self.MinAbund)
 #            if self.Density.size == 1:
 #                title += ', density = %6.1e'%(self.Density)
-#            pl.title(title, fontsize=fontsize)
+#            plt.title(title, fontsize=fontsize)

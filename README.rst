@@ -1,9 +1,11 @@
 ===================================
- Welcome to ChiantiPy version 0.6.4
+ Welcome to ChiantiPy version 0.6.5
 ===================================
 
-changes from 0.6.0 to 0.6.4
+changes from 0.6.0 to 0.6.5
 ===========================
+
+matplotlib.pyplot is now imported for plotting
 
 IPython version 4 / Jupyter is now listed as a prerequisite.  However, v0.6.4 can be made compatible with IPython 2 or 3 with a simple edit.
 

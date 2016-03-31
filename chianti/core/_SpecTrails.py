@@ -1,6 +1,6 @@
 from datetime import datetime
 import numpy as np
-import pylab as pl
+import matplotlib.pyplot as plt
 import chianti.filters as chfilters
 import chianti.util as util
 import chianti.io as chio 
@@ -259,7 +259,7 @@ class _specTrails():
         '''
         to plot the spectrum as a function of wavelength
         '''
-        pl.figure()
+        plt.figure()
         mask = self.Em > 1.
         if mask.sum() == 0:
             ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
@@ -270,37 +270,37 @@ class _specTrails():
         #
 #        ymin = 10.**(np.log10(emiss.min()).round(0))
         #
-        pl.ion()
+        plt.ion()
         #
         if integrated:
             if 'wavelength' in sorted(self.Spectrum.keys()):
-                pl.plot(self.Spectrum['wavelength'], self.Spectrum['integrated'])
+                plt.plot(self.Spectrum['wavelength'], self.Spectrum['integrated'])
             elif 'wvl' in sorted(self.Spectrum.keys()):
-                pl.plot(self.Spectrum['wvl'], self.Spectrum['integrated'])
-            pl.xlabel(xlabel)
-            pl.ylabel(ylabel)
-            pl.title('integrated spectrum')
+                plt.plot(self.Spectrum['wvl'], self.Spectrum['integrated'])
+            plt.xlabel(xlabel)
+            plt.ylabel(ylabel)
+            plt.title('integrated spectrum')
         else:
             nTempDen = self.NTempDen
             if nTempDen == 1:
             #
                 if 'wavelength' in sorted(self.Spectrum.keys()):
-                    pl.plot(self.Spectrum['wavelength'], self.Spectrum['intensity'])
+                    plt.plot(self.Spectrum['wavelength'], self.Spectrum['intensity'])
                 elif 'wvl' in sorted(self.Spectrum.keys()):
-                    pl.plot(self.Spectrum['wvl'], self.Spectrum['intensity'])
-                    pl.title(' Temperature = %10.2e K'%(self.Temperature))
+                    plt.plot(self.Spectrum['wvl'], self.Spectrum['intensity'])
+                    plt.title(' Temperature = %10.2e K'%(self.Temperature))
             else:
                 if index < 0:
                     index = nTempDen/2
                 if 'wavelength' in sorted(self.Spectrum.keys()):
-                    pl.plot(self.Spectrum['wavelength'], self.Spectrum['intensity'][index])
+                    plt.plot(self.Spectrum['wavelength'], self.Spectrum['intensity'][index])
                 elif 'wvl' in sorted(self.Spectrum.keys()):
-                    pl.plot(self.Spectrum['wvl'], self.Spectrum['intensity'][index])
-                    pl.title(' Temperature = %10.2e K for index = %3i'%(self.Temperature[index], index))
-                pl.xlabel(xlabel)
-                pl.ylabel(ylabel)
+                    plt.plot(self.Spectrum['wvl'], self.Spectrum['intensity'][index])
+                    plt.title(' Temperature = %10.2e K for index = %3i'%(self.Temperature[index], index))
+                plt.xlabel(xlabel)
+                plt.ylabel(ylabel)
         if saveFile:
-            pl.savefig(saveFile)
+            plt.savefig(saveFile)
     #
     # -------------------------------------------------------------------------
     #
@@ -310,7 +310,7 @@ class _specTrails():
         '''
         # 
         #
-        pl.figure()
+        plt.figure()
         mask = self.Em > 1.
         if mask.sum() == 0:
             ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
@@ -322,26 +322,26 @@ class _specTrails():
         #
 #        ymin = 10.**(np.log10(emiss.min()).round(0))
         #
-        pl.ion()
+        plt.ion()
         #
         if integrated:
-            pl.plot(self.Spectrum['wavelength'], self.Spectrum['intensity'].sum(axis=0))
-            pl.xlabel(xlabel)
-            pl.ylabel(ylabel)
-            pl.title('integrated spectrum')
+            plt.plot(self.Spectrum['wavelength'], self.Spectrum['intensity'].sum(axis=0))
+            plt.xlabel(xlabel)
+            plt.ylabel(ylabel)
+            plt.title('integrated spectrum')
         else:
             nTempDen = self.NTempDen
             if nTempDen == 1:
             #
-                pl.plot(self.LineSpectrum['wavelength'], self.LineSpectrum['intensity'])
-                pl.title(' Temperature = %10.2e K '%(self.Temperature))
+                plt.plot(self.LineSpectrum['wavelength'], self.LineSpectrum['intensity'])
+                plt.title(' Temperature = %10.2e K '%(self.Temperature))
             else:
-                pl.plot(self.LineSpectrum['wavelength'], self.LineSpectrum['intensity'][index])
-                pl.title(' Temperature = %10.2e K for index = %3i'%(self.Temperature[index], index))
-            pl.xlabel(xlabel)
-            pl.ylabel(ylabel)
+                plt.plot(self.LineSpectrum['wavelength'], self.LineSpectrum['intensity'][index])
+                plt.title(' Temperature = %10.2e K for index = %3i'%(self.Temperature[index], index))
+            plt.xlabel(xlabel)
+            plt.ylabel(ylabel)
         if saveFile:
-            pl.savefig(saveFile)
+            plt.savefig(saveFile)
     #
     # -------------------------------------------------------------------------
  

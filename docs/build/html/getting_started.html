@@ -1,0 +1,203 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Getting started with ChiantiPy &mdash; ChiantiPy 0.6.5 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.6.5',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ChiantiPy 0.6.5 documentation" href="index.html" />
+    <link rel="next" title="Quick Start" href="quick_start.html" />
+    <link rel="prev" title="ChiantiPy Documentation" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="quick_start.html" title="Quick Start"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="ChiantiPy Documentation"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">ChiantiPy 0.6.5 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="getting-started-with-chiantipy">
+<h1>Getting started with ChiantiPy<a class="headerlink" href="#getting-started-with-chiantipy" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference external" href="http://www.chiantidatabase.org/">CHIANTI</a>, the atomic database for astrophysical spectroscopy (Version 8)</li>
+</ul>
+<ul class="simple">
+<li><a class="reference external" href="http://www.python.org">Python</a> (developed with versions 2.7 and 3.3)</li>
+</ul>
+<ul class="simple">
+<li><a class="reference external" href="http://www.scipy.org/">Numpy</a> (developed with 1.10)</li>
+</ul>
+<ul class="simple">
+<li><a class="reference external" href="http://www.scipy.org/">Scipy</a> (developed with 0.16)</li>
+</ul>
+<ul class="simple">
+<li><a class="reference external" href="http://matplotlib.sourceforge.net/">Matplotlib</a> (developed with 1.5)</li>
+</ul>
+<ul>
+<li><p class="first">Matplotlib requires a GUI library</p>
+<p><a class="reference external" href="http://www.riverbankcomputing.co.uk/">PyQt4</a> or <a class="reference external" href="http://www.wxpython.org/">wxPython</a> or <a class="reference external" href="http://www.pygtk.org/">PyGTK</a></p>
+<p>Once one of these is installed, it must be set as the backend in your matplotlibrc file, e.g., backend:  Qt4Agg</p>
+</li>
+</ul>
+<ul class="simple">
+<li><a class="reference external" href="http://ipython.org">IPython</a> version 4 / Jupyter</li>
+</ul>
+</div>
+<div class="section" id="install-the-chianti-database">
+<h2>Install the CHIANTI database<a class="headerlink" href="#install-the-chianti-database" title="Permalink to this headline">¶</a></h2>
+<p>The gzipped <em>data</em> tar ball can be downloaded from the CHIANTI <a class="reference external" href="http://www.chiantidatabase.org/chianti_download.html">website</a></p>
+<ul class="simple">
+<li>put the file in a convenient directory, cd to the directory and untar the file</li>
+<li>ChiantiPy uses the environment variable <em>XUVTOP</em> to find the database.  Set XUVTOP to the name of the directory where the CHIANTI data tarball was placed.  For example</li>
+</ul>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">setenv</span> <span class="n">XUVTOP</span> <span class="o">/</span><span class="n">data1</span><span class="o">/</span><span class="n">xuv</span><span class="o">/</span><span class="n">directory</span><span class="o">.</span><span class="n">where</span><span class="o">.</span><span class="n">the</span><span class="o">.</span><span class="n">tarball</span><span class="o">.</span><span class="n">was</span><span class="o">.</span><span class="n">placed</span>
+</pre></div>
+</div>
+<p>or on Windows:   To set the environment variable, go to Control Panel -&gt; System -&gt; Advanced System Properties -&gt; Environment Variables.</p>
+<p>Some sites have the CHIANTI database maintained as part of a SolarSoft distribution.  In that case, simply set XUVTOP to the directory were it resides, usually something like $SSW/packages/chianti/dbase</p>
+</div>
+<div class="section" id="install-the-prerequisites">
+<h2>Install the Prerequisites<a class="headerlink" href="#install-the-prerequisites" title="Permalink to this headline">¶</a></h2>
+<p>On <strong>Linux</strong> systems this can usually be done with your package manager.</p>
+<p>On <strong>Windows</strong>, <strong>Linux</strong> and <strong>Mac</strong> systems, it is possible to use</p>
+<ul class="simple">
+<li>the <a class="reference external" href="http://continuum.io/downloads">Anaconda</a> distribution from from Continuum, or,</li>
+</ul>
+<ul class="simple">
+<li>the <a class="reference external" href="https://store.enthought.com/downloads/#default">Canopy</a> distribution from Enthought.</li>
+</ul>
+<p>On <strong>Windows</strong>, it is also possible to use:</p>
+<ul class="simple">
+<li><a class="reference external" href="http://winpython.github.io/">WinPython</a></li>
+</ul>
+<p>All of these packages are free, at least for noncommercial use (I believe) and have a considerable amount of documentation.  <strong>You shoud check the version of IPython that is provided</strong>.</p>
+</div>
+<div class="section" id="install-the-chiantipy-package">
+<h2>Install the ChiantiPy package<a class="headerlink" href="#install-the-chiantipy-package" title="Permalink to this headline">¶</a></h2>
+<p>In order to be compatible with the latest version (8.0) of the CHIANTI atomic database, it is necessary to install the latest version (0.6.0) of ChiantiPy</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">ChiantiPy</span>
+</pre></div>
+</div>
+<p>I have not tried this with ChiantiPy, myself.</p>
+<p>The ChiantiPy package can be downloaded from the <a class="reference external" href="http://sourceforge.net/projects/chiantipy/">ChiantiPy</a> project page at Sourceforge, untar it, cd to the directory where it was unpacked, and then, as root</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span>
+</pre></div>
+</div>
+<p>If you do not have root privileges, simply put the ChiantiPy directory in your PYTHONPATH</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span> <span class="o">--</span><span class="n">prefix</span><span class="o">=</span><span class="n">somewhere_in_my_PYTHONPATH</span>
+</pre></div>
+</div>
+<p>or on a Mac, with the Anaconda package</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span> <span class="o">--</span><span class="n">prefix</span><span class="o">=/</span><span class="n">Users</span><span class="o">/</span><span class="n">your_user_name</span><span class="o">/</span><span class="n">anaconda</span><span class="o">/</span>
+</pre></div>
+</div>
+<p><strong>Thanks to Peter Young (GMU) for providing the instructions for installation on Mac and Windows</strong></p>
+</div>
+<div class="section" id="note-chiantipy-interactions-with-matplotlib">
+<h2>Note - ChiantiPy interactions with Matplotlib<a class="headerlink" href="#note-chiantipy-interactions-with-matplotlib" title="Permalink to this headline">¶</a></h2>
+<p>Some of the ChiantiPy methods ask the user to make a selection.  With ChiantiPy, this can be done within the command line shell or with gui dialog widgets using PyQt4 or wxPython.  Matplotlib needs to have a backend specified.  The default is &#8216;GTK&#8217; and ChiantiPy will use the command line shell for user input.  If the Matplotlib backend is specified to be &#8216;Qt4Agg&#8217;, then the PyQt4 widget set will be used by ChiantiPy.  If the Matplotlib backend is specified to be &#8216;WXAgg&#8217; then the wxPython widget set will be used by ChiantiPy.  If the Matplotlib backend is set to something other than the 3 values previously discussed, the command line shell will be used.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Getting started with ChiantiPy</a><ul>
+<li><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li><a class="reference internal" href="#install-the-chianti-database">Install the CHIANTI database</a></li>
+<li><a class="reference internal" href="#install-the-prerequisites">Install the Prerequisites</a></li>
+<li><a class="reference internal" href="#install-the-chiantipy-package">Install the ChiantiPy package</a></li>
+<li><a class="reference internal" href="#note-chiantipy-interactions-with-matplotlib">Note - ChiantiPy interactions with Matplotlib</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">ChiantiPy Documentation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="quick_start.html"
+                        title="next chapter">Quick Start</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/getting_started.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="quick_start.html" title="Quick Start"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="ChiantiPy Documentation"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">ChiantiPy 0.6.5 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Ken Dere.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,549 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Quick Start &mdash; ChiantiPy 0.6.5 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.6.5',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="ChiantiPy 0.6.5 documentation" href="index.html" />
+    <link rel="next" title="Tutorial" href="tutorial.html" />
+    <link rel="prev" title="Getting started with ChiantiPy" href="getting_started.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="tutorial.html" title="Tutorial"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="getting_started.html" title="Getting started with ChiantiPy"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">ChiantiPy 0.6.5 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="quick-start">
+<h1>Quick Start<a class="headerlink" href="#quick-start" title="Permalink to this headline">¶</a></h1>
+<p>This short tutorial will demonstrate some of the capabilities of ChiantiPy and the CHIANTI database.  It assumes that you know what the CHIANTI database provides and why you want to use it.  The current implementation in Version 0.2 mainly provides access to methods concerned with single ions.  An ion such as Fe XIV is specified by the string &#8216;fe_14&#8217;, in the usual CHIANTI notation.</p>
+<p>Bring up a Python session (using &gt; Python -i ), or better yet, an IPython session</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">chianti.core</span> <span class="k">as</span> <span class="nn">ch</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+</pre></div>
+</div>
+<p>What we will really be interested in are various properties of the Fe XIV emissivities as a function of temperature and density.  So, let&#8217;s define a numpy array of temperatures</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">t</span> <span class="o">=</span> <span class="mf">10.</span><span class="o">**</span><span class="p">(</span><span class="mf">5.8</span> <span class="o">+</span> <span class="mf">0.05</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">21.</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>In ChiantiPy, temperatures are currently given in degrees Kelvin and densities as the number electron density per cubic cm.  Then, construct fe14 as would be typically done</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">fe14</span> <span class="o">=</span> <span class="n">ch</span><span class="o">.</span><span class="n">ion</span><span class="p">(</span><span class="s1">&#39;fe_14&#39;</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="n">t</span><span class="p">,</span> <span class="n">eDensity</span><span class="o">=</span><span class="mf">1.e+9</span><span class="p">,</span> <span class="n">em</span><span class="o">=</span><span class="mf">1.e+27</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>note that eDensity is the new keyword for electron density</p>
+<div class="section" id="level-populations">
+<h2>Level populations<a class="headerlink" href="#level-populations" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">fe14</span><span class="o">.</span><span class="n">popPlot</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>produces a matplotlib plot window were the population of the top 10 (the default) levels are plotted as a function of temperature.</p>
+<img alt="_static/fe14.popplot.png" class="align-center" src="_static/fe14.popplot.png" />
+<p>If the level populations had not already been calculated, popPlot() would have invoked the populate() method which calculates the level populations and stores them in the Population dictionary, with keys = [&#8216;protonDensity&#8217;, &#8216;population&#8217;, &#8216;temperature&#8217;, &#8216;density&#8217;].</p>
+</div>
+<div class="section" id="a-chiantipy-convention">
+<h2>A ChiantiPy Convention<a class="headerlink" href="#a-chiantipy-convention" title="Permalink to this headline">¶</a></h2>
+<p>Classes and function of ChiantiPy start with lower case letters.  Data/attributes that are attached to the instantiation of a class will start with a capital letter.  For example,</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">fe14</span><span class="o">.</span><span class="n">populate</span><span class="p">()</span> <span class="n">creates</span> <span class="n">fe14</span><span class="o">.</span><span class="n">Population</span> <span class="n">containing</span> <span class="n">the</span> <span class="n">level</span> <span class="n">population</span> <span class="n">information</span>
+
+<span class="n">fe14</span><span class="o">.</span><span class="n">emiss</span><span class="p">()</span> <span class="n">creates</span> <span class="n">fe14</span><span class="o">.</span><span class="n">Emiss</span> <span class="n">containing</span> <span class="n">the</span> <span class="n">line</span> <span class="n">emissivity</span> <span class="n">information</span>
+
+<span class="n">fe14</span><span class="o">.</span><span class="n">intensity</span><span class="p">()</span> <span class="n">created</span> <span class="n">fe14</span><span class="o">.</span><span class="n">Intensity</span> <span class="n">contain</span> <span class="n">the</span> <span class="n">line</span> <span class="n">intensities</span> <span class="n">information</span>
+
+<span class="n">fe14</span><span class="o">.</span><span class="n">spectrum</span><span class="p">()</span> <span class="n">creates</span> <span class="n">fe14</span><span class="o">.</span><span class="n">Spectrum</span> <span class="n">contain</span> <span class="n">the</span> <span class="n">line</span> <span class="ow">and</span> <span class="n">continuum</span> <span class="n">spectrum</span> <span class="n">information</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="spectral-line-intensities">
+<h2>Spectral Line Intensities<a class="headerlink" href="#spectral-line-intensities" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">fe14</span><span class="o">.</span><span class="n">intensityPlot</span><span class="p">(</span><span class="n">wvlRange</span><span class="o">=</span><span class="p">[</span><span class="mf">210.</span><span class="p">,</span><span class="mf">220.</span><span class="p">],</span><span class="n">linLog</span><span class="o">=</span><span class="s1">&#39;log&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>will plot the intensities for the top (default = 10) lines in the specified wavelength range.  If the <strong>Intensity</strong> attribute has not yet been calculated, it will calculate it.  Since there are 21 temperature involved, a single temperature is selected (21/2 = 10).  Otherwise,</p>
+<img alt="_static/fe14_intensity_plot_log.png" class="align-center" src="_static/fe14_intensity_plot_log.png" />
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">fe14</span><span class="o">.</span><span class="n">intensityPlot</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">wvlRange</span><span class="o">=</span><span class="p">[</span><span class="mf">210.</span><span class="p">,</span> <span class="mf">220.</span><span class="p">],</span> <span class="n">linLog</span> <span class="o">=</span> <span class="s1">&#39;log&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>plots the intensities for a temperature = t[2] = 7.9e+5, in this case.  And, by specifying relative = 1, the emissivities will be plotted relative to the strongest line.</p>
+<img alt="_static/fe14_intensity_plot_log_index2.png" class="align-center" src="_static/fe14_intensity_plot_log_index2.png" />
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">fe14</span><span class="o">.</span><span class="n">intensityList</span><span class="p">(</span><span class="n">wvlRange</span><span class="o">=</span><span class="p">[</span><span class="mi">200</span><span class="p">,</span><span class="mi">220</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>gives the following terminal output:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span> <span class="n">using</span> <span class="n">index</span> <span class="o">=</span>    <span class="mi">10</span> <span class="n">specifying</span> <span class="n">temperature</span> <span class="o">=</span>   <span class="mf">2.00e+06</span><span class="p">,</span> <span class="n">eDensity</span> <span class="o">=</span>    <span class="mf">1.00e+09</span> <span class="n">em</span> <span class="o">=</span>   <span class="mf">1.00e+27</span>
+
+ <span class="o">------------------------------------------</span>
+
+ <span class="n">Ion</span>  <span class="n">lvl1</span>  <span class="n">lvl2</span>                     <span class="n">lower</span> <span class="o">-</span> <span class="n">upper</span>                           <span class="n">Wvl</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>    <span class="n">Intensity</span>      <span class="n">A</span> <span class="n">value</span> <span class="n">Obs</span>
+ <span class="n">fe_14</span>     <span class="mi">1</span>    <span class="mi">11</span>              <span class="mi">3</span><span class="n">s2</span><span class="o">.</span><span class="mi">3</span><span class="n">p</span> <span class="mi">2</span><span class="n">P0</span><span class="o">.</span><span class="mi">5</span> <span class="o">-</span> <span class="mi">3</span><span class="n">s2</span><span class="o">.</span><span class="mi">3</span><span class="n">d</span> <span class="mi">2</span><span class="n">D1</span><span class="o">.</span><span class="mi">5</span>                  <span class="mf">211.3172</span>    <span class="mf">2.336e+02</span>     <span class="mf">3.81e+10</span> <span class="n">Y</span>
+ <span class="n">fe_14</span>     <span class="mi">4</span>    <span class="mi">27</span>              <span class="mi">3</span><span class="n">s</span><span class="o">.</span><span class="mi">3</span><span class="n">p2</span> <span class="mi">4</span><span class="n">P1</span><span class="o">.</span><span class="mi">5</span> <span class="o">-</span> <span class="mi">3</span><span class="n">s</span><span class="o">.</span><span class="mi">3</span><span class="n">p</span><span class="p">(</span><span class="mi">3</span><span class="n">P</span><span class="p">)</span><span class="o">.</span><span class="mi">3</span><span class="n">d</span> <span class="mi">4</span><span class="n">P1</span><span class="o">.</span><span class="mi">5</span>            <span class="mf">212.1255</span>    <span class="mf">5.355e-01</span>     <span class="mf">2.21e+10</span> <span class="n">Y</span>
+ <span class="n">fe_14</span>     <span class="mi">4</span>    <span class="mi">28</span>              <span class="mi">3</span><span class="n">s</span><span class="o">.</span><span class="mi">3</span><span class="n">p2</span> <span class="mi">4</span><span class="n">P1</span><span class="o">.</span><span class="mi">5</span> <span class="o">-</span> <span class="mi">3</span><span class="n">s</span><span class="o">.</span><span class="mi">3</span><span class="n">p</span><span class="p">(</span><span class="mi">3</span><span class="n">P</span><span class="p">)</span><span class="o">.</span><span class="mi">3</span><span class="n">d</span> <span class="mi">4</span><span class="n">D2</span><span class="o">.</span><span class="mi">5</span>            <span class="mf">212.1682</span>    <span class="mf">4.039e-01</span>     <span class="mf">1.15e+10</span> <span class="n">Y</span>
+ <span class="n">fe_14</span>     <span class="mi">3</span>    <span class="mi">24</span>              <span class="mi">3</span><span class="n">s</span><span class="o">.</span><span class="mi">3</span><span class="n">p2</span> <span class="mi">4</span><span class="n">P0</span><span class="o">.</span><span class="mi">5</span> <span class="o">-</span> <span class="mi">3</span><span class="n">s</span><span class="o">.</span><span class="mi">3</span><span class="n">p</span><span class="p">(</span><span class="mi">3</span><span class="n">P</span><span class="p">)</span><span class="o">.</span><span class="mi">3</span><span class="n">d</span> <span class="mi">4</span><span class="n">D0</span><span class="o">.</span><span class="mi">5</span>            <span class="mf">213.1955</span>    <span class="mf">8.073e-01</span>     <span class="mf">4.26e+10</span> <span class="n">Y</span>
+ <span class="n">fe_14</span>     <span class="mi">3</span>    <span class="mi">23</span>              <span class="mi">3</span><span class="n">s</span><span class="o">.</span><span class="mi">3</span><span class="n">p2</span> <span class="mi">4</span><span class="n">P0</span><span class="o">.</span><span class="mi">5</span> <span class="o">-</span> <span class="mi">3</span><span class="n">s</span><span class="o">.</span><span class="mi">3</span><span class="n">p</span><span class="p">(</span><span class="mi">3</span><span class="n">P</span><span class="p">)</span><span class="o">.</span><span class="mi">3</span><span class="n">d</span> <span class="mi">4</span><span class="n">D1</span><span class="o">.</span><span class="mi">5</span>            <span class="mf">213.8822</span>    <span class="mf">1.393e+00</span>     <span class="mf">2.97e+10</span> <span class="n">Y</span>
+ <span class="n">fe_14</span>     <span class="mi">5</span>    <span class="mi">28</span>              <span class="mi">3</span><span class="n">s</span><span class="o">.</span><span class="mi">3</span><span class="n">p2</span> <span class="mi">4</span><span class="n">P2</span><span class="o">.</span><span class="mi">5</span> <span class="o">-</span> <span class="mi">3</span><span class="n">s</span><span class="o">.</span><span class="mi">3</span><span class="n">p</span><span class="p">(</span><span class="mi">3</span><span class="n">P</span><span class="p">)</span><span class="o">.</span><span class="mi">3</span><span class="n">d</span> <span class="mi">4</span><span class="n">D2</span><span class="o">.</span><span class="mi">5</span>            <span class="mf">216.5786</span>    <span class="mf">9.736e-01</span>     <span class="mf">2.83e+10</span> <span class="n">Y</span>
+ <span class="n">fe_14</span>     <span class="mi">5</span>    <span class="mi">25</span>              <span class="mi">3</span><span class="n">s</span><span class="o">.</span><span class="mi">3</span><span class="n">p2</span> <span class="mi">4</span><span class="n">P2</span><span class="o">.</span><span class="mi">5</span> <span class="o">-</span> <span class="mi">3</span><span class="n">s</span><span class="o">.</span><span class="mi">3</span><span class="n">p</span><span class="p">(</span><span class="mi">3</span><span class="n">P</span><span class="p">)</span><span class="o">.</span><span class="mi">3</span><span class="n">d</span> <span class="mi">4</span><span class="n">D3</span><span class="o">.</span><span class="mi">5</span>            <span class="mf">216.9173</span>    <span class="mf">1.730e+00</span>     <span class="mf">4.29e+10</span> <span class="n">Y</span>
+ <span class="n">fe_14</span>     <span class="mi">7</span>    <span class="mi">32</span>              <span class="mi">3</span><span class="n">s</span><span class="o">.</span><span class="mi">3</span><span class="n">p2</span> <span class="mi">2</span><span class="n">D2</span><span class="o">.</span><span class="mi">5</span> <span class="o">-</span> <span class="mi">3</span><span class="n">s</span><span class="o">.</span><span class="mi">3</span><span class="n">p</span><span class="p">(</span><span class="mi">3</span><span class="n">P</span><span class="p">)</span><span class="o">.</span><span class="mi">3</span><span class="n">d</span> <span class="mi">2</span><span class="n">F3</span><span class="o">.</span><span class="mi">5</span>            <span class="mf">218.1767</span>    <span class="mf">3.734e+00</span>     <span class="mf">1.70e+10</span> <span class="n">Y</span>
+ <span class="n">fe_14</span>     <span class="mi">4</span>    <span class="mi">22</span>              <span class="mi">3</span><span class="n">s</span><span class="o">.</span><span class="mi">3</span><span class="n">p2</span> <span class="mi">4</span><span class="n">P1</span><span class="o">.</span><span class="mi">5</span> <span class="o">-</span> <span class="mi">3</span><span class="n">s</span><span class="o">.</span><span class="mi">3</span><span class="n">p</span><span class="p">(</span><span class="mi">3</span><span class="n">P</span><span class="p">)</span><span class="o">.</span><span class="mi">3</span><span class="n">d</span> <span class="mi">4</span><span class="n">P2</span><span class="o">.</span><span class="mi">5</span>            <span class="mf">218.5725</span>    <span class="mf">2.391e+00</span>     <span class="mf">2.65e+10</span> <span class="n">Y</span>
+ <span class="n">fe_14</span>     <span class="mi">2</span>    <span class="mi">12</span>              <span class="mi">3</span><span class="n">s2</span><span class="o">.</span><span class="mi">3</span><span class="n">p</span> <span class="mi">2</span><span class="n">P1</span><span class="o">.</span><span class="mi">5</span> <span class="o">-</span> <span class="mi">3</span><span class="n">s2</span><span class="o">.</span><span class="mi">3</span><span class="n">d</span> <span class="mi">2</span><span class="n">D2</span><span class="o">.</span><span class="mi">5</span>                  <span class="mf">219.1305</span>    <span class="mf">5.077e+01</span>     <span class="mf">4.27e+10</span> <span class="n">Y</span>
+
+<span class="o">------------------------------------------</span>
+</pre></div>
+</div>
+<p>optionally, an output file could also be created by setting the keyword outFile to the name of the desired name</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">fe14</span><span class="o">.</span><span class="n">intensityList</span><span class="p">(</span><span class="n">wvlRange</span><span class="o">=</span><span class="p">[</span><span class="mf">210.</span><span class="p">,</span><span class="mf">220.</span><span class="p">],</span> <span class="n">relative</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="mi">11</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>give the following terminal/notebook output</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span> <span class="n">using</span> <span class="n">index</span> <span class="o">=</span>    <span class="mi">11</span> <span class="n">specifying</span> <span class="n">temperature</span> <span class="o">=</span>   <span class="mf">2.24e+06</span><span class="p">,</span> <span class="n">eDensity</span> <span class="o">=</span>    <span class="mf">1.00e+09</span> <span class="n">em</span> <span class="o">=</span>   <span class="mf">1.00e+27</span>
+
+ <span class="o">------------------------------------------</span>
+
+ <span class="n">Ion</span>  <span class="n">lvl1</span>  <span class="n">lvl2</span>                     <span class="n">lower</span> <span class="o">-</span> <span class="n">upper</span>                           <span class="n">Wvl</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>    <span class="n">Intensity</span>      <span class="n">A</span> <span class="n">value</span> <span class="n">Obs</span>
+ <span class="n">fe_14</span>     <span class="mi">1</span>    <span class="mi">11</span>              <span class="mi">3</span><span class="n">s2</span><span class="o">.</span><span class="mi">3</span><span class="n">p</span> <span class="mi">2</span><span class="n">P0</span><span class="o">.</span><span class="mi">5</span> <span class="o">-</span> <span class="mi">3</span><span class="n">s2</span><span class="o">.</span><span class="mi">3</span><span class="n">d</span> <span class="mi">2</span><span class="n">D1</span><span class="o">.</span><span class="mi">5</span>                  <span class="mf">211.3172</span>    <span class="mf">1.000e+00</span>     <span class="mf">3.81e+10</span> <span class="n">Y</span>
+ <span class="n">fe_14</span>     <span class="mi">4</span>    <span class="mi">27</span>              <span class="mi">3</span><span class="n">s</span><span class="o">.</span><span class="mi">3</span><span class="n">p2</span> <span class="mi">4</span><span class="n">P1</span><span class="o">.</span><span class="mi">5</span> <span class="o">-</span> <span class="mi">3</span><span class="n">s</span><span class="o">.</span><span class="mi">3</span><span class="n">p</span><span class="p">(</span><span class="mi">3</span><span class="n">P</span><span class="p">)</span><span class="o">.</span><span class="mi">3</span><span class="n">d</span> <span class="mi">4</span><span class="n">P1</span><span class="o">.</span><span class="mi">5</span>            <span class="mf">212.1255</span>    <span class="mf">2.267e-03</span>     <span class="mf">2.21e+10</span> <span class="n">Y</span>
+ <span class="n">fe_14</span>     <span class="mi">4</span>    <span class="mi">28</span>              <span class="mi">3</span><span class="n">s</span><span class="o">.</span><span class="mi">3</span><span class="n">p2</span> <span class="mi">4</span><span class="n">P1</span><span class="o">.</span><span class="mi">5</span> <span class="o">-</span> <span class="mi">3</span><span class="n">s</span><span class="o">.</span><span class="mi">3</span><span class="n">p</span><span class="p">(</span><span class="mi">3</span><span class="n">P</span><span class="p">)</span><span class="o">.</span><span class="mi">3</span><span class="n">d</span> <span class="mi">4</span><span class="n">D2</span><span class="o">.</span><span class="mi">5</span>            <span class="mf">212.1682</span>    <span class="mf">1.694e-03</span>     <span class="mf">1.15e+10</span> <span class="n">Y</span>
+ <span class="n">fe_14</span>     <span class="mi">3</span>    <span class="mi">24</span>              <span class="mi">3</span><span class="n">s</span><span class="o">.</span><span class="mi">3</span><span class="n">p2</span> <span class="mi">4</span><span class="n">P0</span><span class="o">.</span><span class="mi">5</span> <span class="o">-</span> <span class="mi">3</span><span class="n">s</span><span class="o">.</span><span class="mi">3</span><span class="n">p</span><span class="p">(</span><span class="mi">3</span><span class="n">P</span><span class="p">)</span><span class="o">.</span><span class="mi">3</span><span class="n">d</span> <span class="mi">4</span><span class="n">D0</span><span class="o">.</span><span class="mi">5</span>            <span class="mf">213.1955</span>    <span class="mf">3.390e-03</span>     <span class="mf">4.26e+10</span> <span class="n">Y</span>
+ <span class="n">fe_14</span>     <span class="mi">3</span>    <span class="mi">23</span>              <span class="mi">3</span><span class="n">s</span><span class="o">.</span><span class="mi">3</span><span class="n">p2</span> <span class="mi">4</span><span class="n">P0</span><span class="o">.</span><span class="mi">5</span> <span class="o">-</span> <span class="mi">3</span><span class="n">s</span><span class="o">.</span><span class="mi">3</span><span class="n">p</span><span class="p">(</span><span class="mi">3</span><span class="n">P</span><span class="p">)</span><span class="o">.</span><span class="mi">3</span><span class="n">d</span> <span class="mi">4</span><span class="n">D1</span><span class="o">.</span><span class="mi">5</span>            <span class="mf">213.8822</span>    <span class="mf">5.891e-03</span>     <span class="mf">2.97e+10</span> <span class="n">Y</span>
+ <span class="n">fe_14</span>     <span class="mi">5</span>    <span class="mi">28</span>              <span class="mi">3</span><span class="n">s</span><span class="o">.</span><span class="mi">3</span><span class="n">p2</span> <span class="mi">4</span><span class="n">P2</span><span class="o">.</span><span class="mi">5</span> <span class="o">-</span> <span class="mi">3</span><span class="n">s</span><span class="o">.</span><span class="mi">3</span><span class="n">p</span><span class="p">(</span><span class="mi">3</span><span class="n">P</span><span class="p">)</span><span class="o">.</span><span class="mi">3</span><span class="n">d</span> <span class="mi">4</span><span class="n">D2</span><span class="o">.</span><span class="mi">5</span>            <span class="mf">216.5786</span>    <span class="mf">4.083e-03</span>     <span class="mf">2.83e+10</span> <span class="n">Y</span>
+ <span class="n">fe_14</span>     <span class="mi">5</span>    <span class="mi">25</span>              <span class="mi">3</span><span class="n">s</span><span class="o">.</span><span class="mi">3</span><span class="n">p2</span> <span class="mi">4</span><span class="n">P2</span><span class="o">.</span><span class="mi">5</span> <span class="o">-</span> <span class="mi">3</span><span class="n">s</span><span class="o">.</span><span class="mi">3</span><span class="n">p</span><span class="p">(</span><span class="mi">3</span><span class="n">P</span><span class="p">)</span><span class="o">.</span><span class="mi">3</span><span class="n">d</span> <span class="mi">4</span><span class="n">D3</span><span class="o">.</span><span class="mi">5</span>            <span class="mf">216.9173</span>    <span class="mf">7.085e-03</span>     <span class="mf">4.29e+10</span> <span class="n">Y</span>
+ <span class="n">fe_14</span>     <span class="mi">7</span>    <span class="mi">32</span>              <span class="mi">3</span><span class="n">s</span><span class="o">.</span><span class="mi">3</span><span class="n">p2</span> <span class="mi">2</span><span class="n">D2</span><span class="o">.</span><span class="mi">5</span> <span class="o">-</span> <span class="mi">3</span><span class="n">s</span><span class="o">.</span><span class="mi">3</span><span class="n">p</span><span class="p">(</span><span class="mi">3</span><span class="n">P</span><span class="p">)</span><span class="o">.</span><span class="mi">3</span><span class="n">d</span> <span class="mi">2</span><span class="n">F3</span><span class="o">.</span><span class="mi">5</span>            <span class="mf">218.1767</span>    <span class="mf">1.557e-02</span>     <span class="mf">1.70e+10</span> <span class="n">Y</span>
+ <span class="n">fe_14</span>     <span class="mi">4</span>    <span class="mi">22</span>              <span class="mi">3</span><span class="n">s</span><span class="o">.</span><span class="mi">3</span><span class="n">p2</span> <span class="mi">4</span><span class="n">P1</span><span class="o">.</span><span class="mi">5</span> <span class="o">-</span> <span class="mi">3</span><span class="n">s</span><span class="o">.</span><span class="mi">3</span><span class="n">p</span><span class="p">(</span><span class="mi">3</span><span class="n">P</span><span class="p">)</span><span class="o">.</span><span class="mi">3</span><span class="n">d</span> <span class="mi">4</span><span class="n">P2</span><span class="o">.</span><span class="mi">5</span>            <span class="mf">218.5725</span>    <span class="mf">1.009e-02</span>     <span class="mf">2.65e+10</span> <span class="n">Y</span>
+ <span class="n">fe_14</span>     <span class="mi">2</span>    <span class="mi">12</span>              <span class="mi">3</span><span class="n">s2</span><span class="o">.</span><span class="mi">3</span><span class="n">p</span> <span class="mi">2</span><span class="n">P1</span><span class="o">.</span><span class="mi">5</span> <span class="o">-</span> <span class="mi">3</span><span class="n">s2</span><span class="o">.</span><span class="mi">3</span><span class="n">d</span> <span class="mi">2</span><span class="n">D2</span><span class="o">.</span><span class="mi">5</span>                  <span class="mf">219.1305</span>    <span class="mf">2.096e-01</span>     <span class="mf">4.27e+10</span> <span class="n">Y</span>
+
+<span class="o">------------------------------------------</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="g-n-t-function">
+<h2>G(n,T) function<a class="headerlink" href="#g-n-t-function" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">fe14</span><span class="o">.</span><span class="n">gofnt</span><span class="p">(</span><span class="n">wvlRange</span><span class="o">=</span><span class="p">[</span><span class="mf">210.</span><span class="p">,</span> <span class="mf">220.</span><span class="p">],</span><span class="n">top</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>brings up a matplotlib plot window which shows the emissivities of the top (strongest) 3 lines in the wavelength region from 210 to 220 Angstroms.</p>
+<img alt="_static/fe14.rel.emiss.png" class="align-center" src="_static/fe14.rel.emiss.png" />
+<p>quickly followed by a dialog where the line(s) of interest can be specified</p>
+<img alt="_static/fe14.gofnt.selector.png" class="align-center" src="_static/fe14.gofnt.selector.png" />
+<p>and finally a plot of the G(n,T) function for the specified lines(s).</p>
+<img alt="_static/fe14.gofnt.png" class="align-center" src="_static/fe14.gofnt.png" />
+<p>The G(n,T) calculation is stored in the Gofnt dictionary, with keys = [&#8216;gofnt&#8217;, &#8216;temperature&#8217;, &#8216;density&#8217;]</p>
+<p>while the is a fairly straightforward way to get a G(T) function, it is not very practical to use for a more than a handful of lines. For if the fe_14 line at 211.3172 is in a list of lines to be analyzed, a more practical way is the following</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">fe14</span><span class="o">.</span><span class="n">intensity</span><span class="p">()</span>
+<span class="n">dist</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">fe14</span><span class="o">.</span><span class="n">Intensity</span><span class="p">[</span><span class="s1">&#39;wvl&#39;</span><span class="p">])</span> <span class="o">-</span> <span class="mf">211.3172</span><span class="p">)</span>
+<span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">dist</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39; wvl = </span><span class="si">%10.3f</span><span class="s1"> &#39;</span><span class="o">%</span><span class="p">(</span><span class="n">fe14</span><span class="o">.</span><span class="n">Intensity</span><span class="p">[</span><span class="s1">&#39;wvl&#39;</span><span class="p">][</span><span class="n">idx</span><span class="p">]))</span>
+</pre></div>
+</div>
+<p>prints</p>
+<p>wvl =    211.317</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">loglog</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span><span class="n">fe14</span><span class="o">.</span><span class="n">Intensity</span><span class="p">[</span><span class="s1">&#39;intensity&#39;</span><span class="p">][:,</span><span class="n">idx</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>once the axes are properly scaled, this produces the same values as fe14.Gofnt[&#8216;gofnt&#8217;]</p>
+<img alt="_static/fe14.gofnt_alternate.png" class="align-center" src="_static/fe14.gofnt_alternate.png" />
+</div>
+<div class="section" id="intensity-ratios">
+<h2>Intensity Ratios<a class="headerlink" href="#intensity-ratios" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">fe14</span><span class="o">.</span><span class="n">intensityRatio</span><span class="p">(</span><span class="n">wvlRange</span><span class="o">=</span><span class="p">[</span><span class="mf">210.</span><span class="p">,</span> <span class="mf">225.</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>this brings up a plot showing the relative emissivities on the Fe XIV lines</p>
+<img alt="_static/fe14.int.vs.t.png" class="align-center" src="_static/fe14.int.vs.t.png" />
+<p>following by a dialog where you can selector the numerator(s) and denominator(s) of the desired intensity ratio</p>
+<img alt="_static/2.selector.png" class="align-center" src="_static/2.selector.png" />
+<p>so the specified ratio is then plotted</p>
+<img alt="_static/fe14.int.ratio.vs.t.png" class="align-center" src="_static/fe14.int.ratio.vs.t.png" />
+<p>if previously, we had done</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dens</span> <span class="o">=</span> <span class="mf">10.</span><span class="o">**</span><span class="p">(</span><span class="mf">6.</span> <span class="o">+</span> <span class="mf">0.1</span><span class="o">*</span><span class="n">arange</span><span class="p">(</span><span class="mi">61</span><span class="p">))</span>
+<span class="n">fe14</span> <span class="o">=</span> <span class="n">ch</span><span class="o">.</span><span class="n">ion</span><span class="p">(</span><span class="s1">&#39;fe_14&#39;</span><span class="p">,</span> <span class="mf">2.e+6</span><span class="p">,</span> <span class="n">dens</span><span class="p">)</span>
+<span class="n">fe14</span><span class="o">.</span><span class="n">intensityRatio</span><span class="p">(</span><span class="n">wvlRange</span><span class="o">=</span><span class="p">[</span><span class="mf">210.</span><span class="p">,</span> <span class="mf">225.</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>then the plot of relative intensities vs density would appear</p>
+<img alt="_static/fe14.int.vs.d.png" class="align-center" src="_static/fe14.int.vs.d.png" />
+<p>the same numerator/denominator selector dialog would come up and when 2 or more lines are selected, the intensity ratio versus density appears.</p>
+<img alt="_static/fe14.int.ratio.vs.d.png" class="align-center" src="_static/fe14.int.ratio.vs.d.png" />
+<p>to obtain ratios of lines widely separated in wavelength, the wvlRanges keyword can be used:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">fe12</span> <span class="o">=</span> <span class="n">ch</span><span class="o">.</span><span class="n">ion</span><span class="p">(</span><span class="s1">&#39;fe_12&#39;</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="n">t</span><span class="p">,</span> <span class="n">eDensity</span><span class="o">=</span><span class="mf">1.e+9</span>
+<span class="n">fe12</span><span class="o">.</span><span class="n">intensityRatio</span><span class="p">(</span><span class="n">wvlRanges</span><span class="o">=</span><span class="p">[[</span><span class="mf">190.</span><span class="p">,</span><span class="mf">200.</span><span class="p">],[</span><span class="mf">1240.</span><span class="p">,</span><span class="mf">1250.</span><span class="p">]])</span>
+</pre></div>
+</div>
+<img alt="_static/fe_12_wvlranges_ratio.png" class="align-center" src="_static/fe_12_wvlranges_ratio.png" />
+</div>
+<div class="section" id="spectra-of-a-single-ion">
+<h2>Spectra of a single ion<a class="headerlink" href="#spectra-of-a-single-ion" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">fe14</span> <span class="o">=</span> <span class="n">ch</span><span class="o">.</span><span class="n">ion</span><span class="p">(</span><span class="s1">&#39;fe_14&#39;</span><span class="p">,</span> <span class="n">temperature</span> <span class="o">=</span> <span class="mf">2.e+6</span><span class="p">,</span> <span class="n">density</span> <span class="o">=</span> <span class="mf">1.e+9</span><span class="p">)</span>
+<span class="n">wvl</span> <span class="o">=</span> <span class="n">wvl</span><span class="o">=</span><span class="mf">200.</span> <span class="o">+</span> <span class="mf">0.125</span><span class="o">*</span><span class="n">arange</span><span class="p">(</span><span class="mi">801</span><span class="p">)</span>
+<span class="n">fe14</span><span class="o">.</span><span class="n">spectrum</span><span class="p">(</span><span class="n">wvl</span><span class="p">,</span> <span class="n">em</span><span class="o">=</span><span class="mf">1.e+27</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">wvl</span><span class="p">,</span> <span class="n">fe14</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">[</span><span class="s1">&#39;intensity&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>this will calculate the spectrum of fe_14 over the specified wavelength range and filter it with the default filter which is a gaussian (filters.gaussianR) with a &#8216;resolving power&#8217; of 1000 which gives a gaussian width of wvl/1000.</p>
+<img alt="_static/fe14.spectrum.png" class="align-center" src="_static/fe14.spectrum.png" />
+<p>other filters available in chianti.filters include a boxcar filter and a gaussian filter where the width can be specified directly</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">fe14</span><span class="p">,</span><span class="s1">&#39;Em&#39;</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; Emission Measure = </span><span class="si">%12.2e</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">fe14</span><span class="o">.</span><span class="n">Em</span><span class="p">))</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; the value for the emission measure is unspecified&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Emission Measure =     1.00e+27</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">chianti.filters</span> <span class="k">as</span> <span class="nn">chfilters</span>
+<span class="n">fe14</span><span class="o">.</span><span class="n">spectrum</span><span class="p">(</span><span class="n">wvl</span><span class="p">,</span><span class="nb">filter</span><span class="o">=</span><span class="p">(</span><span class="n">chfilters</span><span class="o">.</span><span class="n">gaussian</span><span class="p">,</span><span class="o">.</span><span class="mi">04</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>calculates the spectrum of fe_14 for a gaussian filter with a width of 0.04 Angstroms.
+The current value of the spectrum is kept in fe14.Spectrum with the following keys:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">akey</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">fe14</span><span class="o">.</span><span class="n">Spectrum</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; </span><span class="si">%10s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">akey</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>allLines
+em
+filter
+filterWidth
+intensity
+wvl
+xlabel
+ylabel</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">plot</span><span class="p">(</span><span class="n">wvl</span><span class="p">,</span><span class="n">fe14</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">[</span><span class="s1">&#39;intensity&#39;</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">fe14</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">[</span><span class="s1">&#39;xlabel&#39;</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="n">fe14</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">[</span><span class="s1">&#39;ylabel&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<img alt="_static/fe14.spectrum2.png" class="align-center" src="_static/fe14.spectrum2.png" />
+<p>New in <strong>ChiantiPy 0.6</strong>, the <em>label</em> keyword has been added to the ion.spectrum method, and also to the other various spectral classes. This allows several spectral calculations for different filters to be saved and compared</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">temp</span> <span class="o">=</span> <span class="mf">10.</span><span class="o">**</span><span class="p">(</span><span class="mf">5.8</span> <span class="o">+</span> <span class="mf">0.1</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">11.</span><span class="p">))</span>
+<span class="n">dens</span> <span class="o">=</span> <span class="mf">1.e+9</span>
+<span class="n">fe14</span> <span class="o">=</span> <span class="n">ch</span><span class="o">.</span><span class="n">ion</span><span class="p">(</span><span class="s1">&#39;fe_14&#39;</span><span class="p">,</span> <span class="n">temp</span><span class="p">,</span> <span class="n">dens</span><span class="p">)</span>
+<span class="n">emeas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span><span class="o">*</span><span class="mf">1.e+27</span>
+<span class="n">wvl</span> <span class="o">=</span> <span class="mf">200.</span> <span class="o">+</span> <span class="mf">0.125</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">801</span><span class="p">)</span>
+<span class="n">fe14</span><span class="o">.</span><span class="n">spectrum</span><span class="p">(</span><span class="n">wvl</span><span class="p">,</span><span class="nb">filter</span><span class="o">=</span><span class="p">(</span><span class="n">chfilters</span><span class="o">.</span><span class="n">gaussian</span><span class="p">,</span><span class="o">.</span><span class="mi">4</span><span class="p">),</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;.4&#39;</span><span class="p">,</span><span class="n">em</span><span class="o">=</span><span class="n">emeas</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;0.4&#39;</span><span class="p">)</span>
+<span class="n">fe14</span><span class="o">.</span><span class="n">spectrum</span><span class="p">(</span><span class="n">wvl</span><span class="p">,</span><span class="nb">filter</span><span class="o">=</span><span class="p">(</span><span class="n">chfilters</span><span class="o">.</span><span class="n">gaussian</span><span class="p">,</span><span class="mf">1.</span><span class="p">),</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;1.&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">-</span><span class="s1">&#39;1.0&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">wvl</span><span class="p">,</span><span class="n">fe14</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">[</span><span class="s1">&#39;.4&#39;</span><span class="p">][</span><span class="s1">&#39;intensity&#39;</span><span class="p">][</span><span class="mi">5</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">wvl</span><span class="p">,</span><span class="n">fe14</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">[</span><span class="s1">&#39;1.&#39;</span><span class="p">][</span><span class="s1">&#39;intensity&#39;</span><span class="p">][</span><span class="mi">5</span><span class="p">],</span><span class="s1">&#39;-r&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">fe14</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">[</span><span class="s1">&#39;.4&#39;</span><span class="p">][</span><span class="s1">&#39;xlabel&#39;</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="n">fe14</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">[</span><span class="s1">&#39;.4&#39;</span><span class="p">][</span><span class="s1">&#39;ylabel&#39;</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legen</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper right&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="_static/fe14.spectrum_label.png" class="align-center" src="_static/fe14.spectrum_label.png" />
+</div>
+<div class="section" id="free-free-and-free-bound-continuum">
+<h2>Free-free and free-bound continuum<a class="headerlink" href="#free-free-and-free-bound-continuum" title="Permalink to this headline">¶</a></h2>
+<p>The module continuum provides the ability to calculate the free-free and free-bound spectrum for a large number of  individual ions.  The two-photon continuum is produced only by the hydrogen-like and helium-like ions</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">temperature</span> <span class="o">=</span> <span class="mf">2.e+7</span>
+<span class="n">c</span> <span class="o">=</span> <span class="n">ch</span><span class="o">.</span><span class="n">continuum</span><span class="p">(</span><span class="s1">&#39;fe_25&#39;</span><span class="p">,</span> <span class="n">temperature</span> <span class="o">=</span> <span class="n">temperature</span><span class="p">)</span>
+<span class="n">wvl</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">+</span> <span class="mf">0.002</span><span class="o">*</span><span class="n">arange</span><span class="p">(</span><span class="mi">4501</span><span class="p">)</span>
+<span class="n">c</span><span class="o">.</span><span class="n">freeFree</span><span class="p">(</span><span class="n">wvl</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">wvl</span><span class="p">,</span> <span class="n">c</span><span class="o">.</span><span class="n">FreeFree</span><span class="p">[</span><span class="s1">&#39;rate&#39;</span><span class="p">])</span>
+<span class="n">c</span><span class="o">.</span><span class="n">freeBound</span><span class="p">(</span><span class="n">wvl</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">wvl</span><span class="p">,</span> <span class="n">c</span><span class="o">.</span><span class="n">FreeBound</span><span class="p">[</span><span class="s1">&#39;rate&#39;</span><span class="p">])</span>
+<span class="n">fe25</span><span class="o">=</span><span class="n">ch</span><span class="o">.</span><span class="n">ion</span><span class="p">(</span><span class="s1">&#39;fe_25&#39;</span><span class="p">,</span><span class="mf">2.e+7</span><span class="p">,</span><span class="mf">1.e+9</span><span class="p">,</span><span class="n">em</span><span class="o">=</span><span class="mf">1.e+27</span><span class="p">)</span>
+<span class="n">fe25</span><span class="o">.</span><span class="n">twoPhoton</span><span class="p">(</span><span class="n">wvl</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">wvl</span><span class="p">,</span><span class="n">fe25</span><span class="o">.</span><span class="n">TwoPhoton</span><span class="p">[</span><span class="s1">&#39;rate&#39;</span><span class="p">],</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;2 photon&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper right&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>produces</p>
+<img alt="_static/fe_25_ff_fb_tp_2e7_1_10.png" class="align-center" src="_static/fe_25_ff_fb_tp_2e7_1_10.png" />
+<p>In the continuum calculations, the specified ion, Fe XXV in this case, is the target ion for the free-free calculation.  For the free-bound calculation, specified ion is also the target ion.  In this case, the radiative recombination spectrum of Fe XXV recombining to form Fe XXIV is returned.</p>
+</div>
+<div class="section" id="the-multi-ion-class-bunch">
+<h2>The multi-ion class Bunch<a class="headerlink" href="#the-multi-ion-class-bunch" title="Permalink to this headline">¶</a></h2>
+<p>The multi-ion class <strong>bunch</strong> [new in v0.6] inherits a number of the same methods inherited by the ion class, for example <em>intensityList</em>, <em>intensityRatio</em>, and <em>intensityRatioSave</em>. As a short demonstration of its usefulness, Widing and Feldman (1989, ApJ, 344, 1046) used line ratios of Mg VI and Ne VI as diagnostics of elemental abundance variations in the solar atmosphere. For that to be accurate, it is necessary that the lines of the two ions have the same temperature response.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">t</span> <span class="o">=</span> <span class="mf">10.</span><span class="o">**</span><span class="p">(</span><span class="mf">5.0</span><span class="o">+</span><span class="mf">0.1</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">11</span><span class="p">))</span>
+<span class="n">bnch</span><span class="o">=</span><span class="n">ch</span><span class="o">.</span><span class="n">bunch</span><span class="p">(</span><span class="n">t</span><span class="p">,</span><span class="mf">1.e+9</span><span class="p">,</span><span class="n">wvlRange</span><span class="o">=</span><span class="p">[</span><span class="mf">300.</span><span class="p">,</span><span class="mf">500.</span><span class="p">],</span><span class="n">ionList</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;ne_6&#39;</span><span class="p">,</span><span class="s1">&#39;mg_6&#39;</span><span class="p">],</span><span class="n">abundanceName</span><span class="o">=</span><span class="s1">&#39;unity&#39;</span><span class="p">)</span>
+<span class="n">bnch</span><span class="o">.</span><span class="n">intensityRatio</span><span class="p">(</span><span class="n">wvlRange</span><span class="o">=</span><span class="p">[</span><span class="mf">395.</span><span class="p">,</span><span class="mf">405.</span><span class="p">],</span><span class="n">top</span><span class="o">=</span><span class="mi">7</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>produces and initial plot of the selected lines, a selection widget and finally a plot of the ratio</p>
+<img alt="_static/ne6_mg6_t_ratio_top7.png" class="align-center" src="_static/ne6_mg6_t_ratio_top7.png" />
+<img alt="_static/bunch_selector.png" class="align-center" src="_static/bunch_selector.png" />
+<img alt="_static/ne6_mg6_t_ratio.png" class="align-center" src="_static/ne6_mg6_t_ratio.png" />
+<p>there seems to be a significant temperature dependence to the ratio, even though both are formed near 4.e+5 K.</p>
+<p>A new keyword argument <strong>keepIons</strong> has been added in v0.6 to the bunch and the 3 spectrum classes.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">dwvl</span> <span class="o">=</span> <span class="mf">0.01</span>
+<span class="n">nwvl</span> <span class="o">=</span> <span class="p">(</span><span class="mf">406.</span><span class="o">-</span><span class="mf">394.</span><span class="p">)</span><span class="o">/</span><span class="n">dwvl</span>
+<span class="n">wvl</span> <span class="o">=</span> <span class="mf">394.</span> <span class="o">+</span> <span class="n">dwvl</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">nwvl</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">bnch2</span><span class="o">=</span><span class="n">ch</span><span class="o">.</span><span class="n">bunch</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="mf">1.e+9</span><span class="p">,</span> <span class="n">wvlRange</span><span class="o">=</span><span class="p">[</span><span class="n">wvl</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span><span class="n">wvl</span><span class="o">.</span><span class="n">max</span><span class="p">()],</span> <span class="n">elementList</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;ne&#39;</span><span class="p">,</span><span class="s1">&#39;mg&#39;</span><span class="p">],</span> <span class="n">keepIons</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">em</span><span class="o">=</span><span class="mf">1.e+27</span><span class="p">)</span>
+<span class="n">bnch2</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">wvl</span><span class="p">,</span><span class="nb">filter</span><span class="o">=</span><span class="p">(</span><span class="n">chfilters</span><span class="o">.</span><span class="n">gaussian</span><span class="p">,</span><span class="mf">5.</span><span class="o">*</span><span class="n">dwvl</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">wvl</span><span class="p">,</span> <span class="n">bnch2</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">[</span><span class="s1">&#39;intensity&#39;</span><span class="p">][</span><span class="mi">6</span><span class="p">],</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;Total&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Temperature = </span><span class="si">%10.2e</span><span class="s1"> for t[6]&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="mi">6</span><span class="p">]))</span>
+</pre></div>
+</div>
+<p>elapsed seconds =       11.000
+elapsed seconds =    0.000e+00</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="k">for</span> <span class="n">one</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">bnch2</span><span class="o">.</span><span class="n">IonInstances</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+  <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">one</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>yields:</p>
+<p>mg_10
+mg_10d
+mg_3
+mg_4
+mg_5
+mg_6
+mg_8
+mg_9
+ne_10
+ne_2
+ne_3
+ne_5
+ne_6
+ne_8</p>
+<p>these IonInstances have all the properties of the Ion class for each of these ions</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">wvl</span><span class="p">,</span><span class="n">bnch2</span><span class="o">.</span><span class="n">IonInstances</span><span class="p">[</span><span class="s1">&#39;mg_6&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">[</span><span class="s1">&#39;intensity&#39;</span><span class="p">][</span><span class="mi">6</span><span class="p">],</span><span class="s1">&#39;r&#39;</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s1">&#39;mg_6&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper left&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>produces</p>
+<img alt="_static/ne6_mg6_spectrum.png" class="align-center" src="_static/ne6_mg6_spectrum.png" />
+</div>
+<div class="section" id="spectra-of-multiple-ions-and-continuum">
+<h2>Spectra of multiple ions and continuum<a class="headerlink" href="#spectra-of-multiple-ions-and-continuum" title="Permalink to this headline">¶</a></h2>
+<p>the spectrum for all ions in the CHIANTI database can also be calculated</p>
+<p>The spectrum for a selection of all of the ions in the CHIANTI database can also be calculated. There are 3 spectral classes.</p>
+<ul class="simple">
+<li><strong>spectrum</strong> - the single processor implementation that can be used anywhere</li>
+<li><strong>mspectrum</strong> - uses the Python multiprocessing class and cannot be used in a IPython qtconsole or notebook</li>
+<li><strong>ipymspectrum</strong> [new in v0.6] - uses the IPython parallel class and can be used in a IPython qtconsole or notebook</li>
+</ul>
+<div class="section" id="the-single-processor-spectrum-class">
+<h3>The single processor spectrum class<a class="headerlink" href="#the-single-processor-spectrum-class" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">temperature</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.e+6</span><span class="p">,</span> <span class="mf">2.e+6</span><span class="p">]</span>
+<span class="n">density</span> <span class="o">=</span> <span class="mf">1.e+9</span>
+<span class="n">wvl</span> <span class="o">=</span> <span class="mf">200.</span> <span class="o">+</span> <span class="mf">0.05</span><span class="o">*</span><span class="n">arange</span><span class="p">(</span><span class="mi">2001</span><span class="p">)</span>
+<span class="n">emeasure</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.e+27</span> <span class="p">,</span><span class="mf">1.e+27</span><span class="p">]</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">ch</span><span class="o">.</span><span class="n">spectrum</span><span class="p">(</span><span class="n">temperature</span><span class="p">,</span> <span class="n">density</span><span class="p">,</span> <span class="n">wvl</span><span class="p">,</span> <span class="nb">filter</span> <span class="o">=</span> <span class="p">(</span><span class="n">chfilters</span><span class="o">.</span><span class="n">gaussian</span><span class="p">,</span><span class="o">.</span><span class="mi">2</span><span class="p">),</span> <span class="n">em</span> <span class="o">=</span> <span class="n">emeasure</span><span class="p">,</span> <span class="n">doContinuum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">minAbund</span><span class="o">=</span><span class="mf">1.e-5</span><span class="p">)</span>
+<span class="n">subplot</span><span class="p">(</span><span class="mi">311</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">wvl</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">[</span><span class="s1">&#39;integrated&#39;</span><span class="p">])</span>
+<span class="n">subplot</span><span class="p">(</span><span class="mi">312</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">wvl</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">[</span><span class="s1">&#39;intensity&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">subplot</span><span class="p">(</span><span class="mi">313</span><span class="p">)</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">wvl</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">[</span><span class="s1">&#39;intensity&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>produces</p>
+<img alt="_static/spectrum_200_300_3panel.png" class="align-center" src="_static/spectrum_200_300_3panel.png" />
+<p>The integrated spectrum is formed by summing the spectra for all temperatures.</p>
+<blockquote>
+<div><ul class="simple">
+<li>For minAbund=1.e-6, the calculatation takes 209 s on a 3.5 GHz processor.</li>
+<li>For minAbund=1.e-5, the calculatation takes 122 s on a 3.5 GHz processor.</li>
+</ul>
+</div></blockquote>
+<p>The filter is not applied to the continuum.</p>
+<p>Calculations with the Spectrum module can be time consuming.  One way to control the length of time the calculations take is to limit the number of ions with the ionList keyword and to avoid the continuum calculations by setting the doContinuum keyword to 0 or False.  Another way to control the length of time the calculations take is with the minAbund keyword.  It sets the minimum elemental abundance that an element can have for its spectra to be calculated.  The default value is set include all elements.  Some usefull values of minAbund are:</p>
+<blockquote>
+<div><ul class="simple">
+<li>minAbund = 1.e-4, will include H, He, C, O, Ne</li>
+<li>minAbund = 2.e-5 adds  N, Mg, Si, S, Fe</li>
+<li>minAbund = 1.e-6 adds  Na, Al, Ar, Ca, Ni</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="the-multiple-processor-mspectrum-class">
+<h3>The multiple processor mspectrum class<a class="headerlink" href="#the-multiple-processor-mspectrum-class" title="Permalink to this headline">¶</a></h3>
+<p>Another way to speed up calculations is to use the <em>mspectrum</em> class which uses multiple cores on your local computer.  It requires the Python <em>multiprocessing</em> module which is available with Python versions 2.6 and later. <em>mspectrum</em> is called in the same way as <em>spectrum</em> but you can specify the number of cores with the <em>proc</em> keyword.  The default is 3 but it will not use more cores than are available on your machine.  For example,</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">s</span> <span class="o">=</span> <span class="n">ch</span><span class="o">.</span><span class="n">mspectrum</span><span class="p">(</span><span class="n">temperature</span><span class="p">,</span> <span class="n">density</span> <span class="p">,</span><span class="n">wvl</span><span class="p">,</span> <span class="n">em</span><span class="o">=</span><span class="n">emeasure</span><span class="p">,</span> <span class="nb">filter</span> <span class="o">=</span> <span class="p">(</span><span class="n">chfilters</span><span class="o">.</span><span class="n">gaussian</span><span class="p">,</span><span class="o">.</span><span class="mi">005</span><span class="p">),</span> <span class="n">proc</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="the-multiple-processor-ipymspectrum-class">
+<h3>The multiple processor ipymspectrum class<a class="headerlink" href="#the-multiple-processor-ipymspectrum-class" title="Permalink to this headline">¶</a></h3>
+<p>next, we will use the ipymspectrum class.  First, it is necessary to start up the cluster.  In some shell</p>
+<p>&gt; ipcluster start   &#8211;n=4</p>
+<p>or, if you are using Python3</p>
+<p>&gt; ipcluster3 start &#8211;n=4</p>
+<p>this will start 4 engines if you have 4 cores but it won&#8217;t start more than you have</p>
+<p>then in an IPython notebook or qtconsole</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">temp</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.e+6</span><span class="p">,</span> <span class="mf">2.e+6</span><span class="p">]</span>
+<span class="n">dens</span> <span class="o">=</span> <span class="mf">1.e+9</span>
+<span class="n">wvl</span> <span class="o">=</span> <span class="mf">200.</span> <span class="o">+</span> <span class="mf">0.05</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">2001</span><span class="p">)</span>
+<span class="n">emeasure</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.e+27</span> <span class="p">,</span><span class="mf">1.e+27</span><span class="p">]</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">ch</span><span class="o">.</span><span class="n">ipymspectrum</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">dens</span><span class="p">,</span> <span class="n">wvl</span><span class="p">,</span> <span class="nb">filter</span> <span class="o">=</span> <span class="p">(</span><span class="n">chfilters</span><span class="o">.</span><span class="n">gaussian</span><span class="p">,</span><span class="o">.</span><span class="mi">2</span><span class="p">),</span> <span class="n">em</span> <span class="o">=</span> <span class="n">emeasure</span><span class="p">,</span> <span class="n">doContinuum</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">minAbund</span><span class="o">=</span><span class="mf">1.e-5</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">wvl</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">[</span><span class="s1">&#39;integrated&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>produces</p>
+<img alt="_static/spectrum_200_300_integrated.png" class="align-center" src="_static/spectrum_200_300_integrated.png" />
+<p>spectrum, mspectrum and ipymspectrum can all be instantiated with the same arguments and keyword arguments.  Most of the examples below use the ipymspectrum class for speed.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">temperature</span> <span class="o">=</span> <span class="mf">1.e+7</span>
+<span class="n">wvl</span> <span class="o">=</span> <span class="mf">10.</span> <span class="o">+</span> <span class="mf">0.005</span><span class="o">*</span><span class="n">arange</span><span class="p">(</span><span class="mi">2001</span><span class="p">)</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">ch</span><span class="o">.</span><span class="n">ipymspectrum</span><span class="p">(</span><span class="n">temperature</span><span class="p">,</span> <span class="n">density</span><span class="p">,</span> <span class="n">wvl</span><span class="p">,</span> <span class="nb">filter</span> <span class="o">=</span> <span class="p">(</span><span class="n">chfilters</span><span class="o">.</span><span class="n">gaussian</span><span class="p">,</span><span class="o">.</span><span class="mi">015</span><span class="p">))</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">wvl</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">[</span><span class="s1">&#39;intensity&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>produces</p>
+<img alt="_static/spectrum_10_20.png" class="align-center" src="_static/spectrum_10_20.png" />
+<p>It is also possible to specify a selection of ions by means of the <em>ionList</em> keyword, for example, <em>ionList=[&#8216;fe_11&#8217;,&#8217;fe_12&#8217;,&#8217;fe_13&#8217;]</em></p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">s2</span> <span class="o">=</span> <span class="n">ch</span><span class="o">.</span><span class="n">ipymspectrum</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">dens</span><span class="p">,</span> <span class="n">wvl</span><span class="p">,</span> <span class="nb">filter</span> <span class="o">=</span> <span class="p">(</span><span class="n">chfilters</span><span class="o">.</span><span class="n">gaussian</span><span class="p">,</span><span class="o">.</span><span class="mi">2</span><span class="p">),</span> <span class="n">em</span> <span class="o">=</span> <span class="n">emeasure</span><span class="p">,</span> <span class="n">doContinuum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">keepIons</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">elementList</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;si&#39;</span><span class="p">],</span> <span class="n">minAbund</span><span class="o">=</span><span class="mf">1.e-4</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">211</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">wvl</span><span class="p">,</span><span class="n">s2</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">[</span><span class="s1">&#39;intensity&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">r&#39;erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">212</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">wvl</span><span class="p">,</span><span class="n">s2</span><span class="o">.</span><span class="n">IonInstances</span><span class="p">[</span><span class="s1">&#39;si_9&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">[</span><span class="s1">&#39;intensity&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">r&#39;erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">r&#39;Wavelength ($\AA$)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Si IX&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="_static/spectrum_200_300_w_si_9.png" class="align-center" src="_static/spectrum_200_300_w_si_9.png" />
+<p>Because <strong>keepIons</strong> has been set, the ion instances of all of the ions are maintained in the s2.IonInstances dictionary. It has been possible to compare the spectrum of all of the ions with the spectrum of a single ion.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">temp</span><span class="o">=</span><span class="mf">2.e+7</span>
+<span class="n">dens</span><span class="o">=</span><span class="mf">1.e+9</span>
+<span class="n">wvl</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">+</span> <span class="mf">0.002</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">4501</span><span class="p">)</span>
+<span class="n">s3</span> <span class="o">=</span> <span class="n">ch</span><span class="o">.</span><span class="n">ipymspectrum</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">dens</span><span class="p">,</span> <span class="n">wvl</span><span class="p">,</span> <span class="nb">filter</span> <span class="o">=</span> <span class="p">(</span><span class="n">chfilters</span><span class="o">.</span><span class="n">gaussian</span><span class="p">,</span><span class="o">.</span><span class="mi">015</span><span class="p">),</span><span class="n">doContinuum</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">em</span><span class="o">=</span><span class="mf">1.e+27</span><span class="p">,</span><span class="n">minAbund</span><span class="o">=</span><span class="mf">1.e-5</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">wvl</span><span class="p">,</span> <span class="n">s3</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">[</span><span class="s1">&#39;intensity&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<img alt="_static/spectrum_1_10.png" class="align-center" src="_static/spectrum_1_10.png" />
+<p>with doContinuum=1, the continuum can be plotted separately</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">plot</span><span class="p">(</span><span class="n">wvl</span><span class="p">,</span> <span class="n">s3</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">[</span><span class="s1">&#39;intensity&#39;</span><span class="p">])</span>  <span class="n">plot</span><span class="p">(</span><span class="n">wvl</span><span class="p">,</span><span class="n">s</span><span class="o">.</span><span class="n">FreeFree</span><span class="p">[</span><span class="s1">&#39;intensity&#39;</span><span class="p">])</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">wvl</span><span class="p">,</span><span class="n">s</span><span class="o">.</span><span class="n">FreeBound</span><span class="p">[</span><span class="s1">&#39;intensity&#39;</span><span class="p">])</span>
+<span class="n">plot</span><span class="p">(</span><span class="n">wvl</span><span class="p">,</span><span class="n">s</span><span class="o">.</span><span class="n">FreeBound</span><span class="p">[</span><span class="s1">&#39;intensity&#39;</span><span class="p">]</span><span class="o">+</span><span class="n">s</span><span class="o">.</span><span class="n">FreeFree</span><span class="p">[</span><span class="s1">&#39;intensity&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>produces</p>
+<img alt="_static/continuum_2e7_1_10.png" class="align-center" src="_static/continuum_2e7_1_10.png" />
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">temperature</span> <span class="o">=</span> <span class="mf">2.e+7</span>
+<span class="n">density</span> <span class="o">=</span> <span class="mf">1.e+9</span>
+<span class="n">em</span><span class="o">-</span><span class="mf">1.e+27</span>
+<span class="n">wvl</span> <span class="o">=</span> <span class="mf">1.84</span> <span class="o">+</span> <span class="mf">0.0001</span><span class="o">*</span><span class="n">arange</span><span class="p">(</span><span class="mi">601</span><span class="p">)</span>
+<span class="n">s4</span> <span class="o">=</span> <span class="n">ch</span><span class="o">.</span><span class="n">ipymspectrum</span><span class="p">(</span><span class="n">temperature</span><span class="p">,</span> <span class="n">density</span> <span class="p">,</span><span class="n">wvl</span><span class="p">,</span> <span class="nb">filter</span> <span class="o">=</span> <span class="p">(</span><span class="n">chfilters</span><span class="o">.</span><span class="n">gaussian</span><span class="p">,</span><span class="o">.</span><span class="mi">0003</span><span class="p">),</span> <span class="n">doContinuum</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">minAbund</span><span class="o">=</span><span class="mf">1.e-5</span><span class="p">,</span> <span class="n">em</span><span class="o">=</span><span class="n">em</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>produces</p>
+<img alt="_static/spectrum_2e7_1.84_1.90.png" class="align-center" src="_static/spectrum_2e7_1.84_1.90.png" />
+</div>
+</div>
+<div class="section" id="radiative-loss-rate">
+<h2>Radiative loss rate<a class="headerlink" href="#radiative-loss-rate" title="Permalink to this headline">¶</a></h2>
+<p>the radiative loss rate can be calculated as a function of temperature and density:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">temp</span> <span class="o">=</span> <span class="mf">10.</span><span class="o">**</span><span class="p">(</span><span class="mf">4.</span><span class="o">+</span><span class="mf">0.05</span><span class="o">*</span><span class="n">arange</span><span class="p">(</span><span class="mi">81</span><span class="p">))</span>
+<span class="n">rl</span> <span class="o">=</span> <span class="n">ch</span><span class="o">.</span><span class="n">radLoss</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="mf">1.e+4</span><span class="p">,</span> <span class="n">minAbund</span><span class="o">=</span><span class="mf">2.e-5</span><span class="p">)</span>
+<span class="n">rl</span><span class="o">.</span><span class="n">radLossPlot</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>produces, in 446 s:</p>
+<img alt="_static/radloss.png" class="align-center" src="_static/radloss.png" />
+<p>the radiative losses are kept in the rl.RadLoss dictionary</p>
+<p>the <strong>abundancdName</strong> keyword argument can be set to the name of an available abundance file in XUVTOP/abund</p>
+<p>if abundanceName=1, a dialog will come up so that a abundance file can be selected</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Quick Start</a><ul>
+<li><a class="reference internal" href="#level-populations">Level populations</a></li>
+<li><a class="reference internal" href="#a-chiantipy-convention">A ChiantiPy Convention</a></li>
+<li><a class="reference internal" href="#spectral-line-intensities">Spectral Line Intensities</a></li>
+<li><a class="reference internal" href="#g-n-t-function">G(n,T) function</a></li>
+<li><a class="reference internal" href="#intensity-ratios">Intensity Ratios</a></li>
+<li><a class="reference internal" href="#spectra-of-a-single-ion">Spectra of a single ion</a></li>
+<li><a class="reference internal" href="#free-free-and-free-bound-continuum">Free-free and free-bound continuum</a></li>
+<li><a class="reference internal" href="#the-multi-ion-class-bunch">The multi-ion class Bunch</a></li>
+<li><a class="reference internal" href="#spectra-of-multiple-ions-and-continuum">Spectra of multiple ions and continuum</a><ul>
+<li><a class="reference internal" href="#the-single-processor-spectrum-class">The single processor spectrum class</a></li>
+<li><a class="reference internal" href="#the-multiple-processor-mspectrum-class">The multiple processor mspectrum class</a></li>
+<li><a class="reference internal" href="#the-multiple-processor-ipymspectrum-class">The multiple processor ipymspectrum class</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#radiative-loss-rate">Radiative loss rate</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="getting_started.html"
+                        title="previous chapter">Getting started with ChiantiPy</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="tutorial.html"
+                        title="next chapter">Tutorial</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/quick_start.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="tutorial.html" title="Tutorial"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="getting_started.html" title="Getting started with ChiantiPy"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">ChiantiPy 0.6.5 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, Ken Dere.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.
+    </div>
+  </body>
+</html>

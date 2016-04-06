@@ -3,16 +3,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 import chianti.filters as chfilters
 import chianti.util as util
-import chianti.io as chio 
+import chianti.io as chio
 import chianti.data as chdata
 import chianti.constants as const
 #
 defaults = chdata.Defaults
 #
-class _specTrails():
-    '''
+class _specTrails(object):
+    """
     a collection of methods for use in spectrum calculations
-    '''
+    """
     def __init__(self, temperature, density):
         self.Temperature = temperature
         self.EDensity = density
@@ -24,12 +24,12 @@ class _specTrails():
     def convolve(self, wavelength=0, filter=(chfilters.gaussianR, 1000.), label=0, verbose=0):
         '''
         the first application of spectrum calculates the line intensities within the specified wavelength range and for set of ions specified
-        
+
         wavelength will not be used if applied to 'spectrum' objects
-        
+
         wavelength IS need for 'bunch' objects - in this case, the wavelength should not extend beyond the limits of the
         wvlRange used for the 'bunch' calculation
-        
+
         '''
         if not hasattr(self, 'IonInstances'):
             print(' must set keepIons=1 in order to keep self.IonInstances')
@@ -182,7 +182,7 @@ class _specTrails():
                         self.Todo[one]+= '_ff'
                         if not bare:
                             self.Todo[one] += '_fb'
-        if ionList: 
+        if ionList:
             for one in ionList:
                 stuff = util.convertName(one)
                 bare = stuff['Z'] == stuff['Ion']
@@ -308,7 +308,7 @@ class _specTrails():
         '''
         to plot the line spectrum as a function of wavelength
         '''
-        # 
+        #
         #
         plt.figure()
         mask = self.Em > 1.
@@ -316,7 +316,7 @@ class _specTrails():
             ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
         else:
             ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$'
-            
+
         #
         xlabel = 'Wavelength ('+self.Defaults['wavelength'].capitalize() +')'
         #
@@ -344,5 +344,3 @@ class _specTrails():
             plt.savefig(saveFile)
     #
     # -------------------------------------------------------------------------
- 
-

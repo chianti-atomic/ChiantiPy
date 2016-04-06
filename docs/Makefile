@@ -4,8 +4,11 @@
 # You can set these variables from the command line.
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
+SPHINXAPIBUILD = sphinx-apidoc
 PAPER         =
 BUILDDIR      = build
+APIOUTDIR			= source/api/
+MODULEDIR     = ../chianti/
 
 # User-friendly check for sphinx-build
 ifeq ($(shell which $(SPHINXBUILD) >/dev/null 2>&1; echo $$?), 1)
@@ -52,8 +55,12 @@ help:
 clean:
 	rm -rf $(BUILDDIR)/*
 
+.PHONY: apibuild
+apibuild:
+	$(SPHINXAPIBUILD) -f -o $(APIOUTDIR) $(MODULEDIR)
+
 .PHONY: html
-html:
+html: apibuild
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."

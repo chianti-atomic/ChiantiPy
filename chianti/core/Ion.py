@@ -28,6 +28,8 @@ class ion(_ionTrails, _specTrails):
     radTemperature, the radiation black-body temperature in Kelvin
     rPlot, the distance from the center of the star in stellar radii
 
+    FOO BAR test
+
     Inherited methods include 'intensityList', 'intensityRatio' (between lines of different ions), 'intensityRatioSave'
     and 'convolve'
 

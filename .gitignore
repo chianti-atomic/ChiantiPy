@@ -2,3 +2,5 @@
 build/
 #ignore docs build
 docs/build
+#ignore byte code
+*.pyc

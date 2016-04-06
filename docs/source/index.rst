@@ -18,13 +18,12 @@ CHIANTI is developed and maintained by scientists at George Mason University (US
 
 .. toctree::
    :maxdepth: 2
-   
+
    getting_started
    quick_start
    tutorial
-   api
+   api/index.rst
    notes
    cheat
    resources
    bugs
-

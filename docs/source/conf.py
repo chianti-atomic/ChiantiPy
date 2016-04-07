@@ -23,6 +23,9 @@ sys.path.insert(0,os.path.abspath('../../chianti/'))
 
 # -- General configuration ------------------------------------------------
 
+#check if on readthedocs
+on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+
 # If your documentation needs a minimal Sphinx version, state it here.
 #needs_sphinx = '1.0'
 
@@ -117,7 +120,8 @@ todo_include_todos = False
 
 # add sphinx readthedocs theme, revert to classic if we can't find it
 try:
-    import sphinx_rtd_theme
+    if not on_rtd:
+        import sphinx_rtd_theme
     html_theme='sphinx_rtd_theme'
     html_theme_path=[sphinx_rtd_theme.get_html_theme_path()]
 except ImportError:
@@ -160,7 +164,7 @@ html_static_path = ['_static']
 # If not None, a 'Last updated on:' timestamp is inserted at every page
 # bottom, using the given strftime format.
 # The empty string is equivalent to '%b %d, %Y'.
-#html_last_updated_fmt = None
+html_last_updated_fmt = '%b %d, %Y'
 
 # If true, SmartyPants will be used to convert quotes and dashes to
 # typographically correct entities.

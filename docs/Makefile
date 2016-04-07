@@ -54,6 +54,7 @@ help:
 .PHONY: clean
 clean:
 	rm -rf $(BUILDDIR)/*
+	rm -rf $(SPHINXAPIBUILD)/*
 
 .PHONY: apibuild
 apibuild:

@@ -7,7 +7,7 @@ dependencies:
 - futures=3.0.5=py27_0
 - ipykernel=4.3.1=py27_0
 - ipyparallel=5.0.1=py27_0
-- ipython=4.1.2=py27_2
+- ipython=4.1.1=py27_2
 - ipython_genutils=0.1.0=py27_0
 - jupyter_client=4.2.2=py27_0
 - jupyter_core=4.1.0=py27_0

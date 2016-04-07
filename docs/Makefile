@@ -7,8 +7,8 @@ SPHINXBUILD   = sphinx-build
 SPHINXAPIBUILD = sphinx-apidoc
 PAPER         =
 BUILDDIR      = build
-APIOUTDIR			= source/api/
-MODULEDIR     = ../chianti/
+APIOUTDIR			= source/api
+MODULEDIR     = ../chianti
 
 # User-friendly check for sphinx-build
 ifeq ($(shell which $(SPHINXBUILD) >/dev/null 2>&1; echo $$?), 1)
@@ -54,7 +54,7 @@ help:
 .PHONY: clean
 clean:
 	rm -rf $(BUILDDIR)/*
-	rm -rf $(SPHINXAPIBUILD)/*
+	rm -rf $(APIOUTDIR)/*
 
 .PHONY: apibuild
 apibuild:

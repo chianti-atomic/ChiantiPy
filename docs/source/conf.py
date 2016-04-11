@@ -34,8 +34,7 @@ if on_rtd:
     if not os.path.exists(os.environ['XUVTOP']):
         os.makedirs(os.environ['XUVTOP'])
     #note: when version changes, we'll need to update this 
-    subprocess.call('wget http://www.chiantidatabase.org/download/CHIANTI_8.0.1_data.tar.gz',shell=True)
-    subprocess.call('tar xzf CHIANTI_8.0.1_data.tar.gz -C '+os.environ['XUVTOP'],shell=True)
+    subprocess.call('curl -L http://www.chiantidatabase.org/download/CHIANTI_8.0.1_data.tar.gz | tar xz -C '+os.environ['XUVTOP'], shell=True)
 
 # If your documentation needs a minimal Sphinx version, state it here.
 #needs_sphinx = '1.0'

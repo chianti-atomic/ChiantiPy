@@ -14,6 +14,7 @@
 
 import sys
 import os
+import subprocess
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -25,6 +26,16 @@ sys.path.insert(0,os.path.abspath('../../chianti/'))
 
 #check if on readthedocs
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+
+#set XUVTOP path to chianti data to build the docs and download chianti data
+#TODO: change setup.py to avoid needing the database right away
+if on_rtd:
+    os.environ['XUVTOP'] = os.path.join(os.getcwd(),'chianti_dbase')
+    if not os.path.exists(os.environ['XUVTOP']):
+        os.makedirs(os.environ['XUVTOP'])
+    #note: when version changes, we'll need to update this 
+    subprocess.call('wget http://www.chiantidatabase.org/download/CHIANTI_8.0.1_data.tar.gz',shell=True)
+    subprocess.call('tar xzf CHIANTI_8.0.1_data.tar.gz -C '+os.environ['XUVTOP'],shell=True)
 
 # If your documentation needs a minimal Sphinx version, state it here.
 #needs_sphinx = '1.0'

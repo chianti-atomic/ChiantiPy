@@ -46,7 +46,7 @@ if on_rtd:
         def __getattr__(cls,name):
             return Mock()
             
-    MOCK_MODULES = ['scipy','pyzmq','matplotlib']
+    MOCK_MODULES = ['scipy','scipy.interpolate','pyzmq','matplotlib','matplotlib.pyplot']
     sys.modules.update((mod_name,Mock()) for mod_name in MOCK_MODULES)
 
 # If your documentation needs a minimal Sphinx version, state it here.

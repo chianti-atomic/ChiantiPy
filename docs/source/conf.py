@@ -15,6 +15,10 @@
 import sys
 import os
 import subprocess
+try:
+    from unittest.mock import MagicMock
+except ImportError:
+    print("No mocking. Install it yourself.")
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -35,6 +39,15 @@ if on_rtd:
         os.makedirs(os.environ['XUVTOP'])
     #note: when version changes, we'll need to update this 
     subprocess.call('curl -L http://www.chiantidatabase.org/download/CHIANTI_8.0.1_data.tar.gz | tar xz -C '+os.environ['XUVTOP'], shell=True)
+    
+    #Mock modules
+    class Mock(MagicMock):
+        @classmethod
+        def __getattr__(cls,name):
+            return Mock()
+            
+    MOCK_MODULES = ['numpy','scipy','pyzmq','matplotlib']
+    sys.modules.update((mod_name,Mock()) for mod_name in MOCK_MODULES)
 
 # If your documentation needs a minimal Sphinx version, state it here.
 #needs_sphinx = '1.0'

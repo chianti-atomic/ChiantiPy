@@ -16,7 +16,7 @@ import sys
 import os
 import subprocess
 try:
-    from unittest.mock import MagicMock
+    from mock import Mock as MagicMock
 except ImportError:
     print("No mocking. Install it yourself.")
 

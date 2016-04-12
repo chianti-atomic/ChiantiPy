@@ -1,6 +1,5 @@
 name: chiantipy
 dependencies:
-- appnope=0.1.0=py27_0
 - backports_abc=0.4=py27_0
 - cycler=0.10.0=py27_0
 - decorator=4.0.9=py27_0

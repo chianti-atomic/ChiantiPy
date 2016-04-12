@@ -46,7 +46,7 @@ if on_rtd:
         def __getattr__(cls,name):
             return Mock()
             
-    MOCK_MODULES = ['scipy','scipy.interpolate','ipyparallel','ipyparallel.Client','matplotlib','matplotlib.pyplot']
+    MOCK_MODULES = ['scipy','scipy.interpolate','ipyparallel','ipyparallel.Client','matplotlib','matplotlib.pyplot','matplotlib.tri']
     sys.modules.update((mod_name,Mock()) for mod_name in MOCK_MODULES)
 
 # If your documentation needs a minimal Sphinx version, state it here.

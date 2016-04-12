@@ -22,7 +22,7 @@ CHIANTI is developed and maintained by scientists at George Mason University (US
    getting_started
    quick_start
    tutorial
-   api/modules.rst
+   api/chianti.rst
    notes
    cheat
    resources

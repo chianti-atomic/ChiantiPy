@@ -1,4 +1,4 @@
-chianti package
+API Reference
 ===============
 
 Subpackages

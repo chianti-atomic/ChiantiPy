@@ -18,7 +18,7 @@ import subprocess
 try:
     from mock import Mock as MagicMock
 except ImportError:
-    print("No mocking. Install it yourself.")
+    print("Cannot import mock. Only needed for RTD build.")
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the

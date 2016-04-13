@@ -3,8 +3,9 @@ import numpy as np
 import chianti.core as ch
 from chianti import util
 class ioneq(ch.ion):
+    """calculates the ionization equilibrium for element z at a single temperatures"""
+
     def __init__(self,z, temperature, verbose=False):
-        '''calculates the ionization equilibrium for element z at a single temperatures'''
 #        self.Defaults=defaults
         self.Z=z
         self.Temperature=temperature

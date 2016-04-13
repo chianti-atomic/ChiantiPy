@@ -1,0 +1,5 @@
+conda:
+  file: rtd_environment.yml
+python:
+  version: 2.7
+  setup_py_install: True

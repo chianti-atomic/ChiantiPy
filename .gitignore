@@ -1,0 +1,8 @@
+#ignore build
+build/
+#ignore docs build
+docs/build
+#ignore api docs build
+#docs/source/api
+#ignore byte code
+*.pyc

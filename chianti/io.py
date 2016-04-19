@@ -574,7 +574,7 @@ def elvlcRead(ions, filename=0, getExtended=0, verbose=0,  useTh=1):
     #
     # -------------------------------------------------------------------------------------
     #
-def elvlcWrite(info, outfile=0, addLvl=0, includeRyd=0):
+def elvlcWrite(info, outfile=0, addLvl=0, includeRyd=0, includeEv=0, verbose=0):
     '''
     for files created after elvlc format change in November 2012
     creates a .elvlc in the current directory
@@ -613,22 +613,29 @@ def elvlcWrite(info, outfile=0, addLvl=0, includeRyd=0):
     if 'label' not in info:
         nlvl = len(info['ecm'])
         info['label'] = [' ']*nlvl
-    if 'eryd' not in info:
-        info['eryd'] = [x*const.invCm2ryd for x in info['ecm']]
-    if 'erydth 'not in info:
-        info['erydth'] = [x*const.invCm2ryd for x in info['ecmth']]
+    if includeRyd:
+        if 'eryd' not in info:
+            info['eryd'] = [x*const.invCm2ryd for x in info['ecm']]
+        if 'erydth 'not in info:
+            info['erydth'] = [x*const.invCm2ryd for x in info['ecmth']]
+    if includeEv:
+        if 'eV' not in info:
+            info['eV'] = [x*const.invCm2Ev for x in info['ecm']]
+        if 'eVth' not in info:
+            info['eVth'] = [x*const.invCm2Ev for x in info['ecmth']]
    #
     out = open(elvlcName, 'w')
     for i,  aterm in enumerate(info['term']):
         thisTerm = aterm.ljust(29)
         thisLabel = info['label'][i].ljust(4)
 #        print, ' len of thisTerm = ', len(thisTerm)
+        pstring = '%7i%30s%5s%5i%5s%5.1f%15.3f%15.3f'%(i+1+addLvl, thisTerm, thisLabel, info['spin'][i], info['spd'][i], info['j'][i], info['ecm'][i], info['ecmth'][i])
         if includeRyd:
-            pstring = '%7i%30s%5s%5i%5s%5.1f%15.3f%15.3f , %15.8f , %15.8f \n'%(i+1+addLvl, thisTerm, thisLabel, info['spin'][i], info['spd'][i],info['j'][i],  info['ecm'][i], info['ecmth'][i], info['eryd'][i], info['erydth'][i])
-        else:
-            pstring = '%7i%30s%5s%5i%5s%5.1f%15.3f%15.3f \n'%(i+1+addLvl, thisTerm, thisLabel, info['spin'][i], info['spd'][i],info['j'][i],  info['ecm'][i], info['ecmth'][i])
-        out.write(pstring)
-    out.write(' -1\n')
+            pstring += ' , %15.8f , %15.8f '%(info['eryd'][i], info['erydth'][i])
+        if includeEv:
+            pstring += ' , %15.4f , %15.4f '%(info['eV'][i], info['eVth'][i])
+        out.write(pstring + '\n')
+    out.write(' -1 \n')
     out.write('%filename:  ' + os.path.split(elvlcName)[1] + '\n')
 #    info['ref'].append(' produced as a part of the \'CHIANTI\' atomic database for astrophysical spectroscopy')
 #    today = date.today()

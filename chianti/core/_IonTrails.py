@@ -10,10 +10,10 @@ import chianti.io as io
 import chianti.Gui as chGui
 import chianti.data as chdata
 #
-class _ionTrails():
-    '''
+class _ionTrails(object):
+    """
     a collection of methods for use in ion and spectrum calculations
-    '''
+    """
     def __init__(self):
         pass
         return
@@ -353,7 +353,7 @@ class _ionTrails():
                 ndens = 1
         #
         print(' ndens = %5i ntemp = %5i'%(ndens, ntemp))
-        
+
         ionS = self.Intensity['ionS']
         #  see if we are dealing with more than a single ion
         ionSet = set(ionS)
@@ -550,13 +550,13 @@ class _ionTrails():
             if ionNum == 1:
                 desc += ' ' + str(wvl[topLines[aline]])
             else:
-                desc += ' ' + ionS[topLines[aline]] + ' ' + str(wvl[topLines[aline]]) 
+                desc += ' ' + ionS[topLines[aline]] + ' ' + str(wvl[topLines[aline]])
         desc += ' / '
         for aline in den_idx:
             if ionNum == 1:
                 desc += ' ' + str(wvl[topLines[aline]])
             else:
-                desc += ' ' + ionS[topLines[aline]] + ' ' + str(wvl[topLines[aline]]) 
+                desc += ' ' + ionS[topLines[aline]] + ' ' + str(wvl[topLines[aline]])
         if ndens == ntemp and ntemp > 1:
             plt.text(0.07, 0.5,desc, horizontalalignment='left', verticalalignment='center', fontsize=fontsize,  transform = ax.transAxes)
             #

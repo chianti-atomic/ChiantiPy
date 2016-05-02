@@ -317,52 +317,56 @@ def dilute(radius):
 def diCross(diParams, energy=0, verbose=0):
     '''
     Calculate the direct ionization cross section.
-    diParams obtained by util.diRead with the following keys:
+    diParams obtained by io.diRead with the following keys:
     ['info', 'ysplom', 'xsplom', 'btf', 'ev1', 'ref', 'eaev']
     Given as a function of the incident electron energy in eV
     returns a dictionary - {'energy':energy, 'cross':cross}
     '''
+    Z = diParams['info']['iz']
+    Ip = diParams['ev1']
     iso=diParams['info']['iz'] - diParams['info']['ion'] + 1
     energy = np.array(energy, 'float64')
     if not energy.any():
-        btenergy=0.1*np.arange(10)
-        btenergy[0]=0.01
-        dum=np.ones(len(btenergy))
+        btenergy = 0.1*np.arange(10)
+        btenergy[0] = 0.01
+        dum = np.ones(len(btenergy))
         [energy, dum] = descale_bti(btenergy, dum, 2., diParams['ev1'][0])
-        energy=np.asarray(energy, 'float64')
+        energy = np.asarray(energy, 'float64')
     #
-    if iso == 1 and self.Z >= 6:
+    if iso == 1 and Z >= 6:
         #  hydrogenic sequence
-        ryd=27.2113845/2.
-        u=energy/self.Ip
-        ev1ryd=self.Ip/ryd
-        a0=0.5291772108e-8
-        a_bohr=const.pi*a0**2   # area of bohr orbit
-        if self.Z >= 20:
-            ff = (140.+(self.Z/20.)**3.2)/141.
+#        ryd=27.2113845/2.
+        u = energy/Ip
+        IpRyd = Ip/const.ryd2Ev
+#        a0=0.5291772108e-8
+#        a_bohr=const.pi*a0**2   # area of bohr orbit
+        if Z >= 20:
+            ff = (140.+(Z/20.)**3.2)/141.
         else:
             ff = 1.
 #        qr = util.qrp(self.Z,u)*ff
-        qr = qrp(self.Z,u)*ff
+        qr = qrp(Z,u)*ff
         bb = 1.  # hydrogenic
-        qh = bb*a_bohr*qr/ev1ryd**2
+        qh = bb*const.bohrCross*qr/IpRyd**2
         diCross = {'energy':energy, 'cross':qh}
-    elif iso == 2 and self.Z >= 10:
+        return diCross
+    elif iso == 2 and Z >= 10:
         #  use
-        ryd=27.2113845/2.
-        u=energy/self.Ip
-        ev1ryd=self.Ip/ryd
-        a0=0.5291772108e-8
-        a_bohr=const.pi*a0**2   # area of bohr orbit
-        if self.Z >= 20:
+#        ryd=27.2113845/2.
+        u = energy/Ip
+        IpRyd = Ip/const.ryd2Ev
+#        a0=0.5291772108e-8
+#        a_bohr=const.pi*a0**2   # area of bohr orbit
+        if Z >= 20:
             ff=(140.+(self.Z/20.)**3.2)/141.
         else:
             ff=1.
 #        qr=util.qrp(self.Z,u)*ff
-        qr = qrp(self.Z,u)*ff
+        qr = qrp(Z,u)*ff
         bb = 2.  # helium-like
-        qh=bb*a_bohr*qr/ev1ryd**2
-        diCross={'energy':energy, 'cross':qh}
+        qh = bb*const.bohrCross*qr/IpRyd**2
+        diCross = {'energy':energy, 'cross':qh}
+        return diCross
     else:
         cross=np.zeros(len(energy), 'Float64')
 
@@ -377,9 +381,9 @@ def diCross(diParams, energy=0, verbose=0):
                 btcross=interpolate.splev(btenergy, y2, der=0)
                 energy1, cross1 = descale_bti(btenergy, btcross, diParams['btf'][ifac], diParams['ev1'][ifac] )
                 offset=len(energy)-goode.sum()
-                if verbose:
-                    pl.plot(diParams['xsplom'][ifac], diParams['ysplom'][ifac])
-                    pl.plot(btenergy, btcross)
+#                if verbose:
+#                    pl.plot(diParams['xsplom'][ifac], diParams['ysplom'][ifac])
+#                    pl.plot(btenergy, btcross)
                 if offset > 0:
                     seq=[np.zeros(offset, 'Float64'), cross1]
                     cross1=np.hstack(seq)

@@ -19,7 +19,7 @@ xuvtop = chdata.xuvtop
 heseqLvl2 = [-1,3,-1,-1,-1,5,6,6,-1,6,6,6,5,5,3,5,3,5,3,5,-1,-1,-1,-1,-1,4,-1,4,-1,4]
 #
 class ion(_ionTrails, _specTrails):
-    '''
+    """
     The top level class for performing spectral calculations for an ion in the CHIANTI database.
 
     ionStr is a string corresponding such as 'c_5' that corresponds to the C V ion.
@@ -27,24 +27,14 @@ class ion(_ionTrails, _specTrails):
     eDensity in cm^-3
     radTemperature, the radiation black-body temperature in Kelvin
     rPlot, the distance from the center of the star in stellar radii
-    
+
     Inherited methods include 'intensityList', 'intensityRatio' (between lines of different ions), 'intensityRatioSave'
-    and 'convolve'    
-    '''
+    and 'convolve'
+
+    the elemental abundance values can be set to one of the names in the XUVTOP/abundance directory
+    without the '.abund' suffix, such as abundanceName = 'sun_photospheric_1998_grevesse'
+    """
     def __init__(self, ionStr, temperature=None, eDensity=None, pDensity='default', radTemperature=0,  rStar=0, abundanceName=0, abundance=0,  verbose=0, setup=True, em=0):
-        '''
-        The top level class for performing spectral calculations for an ion in the CHIANTI database.
-
-        ionStr is a string corresponding such as 'c_5' that corresponds to the C V ion.
-        temperature in Kelvin
-        eDensity in cm^-3
-        radTemperature, the radiation black-body temperature in Kelvin
-        rStar, the distance from the center of the star in stellar radii
-
-        the elemental abundance values can be set to one of the names in the XUVTOP/abundance directory
-        without the '.abund' suffix, such as abundanceName = 'sun_photospheric_1998_grevesse'
-
-       '''
         #
         #
 #        self.__version__ = chianti.__version__
@@ -153,7 +143,7 @@ class ion(_ionTrails, _specTrails):
 #                self.Em = em
             pass
         elif type(em) == float and em > 0.:
-            em = np.ones(self.NTempDen, 'float64')*em        
+            em = np.ones(self.NTempDen, 'float64')*em
             self.Em = em
         elif type(em) == list or type(em) == tuple or type(em) == np.ndarray:
             em = np.asarray(em, 'float64')
@@ -1308,7 +1298,7 @@ class ion(_ionTrails, _specTrails):
 #            self.elvlcRead()
 #            nlvls=len(self.Elvlc["lvl"])
         if not hasattr(self, 'Elvlc'):
-            self.elvlcRead()            
+            self.elvlcRead()
         #
         #  need to make sure elvl is >0, except for ground level
         eryd=np.asarray(self.Elvlc["eryd"])
@@ -1639,7 +1629,7 @@ class ion(_ionTrails, _specTrails):
         spectrum the same.
 
         includes ionization equilibrium and elemental abundances
-        
+
         can be called multiple times to use different filters and widths
         uses label to keep the separate applications of spectrum sorted by the label
         for example, do .spectrum( .... labe='test1')
@@ -1675,7 +1665,7 @@ class ion(_ionTrails, _specTrails):
             self.Em = em
             useEm = 1
         elif type(em) == float and em > 0.:
-            em = np.ones(self.NTempDen, 'float64')*em        
+            em = np.ones(self.NTempDen, 'float64')*em
             self.Em = em
             useEm = 1
         elif type(em) == list or type(em) == tuple or type(em) == np.ndarray:
@@ -1697,7 +1687,7 @@ class ion(_ionTrails, _specTrails):
                 if len(idx) == 0:
                     print(' no lines in wavelength range %12.2f - %12.2f'%(wavelength.min(), wavelength.max()))
                     self.Spectrum = {'errorMessage':' no lines in wavelength range %12.2f - %12.2f'%(wavelength.min(), wavelength.max())}
-                    return 
+                    return
                 for iwvl in idx:
                     wvlCalc = self.Intensity['wvl'][iwvl]
                     aspectrum += useFilter(wavelength, wvlCalc, factor=useFactor)*intensity['intensity'][iwvl]
@@ -1710,7 +1700,7 @@ class ion(_ionTrails, _specTrails):
                 if len(idx) == 0:
                     print(' no lines in wavelength range %12.2f - %12.2f'%(wavelength.min(), wavelength.max()))
                     self.Spectrum = {'errorMessage':' no lines in wavelength range %12.2f - %12.2f'%(wavelength.min(), wavelength.max())}
-                    return 
+                    return
                 for itemp in range(self.NTempDen):
                     for iwvl in idx:
                         wvlCalc = self.Intensity['wvl'][iwvl]
@@ -1725,7 +1715,7 @@ class ion(_ionTrails, _specTrails):
                 self.Spectrum[label] = {'intensity':aspectrum,  'wvl':wavelength, 'filter':useFilter.__name__, 'filterWidth':useFactor, 'allLines':allLines, 'em':em, 'xlabel':xlabel, 'ylabel':ylabel}
             else:
                 self.Spectrum = {label:{'intensity':aspectrum,  'wvl':wavelength, 'filter':useFilter.__name__, 'filterWidth':useFactor, 'allLines':allLines, 'em':em, 'xlabel':xlabel, 'ylabel':ylabel}}
-            
+
         else:
             self.Spectrum = {'intensity':aspectrum,  'wvl':wavelength, 'filter':useFilter.__name__, 'filterWidth':useFactor, 'allLines':allLines, 'em':em, 'xlabel':xlabel, 'ylabel':ylabel}
         #
@@ -1906,14 +1896,14 @@ class ion(_ionTrails, _specTrails):
             self.upsilonDescale(diel=self.Dielectronic)
             #ups = self.Upsilon['upsilon']
             exRate = self.Upsilon['exRate']
-            dexRate = self.Upsilon['dexRate']                
+            dexRate = self.Upsilon['dexRate']
         #
         if npsplups:
             self.upsilonDescaleSplups(prot=1)
 #            pups = self.PUpsilon['upsilon']
             pexRate = self.PUpsilon['exRate']
             pdexRate = self.PUpsilon['dexRate']
-            
+
         #
         temp = temperature
         ntemp = temp.size
@@ -3359,7 +3349,7 @@ class ion(_ionTrails, _specTrails):
         units:  ergs cm^-3 s^-1 str^-1
 
         includes elemental abundance and ionization fraction.
-        
+
         the emission measure 'em' is included if specified
         """
         # emiss ={"wvl":wvl, "emiss":em, "plotLabels":plotLabels}
@@ -3371,7 +3361,7 @@ class ion(_ionTrails, _specTrails):
                 em = np.ones(self.NTempDen, 'float64')
                 self.Em = em
         elif type(em) == float and em > 0.:
-            em = np.ones(self.NTempDen, 'float64')*em        
+            em = np.ones(self.NTempDen, 'float64')*em
             self.Em = em
         elif type(em) == list or type(em) == tuple or type(em) == np.ndarray:
             em = np.asarray(em, 'float64')
@@ -3430,7 +3420,7 @@ class ion(_ionTrails, _specTrails):
             nwvl, ntempden= emissivity.shape
             intensity = np.zeros((ntempden, nwvl),'Float64')
             if thisIoneq.size == 1:
-                thisIoneq = np.ones(ntempden, 'float64')*thisIoneq            
+                thisIoneq = np.ones(ntempden, 'float64')*thisIoneq
             for it in range(ntempden):
                 intensity[it] = ab*thisIoneq[it]*emissivity[:, it]*em[it]/self.EDensity[it]
         else:
@@ -3917,7 +3907,7 @@ class ion(_ionTrails, _specTrails):
         #-----------------------------------------------------------------
         #
     def twoPhoton(self, wvl, em=0):
-        ''' 
+        '''
         to calculate the two-photon continuum - only for hydrogen- and helium-like ions
         includes the elemental abundance and the ionization equilibrium
         includes the emission measure if specified
@@ -3931,7 +3921,7 @@ class ion(_ionTrails, _specTrails):
                 em = np.ones(self.NTempDen, 'float64')
                 self.Em = em
         elif type(em) == float and em > 0.:
-            em = np.ones(self.NTempDen, 'float64')*em        
+            em = np.ones(self.NTempDen, 'float64')*em
             self.Em = em
         elif type(em) == list or type(em) == tuple or type(em) == np.ndarray:
             em = np.asarray(em, 'float64')
@@ -4029,7 +4019,7 @@ class ion(_ionTrails, _specTrails):
         #-----------------------------------------------------------------
         #
     def twoPhotonLoss(self):
-        ''' 
+        '''
         to calculate the two-photon energy loss rate - only for hydrogen- and helium-like ions
         includes the elemental abundance and the ionization equilibrium
         does not include the emission measure

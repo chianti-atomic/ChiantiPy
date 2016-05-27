@@ -13,5 +13,4 @@ from ._astropy_init import *
 if not _ASTROPY_SETUP_:
     # For ChiantiPy
     from . import  version
-    Version = version.__version__
-    Version_info = version.__version_info__
+    Version = version._last_generated_version

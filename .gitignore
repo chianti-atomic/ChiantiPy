@@ -17,7 +17,7 @@ htmlcov
 MANIFEST
 
 # Sphinx
-docs/api
+docs/source/api
 docs/_build
 
 # Eclipse editor project files

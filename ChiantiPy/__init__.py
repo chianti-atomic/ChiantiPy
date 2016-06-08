@@ -10,7 +10,7 @@ from ._astropy_init import *
 # ----------------------------------------------------------------------------
 
 # For egg_info test builds to pass, put package imports here.
-if not _ASTROPY_SETUP_:
-    # For ChiantiPy
-    from . import  version
-    Version = version._last_generated_version
+#if not _ASTROPY_SETUP_:
+# For ChiantiPy
+from . import  version
+Version = version._last_generated_version

@@ -1,7 +1,7 @@
 #import types
 import numpy as np
-import chianti.core as ch
-from chianti import util
+import ChiantiPy.core as ch
+import ChiantiPy.tools.util as util
 class ioneq(ch.ion):
     """calculates the ionization equilibrium for element z at a single temperatures"""
 

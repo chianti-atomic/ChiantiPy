@@ -1,2 +1,3 @@
 ''' PyQt4 selection dialog widgets'''
-__all__ = ['gui','ui']
+from .gui import (chpicker,selectorDialog,choice2Dialog)
+from .ui import (Ui_selectorDialogForm,Ui_choice2DialogForm)

@@ -3,12 +3,12 @@ import copy
 #
 import numpy as np
 
-import chianti.data as chdata
-import chianti.constants as const
-import chianti.filters as chfilters
-import chianti.util as util
-import chianti.io as chio
-import chianti.Gui as chgui
+import ChiantiPy.tools.data as chdata
+import ChiantiPy.tools.constants as const
+import ChiantiPy.tools.filters as chfilters
+import ChiantiPy.tools.util as util
+import ChiantiPy.tools.io as chio
+import ChiantiPy.Gui as chgui
 from ._IonTrails import _ionTrails
 from ._SpecTrails import _specTrails
 #
@@ -118,7 +118,7 @@ class mspectrum(_ionTrails, _specTrails):
         if type(em) == int and em == 0:
             em = np.ones(self.NTempDen, 'float64')
         elif type(em) == float and em > 0.:
-            em = np.ones(self.NTempDen, 'float64')*em        
+            em = np.ones(self.NTempDen, 'float64')*em
         elif type(em) == list or type(em) == tuple:
             em = np.asarray(em, 'float64')
         self.Em = em
@@ -189,7 +189,7 @@ class mspectrum(_ionTrails, _specTrails):
             self.IonInstances = {}
         self.Finished = []
         #
-        
+
 #        self.Todo = []
         self.ionGate(elementList = elementList, ionList = ionList, minAbund=minAbund, doContinuum=doContinuum, verbose = verbose)
         #

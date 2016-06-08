@@ -3,11 +3,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 np.seterr(over='ignore')
 #import chianti.core as ch
-import chianti
-import chianti.data as chdata
-import chianti.constants as const
-import chianti.util as util
-import chianti.Gui as chgui
+import ChiantiPy
+import ChiantiPy.tools.data as chdata
+import ChiantiPy.tools.constants as const
+import ChiantiPy.tools.util as util
+import ChiantiPy.Gui as chgui
 from ._SpecTrails import _specTrails
 #
 defaults = chdata.Defaults
@@ -132,7 +132,7 @@ class radLoss(_specTrails):
                     # need to skip the neutral
                         cont = chianti.core.continuum(akey, temperature, abundanceName=self.AbundanceName)
                         cont.freeFreeLoss()
-                        freeFreeLoss += cont.FreeFreeLoss['rate']                
+                        freeFreeLoss += cont.FreeFreeLoss['rate']
     #                if nTempDen == 1:
     #                    freeFree += cont.FreeFreeLoss['rate']
     #                else:

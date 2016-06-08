@@ -1,11 +1,11 @@
 from datetime import datetime
 import numpy as np
 import matplotlib.pyplot as plt
-import chianti.filters as chfilters
-import chianti.util as util
-import chianti.io as chio
-import chianti.data as chdata
-import chianti.constants as const
+import ChiantiPy.tools.filters as chfilters
+import ChiantiPy.tools.util as util
+import ChiantiPy.tools.io as chio
+import ChiantiPy.tools.data as chdata
+import ChiantiPy.tools.constants as const
 #
 defaults = chdata.Defaults
 #

@@ -11,7 +11,7 @@ distance is the distance from the central source
 '''
 import os
 
-import chianti.io as chio
+import ChiantiPy.tools.io as chio
 
 ###
 xuvtop = os.environ['XUVTOP']
@@ -39,4 +39,3 @@ for one in filelist:
 Abundance = {AbundanceList[0]:chio.abundanceRead(abundancename = AbundanceList[0])}
 for one in AbundanceList[1:]:
     Abundance[one] = chio.abundanceRead(abundancename = one)
-

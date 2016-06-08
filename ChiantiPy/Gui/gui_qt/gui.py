@@ -3,8 +3,8 @@ PyQt4 widget selection dialogs
 '''
 import sys,  os
 from PyQt4 import QtGui
-import chianti
-from chianti.Gui.gui_qt.ui import *
+import ChiantiPy
+from ChiantiPy.Gui.gui_qt.ui import *
 ' qt4 selection dialogs'
 
 def chpicker(dir, filter='*.*', label='ChiantiPy'):
@@ -117,6 +117,3 @@ class choice2Dialog(QtGui.QDialog):
     def reject(self):
         print(' cancel button pushed')
         self.done(1)
-
-
-

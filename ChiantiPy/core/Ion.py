@@ -4,14 +4,14 @@ import numpy as np
 from scipy import interpolate
 import time
 #
-import chianti.data as chdata
+import ChiantiPy.tools.data as chdata
 import matplotlib.pyplot as plt
 #    #
-import chianti.filters as chfilters
-import chianti.util as util
-import chianti.io as io
-import chianti.constants as const
-import chianti.Gui as chGui
+import ChiantiPy.tools.filters as chfilters
+import ChiantiPy.tools.util as util
+import ChiantiPy.tools.io as io
+import ChiantiPy.tools.constants as const
+import ChiantiPy.Gui as chGui
 from ._IonTrails import _ionTrails
 from ._SpecTrails import _specTrails
 #
@@ -22,19 +22,30 @@ class ion(_ionTrails, _specTrails):
     """
     The top level class for performing spectral calculations for an ion in the CHIANTI database.
 
-    ionStr is a string corresponding such as 'c_5' that corresponds to the C V ion.
-    temperature in Kelvin
-    eDensity in cm^-3
-    radTemperature, the radiation black-body temperature in Kelvin
-    rPlot, the distance from the center of the star in stellar radii
-
-    Inherited methods include 'intensityList', 'intensityRatio' (between lines of different ions), 'intensityRatioSave'
-    and 'convolve'
-
-    the elemental abundance values can be set to one of the names in the XUVTOP/abundance directory
-    without the '.abund' suffix, such as abundanceName = 'sun_photospheric_1998_grevesse'
+    Parameters
+    -----------
+    ionStr : `str`
+        Spectroscopic notation for the given ion, e.g. 'c_5' that corresponds to the C V ion.
+    temperature : `~numpy.ndarray`
+        Temperature array (in Kelvin)
+    eDensity : `~numpy.float64` or `~numpy.ndarray`
+        Electron density array (in :math:`\mathrm{cm}^{-3}` )
+    pDensity : `~numpy.float64` or `~numpy.ndarray`, optional
+        Proton density (in :math:`\mathrm{cm}^{-3}` )
+    radTemperature : `~numpy.float64`, optional
+        Radiation black-body temperature (in Kelvin)
+    rStar : `~numpy.float64`, optional
+        Distance from the center of the star (in stellar radii)
+    abundanceName : `str`, optional
+        Name of Chianti abundance file to use without the '.abund' suffix, e.g. 'sun_photospheric_1998_grevesse'. Ignored if `abundance` is set.
+    abundance : `~numpy.float64`
+        Elemental abundance (TODO: correct type)
+    setup : `bool`
+        If True, run ion setup function
+    em : `~numpy.float64` or `~numpy.ndarray`
+        Emission (in unknown units)
     """
-    def __init__(self, ionStr, temperature=None, eDensity=None, pDensity='default', radTemperature=0,  rStar=0, abundanceName=0, abundance=0,  verbose=0, setup=True, em=0):
+    def __init__(self, ionStr, temperature=None, eDensity=None, pDensity='default', radTemperature=0,  rStar=0, abundanceName=0, abundance=0, setup=True, em=0):
         #
         #
 #        self.__version__ = chianti.__version__

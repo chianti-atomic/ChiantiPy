@@ -5,10 +5,10 @@ import copy
 import time
 import numpy as np
 import matplotlib.pyplot as plt
-import chianti.util as util
-import chianti.io as io
-import chianti.Gui as chGui
-import chianti.data as chdata
+import ChiantiPy.tools.util as util
+import ChiantiPy.tools.io as io
+import ChiantiPy.Gui as chGui
+import ChiantiPy.tools.data as chdata
 #
 class _ionTrails(object):
     """

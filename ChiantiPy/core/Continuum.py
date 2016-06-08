@@ -2,11 +2,11 @@ import os
 import numpy as np
 from scipy import interpolate
 from matplotlib.tri import Triangulation, LinearTriInterpolator
-import chianti.data as chdata
-import chianti.util as util
-import chianti.io as chio
-import chianti.constants as const
-import chianti.Gui as chgui
+import ChiantiPy.tools.data as chdata
+import ChiantiPy.tools.util as util
+import ChiantiPy.tools.io as chio
+import ChiantiPy.tools.constants as const
+import ChiantiPy.Gui as chgui
 ip = chdata.Ip
 MasterList = chdata.MasterList
 #import chianti
@@ -31,7 +31,7 @@ class continuum:
         if self.Ion == 1:
             if verbose:
                 print(' for %s this is the neutral ions an does not produce a continuum'%(ionStr))
-            return 
+            return
         #  the Ip is only relevant to the free-free methods
 #        self.Ip = ip[self.Z-1, self.Ion-1]
         self.Ipr = ip[self.Z-1, self.Ion-2]
@@ -68,7 +68,7 @@ class continuum:
             em = np.ones_like(self.Temperature, 'float64')
             self.Em = em
         elif type(em) == float and em > 0.:
-            em = np.ones_like(self.Temperature, 'float64')*em        
+            em = np.ones_like(self.Temperature, 'float64')*em
             self.Em = em
         elif type(em) == list or type(em) == tuple or type(em) == np.ndarray:
             em = np.asarray(em, 'float64')
@@ -131,7 +131,7 @@ class continuum:
         mult = fblvl['mult']
         multr = rFblvl['mult']
         #
-        #  Ipr 
+        #  Ipr
         #
         # for the ionization potential, must use that of the recombined ion
 #        Ipr = ip[self.Z-1, self.Ion-2]
@@ -208,7 +208,7 @@ class continuum:
             iprLvlCm = (iprcm - ecm[0])
             #
             mask[0] = 1.e+8/wvl < (iprcm - ecm[0])
-            expf[0] = np.exp((iprLvlErg - 1.e+8*const.planck*const.light/wvl)/(const.boltzmann*temperature))  
+            expf[0] = np.exp((iprLvlErg - 1.e+8*const.planck*const.light/wvl)/(const.boltzmann*temperature))
             fbrate[0] = (const.planck*const.light/(1.e-8*wvl))**5*const.verner*ratg*expf[0]*vCross/temperature**1.5
             for ilvl in range(lvl1,nlvls):
                 iprLvlEv = self.Ipr - const.invCm2Ev*ecm[ilvl]
@@ -278,7 +278,7 @@ class continuum:
         the ion is taken to be the recombined ion,
         including the elemental abundance and the ionization equilibrium population
         uses the Gaunt factors of Karzas, W.J, Latter, R, 1961, ApJS, 6, 167
-        for recombination to the ground level, the photoionization cross sections of 
+        for recombination to the ground level, the photoionization cross sections of
         Verner and Yakovlev, 1995, A&ASS, 109, 125
         are used to develop the free-bound cross section
         includes the elemental abundance and the ionization fraction

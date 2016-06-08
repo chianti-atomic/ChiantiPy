@@ -20,8 +20,8 @@ import pickle
 from datetime import date
 import numpy as np
 from scipy import interpolate
-import chianti
-import chianti.constants as const
+import ChiantiPy
+import ChiantiPy.tools.constants as const
 #import chianti.io as chio
 #import chianti.gui as gui
 #
@@ -55,8 +55,8 @@ def z2element(z):
     # -------------------------------------------------------------------------------------
     #
 def spectroscopic2name(el,roman, dielectronic=False):
-    """ 
-    convert Z and ion to spectroscopic notation string 
+    """
+    convert Z and ion to spectroscopic notation string
     """
     elu = el.lower()
     romanu = roman.upper()
@@ -149,8 +149,8 @@ def zion2localFilename(z,ion, dielectronic=False):
     # -------------------------------------------------------------------------------------
     #
 def zion2spectroscopic(z,ion, dielectronic=False):
-    """ 
-    convert Z and ion to spectroscopic notation string 
+    """
+    convert Z and ion to spectroscopic notation string
     """
     if (z-1 < len(const.El)) and (ion <= z+1):
         spect=const.El[z-1].capitalize()+' '+const.Ionstage[ion-1]

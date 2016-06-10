@@ -425,7 +425,7 @@ def easplomRead(ions, filename=0, extension='.splom'):
     if filename:
         input = open(filename)
     else:
-        fname=ion2filename(ions)
+        fname=util.ion2filename(ions)
         omname=fname+extension
         input=open(omname,'r')
     lines=input.readlines()

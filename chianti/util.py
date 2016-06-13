@@ -311,7 +311,6 @@ def dilute(radius):
         d = 0.
     return d
     #
-    #
     # ------------------------------------------------------------------------------
     #
 def diCross(diParams, energy=0, verbose=0):
@@ -320,7 +319,7 @@ def diCross(diParams, energy=0, verbose=0):
     diParams obtained by io.diRead with the following keys:
     ['info', 'ysplom', 'xsplom', 'btf', 'ev1', 'ref', 'eaev']
     Given as a function of the incident electron energy in eV
-    returns a dictionary - {'energy':energy, 'cross':cross}
+    returns a dictionary - {'energy':energy, 'cross':cross,'ref':ref,'ev1':ev1[0}
     '''
     Z = diParams['info']['iz']
     Ip = diParams['ev1']
@@ -358,7 +357,7 @@ def diCross(diParams, energy=0, verbose=0):
 #        a0=0.5291772108e-8
 #        a_bohr=const.pi*a0**2   # area of bohr orbit
         if Z >= 20:
-            ff=(140.+(self.Z/20.)**3.2)/141.
+            ff=(140.+(Z/20.)**3.2)/141.
         else:
             ff=1.
 #        qr=util.qrp(self.Z,u)*ff
@@ -388,85 +387,9 @@ def diCross(diParams, energy=0, verbose=0):
                     seq=[np.zeros(offset, 'Float64'), cross1]
                     cross1=np.hstack(seq)
                 cross+=cross1*1.e-14
-        return {'energy':energy, 'cross':cross}
+        return {'energy':energy, 'cross':cross, 'ref':diParams['ref'], 'ip':diParams['ev1'][0]}
     #
     # ------------------------------------------------------------------------------
-    #
-def diCross1(diParams, energy=0, verbose=0):
-    '''
-    Calculate the direct ionization cross section.
-    diParams obtained by util.diRead with the following keys:
-    ['info', 'ysplom', 'xsplom', 'btf', 'ev1', 'ref', 'eaev']
-    Given as a function of the incident electron energy in eV
-    returns a dictionary - {'energy':energy, 'cross':cross}
-    this version tests whether using the seq and hstack works
-    so using a different approach
-    '''
-    iso=diParams['info']['iz'] - diParams['info']['ion'] + 1
-    energy = np.array(energy, 'float64')
-    if not energy.any():
-        btenergy=0.1*np.arange(10)
-        btenergy[0]=0.01
-        dum=np.ones(len(btenergy))
-        [energy, dum] = descale_bti(btenergy, dum, 2., diParams['ev1'][0])
-        energy=np.asarray(energy, 'float64')
-    #
-    if iso == 1 and self.Z >= 6:
-        #  hydrogenic sequence
-        ryd=27.2113845/2.
-        u=energy/self.Ip
-        ev1ryd=self.Ip/ryd
-        a0=0.5291772108e-8
-        a_bohr=const.pi*a0**2   # area of bohr orbit
-        if self.Z >= 20:
-            ff = (140.+(self.Z/20.)**3.2)/141.
-        else:
-            ff = 1.
-#        qr = util.qrp(self.Z,u)*ff
-        qr = qrp(self.Z,u)*ff
-        bb = 1.  # hydrogenic
-        qh = bb*a_bohr*qr/ev1ryd**2
-        diCross = {'energy':energy, 'cross':qh}
-    elif iso == 2 and self.Z >= 10:
-        #  use
-        ryd=27.2113845/2.
-        u=energy/self.Ip
-        ev1ryd=self.Ip/ryd
-        a0=0.5291772108e-8
-        a_bohr=const.pi*a0**2   # area of bohr orbit
-        if self.Z >= 20:
-            ff=(140.+(self.Z/20.)**3.2)/141.
-        else:
-            ff=1.
-#        qr=util.qrp(self.Z,u)*ff
-        qr = qrp(self.Z,u)*ff
-        bb=2.  # helium-like
-        qh=bb*a_bohr*qr/ev1ryd**2
-        diCross={'energy':energy, 'cross':qh}
-    else:
-        cross=np.zeros(len(energy), 'Float64')
-
-        for ifac in range(diParams['info']['nfac']):
-            # prob. better to do this with masked arrays
-            goode=energy > diParams['ev1'][ifac]
-            if goode.sum() > 0:
-                dum=np.ones(len(energy))
-                btenergy, btdum = scale_bti(energy[goode],dum[goode], diParams['btf'][ifac], diParams['ev1'][ifac])
-                # these interpolations were made with the scipy routine used here
-                y2=interpolate.splrep(diParams['xsplom'][ifac], diParams['ysplom'][ifac], s=0)
-                btcross=interpolate.splev(btenergy, y2, der=0)
-                energy1, cross1 = descale_bti(btenergy, btcross, diParams['btf'][ifac], diParams['ev1'][ifac] )
-                offset=len(energy)-goode.sum()
-                if verbose:
-                    pl.plot(diParams['xsplom'][ifac], diParams['ysplom'][ifac])
-                    pl.plot(btenergy, btcross)
-#                if offset > 0:
-#                    seq=[np.zeros(offset, 'Float64'), cross1]
-#                    cross1=np.hstack(seq)
-                cross[offset:]+=cross1*1.e-14
-        return {'energy':energy, 'cross':cross}
-    #
-    # -------------------------------------------------------------------------------------
     #
 def eaCross(diparams, easplom, elvlc, energy=None, verbose=False):
     '''
@@ -494,9 +417,9 @@ def eaCross(diparams, easplom, elvlc, energy=None, verbose=False):
     totalCross = np.zeros_like(energy)
     ntrans = omega.shape[0]
     for itrans in range(ntrans):
-        lvl1 = easplom['lvl1'][itrans]
-        mult = 2.*elvlc['j'][lvl1 - 1] + 1.
-        cross = f1[itrans]*const.bohrCross*omega[itrans]/(mult.energy/const.ryd2Ev)
+        #lvl1 = easplom['lvl1'][itrans]
+        #mult = 2.*elvlc['j'][lvl1 - 1] + 1.
+        cross = f1[itrans]*const.bohrCross*omega[itrans]/(energy/const.ryd2Ev)
         totalCross += cross
     return {'energy':energy, 'cross':totalCross}
     #

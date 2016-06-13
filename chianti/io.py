@@ -286,7 +286,7 @@ def diRead(ions, filename=0):
     info={"iz":iz,"ion":ion,"nspl":nspl,"neaev":neaev, 'nfac':nfac}
     if neaev:
         info['eaev'] = eaev
-    DiParams={"info":info,"btf":btf,"ev1":ev1,"xsplom":xsplom,"ysplom":ysplom, 'eaev':eaev,"ref":hdr}
+    DiParams={"info":info,"btf":btf,"ev1":ev1,"xsplom":xsplom,"ysplom":ysplom, 'eaev':eaev,"ref":hdr[1:-1]}
     return DiParams
     #
     # -------------------------------------------------------------------------------------

@@ -398,7 +398,7 @@ class ion(_ionTrails, _specTrails):
                 easplom=self.Easplom
             except:
 #                self.splomRead()
-                self.Easplom = util.splomRead(self.IonStr, ea=1)
+                self.Easplom = io.splomRead(self.IonStr, ea=1)
                 easplom =self.Easplom
             #
             # multiplicity of ground level already included
@@ -419,7 +419,7 @@ class ion(_ionTrails, _specTrails):
             totalCross = np.zeros_like(energy)
             ntrans = omega.shape[0]
             for itrans in range(ntrans):
-                lvl1 = self.Easplom['lvl1'][itrans]
+                #lvl1 = self.Easplom['lvl1'][itrans]
                 #  the collision strengths have already by divided by the
                 #   statistical weight of the ground level 2j+1
                 cross = eaev[itrans]*const.bohrCross*omega[itrans]/(energy/const.ryd2Ev)
@@ -1916,7 +1916,7 @@ class ion(_ionTrails, _specTrails):
                 lower.ionizRate()
                 # need to get multiplicity of lower ionization stage
                 lowMult = lower.Elvlc['mult']
-           else:
+            else:
                ci = 0
 #            try:
             if self.Nreclvl:
@@ -1954,8 +1954,8 @@ class ion(_ionTrails, _specTrails):
 ##                   print ' highers = ', highers
 #                    higher = ion(highers, temperature=self.Temperature, eDensity=self.EDensity)
 #                    higher.recombRate()
-               else:
-                   rec = 0
+            else:
+                rec = 0
             #
 #        elif self.Dielectronic:
 ##            self.Ndielsplups and self.Dielectronic:
@@ -2632,11 +2632,11 @@ class ion(_ionTrails, _specTrails):
         if self.Ncilvl:
             ci = 1
             cilvl = self.Cilvl
-                if hasattr(self, 'CilvlRate'):
-                    cilvlRate = self.CilvlRate
-                else:
-                    self.cireclvlDescale('cilvl')
-                    cilvlRate = self.CilvlRate
+            if hasattr(self, 'CilvlRate'):
+                cilvlRate = self.CilvlRate
+            else:
+                self.cireclvlDescale('cilvl')
+                cilvlRate = self.CilvlRate
             self.recombRate()
             #
             lowers = util.zion2name(self.Z, self.Ion-1)
@@ -3160,226 +3160,226 @@ class ion(_ionTrails, _specTrails):
             self.Population['netRecomb'] = netRecomb
         #
         return
-             #
-            # -------------------------------------------------------------------------------------
-            #
-        def popPlot(self,top=10, plotFile=0, outFile=0, pub=0):
-            """
-            Plots populations vs temperature or eDensity.
+        #
+        # -------------------------------------------------------------------------------------
+        #
+    def popPlot(self,top=10, plotFile=0, outFile=0, pub=0):
+        """
+        Plots populations vs temperature or eDensity.
 
-            top specifies the number of the most highly populated levels to plot
-            if pub is set, the want publication plots (bw, lw=2).
-            """
-            #self.Population={"temperature":temperature,"eDensity":eDensity,"population":pop}
-            if pub:
-                fontsize=16
-            else:
-                fontsize=14
-            #
-            if hasattr(self, 'Population'):
-                temperature=self.Population["temperature"]
-                eDensity=self.Population["eDensity"]
-                pop=self.Population["population"]
-            else:
-                self.populate()
-                temperature=self.Population["temperature"]
-                eDensity=self.Population["eDensity"]
-                pop=self.Population["population"]
-            #
-            #  for case of only a single density and temperature
-            if len(pop.shape) == 1:
-                spop = np.sort(pop)
-                idx = np.argsort(pop)
-                minPop = spop[-top:].min()/2.
-                if top > pop.size:
-                    top = pop.size
-                for itop in range(1, top+1):
-                    x = [idx[-itop], idx[-itop], idx[-itop]+1, idx[-itop]+1]
-                    y = [minPop, spop[-itop], spop[-itop], minPop]
-                    plt.semilogy(x, y, 'k')
-                plt.axis([0, max(idx[-top:])+1, minPop, 1.])
-                plt.xlabel('Level', fontsize=fontsize)
-                plt.ylabel('Population', fontsize=fontsize)
-                return
-            #
-            # find the top most populated levels
-            #
-            lvl=self.Elvlc["lvl"]
-    #        nlvls=len(lvl)
-            nlvls = self.Nlvls
-            if top > nlvls:
-                top = nlvls
-            maxpop=np.zeros(nlvls,'Float64')
-            for ilvl in range(nlvls):
-                maxpop[ilvl]=pop[:,ilvl].max()
-            #
-            lvlsort=np.take(lvl,np.argsort(maxpop))
-            toplvl=lvlsort[-top:]
-            #
-    #        temp=np.asarray(temperature,'Float32')
-            ntemp = temperature.size
-            if ntemp > 0:
-    #            if temperature.all() == temperature[0]:
-                if temperature[0] == temperature[-1]:
-                    ntemp = 1
-            #
-            ndens = eDensity.size
-            if ndens > 0:
-    #            if eDensity.all() == eDensity[0]:
-                if eDensity[0] == eDensity[-1]:
-                    ndens = 1
-            #
-            #
-            ylabel='Population'
-            title=self.Spectroscopic
-            #
-            plt.figure()
-            #
-            plt.ion()
-            #
-            #
-            if ndens == 1:
-                toppops = np.zeros((top, ntemp), 'float64')
-                for ilvl in range(top):
-                    toppops[ilvl] = pop[:, toplvl[ilvl]-1]
-                nonzero = toppops > 0.
-                ymin = min(toppops[nonzero])
-                for lvl in toplvl:
-                    # for some low temperature, populations can not be calculated
-                    good = pop[:, lvl-1] > 0
-                    if pub:
-                        plt.loglog(temperature[good],pop[good,lvl-1], 'k',lw=2)
-                    else:
-                        plt.loglog(temperature[good],pop[good,lvl-1])
-                    skip=3
-                    if good.sum() == ntemp:
-                        start=divmod(lvl,ntemp)[1]
-                        for itemp in range(start,ntemp,ntemp//skip):
-                            plt.text(temperature[itemp],pop[itemp,lvl-1],str(lvl))
-                    else:
-                        newtemp=[]
-                        for i, one in enumerate(temperature):
-                            if good[i]:
-                                newtemp.append(one)
-                        start = divmod(lvl, len(newtemp))[1] + ntemp - good.sum()
-                        for itemp in range(start,ntemp,ntemp//skip):
-                            plt.text(temperature[itemp],pop[itemp,lvl-1],str(lvl))
-                xlabel='Temperature (K)'
-                plt.xlabel(xlabel,fontsize=fontsize)
-                plt.ylabel(ylabel,fontsize=fontsize)
-                dstr=' -  Density = %10.2e (cm$^{-3}$)' % eDensity[0]
-                plt.title(title+dstr,fontsize=fontsize)
-                plt.xlim(temperature.min(),temperature.max())
-    #            nonzero = pop
-    #            yl=plt.ylim()
-                plt.ylim(ymin,1.2)
-            elif ntemp == 1:
-                xlabel=r'Electron Density (cm$^{-3}$)'
-    #            for lvl in toplvl:
-    #                plt.loglog(eDensity,pop[:,lvl-1])
-    #                skip=min(3, ndens)
-    #                start=divmod(lvl,ndens)[1]
-    #                for idens in range(start,ndens,ndens//skip):
-    #                    plt.text(eDensity[idens],pop[idens,lvl-1],str(lvl))
-                toppops = np.zeros((top, ndens), 'float64')
-                for ilvl in range(top):
-                    toppops[ilvl] = pop[:, toplvl[ilvl]-1]
-                nonzero = toppops > 0.
-                ymin = min(toppops[nonzero])
-                for lvl in toplvl:
-                    # for some low temperature, populations can not be calculated
-                    good = pop[:, lvl-1] > 0
-                    if pub:
-                        plt.loglog(eDensity[good],pop[good,lvl-1], 'k', lw=2)
-                    else:
-                        plt.loglog(eDensity[good],pop[good,lvl-1])
-                    skip=3
-                    if good.sum() == ndens:
-                        start=divmod(lvl,ndens)[1]
-                        for idens in range(start,ndens,ndens//skip):
-                            plt.text(eDensity[idens],pop[idens,lvl-1],str(lvl))
-                    else:
-                        newdens=[]
-                        for i, one in enumerate(eDensity):
-                            if good[i]:
-                                newdens.append(one)
-                        start = divmod(lvl, len(newdens))[1] + ndens - good.sum()
-                        for idens in range(start,ndens,ndens//skip):
-                            plt.text(eDensity[idens],pop[idens, lvl-1],str(lvl))
-                plt.xlabel(xlabel,fontsize=fontsize)
-                plt.ylabel(ylabel,fontsize=fontsize)
-                tstr=' -  T = %10.2e (K)' % temperature[0]
-                plt.title(title+tstr,fontsize=fontsize)
-                plt.xlim(eDensity[eDensity.nonzero()].min(),eDensity.max())
-                yl=plt.ylim()
-                plt.ylim(yl[0],1.2)
-            else:
-    #            plt.figure()
-                ax = plt.subplot(111)
-    #            for lvl in toplvl:
-    #                plt.loglog(temperature,pop[:,lvl-1])
-    #                skip = min(3, ntemp)
-    #                start=divmod(lvl,ntemp)[1]
-    #                for itemp in range(start,ntemp,ntemp//skip):
-    #                    plt.text(temperature[itemp],pop[itemp,lvl-1],str(lvl))
-                toppops = np.zeros((top, ntemp), 'float64')
-                for ilvl in range(top):
-                    toppops[ilvl] = pop[:, toplvl[ilvl]-1]
-                nonzero = toppops > 0.
-                ymin = min(toppops[nonzero])
-                for lvl in toplvl:
-                    # for some low temperature, populations can not be calculated
-                    good = pop[:, lvl-1] > 0
-                    if pub:
-                        plt.loglog(temperature[good],pop[good,lvl-1], 'k', lw=2)
-                    else:
-                        plt.loglog(temperature[good],pop[good,lvl-1])
-                    skip=3
-                    if good.sum() == ntemp:
-                        start=divmod(lvl,ntemp)[1]
-                        for itemp in range(start,ntemp,ntemp//skip):
-                            plt.text(temperature[itemp],pop[itemp,lvl-1],str(lvl))
-                    else:
-                        newtemp=[]
-                        for i, one in enumerate(temperature):
-                            if good[i]:
-                                newtemp.append(one)
-                        start = divmod(lvl, len(newtemp))[1] + ntemp - good.sum()
-                        for itemp in range(start,ntemp,ntemp//skip):
-                            plt.text(temperature[itemp],pop[itemp,lvl-1],str(lvl))
-                xlabel='Temperature (K)'
-                plt.xlabel(xlabel,fontsize=fontsize)
-                plt.ylabel(ylabel,fontsize=fontsize)
-    #            plt.title(title,fontsize=fontsize)
-    #            plt.xlim(temperature.min(),temperature.max())
-    #            yl=plt.ylim()
-    #            plt.ylim(ymin,1.2)
-                plt.axis([temperature.min(),temperature.max(), ymin, 1.2])
-                plt.text(0.1, 0.5,title, horizontalalignment='center', verticalalignment='center', fontsize=fontsize,  transform = ax.transAxes)
-                #
-                ax2 = plt.twiny()
-                xlabel=r'Electron Density (cm$^{-3}$)'
-                plt.xlabel(xlabel, fontsize=fontsize)
-                plt.loglog(eDensity,pop[:,toplvl[0]], visible=False)
-                ax2.xaxis.tick_top()
-    #            plt.figure()
-    #            for lvl in toplvl:
-    #                plt.loglog(eDensity,pop[:,lvl-1])
-    #                skip = min(3, ntemp)
-    #                start=divmod(lvl,ndens)[1]
-    #                for idens in range(start,ndens,ndens//skip):
-    #                    plt.text(eDensity[idens],pop[idens,lvl-1],str(lvl))
-    #            xlabel=r'Electron Density (cm$^{-3}$)'
-    #            plt.xlabel(xlabel,fontsize=fontsize)
-    #            plt.ylabel(ylabel,fontsize=fontsize)
-    #            plt.title(title,fontsize=fontsize)
-    #            plt.xlim(eDensity.min(),eDensity.max())
-    #            yl=plt.ylim()
-    #            plt.ylim(yl[0],1.2)
-            if outFile:
-                plt.savefig(outFile)
-            self.Population['toplvl'] = toplvl
+        top specifies the number of the most highly populated levels to plot
+        if pub is set, the want publication plots (bw, lw=2).
+        """
+        #self.Population={"temperature":temperature,"eDensity":eDensity,"population":pop}
+        if pub:
+            fontsize=16
+        else:
+            fontsize=14
+        #
+        if hasattr(self, 'Population'):
+            temperature=self.Population["temperature"]
+            eDensity=self.Population["eDensity"]
+            pop=self.Population["population"]
+        else:
+            self.populate()
+            temperature=self.Population["temperature"]
+            eDensity=self.Population["eDensity"]
+            pop=self.Population["population"]
+        #
+        #  for case of only a single density and temperature
+        if len(pop.shape) == 1:
+            spop = np.sort(pop)
+            idx = np.argsort(pop)
+            minPop = spop[-top:].min()/2.
+            if top > pop.size:
+                top = pop.size
+            for itop in range(1, top+1):
+                x = [idx[-itop], idx[-itop], idx[-itop]+1, idx[-itop]+1]
+                y = [minPop, spop[-itop], spop[-itop], minPop]
+                plt.semilogy(x, y, 'k')
+            plt.axis([0, max(idx[-top:])+1, minPop, 1.])
+            plt.xlabel('Level', fontsize=fontsize)
+            plt.ylabel('Population', fontsize=fontsize)
             return
+        #
+        # find the top most populated levels
+        #
+        lvl=self.Elvlc["lvl"]
+#        nlvls=len(lvl)
+        nlvls = self.Nlvls
+        if top > nlvls:
+            top = nlvls
+        maxpop=np.zeros(nlvls,'Float64')
+        for ilvl in range(nlvls):
+            maxpop[ilvl]=pop[:,ilvl].max()
+        #
+        lvlsort=np.take(lvl,np.argsort(maxpop))
+        toplvl=lvlsort[-top:]
+        #
+#        temp=np.asarray(temperature,'Float32')
+        ntemp = temperature.size
+        if ntemp > 0:
+#            if temperature.all() == temperature[0]:
+            if temperature[0] == temperature[-1]:
+                ntemp = 1
+        #
+        ndens = eDensity.size
+        if ndens > 0:
+#            if eDensity.all() == eDensity[0]:
+            if eDensity[0] == eDensity[-1]:
+                ndens = 1
+        #
+        #
+        ylabel='Population'
+        title=self.Spectroscopic
+        #
+        plt.figure()
+        #
+        plt.ion()
+        #
+        #
+        if ndens == 1:
+            toppops = np.zeros((top, ntemp), 'float64')
+            for ilvl in range(top):
+                toppops[ilvl] = pop[:, toplvl[ilvl]-1]
+            nonzero = toppops > 0.
+            ymin = min(toppops[nonzero])
+            for lvl in toplvl:
+                # for some low temperature, populations can not be calculated
+                good = pop[:, lvl-1] > 0
+                if pub:
+                    plt.loglog(temperature[good],pop[good,lvl-1], 'k',lw=2)
+                else:
+                    plt.loglog(temperature[good],pop[good,lvl-1])
+                skip=3
+                if good.sum() == ntemp:
+                    start=divmod(lvl,ntemp)[1]
+                    for itemp in range(start,ntemp,ntemp//skip):
+                        plt.text(temperature[itemp],pop[itemp,lvl-1],str(lvl))
+                else:
+                    newtemp=[]
+                    for i, one in enumerate(temperature):
+                        if good[i]:
+                            newtemp.append(one)
+                    start = divmod(lvl, len(newtemp))[1] + ntemp - good.sum()
+                    for itemp in range(start,ntemp,ntemp//skip):
+                        plt.text(temperature[itemp],pop[itemp,lvl-1],str(lvl))
+            xlabel='Temperature (K)'
+            plt.xlabel(xlabel,fontsize=fontsize)
+            plt.ylabel(ylabel,fontsize=fontsize)
+            dstr=' -  Density = %10.2e (cm$^{-3}$)' % eDensity[0]
+            plt.title(title+dstr,fontsize=fontsize)
+            plt.xlim(temperature.min(),temperature.max())
+#            nonzero = pop
+#            yl=plt.ylim()
+            plt.ylim(ymin,1.2)
+        elif ntemp == 1:
+            xlabel=r'Electron Density (cm$^{-3}$)'
+#            for lvl in toplvl:
+#                plt.loglog(eDensity,pop[:,lvl-1])
+#                skip=min(3, ndens)
+#                start=divmod(lvl,ndens)[1]
+#                for idens in range(start,ndens,ndens//skip):
+#                    plt.text(eDensity[idens],pop[idens,lvl-1],str(lvl))
+            toppops = np.zeros((top, ndens), 'float64')
+            for ilvl in range(top):
+                toppops[ilvl] = pop[:, toplvl[ilvl]-1]
+            nonzero = toppops > 0.
+            ymin = min(toppops[nonzero])
+            for lvl in toplvl:
+                # for some low temperature, populations can not be calculated
+                good = pop[:, lvl-1] > 0
+                if pub:
+                    plt.loglog(eDensity[good],pop[good,lvl-1], 'k', lw=2)
+                else:
+                    plt.loglog(eDensity[good],pop[good,lvl-1])
+                skip=3
+                if good.sum() == ndens:
+                    start=divmod(lvl,ndens)[1]
+                    for idens in range(start,ndens,ndens//skip):
+                        plt.text(eDensity[idens],pop[idens,lvl-1],str(lvl))
+                else:
+                    newdens=[]
+                    for i, one in enumerate(eDensity):
+                        if good[i]:
+                            newdens.append(one)
+                    start = divmod(lvl, len(newdens))[1] + ndens - good.sum()
+                    for idens in range(start,ndens,ndens//skip):
+                        plt.text(eDensity[idens],pop[idens, lvl-1],str(lvl))
+            plt.xlabel(xlabel,fontsize=fontsize)
+            plt.ylabel(ylabel,fontsize=fontsize)
+            tstr=' -  T = %10.2e (K)' % temperature[0]
+            plt.title(title+tstr,fontsize=fontsize)
+            plt.xlim(eDensity[eDensity.nonzero()].min(),eDensity.max())
+            yl=plt.ylim()
+            plt.ylim(yl[0],1.2)
+        else:
+#            plt.figure()
+            ax = plt.subplot(111)
+#            for lvl in toplvl:
+#                plt.loglog(temperature,pop[:,lvl-1])
+#                skip = min(3, ntemp)
+#                start=divmod(lvl,ntemp)[1]
+#                for itemp in range(start,ntemp,ntemp//skip):
+#                    plt.text(temperature[itemp],pop[itemp,lvl-1],str(lvl))
+            toppops = np.zeros((top, ntemp), 'float64')
+            for ilvl in range(top):
+                toppops[ilvl] = pop[:, toplvl[ilvl]-1]
+            nonzero = toppops > 0.
+            ymin = min(toppops[nonzero])
+            for lvl in toplvl:
+                # for some low temperature, populations can not be calculated
+                good = pop[:, lvl-1] > 0
+                if pub:
+                    plt.loglog(temperature[good],pop[good,lvl-1], 'k', lw=2)
+                else:
+                    plt.loglog(temperature[good],pop[good,lvl-1])
+                skip=3
+                if good.sum() == ntemp:
+                    start=divmod(lvl,ntemp)[1]
+                    for itemp in range(start,ntemp,ntemp//skip):
+                        plt.text(temperature[itemp],pop[itemp,lvl-1],str(lvl))
+                else:
+                    newtemp=[]
+                    for i, one in enumerate(temperature):
+                        if good[i]:
+                            newtemp.append(one)
+                    start = divmod(lvl, len(newtemp))[1] + ntemp - good.sum()
+                    for itemp in range(start,ntemp,ntemp//skip):
+                        plt.text(temperature[itemp],pop[itemp,lvl-1],str(lvl))
+            xlabel='Temperature (K)'
+            plt.xlabel(xlabel,fontsize=fontsize)
+            plt.ylabel(ylabel,fontsize=fontsize)
+#            plt.title(title,fontsize=fontsize)
+#            plt.xlim(temperature.min(),temperature.max())
+#            yl=plt.ylim()
+#            plt.ylim(ymin,1.2)
+            plt.axis([temperature.min(),temperature.max(), ymin, 1.2])
+            plt.text(0.1, 0.5,title, horizontalalignment='center', verticalalignment='center', fontsize=fontsize,  transform = ax.transAxes)
+            #
+            ax2 = plt.twiny()
+            xlabel=r'Electron Density (cm$^{-3}$)'
+            plt.xlabel(xlabel, fontsize=fontsize)
+            plt.loglog(eDensity,pop[:,toplvl[0]], visible=False)
+            ax2.xaxis.tick_top()
+#            plt.figure()
+#            for lvl in toplvl:
+#                plt.loglog(eDensity,pop[:,lvl-1])
+#                skip = min(3, ntemp)
+#                start=divmod(lvl,ndens)[1]
+#                for idens in range(start,ndens,ndens//skip):
+#                    plt.text(eDensity[idens],pop[idens,lvl-1],str(lvl))
+#            xlabel=r'Electron Density (cm$^{-3}$)'
+#            plt.xlabel(xlabel,fontsize=fontsize)
+#            plt.ylabel(ylabel,fontsize=fontsize)
+#            plt.title(title,fontsize=fontsize)
+#            plt.xlim(eDensity.min(),eDensity.max())
+#            yl=plt.ylim()
+#            plt.ylim(yl[0],1.2)
+        if outFile:
+            plt.savefig(outFile)
+        self.Population['toplvl'] = toplvl
+        return
         #
         # -------------------------------------------------------------------------------------
         #

@@ -1,4 +1,4 @@
-name: ChiantiPy
+name: chiantipy
 dependencies:
 - alabaster=0.7.8=py27_0
 - astropy=1.1.2=np111py27_0
@@ -68,4 +68,3 @@ dependencies:
   - jupyter-client==4.2.2
   - jupyter-core==4.1.0
   - sphinx-rtd-theme==0.1.9
-prefix: /Users/willbarnes/anaconda/envs/chiantipy

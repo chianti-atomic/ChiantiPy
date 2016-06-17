@@ -30,7 +30,6 @@ dependencies:
 - path.py=8.2.1=py27_0
 - pathlib2=2.1.0=py27_0
 - pbr=1.10.0=py27_0
-- pexpect=4.0.1=py27_0
 - pickleshare=0.7.2=py27_0
 - pip=8.1.2=py27_0
 - ptyprocess=0.5.1=py27_0
@@ -41,7 +40,6 @@ dependencies:
 - python-dateutil=2.5.3=py27_0
 - pytz=2016.4=py27_0
 - pyzmq=15.2.0=py27_1
-- qt=4.8.7=3
 - readline=6.2=2
 - scipy=0.17.1=np111py27_0
 - setuptools=23.0.0=py27_0

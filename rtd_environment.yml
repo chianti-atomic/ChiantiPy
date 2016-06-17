@@ -1,6 +1,5 @@
 name: chiantipy
 dependencies:
-- alabaster=0.7.8=py27_0
 - astropy=1.1.2=np111py27_0
 - babel=2.3.3=py27_0
 - backports=1.0=py27_0
@@ -35,7 +34,6 @@ dependencies:
 - ptyprocess=0.5.1=py27_0
 - pygments=2.1.3=py27_0
 - pyparsing=2.1.4=py27_0
-- pyqt=4.11.4=py27_3
 - python=2.7.11=0
 - python-dateutil=2.5.3=py27_0
 - pytz=2016.4=py27_0

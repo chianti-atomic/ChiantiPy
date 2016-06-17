@@ -1,6 +1,9 @@
 ===================================
  Welcome to ChiantiPy version 0.6.5
 ===================================
+.. image:: http://readthedocs.org/projects/chiantipy/badge/?version=latest
+   :target: http://chiantipy.readthedocs.io/en/latest/?badge=latest
+   :alt: Documentation Status
 
 changes from 0.6.0 to 0.6.5
 ===========================
@@ -50,9 +53,9 @@ What is CHIANTI
 
 CHIANTI provides a database of atomic data that can be used to interpret the emission of spectral lines and continuua emitted from high-temperature, optically-thin astrophysical sources.  The CHIANTI project provides a suite of routines written in Interactive Data Language (IDL) to access the database and calculate various quantities for use in interpreting observed spectra or producing synthetic spectra.
 
-==============================                                                                                                                
-Getting started with ChiantiPy                                                                                                                
-==============================                                                                                                                
+==============================
+Getting started with ChiantiPy
+==============================
 
 Prerequisites
 =============
@@ -70,7 +73,7 @@ Prerequisites
 *  IPython_ version 4 / Jupyter
 
   ChiantiPy has been developed with IPython versions 2.x, 3.x and now version 4 / Jupyter which is the required version.  A very small edit to one of the version 0.6.3 files will allow this version to work in IPython 2 or 3.    This is discussed in the Notes section.  The previously released version 0.6.0 is compatible with IPython 2.x and 3.x and will remain on the SourceForge site for an indefinite period of time.
-  
+
 .. _IPython:  http://ipython.org
 
 * CHIANTI_, the atomic database for astrophysical spectroscopy

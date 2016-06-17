@@ -1,12 +1,15 @@
 name: chiantipy
 dependencies:
+- alabaster=0.7.8=py27_0
 - astropy=1.1.2=np111py27_0
 - babel=2.3.3=py27_0
 - backports=1.0=py27_0
 - backports_abc=0.4=py27_0
+- cairo=1.12.18=6
 - cycler=0.10.0=py27_0
 - decorator=4.0.10=py27_0
 - docutils=0.12=py27_2
+- fontconfig=2.11.1=5
 - freetype=2.5.5=1
 - funcsigs=1.0.2=py27_0
 - futures=3.0.5=py27_0
@@ -14,12 +17,15 @@ dependencies:
 - imagesize=0.7.1=py27_0
 - ipykernel=4.3.1=py27_0
 - ipyparallel=5.0.1=py27_0
-- ipython=4.1.1=py27_0
+- ipython=4.2.0=py27_0
 - ipython_genutils=0.1.0=py27_0
 - jinja2=2.8=py27_1
 - jupyter_client=4.2.2=py27_0
 - jupyter_core=4.1.0=py27_0
-- libpng=1.6.22=0
+- libgfortran=3.0.0=1
+- libpng=1.6.17=0
+- libsodium=1.0.10=0
+- libxml2=2.9.2=0
 - markupsafe=0.23=py27_2
 - matplotlib=1.5.1=np111py27_0
 - mkl=11.3.3=0
@@ -29,15 +35,20 @@ dependencies:
 - path.py=8.2.1=py27_0
 - pathlib2=2.1.0=py27_0
 - pbr=1.10.0=py27_0
+- pexpect=4.0.1=py27_0
 - pickleshare=0.7.2=py27_0
 - pip=8.1.2=py27_0
+- pixman=0.32.6=0
 - ptyprocess=0.5.1=py27_0
+- pycairo=1.10.0=py27_0
 - pygments=2.1.3=py27_0
 - pyparsing=2.1.4=py27_0
+- pyqt=4.11.4=py27_3
 - python=2.7.11=0
 - python-dateutil=2.5.3=py27_0
 - pytz=2016.4=py27_0
 - pyzmq=15.2.0=py27_1
+- qt=4.8.7=3
 - readline=6.2=2
 - scipy=0.17.1=np111py27_0
 - setuptools=23.0.0=py27_0
@@ -54,6 +65,7 @@ dependencies:
 - tornado=4.3=py27_1
 - traitlets=4.2.1=py27_0
 - wheel=0.29.0=py27_0
+- zeromq=4.1.4=0
 - zlib=1.2.8=3
 - pip:
   - backports-abc==0.4
@@ -63,3 +75,4 @@ dependencies:
   - jupyter-client==4.2.2
   - jupyter-core==4.1.0
   - sphinx-rtd-theme==0.1.9
+

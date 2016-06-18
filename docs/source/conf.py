@@ -33,7 +33,7 @@ try:
     import astropy_helpers
 except ImportError:
     # Building from inside the docs/ directory?
-    if os.path.basename(os.getcwd()) == 'docs':
+    if os.path.basename(os.getcwd()) == 'source':
         a_h_path = os.path.abspath(os.path.join('..', '..', 'astropy_helpers'))
         if os.path.isdir(a_h_path):
             sys.path.insert(1, a_h_path)

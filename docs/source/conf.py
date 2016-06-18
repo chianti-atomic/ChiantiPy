@@ -49,10 +49,10 @@ setup_cfg = dict(conf.items('metadata'))
 
 # Custom imports
 import subprocess
-try:
-    from mock import Mock as MagicMock
-except ImportError:
-    print("Cannot import mock. Only needed for RTD build.")
+#try:
+#    from mock import Mock as MagicMock
+#except ImportError:
+#    print("Cannot import mock. Only needed for RTD build.")
 
 # -- Install CHIANTI database (if on RTD) -------------------------------------
 #check if on readthedocs
@@ -66,14 +66,14 @@ if on_rtd:
     subprocess.call('curl -L http://www.chiantidatabase.org/download/CHIANTI_8.0.2_data.tar.gz | tar xz -C '+os.environ['XUVTOP'], shell=True)
 
 # -- Module Mocking -------------------------------------------------------------
-if on_rtd:
-    class Mock(MagicMock):
-        @classmethod
-        def __getattr__(cls,name):
-            return Mock()
+#if on_rtd:
+#    class Mock(MagicMock):
+#        @classmethod
+#        def __getattr__(cls,name):
+#            return Mock()
 
-    MOCK_MODULES = ['scipy','scipy.interpolate','ipyparallel','ipyparallel.Client','matplotlib','matplotlib.pyplot','matplotlib.tri']
-    sys.modules.update((mod_name,Mock()) for mod_name in MOCK_MODULES)
+#    MOCK_MODULES = ['scipy','scipy.interpolate','ipyparallel','ipyparallel.Client','matplotlib','matplotlib.pyplot','matplotlib.tri']
+#    sys.modules.update((mod_name,Mock()) for mod_name in MOCK_MODULES)
 
 # -- General configuration ----------------------------------------------------
 

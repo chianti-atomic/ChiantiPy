@@ -23,7 +23,7 @@ from ._SpecTrails import _specTrails
 try:
     import multiprocessing as mp
 #    from chianti import mputil
-    import chianti.mputil as mputil
+    import ChiantiPy.tools.mputil as mputil
 except:
     print(' your version of Python does not support multiprocessing \n you will not be able to use mspectrum')
 #

@@ -1,5 +1,5 @@
 import numpy as np
-import chianti.constants as const
+import ChiantiPy.tools.constants as const
 class blackStar:
     '''temperature in K, radius is the stellar radius in cm '''
     def __init__(self, temperature, radius):

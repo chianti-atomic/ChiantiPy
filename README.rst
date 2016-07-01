@@ -4,6 +4,9 @@ ChiantiPy
 .. image:: http://readthedocs.org/projects/chiantipy/badge/?version=latest
    :target: http://chiantipy.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
+.. image:: https://kiwiirc.com/buttons/chat.freenode.com/openastronomy.png
+   :target: https://kiwiirc.com/client/chat.freenode.com/?nick=OpenAstron|?#openastronomy
+   :alt: Visit the OpenAstronomy IRC channel
 
 ChiantiPy is the Python interface to the CHIANTI atomic database for astrophysical spectroscopy.  It provides the capability to calculate the emission line and continuum spectrum of an optically thin plasma based on the data in the CHIANTI database.
 

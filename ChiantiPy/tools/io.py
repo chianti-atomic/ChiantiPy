@@ -125,7 +125,7 @@ def cireclvlRead(ions, filename=None, filetype='cilvl'):
     else:
         fname = util.ion2filename(ions)
 
-    paramname=fname+filetype
+    paramname=fname + '.' + filetype
 
     input=open(paramname,'r')
     lines = input.readlines()
@@ -166,7 +166,7 @@ def cireclvlRead(ions, filename=None, filetype='cilvl'):
         shortT = np.asarray(recdat[4:], 'float64')
         # the result of the next statement is to continue to replicate t
         t = np.resize(shortT, maxNtemp)
-        if rrlvl:
+        if filetype == 'rrlvl':
             temp[iline] = t
         else:
             temp[iline] = 10.**t

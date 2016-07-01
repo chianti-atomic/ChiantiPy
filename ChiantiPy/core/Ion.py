@@ -1515,7 +1515,7 @@ class ion(_ionTrails, _specTrails):
             #
             file = fileName +'.cilvl'
             if os.path.isfile(file):
-                self.Cilvl = io.cireclvlRead('',filename = fileName, cilvl=1)
+                self.Cilvl = io.cireclvlRead('',filename = fileName, filetype='cilvl')
                 self.Ncilvl=len(self.Cilvl['lvl1'])
                 nlvlCilvl = max(self.Cilvl['lvl2'])
                 nlvlList.append(nlvlCilvl)
@@ -1524,7 +1524,7 @@ class ion(_ionTrails, _specTrails):
             #  .reclvl file may not exist
             reclvlfile = fileName +'.reclvl'
             if os.path.isfile(reclvlfile):
-                self.Reclvl = io.cireclvlRead('',filename=fileName, reclvl=1)
+                self.Reclvl = io.cireclvlRead('',filename=fileName, filetype='reclvl')
                 self.Nreclvl = len(self.Reclvl['lvl1'])
                 nlvlReclvl = max(self.Reclvl['lvl2'])
                 nlvlList.append(nlvlReclvl)
@@ -1602,7 +1602,7 @@ class ion(_ionTrails, _specTrails):
         #
         file = fileName +'.cilvl'
         if os.path.isfile(file):
-            self.Cilvl = io.cireclvlRead('',filename = fileName, cilvl=1)
+            self.Cilvl = io.cireclvlRead('',filename = fileName, filetype='cilvl')
             self.Ncilvl=len(self.Cilvl['lvl1'])
 #            nlvlCilvl = max(self.Cilvl['lvl2'])
 #            nlvlList.append(nlvlCilvl)
@@ -1611,7 +1611,7 @@ class ion(_ionTrails, _specTrails):
         #  .reclvl file may not exist
         reclvlfile = fileName +'.reclvl'
         if os.path.isfile(reclvlfile):
-            self.Reclvl = io.cireclvlRead('',filename=fileName, reclvl=1)
+            self.Reclvl = io.cireclvlRead('',filename=fileName, filetype='reclvl')
             self.Nreclvl = len(self.Reclvl['lvl1'])
 #            nlvlReclvl = max(self.Reclvl['lvl2'])
 #            nlvlList.append(nlvlReclvl)

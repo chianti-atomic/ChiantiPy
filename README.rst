@@ -51,11 +51,11 @@ Installing the CHIANTI database
 
 CHIANTI can be downloaded as a `gzipped data tar ball <http://www.chiantidatabase.org/download/CHIANTI_8.0.2_data.tar.gz>`_ or through `SSW <http://www.lmsal.com/solarsoft/sswdoc/sswdoc_jtop.html>`_. Detailed download instructions can be found `here <http://www.chiantidatabase.org/download.html>`_.
 
-ChiantiPy uses the environment variable ``XUVTOP`` to find the database.  Set ``XUVTOP`` to the name of the directory where the CHIANTI is located. For example, in bash,::
+ChiantiPy uses the environment variable ``XUVTOP`` to find the database.  Set ``XUVTOP`` to the name of the directory where the CHIANTI database is located. For example, in bash,:
 
   export XUVTOP=/path/to/chianti/tree
 
-Similarly, in csh,::
+Similarly, in csh,:
 
   setenv XUVTOP /path/to/chianti/tree
 
@@ -63,25 +63,25 @@ If you have installed CHIANTI via SSW, the database is probably located at ``/pa
 
 Installing ChiantiPy
 ----------------------
-The best way to obtain the ChiantiPy code is via GitHub. To clone this repository,::
+The best way to obtain the ChiantiPy code is via GitHub. To clone this repository,:
 
   git clone --recursive https://github.com/chianti-atomic/ChiantiPy.git
 
-The code in the ChiantiPy repository will change periodically as features are added and bugs are fixed. To pull down the latest changes, inside the directory where you cloned ChiantiPy, run::
+The code in the ChiantiPy repository will change periodically as features are added and bugs are fixed. To pull down the latest changes, inside the directory where you cloned ChiantiPy, run:
 
   git pull
 
 Alternatively, if you'd prefer not to use git or have not installed it, simply download the `zipped repository <https://github.com/chianti-atomic/ChiantiPy/archive/master.zip>`_.
 
-After obtaining the code, ``cd`` into the directory where you installed ChiantiPy and run::
+After obtaining the code, ``cd`` into the directory where you installed ChiantiPy and run:
 
   python setup.py install
 
-If you do not have root privileges, you can do a local install (e.g. in ``/path/to/local/install``) by first adding ``/path/to/local/install`` to your ``PYTHONPATH`` and then running::
+If you do not have root privileges, you can do a local install (e.g. in ``/path/to/local/install``) by first adding ``/path/to/local/install`` to your ``PYTHONPATH`` and then running:
 
     python setup.py install --prefix=/path/to/local/install
 
-To test your installation, in a Python or IPython shell, run::
+To test your installation, in a Python or IPython shell, run:
 
   import ChiantiPy.core as ch
 

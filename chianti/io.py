@@ -138,7 +138,7 @@ def cireclvlRead(ions, filename=0, cilvl=0, reclvl=0, rrlvl=0):
         idx=aline.find('-1')
         iline += 1
     ndata = iline - 1
-    ntrans = ndata/2
+    ntrans = ndata//2
     #
 #    nref = 0
 #    idx = -1

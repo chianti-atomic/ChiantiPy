@@ -69,7 +69,7 @@ class _ionTrails(object):
             tstr = ' -  T = %10.2e (K)' %(temperature)
         elif ndens == 1 and ntemp > 1:
             if index < 0:
-                index = ntemp/2
+                index = ntemp//2
             print('using index = %5i specifying temperature =  %10.2e'%(index, temperature[index]))
             self.Message = 'using index = %5i specifying temperature =  %10.2e'%(index, temperature[index])
 

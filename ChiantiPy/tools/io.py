@@ -3,7 +3,6 @@ A collection of reading and writing functions
 '''
 import os
 import fnmatch
-import sys
 import pickle
 try:
     #Python 3
@@ -71,7 +70,8 @@ def zion2name(z,ion, dielectronic=False):
     """
     Convert `Z` and `ion` to generic name, e.g. 26, 13 -> fe_13
     (A duplicate of the routine in util but needed by masterList Info
-    TODO: can we remove the duplicate?)
+    TODO: can we remove the duplicate? - it is duplicated because both modules need it, 
+    otherwise, get into circular imports)
     """
     if ion == 0:
         thisone = 0
@@ -91,7 +91,8 @@ def convertName(name):
     """
     Convert ion name string to Z and Ion
     (A duplicate of the routine in util but needed by masterList Info
-    TODO: Can we remove this duplicate?)
+    TODO: Can we remove this duplicate? - it is duplicated because both modules need it, 
+    otherwise, get into circular imports)
     """
     s2=name.split('_')
     els=s2[0].strip()

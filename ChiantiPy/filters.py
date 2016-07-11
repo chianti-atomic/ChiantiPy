@@ -1,16 +1,18 @@
-''' line profile filters from creating synthetic spectra
+''' line profile filters for creating synthetic spectra
 
-Copyright 2009, 2010 Kenneth P. Dere
+Copyright 2009 - 2016 Kenneth P. Dere
 
-This software is distributed under the terms of the GNU General Public License
-that is found in the LICENSE file
+This software is distributed under the terms of the ISC software License
+found in the LICENSE file
 
 '''
 import numpy as np
 def gaussianR(wvl,wvl0, factor=1000.):
     '''
-    a gaussian filter where factor is the resolving power, so that the gaussian width (standard deviation)
-    is given by wvl0/factor'''
+    a gaussian filter where factor is the resolving power, 
+    so that the gaussian width (standard deviation)
+    is given by wvl0/factor
+    '''
     if factor:
         std = wvl0/factor
     else:

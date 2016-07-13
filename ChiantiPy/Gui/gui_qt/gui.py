@@ -3,10 +3,9 @@ PyQt4 widget selection dialogs
 '''
 import sys,  os
 from PyQt4 import QtGui
-import matplotlib as mpl
-import chianti
-from chianti.Gui.gui_qt.ui import *
-'''qt4 selection dialogs'''
+import ChiantiPy
+from ChiantiPy.Gui.gui_qt.ui import *
+' qt4 selection dialogs'
 
 def chpicker(dir, filter='*.*', label='ChiantiPy'):
     '''Select a filename using a Qt gui dialog.'''
@@ -30,11 +29,6 @@ class selectorDialog(QtGui.QDialog):
     def __init__(self, items, label=None ,  parent=None):
 #       if using the Qt4Agg backend for matplotlib, the following line needs to be comment out
 #        app=QtGui.QApplication(sys.argv)
-        #try:
-            #if 'backend' in mpl.rcParams.keys():
-                #print('mpl backend %s'%(mpl.rcParams['backend''']))
-        #except:
-            #app = QtGui.QApplication(sys.argv) 
         QtGui.QDialog.__init__(self)
         self.ui = Ui_selectorDialogForm()
         self.ui.setupUi(self)
@@ -123,6 +117,3 @@ class choice2Dialog(QtGui.QDialog):
     def reject(self):
         print(' cancel button pushed')
         self.done(1)
-
-
-

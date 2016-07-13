@@ -5,10 +5,10 @@ import copy
 import time
 import numpy as np
 import matplotlib.pyplot as plt
-import chianti.util as util
-import chianti.io as io
-import chianti.Gui as chGui
-import chianti.data as chdata
+import ChiantiPy.tools.util as util
+import ChiantiPy.tools.io as io
+import ChiantiPy.Gui as chGui
+import ChiantiPy.tools.data as chdata
 #
 class _ionTrails(object):
     """
@@ -76,15 +76,15 @@ class _ionTrails(object):
             intensity=intensity[index]
         elif ndens > 1 and ntemp == 1:
             if index < 0:
-                index = ntemp//2
+                index = ntemp/2
             print('using index =%5i specifying eDensity = %10.2e'%(index, eDensity[index]))
             self.Message = 'using index =%5i specifying eDensity = %10.2e'%(index, eDensity[index])
             intensity=intensity[index]
         elif ndens > 1 and ntemp > 1:
             if index < 0:
-                index = ntemp//2
+                index = ntemp/2
             print('using index = %5i specifying temperature = %10.2e, eDensity =  %10.2e em = %10.2e'%(index, temperature[index], eDensity[index], em[index]))
-            self.Message = 'using index = %5i specifying temperature = %10.2e, eDensity =  %10.2e em = %10.2e'%(index, temperature[index], eDensity[index], em[index])
+            self.Message = 'using index = %5i specifying temperature = %10.2e, eDensity =  %10.2eem = %10.2e'%(index, temperature[index], eDensity[index], em[index])
             intensity=intensity[index]
         #
 #        print('shpae of intensity 0 = %5i %5i'%(intensity.shape))

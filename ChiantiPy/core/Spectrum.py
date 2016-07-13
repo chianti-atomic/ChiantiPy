@@ -1,14 +1,14 @@
 import copy
 from datetime import datetime
 import numpy as np
-import chianti
-import chianti.data as chdata
-import chianti.constants as const
-import chianti.filters as chfilters
-import chianti.util as util
-import chianti.io as chio
+import ChiantiPy
+import ChiantiPy.tools.data as chdata
+import ChiantiPy.tools.constants as const
+import ChiantiPy.tools.filters as chfilters
+import ChiantiPy.tools.util as util
+import ChiantiPy.tools.io as chio
 #
-import chianti.Gui as chGui
+import ChiantiPy.Gui as chGui
 #
 from ._IonTrails import _ionTrails
 from ._SpecTrails import _specTrails
@@ -18,13 +18,13 @@ defaults = chdata.Defaults
 class spectrum(_ionTrails, _specTrails):
     '''
     Calculate the emission spectrum as a function of temperature and density.
-    
+
     one of the convenient things is that all of the instantiated ion classes, determined through such keywords as 'elementList',
     'ionList', and 'minAbund' are kept in a dictionary self.IonInstances where self.IonInstances['mg_7'] is the class instance of
     chianti.core.ion for 'mg_7'.  All its methods and attributes are available.
 
     includes elemental abundances and ionization equilibria
-    
+
     the set of abundances, a file in $XUVTOP/abundance, can be set with the keyword argument 'abundanceName'
 
     temperature and density can be arrays but, unless the size of either is one (1),
@@ -37,7 +37,7 @@ class spectrum(_ionTrails, _specTrails):
     such as gaussian, box and lorentz, are available in chianti.filters.  When using the box filter,
     the width should equal the wavelength interval to keep the units of the continuum and line
     spectrum the same.
-    
+
     Inherited methods include 'intensityList', 'intensityRatio' (between lines of different ions), 'intensityRatioSave'
     and 'convolve'
 
@@ -271,7 +271,7 @@ class spectrum(_ionTrails, _specTrails):
 class bunch(_ionTrails, _specTrails):
     '''
     Calculate the emission line spectrum as a function of temperature and density.
-    
+
     'bunch' is very similar to 'spectrum' except that continuum is not calculated and the spectrum
     is not convolved over a filter.  However, this can be done with the inherited convolve method
 
@@ -347,7 +347,7 @@ class bunch(_ionTrails, _specTrails):
         if type(em) == int and em == 0:
             em = np.ones(self.NTempDen, 'float64')
         elif type(em) == float and em > 0.:
-            em = np.ones(self.NTempDen, 'float64')*em        
+            em = np.ones(self.NTempDen, 'float64')*em
         elif type(em) == list or type(em) == tuple:
             em = np.asarray(em, 'float64')
         self.Em = em
@@ -413,7 +413,7 @@ class bunch(_ionTrails, _specTrails):
         for ionS in sorted(self.Todo.keys()):
             nameStuff = util.convertName(ionS)
             Z = nameStuff['Z']
-            
+
             if verbose:
                 print(' calculating %s'%(ionS))
             thisIon = chianti.core.ion(ionS, temperature, eDensity, abundance=abundAll[Z-1])

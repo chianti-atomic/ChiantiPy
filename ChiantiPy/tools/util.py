@@ -1,12 +1,11 @@
-'''Utility functions, many for reading the CHIANTI database files.
+"""
+Utility functions, many for reading the CHIANTI database files.
 
-Copyright 2009, 2010 Kenneth P. Dere
+Notes
+-----
+Some of these functions can be replaced by roman numeral and periodic table lookup libraries.
+"""
 
-This software is distributed under the terms of the GNU General Public License
-that is found in the LICENSE file
-
-
-'''
 import os, fnmatch
 #from types import *
 #try:
@@ -24,13 +23,17 @@ import ChiantiPy
 import ChiantiPy.tools.constants as const
 #import chianti.io as chio
 #import chianti.gui as gui
-#
-#
+
+
 def between(array,limits):
-    '''
-    returns an index array of elements of array where the values lie
-    between the limits given as a 2 element list or tuple
-    '''
+    """
+    Find the indices of `array` corresponding to values in the range given by `limits`
+
+    Parameters
+    ----------
+    array : `~numpy.ndarray`
+    limits : `list` or `tuple` of length 2
+    """
     array=np.asarray(array)
     nlines=len(array)
 #    hi=np.where(array >= limits[0],range(1,nlines+1),0)
@@ -41,34 +44,44 @@ def between(array,limits):
     hilo=hi&lo
     out=[a -1  for a in hilo if a > 0]
     return out
-    #
-    # --------------------------------------------------
-    #
+
+
 def z2element(z):
-    """ convert Z to element string """
+    """Convert atomic number `z` to its elemental symbol."""
     if z-1 < len(const.El):
         thisel=const.El[z-1]
     else:
         thisel=''
     return thisel
-    #
-    # -------------------------------------------------------------------------------------
-    #
-def spectroscopic2name(el,roman, dielectronic=False):
+
+
+def spectroscopic2name(el,roman):
     """
-    convert Z and ion to spectroscopic notation string
+    Convert from spectroscopic notation, e.g. Fe XI to 'fe_11'
+
+    Parameters
+    ----------
+    el : `str`
+        Elemental symbol, e.g. Fe for iron
+    roman : `str`
+        Roman numeral spectroscopic symbol
     """
     elu = el.lower()
     romanu = roman.upper()
     idx =const.Ionstage.index(romanu)
     gname = elu+'_'+str(idx+1)
     return gname
-    #
-    # -------------------------------------------------------------------------------------
-    #
+
+
 def zion2name(z,ion, dielectronic=False):
     """
-    convert Z, ion to generic name  26, 13 -> fe_13
+    Convert atomic number and ion number to generic name, e.g. (26,13) to 'fe_13'
+
+    Parameters
+    ----------
+    z : `int`
+    ion : `int`
+    dielectronic : `bool`, optional
     """
     if ion == 0:
         thisone = 0
@@ -82,11 +95,20 @@ def zion2name(z,ion, dielectronic=False):
         # this should not actually happen
         thisone = 0
     return thisone
-    #
-    # -------------------------------------------------------------------------------------
-    #
-def zion2dir(z,ion, dielectronic=False, xuvtop=0):
-    """ convert Z to generic file name string """
+
+
+def zion2dir(z,ion, dielectronic=False, xuvtop=''):
+    """
+    Convert atomic number and ion number to CHIANTI database directory.
+
+    Parameters
+    ----------
+    z : `int`
+    ion : `int`
+    dielectronic : `bool`, optional
+    xuvtop : `str`, optional
+        Set different CHIANTI database than the default
+    """
     if xuvtop:
         dir = xuvtop
     else:
@@ -104,11 +126,20 @@ def zion2dir(z,ion, dielectronic=False, xuvtop=0):
     if thisel != '' :
         fname=os.path.join(dir,thisel,thisone)
     return fname
-    #
-    # -------------------------------------------------------------------------------------
-    #
-def zion2filename(z,ion, dielectronic=False, xuvtop=0):
-    """ convert Z to generic file name string """
+
+
+def zion2filename(z,ion, dielectronic=False, xuvtop=''):
+    """
+    Convert atomic number and ion number to CHIANTI database filename.
+
+    Parameters
+    ----------
+    z : `int`
+    ion : `int`
+    dielectronic : `bool`, optional
+    xuvtop : `str`, optional
+        Set different CHIANTI database than the default
+    """
     if xuvtop:
         dir = xuvtop
     else:
@@ -126,9 +157,8 @@ def zion2filename(z,ion, dielectronic=False, xuvtop=0):
     if thisel != '' :
         fname=os.path.join(dir,thisel,thisone,thisone)
     return fname
-    #
-    # -------------------------------------------------------------------------------------
-    #
+
+
 def zion2localFilename(z,ion, dielectronic=False):
     """ convert Z to generic file name string with current directory at top"""
     dir='.'

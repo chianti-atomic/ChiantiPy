@@ -5,9 +5,9 @@ using the autoionization rates in the .auto files
 '''
 import os
 import numpy as np
-import chianti.data as chdata
-import chianti.util as util
-import chianti.io as io
+import ChiantiPy.tools.data as chdata
+import ChiantiPy.tools.util as util
+import ChiantiPy.tools.io as io
     #
     # -------------------------------------------------------------------------
     #

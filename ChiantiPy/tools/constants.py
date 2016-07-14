@@ -5,7 +5,6 @@ References
 ----------
 .. [1] NIST Reference on Constants, Units and Uncertainty (`link <http://physics.nist.gov/cuu>`_)
 
-<<<<<<< HEAD
 Notes
 -----
 Many of these can be replaced by the `~astropy.constants` module. Elemental symbols can be removed in favor of the periodictable module. Spectroscopic roman numerals can be removed in favor of roman module. The Gauss-Laguerre weights can be calculated by `~numpy.polynomial.laguerre.laggauss`.
@@ -72,13 +71,9 @@ Ionstage = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII'
     'XIV','XV','XVI','XVII','XVIII','XIX','XX','XXI',' XXII','XXIII','XXIV', \
     'XXV','XXVI','XXVII','XXVIII','XXIX','XXX','XXXI','XXXII','XXXIII','XXXIV', \
     'XXXV','XXXVI','XXXVII']
-<<<<<<< HEAD:ChiantiPy/tools/constants.py
 Spd = ['S', 'P', 'D', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'O', 'Q', 'R', 'T', 'U', 'V', 'W', \
        'X','Y', 'Z', 'A','B', 'C', 'S1', 'P1', 'D1', 'E1', 'F1', 'G1', 'H1', 'I1', 'K1', 'L1', \
        'M1', 'N1', 'O1', 'Q1', 'R1', 'T1', 'U1', 'V1', 'W1','X1','Y1', 'Z1', 'A1','B1', 'C1']
-=======
-Spd = ['S', 'P', 'D', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'O', 'Q', 'R', 'T', 'U', 'V', 'W','X','Y', 'Z', 'A','B', 'C', 'S1', 'P1', 'D1', 'E1', 'F1', 'G1', 'H1', 'I1', 'K1', 'L1', 'M1', 'N1', 'O1', 'Q1', 'R1', 'T1', 'U1', 'V1', 'W1','X1','Y1', 'Z1', 'A1','B1', 'C1']
->>>>>>> 4f86943e9c6f77a9f3b104403da5fef5f7207044:ChiantiPy/tools/constants.py
 #
 #  data for Gauss-Laguerre integration
 #

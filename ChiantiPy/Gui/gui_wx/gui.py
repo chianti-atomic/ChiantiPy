@@ -5,10 +5,12 @@ wxWidget selection dialogs.
 ' wxWidget selection dialogs'
 
 import wx
-from chianti.Gui.gui_wx.ui import *
+from Chianti.Gui.gui_wx.ui import *
 
 def chpicker(dir,filter='All files (*.*)|*.*',label='ChiantiPy'):
-    '''Select a filename using a gui dialog.'''
+    '''
+    Select a filename using a wx gui dialog.
+    '''
     app=wx.App()
     a=wx.FileDialog(None)
     a.SetMessage(label)
@@ -20,7 +22,8 @@ def chpicker(dir,filter='All files (*.*)|*.*',label='ChiantiPy'):
     return a.name
 
 class selectorDialog:
-    '''Make a single or multiple selection from a list of items.
+    '''
+    Make a single or multiple selection from a list of items.
 
     expects the input of an array of items, will select one or more
     '''
@@ -36,12 +39,13 @@ class selectorDialog:
         a.Destroy
 
 class choice2Dialog:
-    '''Make a single or multiplee selection from a list of items and another
+    '''Make a single or multiple selection from a list of items and another
     single or multiple selection from the same list.
 
     Useful for picking numerators and denominators.
 
-    expects the input of an array of items, will select one or more from both widgets.'''
+    expects the input of an array of items, will select one or more from both widgets.
+    '''
     def __init__(self, items,  label=None):
 #       app = wx.PySimpleApp(0)
         app = wx.App()

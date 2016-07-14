@@ -20,7 +20,6 @@ Defaults = chio.defaultsRead()
 Ip = chio.ipRead()
 MasterList = chio.masterListRead()
 IoneqAll = chio.ioneqRead(ioneqname = Defaults['ioneqfile'])
-# gets the ChianitPy version
 # gets the version of the CHIANTI database
 ChiantiVersion = chio.versionRead()
 keywordArgs = ['temperature','eDensity','hDensity', 'pDensity','radTemperature', 'rStar', 'distance']

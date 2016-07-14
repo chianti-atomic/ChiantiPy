@@ -1,5 +1,8 @@
 #Author: Ken Dere
-''' Line profile filters for creating synthetic spectra.'''
+
+''' 
+Line profile filters for creating synthetic spectra.
+'''
 
 import numpy as np
 

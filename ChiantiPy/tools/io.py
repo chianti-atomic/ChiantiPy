@@ -70,12 +70,8 @@ def zion2name(z,ion, dielectronic=False):
     """
     Convert `Z` and `ion` to generic name, e.g. 26, 13 -> fe_13
     (A duplicate of the routine in util but needed by masterList Info
-<<<<<<< HEAD:ChiantiPy/tools/io.py
-    TODO: can we remove the duplicate? - it is duplicated because both modules need it, 
+    TODO: can we remove the duplicate? - it is duplicated because both modules need it,
     otherwise, get into circular imports)
-=======
-    TODO: can we remove the duplicate?)
->>>>>>> 4f86943e9c6f77a9f3b104403da5fef5f7207044:ChiantiPy/tools/io.py
     """
     if ion == 0:
         thisone = 0
@@ -95,12 +91,8 @@ def convertName(name):
     """
     Convert ion name string to Z and Ion
     (A duplicate of the routine in util but needed by masterList Info
-<<<<<<< HEAD:ChiantiPy/tools/io.py
     TODO: Can we remove this duplicate? - it is duplicated because both modules need it, 
     otherwise, get into circular imports)
-=======
-    TODO: Can we remove this duplicate?)
->>>>>>> 4f86943e9c6f77a9f3b104403da5fef5f7207044:ChiantiPy/tools/io.py
     """
     s2=name.split('_')
     els=s2[0].strip()

@@ -4,7 +4,10 @@ Calculates various aspects of emission line and continua from the CHIANTI atomic
 This is not yet an Astropy affiliated package, but it makes use of the Astropy package template
 '''
 # Include this stuff for astropy affiliation
+# -------------------------------------------
 from ._astropy_init import *
+#--------------------------------------------
+
 if not _ASTROPY_SETUP_:
     # For ChiantiPy
     from . import  version

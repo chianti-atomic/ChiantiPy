@@ -3,13 +3,13 @@ import copy
 #
 #
 import numpy as np
-import chianti
-import chianti.data as chdata
-import chianti.constants as const
-import chianti.filters as chfilters
-import chianti.util as util
-import chianti.io as chio
-import chianti.Gui as chgui
+import ChiantiPy
+import ChiantiPy.tools.data as chdata
+import ChiantiPy.tools.constants as const
+import ChiantiPy.tools.filters as chfilters
+import ChiantiPy.tools.util as util
+import ChiantiPy.tools.io as chio
+import ChiantiPy.Gui as chgui
 #
 from ._IonTrails import _ionTrails
 from ._SpecTrails import _specTrails
@@ -124,7 +124,7 @@ class ipymspectrum(_ionTrails, _specTrails):
         if type(em) == int and em == 0:
             em = np.ones(self.NTempDen, 'float64')
         elif type(em) == float and em > 0.:
-            em = np.ones(self.NTempDen, 'float64')*em        
+            em = np.ones(self.NTempDen, 'float64')*em
         elif type(em) == list or type(em) == tuple:
             em = np.asarray(em, 'float64')
         self.Em = em
@@ -338,13 +338,13 @@ class ipymspectrum(_ionTrails, _specTrails):
         if type(label) == type(''):
             if hasattr(self, 'Spectrum'):
                 print(' hasattr = true')
-                self.Spectrum[label] = {'wavelength':wavelength, 'intensity':total.squeeze(), 'filter':filter[0].__name__,   'width':filter[1], 'integrated':integrated, 'em':em,  'Abundance':self.AbundanceName, 
+                self.Spectrum[label] = {'wavelength':wavelength, 'intensity':total.squeeze(), 'filter':filter[0].__name__,   'width':filter[1], 'integrated':integrated, 'em':em,  'Abundance':self.AbundanceName,
                                             'xlabel':xlabel, 'ylabel':ylabel}
             else:
-                self.Spectrum = {label:{'wavelength':wavelength, 'intensity':total.squeeze(), 'filter':filter[0].__name__,   'width':filter[1], 'integrated':integrated, 'em':em, 'Abundance':self.AbundanceName, 
+                self.Spectrum = {label:{'wavelength':wavelength, 'intensity':total.squeeze(), 'filter':filter[0].__name__,   'width':filter[1], 'integrated':integrated, 'em':em, 'Abundance':self.AbundanceName,
                                 'xlabel':xlabel, 'ylabel':ylabel}}
         else:
-            self.Spectrum = {'wavelength':wavelength, 'intensity':total.squeeze(), 'filter':filter[0].__name__,   'width':filter[1], 'integrated':integrated, 'em':em, 'Abundance':self.AbundanceName, 
+            self.Spectrum = {'wavelength':wavelength, 'intensity':total.squeeze(), 'filter':filter[0].__name__,   'width':filter[1], 'integrated':integrated, 'em':em, 'Abundance':self.AbundanceName,
                                 'xlabel':xlabel, 'ylabel':ylabel}
     #
     # -------------------------------------------------------------------------
@@ -362,7 +362,7 @@ def doAll(inpt):
         em = inpt[5]
         FF = chianti.core.continuum(ionS, temperature, abundance=abund, em=em)
         FF.freeFree(wavelength)
-        # can not do a deep copy of 
+        # can not do a deep copy of
 #        return [ionS, calcType, copy.deepcopy(cont)]
         return [ionS, calcType, copy.copy(FF.FreeFree)]
     elif calcType == 'fb':
@@ -400,4 +400,3 @@ def doAll(inpt):
 #        else:
 #            outList=[ionS,  calcType, 'error in calculating line emissivity']
 #            return outList
-

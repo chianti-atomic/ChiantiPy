@@ -1,10 +1,10 @@
 '''
 functions needed for standard Python multiprocessing module mspectrum
 '''
-import chianti
+import ChiantiPy
 
 def doFfQ(inQ, outQ):
-    ''' 
+    '''
     multiprocessing helper for freefree
     '''
     for inputs in iter(inQ.get, 'STOP'):
@@ -21,7 +21,7 @@ def doFfQ(inQ, outQ):
     # ----------------------------------------------
     #
 def doFbQ(inQ, outQ):
-    ''' 
+    '''
     multiprocessing helper for freeBound
     '''
     for inputs in iter(inQ.get, 'STOP'):
@@ -38,7 +38,7 @@ def doFbQ(inQ, outQ):
     # ----------------------------------------------
     #
 def doIonQ(inQueue, outQueue):
-    ''' 
+    '''
     multiprocessing helper for ion, also does two-photon
     '''
     for inpts in iter(inQueue.get, 'STOP'):

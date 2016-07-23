@@ -1,7 +1,7 @@
 import os
 #from .FortranFormat import *
-import chianti.constants as const
-from .util import ion2filename
+import ChiantiPy.tools.constants as const
+import ChiantiPy.tools.util as util
     #
     # -------------------------------------------------------------------------------------
     #
@@ -87,29 +87,43 @@ from .util import ion2filename
     #
     # -------------------------------------------------------------------------------------
     #
-def elvlcWrite(info, outfile=0, addLvl=0):
-    ''' creates a .elvlc in the current directory
-    info is a dictionary that must contain the following keys
-    ionS, the Chianti style name of the ion such as c_4
-    conf, an integer denoting the configuration - not too essential
-    term, a string showing the configuration
-    spin, an integer of the spin of the state in LS coupling
-    l, an integer of the angular momentum quantum number
-    spd, an string for the alphabetic symbol of the angular momemtum, S, P, D, etc
-    j, a floating point number, the total angular momentum
-    ecm, the observed energy in inverse cm, if unknown, the value is 0.
-    eryd, the observed energy in Rydbergs, if unknown, the value is 0.
-    ecmth, the calculated energy from the scattering calculation, in inverse cm
-    erydth, the calculated energy from the scattering calculation in Rydbergs
-    ref, the references in the literature to the data in the input info
-    the output filename will be ionS+'.elvlc' unless outfile is specified
-    addLvl is to add a constant value to the index of all levels
+def elvlcWrite(info, outfile=None, addLvl=0):
     '''
-    gname = info['ionS']
+    Write Chianti data to .elvlc file.
+
+    Parameters
+    ----------
+    inf : `dict`
+        Information about the Chianti data to write. Should contain
+        the following keys: ionS, the Chianti style name of the ion such as c_4
+        conf, an integer denoting the configuration - not too essential
+        term, a string showing the configuration
+        spin, an integer of the spin of the state in LS coupling
+        l, an integer of the angular momentum quantum number
+        spd, an string for the alphabetic symbol of the angular momemtum, S, P, D, etc
+        j, a floating point number, the total angular momentum
+        ecm, the observed energy in inverse cm, if unknown, the value is 0.
+        eryd, the observed energy in Rydbergs, if unknown, the value is 0.
+        ecmth, the calculated energy from the scattering calculation, in inverse cm
+        erydth, the calculated energy from the scattering calculation in Rydbergs
+        ref, the references in the literature to the data in the input info
+    outfile : `str`
+        Output filename. ionS+'.elvlc' (in current directory) if None
+    addLvl : `int`
+        Add a constant value to the index of all levels
+
+    Notes
+    -----
+    For use with files created before elvlc format change in November 2012
+
+    See Also
+    --------
+    ChiantiPy.tools.io.elvlcWrite : Write .elvlc file using the new format.
+    '''
     if outfile:
         elvlcName = outfile
     else:
-        elvlcName = gname + '.elvlc'
+        elvlcName = info['ionS'] + '.elvlc'
     print((' elvlc file name = %s'%(elvlcName)))
     out = open(elvlcName, 'w')
     for i,  conf in enumerate(info['conf']):
@@ -124,10 +138,7 @@ def elvlcWrite(info, outfile=0, addLvl=0):
         out.write(one+'\n')
     out.write(' -1\n')
     out.close()
-    return
-    #
-    # -------------------------------------------------------------------------------------
-    #
+
 def wgfaRead(ions, filename=0, elvlcname=-1, total=0, verbose=0):
     """
     this is text-wise not different that the v8.0 util.wgfaRead except that it uses the
@@ -153,7 +164,7 @@ def wgfaRead(ions, filename=0, elvlcname=-1, total=0, verbose=0):
             elvlc = elvlcRead('',elvlcname)
 
     else:
-        fname=ion2filename(ions)
+        fname=util.ion2filename(ions)
         wgfaname=fname+'.wgfa'
         elvlcname = fname + '.elvlc'
         if os.path.isfile(elvlcname):

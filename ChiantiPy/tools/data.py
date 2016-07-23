@@ -11,7 +11,7 @@ distance is the distance from the central source
 '''
 import os
 
-import chianti.io as chio
+import ChiantiPy.tools.io as chio
 
 ###
 xuvtop = os.environ['XUVTOP']
@@ -20,7 +20,6 @@ Defaults = chio.defaultsRead()
 Ip = chio.ipRead()
 MasterList = chio.masterListRead()
 IoneqAll = chio.ioneqRead(ioneqname = Defaults['ioneqfile'])
-# gets the ChianitPy version
 # gets the version of the CHIANTI database
 ChiantiVersion = chio.versionRead()
 keywordArgs = ['temperature','eDensity','hDensity', 'pDensity','radTemperature', 'rStar', 'distance']
@@ -39,4 +38,3 @@ for one in filelist:
 Abundance = {AbundanceList[0]:chio.abundanceRead(abundancename = AbundanceList[0])}
 for one in AbundanceList[1:]:
     Abundance[one] = chio.abundanceRead(abundancename = one)
-

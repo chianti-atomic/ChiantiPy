@@ -5,16 +5,16 @@ using the autoionization rates in the .auto files
 '''
 import os
 import numpy as np
-import chianti.data as chdata
-import chianti.util as util
-import chianti.io as io
+import ChiantiPy.tools.data as chdata
+import ChiantiPy.tools.util as util
+import ChiantiPy.tools.io as io
     #
     # -------------------------------------------------------------------------
     #
 def setupNew(self, dir=0, verbose=0):
     '''
     if ion is initiated with setup=0, this allows the setup to be done at a later point
-    perhaps, more importantly,  by setting dir to a directory cotaining the necessary files
+    perhaps, more importantly,  by setting dir to a directory containing the necessary files
     for a ChiantiPy ion, it allows one to setup an ion with files not in the current
     Chianti directory
     this is a development version for integrating auoionizing levels etc into the main ion

@@ -1,16 +1,24 @@
-''' line profile filters from creating synthetic spectra
+#Author: Ken Dere
 
-Copyright 2009, 2010 Kenneth P. Dere
-
-This software is distributed under the terms of the GNU General Public License
-that is found in the LICENSE file
-
+''' 
+Line profile filters for creating synthetic spectra.
 '''
+
 import numpy as np
+
 def gaussianR(wvl,wvl0, factor=1000.):
     '''
-    a gaussian filter where factor is the resolving power, so that the gaussian width (standard deviation)
-    is given by wvl0/factor'''
+    A gaussian filter where the gaussian width is given by `wvl0`/`factor`.
+
+    Parameters
+    -----------
+    wvl : `~numpy.ndarray`
+        Wavelength array
+    wvl0 : `~numpy.float64`
+        Wavelength filter should be centered on.
+    factor : `~numpy.float64`
+        Resolving power
+    '''
     if factor:
         std = wvl0/factor
     else:
@@ -21,7 +29,16 @@ def gaussianR(wvl,wvl0, factor=1000.):
 
 def gaussian(wvl,wvl0, factor=0):
     '''
-    a gaussian filter where factor is the gaussian width (standard deviation)
+    A gaussian filter
+
+    Parameters
+    -----------
+    wvl : `~numpy.ndarray`
+        Wavelength array
+    wvl0 : `~numpy.float64`
+        Wavelength filter should be centered on.
+    factor : `~numpy.float64`
+        Gaussian width
     '''
     if factor:
         std = factor
@@ -34,7 +51,18 @@ def gaussian(wvl,wvl0, factor=0):
     return np.exp(-0.5*((wvl - wvl0)/std)**2)/(np.sqrt(2.*np.pi)*std)
     #
 def boxcar(wvl, wvl0, factor=0):
-    ''' box-car filter, factor is the full width of the box filter'''
+    '''
+    Box-car filter
+
+    Parameters
+    -----------
+    wvl : `~numpy.ndarray`
+        Wavelength array
+    wvl0 : `~numpy.float64`
+        Wavelength filter should be centered on.
+    factor : `~numpy.float64`
+        Full width of the box-car filter
+    '''
     wvl = np.asarray(wvl, 'float64')
     dwvl = wvl - np.roll(wvl, 1)
     dwvl[0] = dwvl[1]
@@ -53,9 +81,18 @@ def boxcar(wvl, wvl0, factor=0):
     return np.where(realgood, one, zed)/(width)
     #
 def lorentz(wvl, wvl0, factor=0):
-    '''the lorentz profile with the exception that all factors are in wavelength units
+    '''Lorentz profile filter with the exception that all factors are in wavelength units
     rather than frequency as the lorentz profile is usually defined.
-    factor is the value of the so-called constant gamma'''
+
+    Parameters
+    -----------
+    wvl : `~numpy.ndarray`
+        Wavelength array
+    wvl0 : `~numpy.float64`
+        Wavelength filter should be centered on.
+    factor : `~numpy.float64`
+        Value of the so-called constant gamma
+    '''
     if factor:
         gamma = factor
     else:
@@ -69,7 +106,16 @@ def lorentz(wvl, wvl0, factor=0):
     #
 def moffat(wvl, wvl0, factor=2.5):
     '''
-    the moffat profile with parameters suited to Chandra Letg spectra
+    Moffat profile with parameters suited to Chandra Letg spectra
+
+    Parameters
+    -----------
+    wvl : `~numpy.ndarray`
+        Wavelength array
+    wvl0 : `~numpy.float64`
+        Wavelength filter should be centered on.
+    factor : `~numpy.float64`
+        Resolving power (TODO: correct description)
     '''
     wvl = np.asarray(wvl, 'float64')
     dwvl = np.abs(wvl[1] - wvl[0])

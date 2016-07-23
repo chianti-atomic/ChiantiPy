@@ -1,0 +1,4 @@
+ChiantiPy
+=========
+
+.. automodapi:: ChiantiPy

@@ -1,11 +1,11 @@
-'''
+"""
 Functions needed for standard Python multiprocessing module mspectrum
-'''
+"""
 
 import ChiantiPy.core as ch
 
 def doFfQ(inQ, outQ):
-    '''
+    """
     Multiprocessing helper for `ChiantiPy.core.continuum.freeFree`
 
     Parameters
@@ -14,7 +14,7 @@ def doFfQ(inQ, outQ):
         Ion free-free emission jobs queued up by multiprocessing module
     outQ : `~multiprocessing.Queue`
         Finished free-free emission jobs
-    '''
+    """
     for inputs in iter(inQ.get, 'STOP'):
         ionS = inputs[0]
         temperature = inputs[1]
@@ -25,11 +25,10 @@ def doFfQ(inQ, outQ):
         ff.freeFree(wavelength)
         outQ.put(ff.FreeFree)
     return
-    #
-    # ----------------------------------------------
-    #
+
+
 def doFbQ(inQ, outQ):
-    '''
+    """
     Multiprocessing helper for `ChiantiPy.core.continuum.freeBound`
 
     Parameters
@@ -38,7 +37,7 @@ def doFbQ(inQ, outQ):
         Ion free-bound emission jobs queued up by multiprocessing module
     outQ : `~multiprocessing.Queue`
         Finished free-bound emission jobs
-    '''
+    """
     for inputs in iter(inQ.get, 'STOP'):
         ionS = inputs[0]
         temperature = inputs[1]
@@ -49,11 +48,10 @@ def doFbQ(inQ, outQ):
         fb.freeBound(wavelength)
         outQ.put(fb.FreeBound)
     return
-    #
-    # ----------------------------------------------
-    #
+
+
 def doIonQ(inQueue, outQueue):
-    '''
+    """
     Multiprocessing helper for `ChiantiPy.core.ion` and `ChiantiPy.core.ion.twoPhoton`
 
     Parameters
@@ -62,7 +60,7 @@ def doIonQ(inQueue, outQueue):
         Jobs queued up by multiprocessing module
     outQueue : `~multiprocessing.Queue`
         Finished jobs
-    '''
+    """
     for inpts in iter(inQueue.get, 'STOP'):
         ionS = inpts[0]
         temperature = inpts[1]

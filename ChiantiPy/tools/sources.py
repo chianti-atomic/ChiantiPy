@@ -3,7 +3,9 @@ Blackbody temperature calculations
 """
 
 import numpy as np
+
 import ChiantiPy.tools.constants as const
+
 class blackStar:
     """
     Calculate blackbody radiation

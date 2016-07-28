@@ -82,6 +82,3 @@ class choice2Dialog:
         for one in sraw:
             self.denIndex.append(int(one))
             self.denText.append(items[int(one)])
-
-
-

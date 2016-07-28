@@ -1,19 +1,17 @@
-'''
-A set of physical constants.
+"""
+A set of physical constants, in (mostly) cgs unit system. Most are from [1]_.
 
-Copyright 2009, 2010 Kenneth P. Dere
+References
+----------
+.. [1] NIST Reference on Constants, Units and Uncertainty (`link <http://physics.nist.gov/cuu>`_)
 
-unit system is cgs (mostly)
-
-This software is distributed under the terms of the ISC software License
-that is found in the LICENSE file
-
-
-Most are from http://physics.nist.gov/cuu - the NIST Reference on
-Constants, Units and Uncertainty
-'''
+Notes
+-----
+Many of these can be replaced by the `~astropy.constants` module. Elemental symbols can be removed in favor of the periodictable module. Spectroscopic roman numerals can be removed in favor of roman module. The Gauss-Laguerre weights can be calculated by `~numpy.polynomial.laguerre.laggauss`.
+"""
 
 import numpy as np
+
 planck = 6.6260693e-27   #erg s
 planckEv = 4.13566743e-15  # ev s
 light = 29979245800.  # cm/s

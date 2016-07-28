@@ -1,23 +1,38 @@
-'''Utility functions for dealing with the CHIANTI database files.
+"""
+Utility functions, many for reading the CHIANTI database files.
 
-Copyright 2009, 2016 Kenneth P. Dere
+Notes
+-----
+Some of these functions can be replaced by roman numeral and periodic table lookup libraries.
+"""
 
-This software is distributed under the terms of the ISC Software License
-that is found in the LICENSE file
+import os, fnmatch
+#from types import *
+#try:
+#    # for Python 3 import
+#    import configparser
+#except ImportError:
+#    # for Python 2 import
+#    import ConfigParser as configparser
+##from ConfigParser import *
+import pickle
+from datetime import date
 
-
-'''
-import os
 import numpy as np
 from scipy import interpolate
+
 import ChiantiPy.tools.constants as const
-#
-#
+
+
 def between(array,limits):
-    '''
-    returns an index array of elements of array where the values lie
-    between the limits given as a 2 element list or tuple
-    '''
+    """
+    Find the indices of `array` corresponding to values in the range given by `limits`
+
+    Parameters
+    ----------
+    array : `~numpy.ndarray`
+    limits : `list` or `tuple` of length 2
+    """
     array=np.asarray(array)
     nlines=len(array)
 #    hi=np.where(array >= limits[0],range(1,nlines+1),0)
@@ -28,36 +43,46 @@ def between(array,limits):
     hilo=hi&lo
     out=[a -1  for a in hilo if a > 0]
     return out
-    #
-    # --------------------------------------------------
-    #
+
+
 def z2element(z):
     """
-    convert Z to element string
+    Convert atomic number `z` to its elemental symbol.
     """
     if z-1 < len(const.El):
         thisel=const.El[z-1]
     else:
         thisel=''
     return thisel
-    #
-    # -------------------------------------------------------------------------------------
-    #
-def spectroscopic2name(el,roman, dielectronic=False):
+
+
+def spectroscopic2name(el,roman):
     """
-    convert Z and ion to spectroscopic notation string
+    Convert from spectroscopic notation, e.g. Fe XI to 'fe_11'
+
+    Parameters
+    ----------
+    el : `str`
+        Elemental symbol, e.g. Fe for iron
+    roman : `str`
+        Roman numeral spectroscopic symbol
     """
     elu = el.lower()
     romanu = roman.upper()
     idx =const.Ionstage.index(romanu)
     gname = elu+'_'+str(idx+1)
     return gname
-    #
-    # -------------------------------------------------------------------------------------
-    #
+
+
 def zion2name(z,ion, dielectronic=False):
     """
-    convert Z, ion to generic name  26, 13 -> fe_13
+    Convert atomic number and ion number to generic name, e.g. (26,13) to 'fe_13'
+
+    Parameters
+    ----------
+    z : `int`
+    ion : `int`
+    dielectronic : `bool`, optional
     """
     if ion == 0:
         thisone = 0
@@ -71,12 +96,19 @@ def zion2name(z,ion, dielectronic=False):
         # this should not actually happen
         thisone = 0
     return thisone
-    #
-    # -------------------------------------------------------------------------------------
-    #
-def zion2dir(z,ion, dielectronic=False, xuvtop=0):
+
+
+def zion2dir(z,ion, dielectronic=False, xuvtop=''):
     """
-    convert Z, ion to generic directory name string
+    Convert atomic number and ion number to CHIANTI database directory.
+
+    Parameters
+    ----------
+    z : `int`
+    ion : `int`
+    dielectronic : `bool`, optional
+    xuvtop : `str`, optional
+        Set different CHIANTI database than the default
     """
     if xuvtop:
         dir = xuvtop
@@ -95,12 +127,19 @@ def zion2dir(z,ion, dielectronic=False, xuvtop=0):
     if thisel != '' :
         fname=os.path.join(dir,thisel,thisone)
     return fname
-    #
-    # -------------------------------------------------------------------------------------
-    #
-def zion2filename(z,ion, dielectronic=False, xuvtop=0):
+
+
+def zion2filename(z,ion, dielectronic=False, xuvtop=''):
     """
-    convert Z to generic file name string
+    Convert atomic number and ion number to CHIANTI database filename.
+
+    Parameters
+    ----------
+    z : `int`
+    ion : `int`
+    dielectronic : `bool`, optional
+    xuvtop : `str`, optional
+        Set different CHIANTI database than the default
     """
     if xuvtop:
         dir = xuvtop
@@ -119,12 +158,17 @@ def zion2filename(z,ion, dielectronic=False, xuvtop=0):
     if thisel != '' :
         fname=os.path.join(dir,thisel,thisone,thisone)
     return fname
-    #
-    # -------------------------------------------------------------------------------------
-    #
+
+
 def zion2localFilename(z,ion, dielectronic=False):
     """
-    convert Z, ion to generic file name string with current directory at top
+    Convert atomic number and ion number to generic file name with current directory at top.
+
+    Parameters
+    ----------
+    z : `int`
+    ion : `int`
+    dielectronic : `bool`, optional
     """
     dir='.'
     if (z-1 < len(const.El)) and (ion <= z+1):
@@ -140,12 +184,17 @@ def zion2localFilename(z,ion, dielectronic=False):
     if thisel != '' :
         fname=os.path.join(dir,thisel,thisone,thisone)
     return fname
-    #
-    # -------------------------------------------------------------------------------------
-    #
+
+
 def zion2spectroscopic(z,ion, dielectronic=False):
     """
-    convert Z and ion to spectroscopic notation string
+    Convert atomic number and ion number to spectroscopic notation string
+
+    Parameters
+    ----------
+    z : `int`
+    ion : `int`
+    dielectronic : `bool`, optional
     """
     if (z-1 < len(const.El)) and (ion <= z+1):
         spect=const.El[z-1].capitalize()+' '+const.Ionstage[ion-1]
@@ -153,16 +202,20 @@ def zion2spectroscopic(z,ion, dielectronic=False):
             spect+=' d'
     else:  spect = ''
     return spect
-    #
-    # -------------------------------------------------------------------------------------
-    #
+
+
 def convertName(name):
     """
-    convert ion name string to Z and Ion
-    output is a dictionary with keys:
-    'Z', 'Ion', 'Dielectronic', 'Element', 'higher', 'lower'
-    'higher' is the Chianti-style name for the higher ionization stage
-    'lower' is the Chianti-style name for the lower ionization stage
+    Convert ion name string (e.g. 'fe_13') to atomic number and ion number
+
+    Parameters
+    ----------
+    name : `str`
+
+    Returns
+    -------
+    {'Z', 'Ion', 'Dielectronic', 'Element', 'higher', 'lower'} : `dict`
+        `higher` and `lower` are the Chianti-style names for the higher and lower ionization stages, respectively.
     """
     s2=name.split('_')
     els=s2[0].strip()
@@ -176,36 +229,51 @@ def convertName(name):
     higher = zion2name(int(i1), int(ions)+1)
     lower = zion2name(int(i1), int(ions)-1)
     return {'Z':int(i1),'Ion':int(ions),'Dielectronic':dielectronic, 'Element':els, 'higher':higher, 'lower':lower}
-    #
-    # -------------------------------------------------------------------------------------
-    #
+
+
 def ion2filename(ions):
     """
-    convert ion string to generic directory-file name string
+    Convert ion name string to generic directory-file name.
     """
     dir=os.environ["XUVTOP"]
     zion=convertName(ions)
     el=z2element(zion['Z'])
     fname=os.path.join(dir,el,ions,ions)
     return fname
-    #
-    # -------------------------------------------------------------------------------------
-    #
+
+
 def el2z(els):
     """
-    from an the name of the element (1-2 letter) return Z
+    Convert elemental symbol to atomic number
     """
     z=const.El.index(els.lower())+1
     return z
-    #
-    # -------------------------------------------------------------------------------------
-    #
+
+
 def qrp(z,u):
-    '''
-    qrp(Z,u)  u = E/IP
-    calculate Qr-prime (equ. 2.12) of Fontes, Sampson and Zhang 1999
-    used for calculations of direct ionization cross sections of the H and He sequences
-    '''
+    """
+    Calculate :math:`Q_R^{\prime}(Z,u)`, where :math:`u=\epsilon/I` is the impact electron energy in threshold units, from Eq. 2.12 of [1]_.
+
+    Parameters
+    ----------
+    z : `int`
+        Atomic number
+    u : array-like
+        Impact electron energy in threshold units.
+
+    Returns
+    -------
+    q : array-like
+        1s ionization cross-section, :math:`Q_R^{\prime}(Z,u)`
+
+    Notes
+    -----
+    Used for calculations of direct ionization cross-sections of the H and He sequences in `ChiantiPy.tools.io.twophotonHRead` and `ChiantiPy.tools.io.twophotonHeRead`, respectively.
+
+    References
+    ----------
+    .. [1] Fontes, C. et al., 1999, PhRvA, `59, 1329 <http://adsabs.harvard.edu/abs/1999PhRvA..59.1329F>`_
+    """
     #
     aa=1.13  # aa stands for A in equ 2.12
     #
@@ -233,15 +301,23 @@ def qrp(z,u):
     #
     q.set_fill_value(0.)  # I don't know why this is necessary
     return q  #  .set_fill_value(0.)
-    #
-    #-----------------------------------------------------------
-    #
+
+
 def splomDescale(splom, energy):
     """
-    Calculates the collision strength
-    for excitation-autoionization as a function of energy.
-    energy in eV
-    splom is obtained by tools/io.splotRead
+    Calculate the collision strength for excitation-autoionization as a function of energy.
+
+    Parameters
+    ----------
+    energy : array-like
+        In eV
+    splom : `dict`
+        Structure returned by `ChiantiPy.tools.io.splomRead`
+
+    Returns
+    -------
+    omega : array-like
+        Collision strength
     """
     #
     #
@@ -301,27 +377,36 @@ def splomDescale(splom, energy):
     omega=np.where(omega > 0.,omega,0.)
     #
     return omega
-    #
-    # ------------------------------------------------------------------------------
-    #
+
+
 def dilute(radius):
-    '''
-    to calculate the dilution factor as a function distance from
-    the center of a star in units of the stellar radius
-    a radius of less than 1.0 (incorrect) results in a dilution factor of 0.
-    '''
+    """
+    Calculate the dilution factor.
+
+    Parameters
+    ----------
+    radius : array-like
+        Distance from the center of a star in units of the stellar radius.
+
+    Notes
+    -----
+    If `radius` is less than 1.0, returns 0.
+    """
     if radius >= 1.:
         d = 0.5*(1. - np.sqrt(1. - 1./radius**2))
     else:
         d = 0.
     return d
-    #
-    # -------------------------------------------------------------------------------------
-    #
+
+
 def listFiles(path):
-    '''
-    walks the path and subdirectories to return a list of files
-    '''
+    """
+    Walks the path and subdirectories to return a list of files.
+
+    Notes
+    -----
+    This can be replaced by functions in `os.path`.
+    """
     alist=os.walk(path)
 #    print(' getting file list')
     listname=[]
@@ -337,49 +422,143 @@ def listFiles(path):
                 if os.path.isfile(file):
                     listname.append(file)
     return listname
-    #
-    #-----------------------------------------------------------
-    #
+
+
 def scale_bti(evin,crossin,f,ev1):
     """
-    apply BT ionization scaling to (energy, cross-section)
-    returns BT scaled energy and cross-section [bte,btx]
+    Apply ionization scaling of [1]_ to energy and cross-section.
+
+    Parameters
+    ----------
+    evin : array-like
+        Energy
+    crossin : array-like
+        Cross-section
+    f : array-like
+    ev1 : array-like
+
+    Returns
+    -------
+    [bte,btx] : `list`
+        Scaled energy and cross-section
+
+    Notes
+    -----
+    Need more details here. Not clear which equations are being used.
+
+    See Also
+    --------
+    descale_bti : Descale ionization energy and cross-section
+
+    References
+    ----------
+    .. [1] Burgess, A. and Tully, J. A., 1992, A&A, `254, 436 <http://adsabs.harvard.edu/abs/1992A%26A...254..436B>`_
     """
     u=evin/ev1
     bte=1.-np.log(f)/np.log(u-1.+f)
     btx=u*crossin*(ev1**2)/(np.log(u)+1.)
     return [bte,btx]
-    #
-    #-----------------------------------------------------------
-    #
+
+
 def descale_bti(bte,btx,f,ev1):
     """
-    descale BT ionization scaling
-    returns [energy,cross-section]
+    Apply ionization descaling of [1]_ to energy and cross-section.
+
+    Parameters
+    ----------
+    bte : array-like
+        Scaled energy
+    btx : array-like
+        Scaled cross-section
+    f : array-like
+    ev1 : array-like
+
+    Returns
+    -------
+    [energy,cross] : `list`
+        Descaled energy and cross-section
+
+    Notes
+    -----
+    Need more details here. Not clear which equations are being used.
+
+    See Also
+    --------
+    scale_bti : Apply ionization scaling for energy and cross-section
+
+    References
+    ----------
+    .. [1] Burgess, A. and Tully, J. A., 1992, A&A, `254, 436 <http://adsabs.harvard.edu/abs/1992A%26A...254..436B>`_
     """
     u=1.-f+np.exp(np.log(f)/(1.-bte))
     energy=u*ev1
     cross=(np.log(u)+1.)*btx/(u*ev1**2)
     return [energy,cross]
-    #
-    #-----------------------------------------------------------
-    #
+
+
 def descale_bt(bte,btomega,f,ev1):
     """
-    descale BT excitation scaling
-    returns [energy,collision strength]
+    Apply excitation descaling of [1]_ to energy and collision strength
+
+    Parameters
+    ----------
+    bte : array-like
+        Scaled energy
+    btomega : array-like
+        Scaled collision strength
+    f : array-like
+    ev1 : array-like
+
+    Returns
+    -------
+    [energy,omega] : `list`
+        Descaled energy and collision strength
+
+    Notes
+    -----
+    Need more details here. Not clear which equations are being used.
+
+    See Also
+    --------
+    scale_bt : Apply scaling to excitation energy and cross-section
+
+    References
+    ----------
+    .. [1] Burgess, A. and Tully, J. A., 1992, A&A, `254, 436 <http://adsabs.harvard.edu/abs/1992A%26A...254..436B>`_
     """
     u=1.-f+np.exp(np.log(f)/(1.-bte))
     energy=u*ev1
     omega=(np.log(u)-1.+np.exp(1.))*btomega
     return [energy,omega]
-    #
-    #-----------------------------------------------------------
-    #
+
+
 def scale_bt(evin,omega,f,ev1):
     """
-    apply BT excitation scaling to (energy, collision strength)
-    returns [bte,btomega]
+    Apply excitation scaling of [1]_ to energy and collision strength.
+
+    Parameters
+    ----------
+    evin : array-like
+    omega : array-like
+    f : array-like
+    ev1 : array-like
+
+    Returns
+    -------
+    [bte,btomega] : `list`
+        Scaled energy and collision strength
+
+    Notes
+    -----
+    Need more details here. Not clear which equations are being used.
+
+    See Also
+    --------
+    descale_bt : Descale excitation energy and cross-section
+
+    References
+    ----------
+    .. [1] Burgess, A. and Tully, J. A., 1992, A&A, `254, 436 <http://adsabs.harvard.edu/abs/1992A%26A...254..436B>`_
     """
     u=evin/ev1
     bte=1.-np.log(f)/np.log(u-1.+f)

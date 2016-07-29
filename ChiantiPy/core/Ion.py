@@ -26,29 +26,35 @@ class ion(_ionTrails, _specTrails):
     -----------
     ionStr : `str`
         Spectroscopic notation for the given ion, e.g. 'c_5' that corresponds to the C V ion.
-    temperature : `~numpy.ndarray`
+    temperature : `~numpy.float64` or `~numpy.ndarray`
         Temperature array (in Kelvin)
     eDensity : `~numpy.float64` or `~numpy.ndarray`
         Electron density array (in :math:`\mathrm{cm}^{-3}` )
     pDensity : `~numpy.float64` or `~numpy.ndarray`, optional
         Proton density (in :math:`\mathrm{cm}^{-3}` )
-    radTemperature : `~numpy.float64`, optional
+    radTemperature : `~numpy.float64` or `~numpy.ndarray`, optional
         Radiation black-body temperature (in Kelvin)
-    rStar : `~numpy.float64`, optional
+    rStar : `~numpy.float64` or `~numpy.ndarray`, optional
         Distance from the center of the star (in stellar radii)
     abundanceName : `str`, optional
-        Name of Chianti abundance file to use without the '.abund' suffix, e.g. 'sun_photospheric_1998_grevesse'. Ignored if `abundance` is set.
-    abundance : `~numpy.float64`
-        Elemental abundance (TODO: correct type)
-    setup : `bool`
+        Name of Chianti abundance file to use, without the '.abund' suffix, e.g. 'sun_photospheric_1998_grevesse'. Ignored if `abundance` is set.
+    abundance : `float or ~numpy.float64`
+        Elemental abundance relative to Hydrogen
+    setup : `bool or str`
         If True, run ion setup function
+        Otherwise, provide a limited number of attributes of the selected ion
+        
     em : `~numpy.float64` or `~numpy.ndarray`
-        Emission (in unknown units)
+        Emission Measure, for the line-of-sight emission measure :math:`\int \, n_e \, n_H \, dl` (in :math:`cm^{-5}`), for the volumetric emission measure :math:`\int \, n_e \, n_H \, dV` (in :math:`cm^{-3}`).
+    
+    note:  the keyword arguments temperature, eDensity, radTemperature, rStar, em must all be either a float or have the same dimension as the rest if specified as lists, tuples or arrays.
     """
     def __init__(self, ionStr, temperature=None, eDensity=None, pDensity='default', radTemperature=0,  rStar=0, abundanceName=0, abundance=0, setup=True, em=0):
+        ''' this is the doc string for the ion init method
+        
+        '''
         #
         #
-#        self.__version__ = chianti.__version__
         self.IonStr=ionStr
         self.Z=util.convertName(ionStr)['Z']
         self.Ion=util.convertName(ionStr)['Ion']
@@ -3449,11 +3455,18 @@ class ion(_ionTrails, _specTrails):
         #
     def boundBoundLoss(self,  wvlRange = None,  allLines=1):
         """
-        Calculate  the summed radiative loss rate for all lines of the specified ion.
+        Calculate  the summed radiative loss rate for all spectral lines of the specified ion.
+        
+        Parameters
+        ----------
 
-        wvlRange, a 2 element tuple, list or array determines the wavelength range
+        wvlRange : a 2 element tuple, list or array determines a limited wavelength range
+        
+        allLines : `bool`
+            If True, include losses from both observed and unobserved lines.
+            If False, only include losses from observed lines.
 
-        units:  ergs cm^-3 s^-1
+        units :  :math:`erg \, cm^3 \, s^{-1}`.
 
         includes elemental abundance and ionization fraction.
         """

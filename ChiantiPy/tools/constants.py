@@ -1,7 +1,7 @@
 '''
 A set of physical constants.
 
-Copyright 2009, 2010 Kenneth P. Dere
+Copyright 2009, 2016 Kenneth P. Dere
 
 unit system is cgs (mostly)
 

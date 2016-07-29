@@ -11,7 +11,7 @@ import ChiantiPy.tools.data as chdata
 #
 class _ionTrails(object):
     """
-    a collection of methods inherited by ion and spectrum classes
+    a collection of methods inherited by the ion and spectrum classes
     """
     def __init__(self):
         pass
@@ -27,8 +27,12 @@ class _ionTrails(object):
             'intensityList' uses those values.  If it does not exist, then 'intensityList'
             invokes the intensity() method to produce the attribute
         
-        Parameters
+        Arguments.
         ----------
+            None
+        
+        Keyword Arguments.
+        ------------------
         
         index:  integer 
             specified which value of the temperature array or eDensity array to use.
@@ -242,8 +246,12 @@ class _ionTrails(object):
             'intensityList' uses those values.  If it does not exist, then 'intensityList'
             invokes the intensity(em=em) method to produce the attribute
         
-        Parameters
+        Arguments.
         ----------
+            None
+        
+        Keyword Arguments.
+        ------------------
 
         index:  integer 
             specified which value of the temperature array or eDensity array to use.
@@ -403,8 +411,12 @@ class _ionTrails(object):
         A plot of relative emissivities is shown and then a dialog appears for the user to
         choose a set of lines.
         
-        Parameters
+        Arguments.
         ----------
+            None
+        
+        Keyword Arguments.
+        ------------------
 
         wvlRange:  2 element tuple, list or array determines the wavelength range
         
@@ -697,6 +709,17 @@ class _ionTrails(object):
         The intensity ratio as a function to temperature and eDensity is saved to an asciii file.
 
         Descriptive information is included at the top of the file.
+        
+        Arguments.
+        ----------
+            None
+        
+        Keyword Arguments.
+        ------------------
+            outFile
+                default(0):  the plot of the intensity ratio is not saved
+                str/unicode:  the plot is saved to the file names 'outFile'
+                
         '''
         if not outFile:
             outFile = self.IntensityRatio['filename']

@@ -93,7 +93,7 @@ def elvlcWrite(info, outfile=None, addLvl=0):
 
     Parameters
     ----------
-    inf : `dict`
+    info : `dict`
         Information about the Chianti data to write. Should contain
         the following keys: ionS, the Chianti style name of the ion such as c_4
         conf, an integer denoting the configuration - not too essential

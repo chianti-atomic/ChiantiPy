@@ -29,9 +29,9 @@ class ion(_ionTrails, _specTrails):
     temperature : `~numpy.float64` or `~numpy.ndarray`
         Temperature array (in Kelvin)
     eDensity : `~numpy.float64` or `~numpy.ndarray`
-        Electron density array (in :math:`\mathrm{cm}^{-3}` )
+        Electron density array (in :math:`{cm}^{-3}`. )
     pDensity : `~numpy.float64` or `~numpy.ndarray`, optional
-        Proton density (in :math:`\mathrm{cm}^{-3}` )
+        Proton density (in :math:`{\mathrm{cm}}^{-3}` .)
     radTemperature : `~numpy.float64` or `~numpy.ndarray`, optional
         Radiation black-body temperature (in Kelvin)
     rStar : `~numpy.float64` or `~numpy.ndarray`, optional

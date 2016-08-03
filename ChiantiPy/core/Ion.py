@@ -27,11 +27,11 @@ class ion(_ionTrails, _specTrails):
     ionStr : `str`
         Spectroscopic notation for the given ion, e.g. 'c_5' that corresponds to the C V ion.
     temperature : `~numpy.float64` or `~numpy.ndarray`
-        Temperature array (in Kelvin)
+        Temperature array (Kelvin)
     eDensity : `~numpy.float64` or `~numpy.ndarray`
-        Electron density array (in :math:`{cm}^{-3}`. )
+        Electron density array (:math:`\mathrm{cm^{-3}}` )
     pDensity : `~numpy.float64` or `~numpy.ndarray`, optional
-        Proton density (in :math:`{\mathrm{cm}}^{-3}` .)
+        Proton density (:math:`\mathrm{cm}^{-3}` )
     radTemperature : `~numpy.float64` or `~numpy.ndarray`, optional
         Radiation black-body temperature (in Kelvin)
     rStar : `~numpy.float64` or `~numpy.ndarray`, optional
@@ -45,7 +45,7 @@ class ion(_ionTrails, _specTrails):
         Otherwise, provide a limited number of attributes of the selected ion
         
     em : `~numpy.float64` or `~numpy.ndarray`
-        Emission Measure, for the line-of-sight emission measure :math:`\int \, n_e \, n_H \, dl` (in :math:`cm^{-5}`), for the volumetric emission measure :math:`\int \, n_e \, n_H \, dV` (in :math:`cm^{-3}`).
+        Emission Measure, for the line-of-sight emission measure (:math:`\mathrm{\int \, n_e \, n_H \, dl}`) (:math:`\mathrm{cm}^{-5}`.), for the volumetric emission measure :math:`\mathrm{\int \, n_e \, n_H \, dV}` (:math:`\mathrm{cm^{-3}}`).
     
     note:  the keyword arguments temperature, eDensity, radTemperature, rStar, em must all be either a float or have the same dimension as the rest if specified as lists, tuples or arrays.
     """

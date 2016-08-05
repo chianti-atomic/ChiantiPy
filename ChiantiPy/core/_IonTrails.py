@@ -6,13 +6,12 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 import ChiantiPy.tools.util as util
-import ChiantiPy.tools.io as io
 import ChiantiPy.Gui as chGui
 import ChiantiPy.tools.data as chdata
 #
 class _ionTrails(object):
     """
-    a collection of methods for use in ion and spectrum calculations
+    a collection of methods inherited by the ion and spectrum classes
     """
     def __init__(self):
         pass
@@ -20,16 +19,84 @@ class _ionTrails(object):
         #
         # -------------------------------------------------------------------------------------
         #
-    def intensityList(self, index=-1,  wvlRange=None, wvlRanges=None,   top=10, relative=0, outFile=0 ):
+    def intensityList(self, index=-1, wvlRange=None, wvlRanges=None, top=10, relative=0, outFile=0 ):
         '''
         List the line intensities
+        
+        First, checks to see if there is an existing Intensity attribute.  If it exists, then
+            'intensityList' uses those values.  If it does not exist, then 'intensityList'
+            invokes the intensity() method to produce the attribute
+        
+        Arguments.
+        ----------
+            None
+        
+        Keyword Arguments.
+        ------------------
+        
+        index:  integer 
+            specified which value of the temperature array or eDensity array to use.
+            default (index=-1) sets the specified value to the middle of the array
 
-        wvlRange, a 2 element tuple, list or array determines the wavelength range
+        wvlRange:  2 element tuple, list or array determines the wavelength range
+        
+        wvlRanges: a tuple, list or array that contains at least 2
+            2 element tuples, lists or arrays so that multiple
+            wavelength ranges can be specified
 
-        Top specifies to plot only the top strongest lines, default = 10
+        top:  integer
+            specifies to plot only the top strongest lines, default = 10
 
-        normalize = 1 specifies whether to normalize to strongest line, default = 0
-        rewrite of emissList
+        normalize: = 1 specifies whether to normalize to strongest line
+            default (relative = 0) specified that the intensities should be their calculated
+            values
+        outFile:  str
+            specifies the file that the intensities should be output to
+            default(outFile = 0) intensities are output to the terminal
+            
+        Output
+        ------
+        
+        outputs an ascii table with the following columns
+        
+        Ion:  the CHIANTI style notation for the ion, such as, c_4 for C IV
+        
+        lvl1:  the lower level of the transition in the CHIANTI .elvlc file
+        
+        lvl2:  the upper level of the transition in the CHIANTI .elvlc file
+        
+        lower:  the notation, usually in LS coupling, of the lower fine structure level
+        
+        upper:  the notation, usually in LS coupling, of the upper fine structure level
+        
+        Wvl(A):  the wavelength of the transition, usually in Angstroms.  However, other
+            units, such as 'nm' or 'kev' can be specified in the chiantirc file.
+        
+        Intensity:
+            if flux set to 'energy' in chiantirc file (default)
+                intensity = (delta E)_ij * n_j * A_ij * Abund * Ioneq(T) * em
+                    where (delta E)_ij is the transition energy in ergs
+                    n_j:  the fractions of ions in level 'j'
+                    A_ij:  the Einstein coefficient for spontaneous emission from level 'j' to 
+                        level 'i'
+                    Abund:  the abundance of the specified element relative to hydrogen 'H'
+                    em:  the line-of-sight emission measure - 
+                        the integral of n_e * n_H dl along the line-of-sight
+                        n_e:  the electron density (cm^-3)
+                        n_H:  the density of hydrogen (neutral + ionized) (cm^-3)
+                        dl:  the line of sight (cm)
+            if flux set to 'photon' in chiantirc file
+                intensity = n_j * A_ij * Abund * Ioneq(T) * em
+            default(relative = 0):  the line intensity in ergs cm^-3 s^-1 str^-1
+            if relative > :  the line intensity relative to the strongest line in the
+                specified wavelength range(s)
+                
+        A value:  the Einstein coefficient for spontaneous emission from level 'j' to 
+            level 'i'
+            
+        Obs:  indicates whether the CHIANTI database considers this an observed line or one obtained 
+            from theoretical energy levels
+        
         '''
         #
         #
@@ -69,22 +136,22 @@ class _ionTrails(object):
             tstr = ' -  T = %10.2e (K)' %(temperature)
         elif ndens == 1 and ntemp > 1:
             if index < 0:
-                index = ntemp/2
+                index = ntemp//2
             print('using index = %5i specifying temperature =  %10.2e'%(index, temperature[index]))
             self.Message = 'using index = %5i specifying temperature =  %10.2e'%(index, temperature[index])
 
             intensity=intensity[index]
         elif ndens > 1 and ntemp == 1:
             if index < 0:
-                index = ntemp/2
+                index = ntemp//2
             print('using index =%5i specifying eDensity = %10.2e'%(index, eDensity[index]))
             self.Message = 'using index =%5i specifying eDensity = %10.2e'%(index, eDensity[index])
             intensity=intensity[index]
         elif ndens > 1 and ntemp > 1:
             if index < 0:
-                index = ntemp/2
+                index = ntemp//2
             print('using index = %5i specifying temperature = %10.2e, eDensity =  %10.2e em = %10.2e'%(index, temperature[index], eDensity[index], em[index]))
-            self.Message = 'using index = %5i specifying temperature = %10.2e, eDensity =  %10.2eem = %10.2e'%(index, temperature[index], eDensity[index], em[index])
+            self.Message = 'using index = %5i specifying temperature = %10.2e, eDensity =  %10.2e = %10.2e'%(index, temperature[index], eDensity[index], em[index])
             intensity=intensity[index]
         #
 #        print('shpae of intensity 0 = %5i %5i'%(intensity.shape))
@@ -171,16 +238,45 @@ class _ionTrails(object):
         #
         # ---------------------------------------------------------------------------
         #
-    def intensityPlot(self, index=-1,  wvlRange=None,  top=10, linLog='lin', relative=0,  verbose=0, plotFile = 0, saveFile=0, em=0 ):
-        '''Plot the line intensities.
+    def intensityPlot(self, index=-1,  wvlRange=None,  top=10, linLog='lin', relative=0,  verbose=0, plotFile = 0, em=0 ):
+        '''        
+        List the line intensities
+        
+        First, checks to see if there is an existing Intensity attribute.  If it exists, then
+            'intensityList' uses those values.  If it does not exist, then 'intensityList'
+            invokes the intensity(em=em) method to produce the attribute
+        
+        Arguments.
+        ----------
+            None
+        
+        Keyword Arguments.
+        ------------------
 
-        wvlRange, a 2 element tuple, list or array determines the wavelength range
+        index:  integer 
+            specified which value of the temperature array or eDensity array to use.
+            default (index=-1) sets the specified value to the middle of the array
 
-        Top specifies to plot only the top strongest lines, default = 10
+        wvlRange:  2 element tuple, list or array determines the wavelength range
+        
+        top:  integer
+            specifies to plot only the top strongest lines, default = 10
+            
+        linLog:  str
+            default('lin') produces a plot where the intensity scale is linear
+            if set to 'log', produces a plot where the intensity scale is logarithmic
 
-        linLog specifies a linear or log plot, want either lin or log, default = lin
-
-        normalize = 1 specifies whether to normalize to strongest line, default = 0'''
+        normalize: = 1 specifies whether to normalize to strongest line
+            default (relative = 0) specified that the intensities should be their calculated
+            values
+        
+        plotFile:
+            default=0, the plot is not saved to a file
+            othewise, the plot is saved to the 'plotFile'
+        
+        em:  emission measure
+            if an Intensity attribute needs be created, then the emission measure is applied
+        '''
         #
         title=self.Spectroscopic
         #
@@ -206,7 +302,7 @@ class _ionTrails(object):
             tstr = ' -  T = %10.2e (K)' %(temperature)
         elif ndens == 1 and ntemp > 1:
             if index < 0:
-                index = ntemp/2
+                index = ntemp//2
                 print('using index = %5i specifying temperature =  %10.2e'%(index, temperature[index]))
                 self.Message = 'using index = %5i specifying temperature =  %10.2e'%(index, temperature[index])
 #            if chInteractive:
@@ -218,7 +314,7 @@ class _ionTrails(object):
             tstr=' -  T = %10.2e (K)' % temperature[index]
         elif ndens > 1 and ntemp == 1:
             if index < 0:
-                index = ntemp/2
+                index = ntemp//2
                 print('using index =%5i specifying eDensity = %10.2e'%(index, eDensity[index]))
                 self.Message = 'using index =%5i specifying eDensity = %10.2e'%(index, eDensity[index])
 #            if chInteractive:
@@ -230,7 +326,7 @@ class _ionTrails(object):
             tstr=' -  T = %10.2e (K)' % temperature
         elif ndens > 1 and ntemp > 1:
             if index < 0:
-                index = ntemp/2
+                index = ntemp//2
                 print('using index = %5i specifying temperature = %10.2e, eDensity =  %10.2e'%(index, temperature[index], eDensity[index]))
                 self.Message = 'using index = %5i specifying temperature = %10.2e, eDensity =  %10.2e'%(index, temperature[index], eDensity[index])
 #             if chInteractive:
@@ -306,14 +402,31 @@ class _ionTrails(object):
         #
         # -------------------------------------------------------------------------------------
         #
-    def intensityRatio(self,wvlRange=None, wvlRanges=None,top=10):
+    def intensityRatio(self, wvlRange=None, wvlRanges=None, top=10):
         """
-        Plot the ratio of 2 lines or sums of lines.
+        Plot the intensity ratio of 2 lines or sums of lines.
         Shown as a function of density and/or temperature.
         For a single wavelength range, set wvlRange = [wMin, wMax]
         For multiple wavelength ranges, set wvlRanges = [[wMin1,wMax1],[wMin2,wMax2], ...]
         A plot of relative emissivities is shown and then a dialog appears for the user to
         choose a set of lines.
+        
+        Arguments.
+        ----------
+            None
+        
+        Keyword Arguments.
+        ------------------
+
+        wvlRange:  2 element tuple, list or array determines the wavelength range
+        
+        wvlRanges: a tuple, list or array that contains at least 2
+            2 element tuples, lists or arrays so that multiple
+            wavelength ranges can be specified
+
+        top:  integer
+            specifies to plot only the top strongest lines, default = 10
+
         """
         #
         #        self.Emiss={"temperature":temperature,"density":density,"wvl":wvl,"emiss":em,
@@ -596,6 +709,17 @@ class _ionTrails(object):
         The intensity ratio as a function to temperature and eDensity is saved to an asciii file.
 
         Descriptive information is included at the top of the file.
+        
+        Arguments.
+        ----------
+            None
+        
+        Keyword Arguments.
+        ------------------
+            outFile
+                default(0):  the plot of the intensity ratio is not saved
+                str/unicode:  the plot is saved to the file names 'outFile'
+                
         '''
         if not outFile:
             outFile = self.IntensityRatio['filename']

@@ -1,8 +1,8 @@
 ''' chianti.core - contains the main classes for ChiantiPy users.
 
-Copyright 2009-2015, 2010 Kenneth P. Dere
+Copyright 2009-2016, Kenneth P. Dere
 
-This software is distributed under the terms of the GNU General Public License
+This software is distributed under the terms of the ISC Software License
 that is found in the LICENSE file
 
 

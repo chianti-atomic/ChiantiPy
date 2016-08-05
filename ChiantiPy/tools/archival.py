@@ -1,5 +1,11 @@
+"""
+Functions for reading pre-v8 CHIANTI files 
+"""
+
 import os
+
 #from .FortranFormat import *
+
 import ChiantiPy.tools.constants as const
 import ChiantiPy.tools.util as util
     #
@@ -139,14 +145,35 @@ def elvlcWrite(info, outfile=None, addLvl=0):
     out.write(' -1\n')
     out.close()
 
-def wgfaRead(ions, filename=0, elvlcname=-1, total=0, verbose=0):
+def wgfaRead(ions, filename=None, elvlcname=-1, total=False, verbose=False):
     """
-    this is text-wise not different that the v8.0 util.wgfaRead except that it uses the
-    archival elvlcRead above
+    Read CHIANTI data from a .wgfa file.
 
-    reads chianti wgfa file and returns
-    {"lvl1":lvl1,"lvl2":lvl2,"wvl":wvl,"gf":gf,"avalue":avalue,"ref":ref}
-    if elvlcname is specified, the lsj term labels are returned as 'pretty1' and 'pretty2'
+    Parameters
+    ----------
+    ions : `str`
+        Ion, e.g. 'c_5' for C V
+    filename : `str`
+        Custom filename, will override that specified by `ions`
+    elvlcname : `str`
+        If specified, the lsj term labels are returned in the `pretty1` and `pretty2` keys of `Wgfa`
+    total : `bool`
+        Return the level 2 avalue data in `Wgfa`
+    verbose : `bool`
+
+    Returns
+    -------
+    Wgfa : `dict`
+        Information read from the .wgfa file. The dictionary structure is {"lvl1","lvl2","wvl","gf","avalue","ref","ionS","filename"}
+
+    Notes
+    -----
+    This is text-wise not different than the v8 version except that it uses the
+    archival elvlcRead in `~ChiantiPy.tools.archival` though this has now been commented out. Can this routine be removed? Should the elvlcRead routine be uncommented?
+
+    See Also
+    --------
+    ChiantiPy.tools.io.wgfaRead : Read .wgfa file with the new format.
     """
     #
     if filename:

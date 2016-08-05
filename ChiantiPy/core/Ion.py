@@ -1064,7 +1064,7 @@ class ion(_ionTrails, _specTrails):
             try:
                 nscups=len(self.Psplups["lvl1"])
             except:
-                self.Psplups=io.splupsRead(self.IonStr,prot=1)
+                self.Psplups=io.splupsRead(self.IonStr,filetype='psplups')
                 if type(self.Psplups) == type(None):
                     self.PUpsilon = None
                     return
@@ -1273,7 +1273,7 @@ class ion(_ionTrails, _specTrails):
             try:
                 nsplups=len(self.Psplups["lvl1"])
             except:
-                self.Psplups=io.splupsRead(self.IonStr,prot=1)
+                self.Psplups=io.splupsRead(self.IonStr,filetype='psplups')
                 if type(self.Psplups) == type(None):
                     self.PUpsilon = None
                     return
@@ -1284,7 +1284,7 @@ class ion(_ionTrails, _specTrails):
             try:
                 nsplups = len(self.DielSplups["lvl1"])
             except:
-                self.DielSplups = io.splupsRead(self.IonStr,diel=1)
+                self.DielSplups = io.splupsRead(self.IonStr,filetype='splups')
                 if type(self.DielSplups) == type(None):
                     self.DielUpsilon = None
                     return
@@ -1539,7 +1539,7 @@ class ion(_ionTrails, _specTrails):
             #  .dielsplups files not longer exist
 #            dielsplupsfile = fileName +'.splups'
 #            if self.Dielectronic and os.path.isfile(dielsplupsfile):
-#                self.DielSplups = io.splupsRead('', filename=dielsplupsfile, diel=1)
+#                self.DielSplups = io.splupsRead('', filename=dielsplupsfile, filetype='splups')
 #                self.Ndielsplups=len(self.DielSplups["lvl1"])
 #                nlvlDielSplups = max(self.DielSplups['lvl2'])
 #                nlvlList.append(nlvlDielSplups)
@@ -1549,7 +1549,7 @@ class ion(_ionTrails, _specTrails):
             #  psplups file may not exist
             psplupsfile = fileName +'.psplups'
             if os.path.isfile(psplupsfile):
-                self.Psplups = io.splupsRead('', filename=psplupsfile,  prot=True)
+                self.Psplups = io.splupsRead('', filename=psplupsfile,  filetype='psplups')
                 self.Npsplups=len(self.Psplups["lvl1"])
             else:
                 self.Npsplups = 0

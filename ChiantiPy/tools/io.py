@@ -1,6 +1,6 @@
-'''
-A collection of reading and writing functions
-'''
+"""
+Reading and writing functions
+"""
 import os
 import fnmatch
 import pickle
@@ -69,9 +69,11 @@ def abundanceRead(abundancename=''):
 def zion2name(z,ion, dielectronic=False):
     """
     Convert `Z` and `ion` to generic name, e.g. 26, 13 -> fe_13
-    (A duplicate of the routine in util but needed by masterList Info
-    TODO: can we remove the duplicate? - it is duplicated because both modules need it,
-    otherwise, get into circular imports)
+
+    Notes
+    -----
+    A duplicate of the routine in `ChiantiPy.tools.util` but needed by masterList Info
+    TODO: Put in separate module to avoid multiple copies
     """
     if ion == 0:
         thisone = 0
@@ -90,9 +92,11 @@ def zion2name(z,ion, dielectronic=False):
 def convertName(name):
     """
     Convert ion name string to Z and Ion
-    (A duplicate of the routine in util but needed by masterList Info
-    TODO: Can we remove this duplicate? - it is duplicated because both modules need it, 
-    otherwise, get into circular imports)
+
+    Notes
+    -----
+    A duplicate of the routine in `ChiantiPy.tools.util` but needed by masterList Info
+    TODO: Put in separate module to avoid multiple copies
     """
     s2=name.split('_')
     els=s2[0].strip()
@@ -109,7 +113,7 @@ def convertName(name):
 
 
 def cireclvlRead(ions, filename=None, filetype='cilvl'):
-    '''
+    """
     Read Chianti cilvl, reclvl, or rrlvl files and return data
 
     Parameters
@@ -120,7 +124,7 @@ def cireclvlRead(ions, filename=None, filetype='cilvl'):
         Custom filename, will override that specified by `ions`
     filetype : `str`
         {'cilvl', 'reclvl', 'rrlvl'} Type of the file to read
-    '''
+    """
     if filename:
         fname = filename
     else:
@@ -189,9 +193,9 @@ def cireclvlRead(ions, filename=None, filetype='cilvl'):
 
 
 def defaultsRead(verbose=False):
-    '''
+    """
     Read in configuration from .chiantirc file or set defaults if one is not found.
-    '''
+    """
     initDefaults={'abundfile': 'sun_photospheric_1998_grevesse','ioneqfile': 'chianti', 'wavelength': 'angstrom', 'flux': 'energy','gui':False}
     rcfile=os.path.join(os.environ['HOME'],'.chianti/chiantirc')
     if os.path.isfile(rcfile):
@@ -294,7 +298,7 @@ def diRead(ions, filename=None):
 
 def drRead(ions):
     """
-    Read chianti dielectronic recombination .drparams files
+    Read CHIANTI dielectronic recombination .drparams files
     """
     #
     #
@@ -333,12 +337,11 @@ def drRead(ions):
     else:
         DrParams=None
     return DrParams
-    #
-    # -------------------------------------------------------------------------------------
-    #
+
+
 def eaRead(ions, filename=None):
-    '''
-    Read a chianti excitation-autoionization file and calculate the EA ionization rate data
+    """
+    Read a CHIANTI excitation-autoionization file and calculate the EA ionization rate data
     derived from splupsRead.
 
     Parameters
@@ -347,7 +350,7 @@ def eaRead(ions, filename=None):
         Ion, e.g. 'c_5' for C V
     filename : `str`, optional
         Custom filename, will override that specified by `ions`
-    '''
+    """
     if filename:
         splupsname = filename
     else:
@@ -416,12 +419,11 @@ def eaRead(ions, filename=None):
 #                ,"nspl":nspl,"splups":splups,"ref":ref}
         return {"lvl1":lvl1,"lvl2":lvl2,"ttype":ttype,"gf":gf,"de":de,"cups":cups
                 ,"nspl":nspl,"splups":splups,"ref":ref}
-    #
-    # -----------------------------------------------------------------------
-    #
+
+
 def easplomRead(ions, filename=0, extension='.splom'):
     """
-    Read chianti splom files for `ions`.
+    Read CHIANTI splom files for `ions`.
 
     Notes
     -----
@@ -477,9 +479,8 @@ def easplomRead(ions, filename=0, extension='.splom'):
 #        return Easplom
     Splom={"lvl1":lvl1,"lvl2":lvl2,'ttype':ttype,"gf":gf, "deryd":de,"omega":omout, 'ref':ref}
     return Splom
-    #
-    # -----------------------------------------------------------------------
-    #
+
+
 def elvlcRead(ions, filename=None, getExtended=False, verbose=False, useTh=True):
     """
     Reads the new format elvlc files.
@@ -582,9 +583,8 @@ def elvlcRead(ions, filename=None, getExtended=False, verbose=False, useTh=True)
     if getExtended:
         info['extended'] = extended
     return info
-    #
-    # -------------------------------------------------------------------------------------
-    #
+
+
 def elvlcWrite(info, outfile=None, addLvl=0, includeRyd=False):
     '''
     Write Chianti data to .elvlc file.
@@ -664,9 +664,8 @@ def elvlcWrite(info, outfile=None, addLvl=0, includeRyd=False):
     out.write(' -1 \n')
     out.close()
     return
-    #
-    # ----------------------------------------------------------------------------------------
-    #
+
+
 def fblvlRead(filename, verbose=False):
     """
     Read a Chianti energy level file
@@ -725,7 +724,7 @@ def fblvlRead(filename, verbose=False):
 
 
 def gffRead():
-    '''
+    """
     Read the free-free gaunt factors of [1]_.
 
     References
@@ -736,7 +735,7 @@ def gffRead():
     Notes
     -----
     This function reads the file and reverses the values of g2 and u
-    '''
+    """
     xuvtop = os.environ['XUVTOP']
     fileName = os.path.join(xuvtop, 'continuum','gffgu.dat' )
     input = open(fileName)
@@ -769,18 +768,17 @@ def gffRead():
             ivalue += 1
     #
     return {'g2':g2, 'g21d':g21d,  'u':u, 'u1d':u1d,  'gff':gff,  'gff1d':gff1d}
-    #
-    # ----------------------------------------------------------------------------------------
-    #
+
+
 def gffintRead():
-    '''
+    """
     Read the integrated free-free gaunt factors of [1]_.
 
     References
     ----------
     .. [1] Sutherland, R. S., 1998, MNRAS, `300, 321
         <http://adsabs.harvard.edu/abs/1998MNRAS.300..321S>`_
-    '''
+    """
     xuvtop = os.environ['XUVTOP']
     fileName = os.path.join(xuvtop, 'continuum','gffint.dat' )
     input = open(fileName)
@@ -809,14 +807,14 @@ def gffintRead():
 
 
 def itohRead():
-    '''
+    """
     Read in the free-free gaunt factors of [1]_.
 
     References
     ----------
     .. [1] Itoh, N. et al., 2000, ApJS, `128, 125
         <http://adsabs.harvard.edu/abs/2000ApJS..128..125I>`_
-    '''
+    """
     xuvtop = os.environ['XUVTOP']
     itohName = os.path.join(xuvtop, 'continuum', 'itoh.dat')
     input = open(itohName)
@@ -829,7 +827,7 @@ def itohRead():
 
 
 def klgfbRead():
-    '''
+    """
     Read CHIANTI files containing the free-bound gaunt factors for n=1-6 from [1]_.
 
     Returns
@@ -841,7 +839,7 @@ def klgfbRead():
     ----------
     .. [1] Karzas and Latter, 1961, ApJSS, `6, 167
         <http://adsabs.harvard.edu/abs/1961ApJS....6..167K>`_
-    '''
+    """
     xuvtop = os.environ['XUVTOP']
     fname = os.path.join(xuvtop, 'continuum', 'klgfb.dat')
     input = open(fname)
@@ -863,7 +861,7 @@ def klgfbRead():
     return {'pe':pe, 'klgfb':gfb}
 
 
-def ioneqRead(ioneqname='', verbose=0):
+def ioneqRead(ioneqname='', verbose=False):
     """
     Reads an ioneq file
 
@@ -1029,12 +1027,11 @@ def ipRead(verbose=False):
         ion=int(s2[1])
         ip[iz-1, ion-1]=float(s2[2])
     return ip*const.invCm2Ev
-    #
-    # -------------------------------------------------------------------------------------
-    #
+
+
 def masterListRead():
     """
-    Read a Chianti masterlist file.
+    Read a CHIANTI masterlist file.
 
     Returns
     -------
@@ -1052,9 +1049,8 @@ def masterListRead():
         s2=s1a.split(';')
         masterlist.append(s2[0].strip())
     return masterlist
-    #
-    # -------------------------------------------------------------------------------------
-    #
+
+
 def masterListInfo(force=False, verbose=False):
     """
     Get information about ions in the CHIANTI masterlist.
@@ -1227,12 +1223,11 @@ def photoxRead(ions):
     cross = np.asarray(cross, 'float64')
     energy = np.asarray(energy, 'float64')
     return {'lvl1':lvl1, 'lvl2':lvl2,'energy':energy, 'cross':cross,  'ref':ref}
-    #
-    # -------------------------------------------------------------------------------------
-    #
+
+
 def rrRead(ions):
     """
-    Read chianti radiative recombination .rrparams files
+    Read CHIANTI radiative recombination .rrparams files
 
     Returns
     -------
@@ -1277,9 +1272,8 @@ def rrRead(ions):
         return RrParams
     else:
         return {'rrtype':-1}
-    #
-    # --------------------------------------
-    #
+
+
 def scupsRead(ions, filename=None, verbose=False):
     '''
     Read the new format v8 scups file containing the scaled temperature and upsilons from [1]_.
@@ -1450,10 +1444,9 @@ def splomRead(ions, ea=False, filename=None):
     splom={"lvl1":lvl1,"lvl2":lvl2,"ttype":ttype,"gf":gf,"deryd":de,"c":f
         ,"splom":splomout,"ref":hdr}
     return  splom
-    #
-    # --------------------------------------------------
-    #
-def splupsRead(ions, filename=0, prot=0, ci=0,  diel=0):
+
+
+def splupsRead(ions, filename=None, filetype='splups'):
     """
     Read a CHIANTI .splups file
 
@@ -1463,41 +1456,22 @@ def splupsRead(ions, filename=0, prot=0, ci=0,  diel=0):
         Ion, e.g. 'c_5' for C V
     filename : `str`, optional
         Custom filename, will override that specified by `ions`
-    prot
-    ci
-    diel
+    filetype : `str`, optional
+        {`psplups`,`cisplups`,`splups`} Type of file to read
 
     Returns
     -------
     {'lvl1', 'lvl2', 'ttype', 'gf', 'de', 'cups', 'bsplups', 'ref'} : `dict`
-
-    Notes
-    -----
-    f prot >0, then reads the psplups file
-    if ci > 0, then reads cisplups file
-    if diel > 0, then reads dielsplups file
     """
     #
     if filename:
         splupsname = filename
     else:
         fname = util.ion2filename(ions)
-        if prot:
-            splupsname=fname+'.psplups'
-        elif ci:
-            splupsname=fname+'.cisplups'
-        elif diel:
-            #TODO: typo? should be '.dielsplups'?
-            splupsname=fname+'.splups'
-        else:
-            splupsname=fname+'.splups'
+        splupsname=fname+'.'+filetype
     if not os.path.exists(splupsname):
-        if prot:
-            return {'file not found':splupsname}
-        elif ci:
-            return {'file not found':splupsname}
-        else:
-            return {'file not found':splupsname}
+        #TODO: raise exception here or just let the open() function do that for us
+        return {'file not found':splupsname}
     # there is splups/psplups data
     else:
         input=open(splupsname,'r')
@@ -1520,7 +1494,7 @@ def splupsRead(ions, filename=0, prot=0, ci=0,  diel=0):
         nspl=[0]*nsplups
 #        splups=np.zeros((nsplups,9),'Float64')
         splups = [0.]*nsplups
-        if prot:
+        if filetype=='psplups':
 #            splupsFormat1 = FortranFormat('3i3,8e10.3')
 #            splupsFormat2 = FortranFormat('3i3,3e10.3')
             header_line = FortranRecordReader('3i3,3e10.3')
@@ -1537,7 +1511,7 @@ def splupsRead(ions, filename=0, prot=0, ci=0,  diel=0):
             gf[i]=inpt[3]
             de[i]=inpt[4]
             cups[i]=inpt[5]
-            if prot:
+            if filetype=='psplups':
                 as1 = s1[i][39:].rstrip()
             else:
                 as1 = s1[i][45:].rstrip()
@@ -1554,7 +1528,7 @@ def splupsRead(ions, filename=0, prot=0, ci=0,  diel=0):
         for i in range(nsplups+1,len(s1)):
             s1a=s1[i][:-1]
             ref.append(s1a.strip())
-        if prot:
+        if filetype=='psplups':
 #            self.Npsplups=nsplups
 #            self.Psplups={"lvl1":lvl1,"lvl2":lvl2,"ttype":ttype,"gf":gf,"de":de,"cups":cups
 #                ,"nspl":nspl,"splups":splups,"ref":ref}
@@ -1565,13 +1539,16 @@ def splupsRead(ions, filename=0, prot=0, ci=0,  diel=0):
 #                ,"nspl":nspl,"splups":splups,"ref":ref}
             return {"lvl1":lvl1,"lvl2":lvl2,"ttype":ttype,"gf":gf,"de":de,"cups":cups
                 ,"nspl":nspl,"splups":splups,"ref":ref, 'filename':splupsname}
-    #
-    #-----------------------------------------------------------
-    #
+
+
 def twophotonHRead():
-    '''
-    Read the two-photon A values and distribution function for the H seq
-    '''
+    """
+    Read the two-photon Einstein A values and distribution function for the H sequence.
+
+    Returns
+    -------
+    {'y0', 'z0', 'avalue', 'asum', 'psi0'} : `dict`
+    """
     xuvtop = os.environ['XUVTOP']
     fName = os.path.join(xuvtop, 'continuum', 'hseq_2photon.dat')
     dFile = open(fName, 'r')
@@ -1591,13 +1568,16 @@ def twophotonHRead():
         psi0[iz] = psi
     dFile.close()
     return {'y0':y0, 'z0':z0, 'avalue':avalue, 'asum':asum, 'psi0':psi0.reshape(30, 17)}
-    #
-    #-----------------------------------------------------------
-    #
+
+
 def twophotonHeRead():
-    '''
-    Read the two-photon A values and distribution function for the He seq
-    '''
+    """
+    Read the two-photon Einstein A values and distribution function for the He sequence.
+
+    Returns
+    -------
+    {'y0', 'avalue', 'psi0'} : `dict`
+    """
     xuvtop = os.environ['XUVTOP']
     fName = os.path.join(xuvtop, 'continuum', 'heseq_2photon.dat')
     dFile = open(fName, 'r')
@@ -1613,17 +1593,21 @@ def twophotonHeRead():
         psi0[iz] = psi
     dFile.close()
     return {'y0':y0, 'avalue':avalue, 'psi0':psi0.reshape(30, 41)}
-    #
-    # -----------------------------------------------------------------
-    #
+
+
 def vernerRead():
-    '''
+    """
     Reads the photoionization cross-section data from [1]_.
+
+    Returns
+    -------
+    {'pqn','l','eth','e0','sig0','ya','p', yw'} : `dict`
+        `pqn` is the principal quantum number, `l` is the subshell orbital quantum number, `eth` (in eV) is the subshell ionization threshold energy; `sig0`, `ya`, `p`, and `yw` are all fit parameters used in calculating the total photoionization cross-section.
 
     References
     ----------
     .. [1] Verner & Yakovlev, 1995, A&AS, `109, 125 <http://adsabs.harvard.edu/abs/1995A%26AS..109..125V>`_
-    '''
+    """
     xuvtop = os.environ['XUVTOP']
     fname = os.path.join(xuvtop, 'continuum', 'verner_short.txt')
     input = open(fname)
@@ -1665,9 +1649,8 @@ def vernerRead():
         yw[z,stage] = out[9]
     #
     return {'pqn':pqn, 'l':l, 'eth':eth, 'e0':e0, 'sig0':sig0, 'ya':ya, 'p':p, 'yw':yw}
-    #
-    # -----------------------------------------------------
-    #
+
+
 def versionRead():
     """
     Read the version number of the CHIANTI database
@@ -1678,28 +1661,32 @@ def versionRead():
     versionStr = vFile.readline()
     vFile.close()
     return versionStr.strip()
-    #
-    # -------------------------------------------------------------------------------------
-    #
-def wgfaRead(ions, filename=None, elvlcname=-1, total=0, verbose=False):
+
+
+def wgfaRead(ions, filename=None, elvlcname=-1, total=False, verbose=False):
     """
-    Reads CHIANTI wgfa file
+    Read CHIANTI data from a .wgfa file.
 
     Parameters
     ----------
     ions : `str`
         Ion, e.g. 'c_5' for C V
-    filename : `str`, optional
+    filename : `str`
         Custom filename, will override that specified by `ions`
-    elvlcname
-    total
+    elvlcname : `str`
+        If specified, the lsj term labels are returned in the `pretty1` and `pretty2` keys of `Wgfa`
+    total : `bool`
+        Return the level 2 avalue data in `Wgfa`
     verbose : `bool`
 
     Returns
     -------
-    {'lvl1', 'lvl2', 'wvl', 'gf', 'avalue', 'ref'} : `dict`
+    Wgfa : `dict`
+        Information read from the .wgfa file. The dictionary structure is {"lvl1","lvl2","wvl","gf","avalue","ref","ionS","filename"}
 
-    if elvlcname is specified, the lsj term labels are returned as 'pretty1' and 'pretty2'
+    See Also
+    --------
+    ChiantiPy.tools.archival.wgfaRead : Read .wgfa file with the old format.
     """
     #
     if filename:
@@ -1790,12 +1777,11 @@ def wgfaRead(ions, filename=None, elvlcname=-1, total=0, verbose=False):
         Wgfa['pretty2'] = pretty2
     #
     return Wgfa
-    #
-    # --------------------------------------
-    #
-def wgfaWrite(info, outfile = 0, minBranch = 0.):
-    '''
-    Write a wgfa file
+
+
+def wgfaWrite(info, outfile = None, minBranch = 0.):
+    """
+    Write data to a CHIANTI .wgfa file
 
     Parameters
     ----------
@@ -1804,7 +1790,7 @@ def wgfaWrite(info, outfile = 0, minBranch = 0.):
     outfile : `str`
     minBranch : `~numpy.float64`
         The transition must have a branching ratio greater than the specified to be written to the file
-    '''
+    """
     #
 #    gname = info['ionS']
     if outfile:

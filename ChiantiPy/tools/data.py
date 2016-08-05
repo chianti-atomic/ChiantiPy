@@ -1,13 +1,15 @@
 '''
-module for collecting various top-level Chianti data
-for the keyword arguments below
-temperature = temperature in Kelvin
-eDensity is the electron density per cubic cm
-hDensity is the hydrogen density per cubic cm
-pDensity is the proton density per cubic cm
-radTemperature is the radiation temperature of central source
-rStar is the distance of the plasma from the source in units of the sources radius
-distance is the distance from the central source
+Module for collecting various top-level Chianti data
+
+Descriptions for `keywordArgs`:
+
+- `temperature` : temperature (in K)
+- `eDensity` : electron density (in :math:`\mathrm{cm}^{-3}`)
+- `hDensity` : hydrogen density (in :math:`\mathrm{cm}^{-3}`)
+- `pDensity` : proton density (in :math:`\mathrm{cm}^{-3}`)
+- `radTemperature` : radiation temperature of central source (in K)
+- `rStar` : distance of the plasma from the source (in units of the source's radius)
+- `distance` : distance from the central source
 '''
 import os
 

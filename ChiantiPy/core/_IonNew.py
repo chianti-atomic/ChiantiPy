@@ -1,6 +1,6 @@
 '''
 IonNew
-for calculating level populations including dielectronic recombination 
+for calculating level populations including dielectronic recombination
 using the autoionization rates in the .auto files
 '''
 import os
@@ -115,7 +115,7 @@ def setupNew(self, dir=0, verbose=0):
         #  .dielsplups file may not exist
 #            dielsplupsfile = fileName +'.dielsplups'
 #            if os.path.isfile(dielsplupsfile):
-#                self.DielSplups = io.splupsRead('', filename=dielsplupsfile, diel=1)
+#                self.DielSplups = io.splupsRead('', filename=dielsplupsfile, filetype='splups')
 #                self.Ndielsplups=len(self.DielSplups["lvl1"])
 #                nlvlDielSplups = max(self.DielSplups['lvl2'])
 #                nlvlList.append(nlvlDielSplups)
@@ -125,7 +125,7 @@ def setupNew(self, dir=0, verbose=0):
         #  psplups file may not exist
         psplupsfile = fileName +'.psplups'
         if os.path.isfile(psplupsfile):
-            self.Psplups = io.splupsRead('', filename=psplupsfile,  prot=True)
+            self.Psplups = io.splupsRead('', filename=psplupsfile,  filetype='psplups')
             self.Npsplups=len(self.Psplups["lvl1"])
         else:
             self.Npsplups = 0

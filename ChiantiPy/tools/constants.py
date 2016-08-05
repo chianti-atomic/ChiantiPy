@@ -1,6 +1,7 @@
 """
 A set of physical constants, in (mostly) cgs unit system. Most are from [1]_.
 
+
 References
 ----------
 .. [1] NIST Reference on Constants, Units and Uncertainty (`link <http://physics.nist.gov/cuu>`_)

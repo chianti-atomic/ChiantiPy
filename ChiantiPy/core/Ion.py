@@ -26,9 +26,9 @@ class ion(_ionTrails, _specTrails):
     -----------
     ionStr : `str`
         Spectroscopic notation for the given ion, e.g. 'c_5' that corresponds to the C V ion.
-    temperature : `~numpy.float64` or `~numpy.ndarray`
+    temperature : `~numpy.float64` or `~numpy.ndarray`, optional
         Temperature array (Kelvin)
-    eDensity : `~numpy.float64` or `~numpy.ndarray`
+    eDensity : `~numpy.float64` or `~numpy.ndarray`, optional
         Electron density array (:math:`\mathrm{cm^{-3}}` )
     pDensity : `~numpy.float64` or `~numpy.ndarray`, optional
         Proton density (:math:`\mathrm{cm}^{-3}` )
@@ -38,20 +38,28 @@ class ion(_ionTrails, _specTrails):
         Distance from the center of the star (in stellar radii)
     abundanceName : `str`, optional
         Name of Chianti abundance file to use, without the '.abund' suffix, e.g. 'sun_photospheric_1998_grevesse'. Ignored if `abundance` is set.
-    abundance : `float or ~numpy.float64`
+    abundance : `float or ~numpy.float64`, optional
         Elemental abundance relative to Hydrogen
-    setup : `bool or str`
+    setup : `bool or str`, optional
         If True, run ion setup function
         Otherwise, provide a limited number of attributes of the selected ion
         
-    em : `~numpy.float64` or `~numpy.ndarray`
+    em : `~numpy.float64` or `~numpy.ndarray`, optional
         Emission Measure, for the line-of-sight emission measure (:math:`\mathrm{\int \, n_e \, n_H \, dl}`) (:math:`\mathrm{cm}^{-5}`.), for the volumetric emission measure :math:`\mathrm{\int \, n_e \, n_H \, dV}` (:math:`\mathrm{cm^{-3}}`).
     
-    note:  the keyword arguments temperature, eDensity, radTemperature, rStar, em must all be either a float or have the same dimension as the rest if specified as lists, tuples or arrays.
+    note :  the keyword arguments temperature, eDensity, radTemperature, rStar, em must all be either a float or have the same dimension as the rest if specified as lists, tuples or arrays.
     """
     def __init__(self, ionStr, temperature=None, eDensity=None, pDensity='default', radTemperature=0,  rStar=0, abundanceName=0, abundance=0, setup=True, em=0):
-        ''' this is the doc string for the ion init method
-        
+        '''if the ion class is instantiated with the single required parameter ionStr, then the following attributes will be available
+            Attributes
+            ----------
+            ionStr : the same as the `ionStr` argument, such as `fe_12`
+            Z : `int`, the nuclear charge, 26 for `fe_12`
+            Ion : `int`, the ionization stage, 12 for `fe_12`
+            Dielectronic : `bool`, true if the ion is a 'dielectronic' ion where the levels are populated by dielectronic recombination
+            Spectroscopic : `str`, the spectroscopic notation for the ion, such as `Fe XII` for `fe_12`
+            Filename : `str`, the complete name of the file `generic` filename in the CHIANTI database, such as `$XUVTOP/fe/fe_12/fe_12`
+            Defaults : `dict`
         '''
         #
         #

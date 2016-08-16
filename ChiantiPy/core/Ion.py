@@ -22,37 +22,9 @@ class ion(_ionTrails, _specTrails):
     """
     The top level class for performing spectral calculations for an ion in the CHIANTI database.
 
-    Parameters
+    Attributes
     -----------
-    ionStr : `str`
-        Spectroscopic notation for the given ion, e.g. 'c_5' that corresponds to the C V ion.
-    temperature : `~numpy.float64` or `~numpy.ndarray`
-        Temperature array (Kelvin)
-    eDensity : `~numpy.float64` or `~numpy.ndarray`
-        Electron density array (:math:`\mathrm{cm^{-3}}` )
-    pDensity : `~numpy.float64` or `~numpy.ndarray`, optional
-        Proton density (:math:`\mathrm{cm}^{-3}` )
-    radTemperature : `~numpy.float64` or `~numpy.ndarray`, optional
-        Radiation black-body temperature (in Kelvin)
-    rStar : `~numpy.float64` or `~numpy.ndarray`, optional
-        Distance from the center of the star (in stellar radii)
-    abundanceName : `str`, optional
-        Name of Chianti abundance file to use, without the '.abund' suffix, e.g. 'sun_photospheric_1998_grevesse'. Ignored if `abundance` is set.
-    abundance : `float or ~numpy.float64`
-        Elemental abundance relative to Hydrogen
-    setup : `bool or str`
-        If True, run ion setup function
-        Otherwise, provide a limited number of attributes of the selected ion
-
-    em : `~numpy.float64` or `~numpy.ndarray`
-        Emission Measure, for the line-of-sight emission measure (:math:`\mathrm{\int \, n_e \, n_H \, dl}`) (:math:`\mathrm{cm}^{-5}`.), for the volumetric emission measure :math:`\mathrm{\int \, n_e \, n_H \, dV}` (:math:`\mathrm{cm^{-3}}`).
-
-    note:  the keyword arguments temperature, eDensity, radTemperature, rStar, em must all be either a float or have the same dimension as the rest if specified as lists, tuples or arrays.
     """
-    def __init__(self, ionStr, temperature=None, eDensity=None, pDensity='default', radTemperature=0,  rStar=0, abundanceName=0, abundance=0, setup=True, em=0):
-        ''' this is the doc string for the ion init method
-
-        '''
         #
         #
         self.IonStr=ionStr
@@ -3466,9 +3438,17 @@ class ion(_ionTrails, _specTrails):
             If True, include losses from both observed and unobserved lines.
             If False, only include losses from observed lines.
 
-        units :  :math:`erg \, cm^3 \, s^{-1}`.
-
         includes elemental abundance and ionization fraction.
+        
+        creates
+        
+        Attributes
+        ----------
+        
+        BoundBoundLoss : `dict`
+        
+            (:math:`\mathrm{cm}^{-3}` ).
+
         """
         # emiss ={"wvl":wvl, "emiss":em, "plotLabels":plotLabels}
         #
@@ -3652,10 +3632,10 @@ class ion(_ionTrails, _specTrails):
         #
 #        temperature=self.Temperature
 #        eDensity=self.EDensity
-    	if plot:
-    		plotLabels = em["plotLabels"]
-    		xLabel = plotLabels["xLabel"]
-    		yLabel = plotLabels["yLabel"]
+        if plot:
+            plotLabels = em["plotLabels"]
+            xLabel = plotLabels["xLabel"]
+            yLabel = plotLabels["yLabel"]
         #
         # find which lines are in the wavelength range if it is set
         #
@@ -3744,7 +3724,7 @@ class ion(_ionTrails, _specTrails):
         #
         # put all actual plotting here
         #
-    	if plot:
+        if plot:
             plt.ion()
             #        if chInteractive:
             #            plt.ion()
@@ -3796,11 +3776,11 @@ class ion(_ionTrails, _specTrails):
         for iline in range(top):
             tline = topLines[iline]
             wvlChoices.append('%12.4f %4i %4i %s - %s'%(wvl[tline], lvl1[tline], lvl2[tline], pretty1[tline], pretty2[tline]))
-    	if plot:
-    		gline = chGui.gui.selectorDialog(wvlChoices,label='Select line(s)')
-    		gline_idx=gline.selectedIndex
-    	else:
-    		gline_idx = 0 # insert the top line as the first line -TDW
+        if plot:
+            gline = chGui.gui.selectorDialog(wvlChoices,label='Select line(s)')
+            gline_idx=gline.selectedIndex
+        else:
+            gline_idx = 0 # insert the top line as the first line -TDW
         #
         #
         gAbund=self.Abundance
@@ -3823,46 +3803,46 @@ class ion(_ionTrails, _specTrails):
         #
         #
         # plot the desired ratio
-    	if plot:
-            	plt.figure()
+        if plot:
+                plt.figure()
         g_line = topLines[gline_idx]#  [0]
         ##        print ' g_line = ',g_line
         #
         gofnt=np.zeros(ngofnt,'float64')
-    	if plot:
-    		for aline in g_line:
-    		    gofnt+=gAbund*gIoneq*emiss[aline].squeeze()
-    	else:
-    		gofnt+=gAbund*gIoneq*emiss[g_line].squeeze()
+        if plot:
+            for aline in g_line:
+                gofnt+=gAbund*gIoneq*emiss[aline].squeeze()
+        else:
+            gofnt+=gAbund*gIoneq*emiss[g_line].squeeze()
         self.Gofnt={'temperature':outTemperature,'eDensity':outDensity,'gofnt':gofnt, 'index':g_line, 'wvl':wvl[g_line]}
         #
-    	if plot:
-    		plt.loglog(xvalues,gofnt)
-    		plt.xlim(xvalues.min(),xvalues.max())
-    		plt.xlabel(xlabel,fontsize=fontsize)
-    		plt.ylabel('Gofnt',fontsize=fontsize)
-    		newTitle = '%9s'%(self.Spectroscopic) + '%12.3f %4i %4i %s - %s'%(wvl[g_line[0]], lvl1[g_line[0]], lvl2[g_line[0]], pretty1[g_line[0]], pretty2[g_line[0]])
-    		if len(g_line) > 1:
-    		    newTitle +='\n'
-    		for igl in g_line[1:]:
-    		    newTitle += ' ' + '%12.3f %4i %4i %s - %s'%(wvl[igl], lvl1[igl], lvl2[igl], pretty1[igl], pretty2[igl])
-    		    if igl != g_line[-1]:
-    		        newTitle +='\n'
-    	#        plt.annotate(newTitle, xytext=(0.3, 0.3), textcoords='figure_fraction')
-    		plt.annotate(newTitle, xy=(-10, 10),
-    		        xycoords='axes points',
-    		        horizontalalignment='right', verticalalignment='bottom')  #,fontsize=20)
-    		if ndens == ntemp and ntemp > 1:
-    	#            newTitle +' '+str(wvl[g_line])+' '+desc_str
-    		    plt.text(0.07, 0.5,newTitle, horizontalalignment='left', verticalalignment='center', fontsize=fontsize,  transform = ax.transAxes)
-    		    #
-    		    ax2 = plt.twiny()
-    	#            xlabel=r'Electron Density (cm$^{-3}$)'
-    		    plt.xlabel(xlabelDen, fontsize=fontsize)
-    		    plt.loglog(eDensity,gofnt, visible=False)
-    		    ax2.xaxis.tick_top()
-    		else:
-    		    plt.title(newTitle, fontsize=fontsize)
+        if plot:
+            plt.loglog(xvalues,gofnt)
+            plt.xlim(xvalues.min(),xvalues.max())
+            plt.xlabel(xlabel,fontsize=fontsize)
+            plt.ylabel('Gofnt',fontsize=fontsize)
+            newTitle = '%9s'%(self.Spectroscopic) + '%12.3f %4i %4i %s - %s'%(wvl[g_line[0]], lvl1[g_line[0]], lvl2[g_line[0]], pretty1[g_line[0]], pretty2[g_line[0]])
+            if len(g_line) > 1:
+                newTitle +='\n'
+            for igl in g_line[1:]:
+                newTitle += ' ' + '%12.3f %4i %4i %s - %s'%(wvl[igl], lvl1[igl], lvl2[igl], pretty1[igl], pretty2[igl])
+                if igl != g_line[-1]:
+                    newTitle +='\n'
+        #        plt.annotate(newTitle, xytext=(0.3, 0.3), textcoords='figure_fraction')
+            plt.annotate(newTitle, xy=(-10, 10),
+                    xycoords='axes points',
+                    horizontalalignment='right', verticalalignment='bottom')  #,fontsize=20)
+            if ndens == ntemp and ntemp > 1:
+        #            newTitle +' '+str(wvl[g_line])+' '+desc_str
+                plt.text(0.07, 0.5,newTitle, horizontalalignment='left', verticalalignment='center', fontsize=fontsize,  transform = ax.transAxes)
+                #
+                ax2 = plt.twiny()
+        #            xlabel=r'Electron Density (cm$^{-3}$)'
+                plt.xlabel(xlabelDen, fontsize=fontsize)
+                plt.loglog(eDensity,gofnt, visible=False)
+                ax2.xaxis.tick_top()
+            else:
+                plt.title(newTitle, fontsize=fontsize)
         #plt.ioff()
         #plt.show()
 #        return

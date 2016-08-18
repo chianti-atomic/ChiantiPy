@@ -37,7 +37,7 @@ class selectorDialog(QtGui.QDialog):
             self.setWindowTitle('ChiantiPy')
         else:
             self.setWindowTitle('ChiantiPy - '+label)
-        imagefile = os.path.join(chianti.__path__[0], "images/chianti2.png")
+        imagefile = os.path.join(ChiantiPy.__path__[0], "images/chianti2.png")
         self.setWindowIcon(QtGui.QIcon(imagefile))
         for anitem in items:
 #            print ' item = ', anitem, QtCore.QString(anitem)

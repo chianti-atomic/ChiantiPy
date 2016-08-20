@@ -107,15 +107,17 @@ def lorentz(wvl, wvl0, factor=0):
 def moffat(wvl, wvl0, factor=2.5):
     '''
     Moffat profile with parameters suited to Chandra Letg spectra
-
+    
+    
     Parameters
-    -----------
-    wvl : `~numpy.ndarray`
-        Wavelength array
-    wvl0 : `~numpy.float64`
-        Wavelength filter should be centered on.
-    factor : `~numpy.float64`
-        Resolving power (TODO: correct description)
+
+    
+    wvl : `~numpy.ndarray` Wavelength array
+    
+    wvl0 : `~numpy.float64` Wavelength the filter is centered on.
+    
+    factor : `~numpy.float64`  Resolving power (TODO: correct description)
+    
     '''
     wvl = np.asarray(wvl, 'float64')
     dwvl = np.abs(wvl[1] - wvl[0])

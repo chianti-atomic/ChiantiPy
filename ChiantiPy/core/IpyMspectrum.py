@@ -21,7 +21,7 @@ from ._SpecTrails import _specTrails
     #import ipyparallel as parallel
 #
 # *************************************
-# to make ChianitPy work under IPython versions 2.x and 3.x
+# to make ChiantiPy work under IPython versions 2.x and 3.x
 # comment out the next line
 # and remove the comment before 'from IPython import parallel'
 # in the following line

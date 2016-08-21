@@ -5055,64 +5055,70 @@ class ioneq(ion):
         oplot="ioneqfilename" such as 'mazzotta'
         or if oplot=True or oplot=1 and a widget will come up so that a file can be selected.
         '''
+        try:
+            ioneq = getattr(self, 'Ioneq')
+        except:
+            print(' must first load or calculate and ionization equilibrium')
+            return
+        
         if bw:
-            linestyle=['k-','k--', 'k-.', 'k:']
+            linestyle = ['k-','k--', 'k-.', 'k:']
             plt.rcParams['font.size'] = 16.
             lw = 2
         else:
-            linestyle=['b-','r--', 'g-.', 'm:']
+            linestyle = ['b-','r--', 'g-.', 'm:']
             lw = 1
         #
         if not stages:
-            stages=range(1, self.Z+2)
+            stages = range(1, self.Z+2)
         elif min(stages) < 1 or max(stages) > self.Z+1:
-            stages=range(1, self.Z+2)  #  spectroscopic notation
+            stages = range(1, self.Z+2)  #  spectroscopic notation
         if not xr:
-            xr=[self.Temperature.min(), self.Temperature.max()]
+            xr = [self.Temperature.min(), self.Temperature.max()]
         if not yr:
-            yr=[0.01, 1.1]
-        xyr=list(xr)
+            yr = [0.01, 1.1]
+        xyr = list(xr)
         xyr.extend(list(yr))
         #
-        iz=stages[0]
+        iz = stages[0]
         if semilogx:
-            plt.semilogx(self.Temperature, self.Ioneq[iz-1], linestyle[0], lw=lw)
+            plt.semilogx(self.Temperature, ioneq[iz-1], linestyle[0], lw=lw)
         else:
-            plt.loglog(self.Temperature, self.Ioneq[iz-1], linestyle[0], lw=lw)
+            plt.loglog(self.Temperature, ioneq[iz-1], linestyle[0], lw=lw)
         if label:
-            idx=self.Ioneq[iz-1] == self.Ioneq[iz-1].max()
+            idx = self.Ioneq[iz-1] == self.Ioneq[iz-1].max()
             if idx.sum() > 1:
-                jdx=np.arange(len(idx))
-                idx=jdx[idx].max()
-            ann=const.Ionstage[iz-1]
-            plt.annotate(ann, [self.Temperature[idx], 0.7*self.Ioneq[iz-1, idx]], ha='center')
+                jdx = np.arange(len(idx))
+                idx = int(jdx[idx].max())
+            ann = const.Ionstage[iz-1]
+            plt.annotate(ann, [self.Temperature[idx], 0.7*ioneq[iz-1, idx]], ha='center')
         for iz in stages[1:]:
             if semilogx:
-                plt.semilogx(self.Temperature, self.Ioneq[iz-1], linestyle[0], lw=lw)
+                plt.semilogx(self.Temperature, ioneq[iz-1], linestyle[0], lw=lw)
             else:
-                plt.loglog(self.Temperature, self.Ioneq[iz-1], linestyle[0], lw=lw)
+                plt.loglog(self.Temperature, ioneq[iz-1], linestyle[0], lw=lw)
             if label:
-                idx=self.Ioneq[iz-1] == self.Ioneq[iz-1].max()
+                idx = ioneq[iz-1] == ioneq[iz-1].max()
                 if idx.sum() > 1:
-                    jdx=np.arange(len(idx))
-                    idx=jdx[idx].mean()
-                ann=const.Ionstage[iz-1]
-                plt.annotate(ann, [self.Temperature[idx], 0.7*self.Ioneq[iz-1, idx]], ha='center')
+                    jdx = np.arange(len(idx))
+                    idx = int(jdx[idx].mean())
+                ann = const.Ionstage[iz-1]
+                plt.annotate(ann, [self.Temperature[idx], 0.7*ioneq[iz-1, idx]], ha='center')
         plt.xlabel('Temperature (K)')
         plt.ylabel('Ion Fraction')
         atitle='Chianti Ionization Equilibrium for '+const.El[self.Z-1].capitalize()
         #
         if oplot:
             if oplot == 0:
-                result=io.ioneqRead(ioneqname='')
+                result = io.ioneqRead(ioneqname='')
 #                print 'keys = ', result.keys()
                 if result != False:
-                    atitle+='  & '+result['ioneqname'].replace('.ioneq', '')
-                    atitle+=' '+linestyle[0]
+                    atitle += '  & '+result['ioneqname'].replace('.ioneq', '')
+                    atitle += ' '+linestyle[0]
                     for iz in stages:
                         plt.plot(result['ioneqTemperature'], result['ioneqAll'][self.Z-1, iz-1],linestyle[1], lw=lw)
             elif type(oplot) == type('string'):
-                atitle+='  & ' + oplot
+                atitle += '  & ' + oplot
                 result = io.ioneqRead(ioneqname=oplot)
 #                print 'keys = ', result.keys()
 #                print result
@@ -5124,7 +5130,7 @@ class ioneq(ion):
                     result = io.ioneqRead(ioneqname=oplot[iplot])
 #                    print 'keys = ', result.keys()
                     if result != False:
-                        atitle+='  & '+oplot[iplot]+' '+linestyle[iplot%3]
+                        atitle += '  & '+oplot[iplot]+' '+linestyle[iplot%3]
                         for iz in stages:
                             plt.plot(result['ioneqTemperature'], result['ioneqAll'][self.Z-1, iz-1],linestyle[1], lw=lw)
             else:
@@ -5132,8 +5138,3 @@ class ioneq(ion):
         if title:
             plt.title(atitle)
         plt.axis(xyr)
-#        if bw:
-#            plt.rcParams['font.size'] = plt.rcParamsDefault['font.size']
-    #
-    # -------------------------------------------------------------------------
-    #

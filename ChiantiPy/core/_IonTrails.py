@@ -676,11 +676,11 @@ class _ionTrails(object):
             ax2 = plt.twiny()
             xlabelDen=r'Electron Density (cm$^{-3}$)'
             plt.xlabel(xlabelDen, fontsize=fontsize)
-            pl.loglog(eDensity,numIntens/denIntens, visible=False)
+            plt.loglog(eDensity,numIntens/denIntens, visible=False)
             ax2.xaxis.tick_top()
         else:
 #            pl.ylim(ymin, ymax)
-            pl.title(desc,fontsize=fontsize)
+            plt.title(desc,fontsize=fontsize)
 #       desc=title+' '+str(wvl[num_line])+' / '+str(wvl[den_line])+' '+desc_str
 #        pl.title(desc, fontsize=fontsize)
 #       pl.title(title+' '+str(wvl[num_line])+' / '+str(wvl[den_line])+' '+desc_str,fontsize=fontsize)

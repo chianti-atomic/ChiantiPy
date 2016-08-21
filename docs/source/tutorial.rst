@@ -56,9 +56,51 @@ Below, the methods that are most likely of interest to users are listed below.  
 
   **ion**
   
+    **popPlot()** method
+    
+        plots the level populations of the *top* (most highly populated) levels as a function of temperature and/or density.
+  
+    **gofnt()** method
+    
+        an interactive method that plots the most intense lines of an ion in a give wavelength range (*wvlRange*) and allows the user to select a line or several lines, that will be summed, and then plots the *GofT* function for the selected lines and saves these values in the **Gofnt** dictionary as an attribute of the ion object.
+      
+    **emiss()** method
+    
+      calculates the spectral line emissivities of the ion and saves these in the **Emiss** dictionary as an attribute of the ion object.
+        
     **intensity()** method
     
       calculates the *intensity* of the specified ion as a function of temperature and density.  These properties are saved in the **Intensity** dictionary, available as an attribute of the ion.
+      
+    **intensityList()** method
+    
+      lists the spectral line intensities in a given wavelength range (*wvlRange*) in an interactive terminal or notebook
+      
+    **intensityPlot()** method
+    
+      plots the spectral line intensites in a given wavelength range (*wvlRange*) for the *top* most intensity lines.
+      
+    **intensityRatio()** method
+    
+      an interactive method that plots the most intense lines of an ion in a give wavelength range (*wvlRange*) and allows the user to select a pair of lines or a pair of lines to be summed and then plots the intensity ratio as a function of temperature and/or density.  The ratio is saved in the **IntensityRatio** dictionary as an attribute of the ion.
+      
+    **spectrum()** method
+    
+      calculates the spectrum of the ion as a function of wavelength.  The spectral line intensities are pass through a selectable filter to simulate the spectrometer line profile.  The spectrum is save in the **Spectrum** dictionary as an attribute of the ion.
+      
+  **ioneq**
+  
+    **load()** method
+    
+      reads a selected, existing ionization equilibrium calculation for a given element and saves it as a numpy array **Ioneq** as an attribute of the object.
+      
+    **calculate()** method
+    
+      calculates the ionization equilibrium of a selected element from the CHIANTI ionization and recombination rates for a specified temperature(s) and saves it as a numpy array **Ioneq** as an attribute of the object.
+      
+    **plot()** method
+    
+      plots the loaded or calculated ionization equilibrium.  Various parameters can be specified to plot only those aspects that are desired.  Can also plot an additional existing ionization equilibrium for comparison
 
 
 The ion class, basic properties
@@ -68,7 +110,7 @@ Bring up a Python session, or better yet, an IPython session
 
 ::
 
-  import chianti.core as ch
+  import ChiantiPy.core as ch
   fe14 = ch.ion('fe_14')
 
 The fe14 object is instantiated with a number of methods and data.  Methods start with lowercase letters and attributes start with uppercase letters.  It is best not to simply import ion as there is a method with the same name in matplotlib.  A few examples:

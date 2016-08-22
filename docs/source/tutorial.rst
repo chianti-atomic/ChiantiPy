@@ -5,7 +5,9 @@ Tutorial
 The ChiantiPy Approach
 ----------------------
 
-Python is a modern, object-oriented programming language.  It provides a number of features that are useful to the programmer and the end user, such as, classes with methods (function-like) and attributes (data), and functions, among other things.  ChiantiPy has been constructed so that the primary means to calculate the spectral properties of ions and groups of ions is by way of Python classes.  
+Python is a modern, object-oriented programming language.  It provides a number of features that are useful to the programmer and the end user, such as, classes with methods (function-like) and attributes (data), and functions, among other things.  ChiantiPy has been constructed so that the primary means to calculate the spectral properties of ions and groups of ions is by way of Python classes.
+
+More detailed information can be found in the **API** Reference.
 
 ChiantiPy Classes
 ~~~~~~~~~~~~~~~~~
@@ -87,7 +89,15 @@ Below, the methods that are most likely of interest to users are listed below.  
     **spectrum()** method
     
       calculates the spectrum of the ion as a function of wavelength.  The spectral line intensities are pass through a selectable filter to simulate the spectrometer line profile.  The spectrum is save in the **Spectrum** dictionary as an attribute of the ion.
+    
+    **ionizRate()** method
+    
+      calculates the ionization rate coefficient as a function of temperature.  The rate coefficient is save in the **IonizRate** dictionary as an attribute.  Uses the methods **diRate()** and **eaRate()** to first calculate the direct and excitation-ionization (ea) rate coefficients and sums them.
       
+    **recombRate()** method
+    
+      calculates the recombination rate coefficient as a function of temperature.  The rate coefficient is save in the **RecombRate** dictionary as an attribute.    Uses the methods **rrRate()** and **drRate()** to first calculate the radiative recombination and dielectronic recombination rate coefficients and sums them.
+    
   **ioneq**
   
     **load()** method
@@ -101,6 +111,52 @@ Below, the methods that are most likely of interest to users are listed below.  
     **plot()** method
     
       plots the loaded or calculated ionization equilibrium.  Various parameters can be specified to plot only those aspects that are desired.  Can also plot an additional existing ionization equilibrium for comparison
+      
+  **bunch**
+  
+    the init method calculates the spectral line intensities for the selection of ions save the information in the **Intensity** dictionary as an attribute .  It does not calculate the continuum.
+  
+    beyond the init method, the **bunch** class inherits all of the following methods that are described under the **ion** class above
+      
+    **intensityList()**
+      
+    **intensityPlot()**
+      
+    **intensityRatio()**
+      
+    in addition, it inherits the following methods that are described under the **spectrum** class below
+      
+    **convolve()**
+      
+    **lineSpectrumPlot()**
+      
+    **spectrumPlot()**
+      
+  **spectrum**
+  
+    the init method calculates the spectral line intensities and the continuum due to the free-free (*bremstrahlung*), free-bound (radiative recombination), and two-photon processes.  The line intensities are convolved using the **convolve()** method (below).  The sum is saved in the **Spectrum** dictionary as an attribute.
+  
+    beyond the init method, the **spectrum** class also inherits the same methods as the **bunch** class including **intensityList()**, **intensityPlot**, and **intensityRatio**.
+      
+    **convolve()**
+    
+      convolves the line spectrum with specified filter from **ChiantiPy.tools.filters** using a specified width.
+      
+    **lineSpectrumPlot()**
+    
+      plots the convolved line spectrum as a function wavelength
+      
+    **spectrumPlot()**
+    
+      plots the spectrum calculated by the init method.  The summed (integrated) spectrum can be plotted or the spectrum for a specific temperature can be plotted.
+      
+  **mspectrum**
+  
+    the mspectrum behaves in the same way as the **spectrum** class except that it invokes the Python multiprocessing module so that the calculations are made using a specified number of cpu cores.  **mspectrum** can not be used in the Jupyter qtconsole or notebook.
+    
+  **ipymspectrum**
+  
+    the ipymspectrum behaves in the same way as the **spectrum** class except that it invokes the IPython ipyparallel module so that the calculations are made using a specified number of cpu cores.  **ipymspectrum** can only be used in the IPython terminal or the Jupyter qtconsole or notebook.
 
 
 The ion class, basic properties

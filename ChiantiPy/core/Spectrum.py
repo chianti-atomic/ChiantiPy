@@ -6,7 +6,7 @@ import ChiantiPy.tools.data as chdata
 import ChiantiPy.tools.constants as const
 import ChiantiPy.tools.filters as chfilters
 import ChiantiPy.tools.util as util
-import ChiantiPy.tools.io as chio
+#import ChiantiPy.tools.io as chio
 #
 import ChiantiPy.Gui as chGui
 #
@@ -21,20 +21,20 @@ class spectrum(_ionTrails, _specTrails):
 
     one of the convenient things is that all of the instantiated ion classes, determined through such keywords as 'elementList',
     'ionList', and 'minAbund' are kept in a dictionary self.IonInstances where self.IonInstances['mg_7'] is the class instance of
-    chianti.core.ion for 'mg_7'.  All its methods and attributes are available.
+    ChiantiPy.core.ion for 'mg_7'.  All its methods and attributes are available.
 
     includes elemental abundances and ionization equilibria
 
     the set of abundances, a file in $XUVTOP/abundance, can be set with the keyword argument 'abundanceName'
 
-    temperature and density can be arrays but, unless the size of either is one (1),
+    temperature and density can be arrays but, unless the size of either is unity (1),
     the two must have the same size
 
     the returned spectrum will be convolved with a filter of the specified width on the
     specified wavelength array
 
     the default filter is gaussianR with a resolving power of 1000.  Other filters,
-    such as gaussian, box and lorentz, are available in chianti.filters.  When using the box filter,
+    such as gaussian, box and lorentz, are available in ChiantiPy.tools.filters.  When using the box filter,
     the width should equal the wavelength interval to keep the units of the continuum and line
     spectrum the same.
 
@@ -45,7 +45,7 @@ class spectrum(_ionTrails, _specTrails):
     that are desired to be included, e.g., ['fe','ni']
 
     A selection of ions can be make with ionList containing the names of
-    the desired lines in Chianti notation, i.e. C VI = c_6
+    the desired lines in CHIANTI notation, i.e. C VI = c_6
 
     Both elementList and ionList can not be specified at the same time
 
@@ -69,7 +69,7 @@ class spectrum(_ionTrails, _specTrails):
         # creates Intensity dict from first ion calculated
         setupIntensity = 0
         #
-        masterlist = chdata.MasterList
+#        masterlist = chdata.MasterList
         # use the ionList but make sure the ions are in the database
         #if elementList:
             #for i,  one in enumerate(elementList):
@@ -176,7 +176,7 @@ class spectrum(_ionTrails, _specTrails):
             if 'ff' in self.Todo[akey]:
                 if verbose:
                     print(' calculating ff continuum for :  %s'%(akey))
-                FF = chianti.core.continuum(akey, temperature, abundanceName=self.AbundanceName, em=em)
+                FF = ChiantiPy.core.continuum(akey, temperature, abundanceName=self.AbundanceName, em=em)
                 FF.freeFree(wavelength)
 #                if nTempDen == 1:
 #                    freeFree += cont.FreeFree['rate']*em[0]
@@ -188,13 +188,13 @@ class spectrum(_ionTrails, _specTrails):
                 if verbose:
                     print(' calculating fb continuum for :  %s'%(akey))
                 try:
-                    FB = chianti.core.continuum(akey, temperature, abundanceName=self.AbundanceName, em=em)
+                    FB = ChiantiPy.core.continuum(akey, temperature, abundanceName=self.AbundanceName, em=em)
                     FB.freeBound(wavelength)
-                    if 'errorMessage' not in list(cont.FreeBound.keys()):
+                    if 'errorMessage' not in list(FB.FreeBound.keys()):
                         #  an fblvl file exists for this ions
                         freeBound += FB.FreeBound['rate']
                 except:
-                    cont = chianti.core.continuum(akey, temperature, abundanceName=self.AbundanceName)
+                    cont = ChiantiPy.core.continuum(akey, temperature, abundanceName=self.AbundanceName)
                     cont.freeBound(wavelength)
 #                if 'errorMessage' not in list(cont.FreeBound.keys()):
 #                    #  an fblvl file exists for this ions
@@ -207,7 +207,7 @@ class spectrum(_ionTrails, _specTrails):
             if 'line' in self.Todo[akey]:
                 if verbose:
                     print(' calculating spectrum for  :  %s'%(akey))
-                thisIon = chianti.core.ion(akey, temperature, eDensity, abundanceName=self.AbundanceName)
+                thisIon = ChiantiPy.core.ion(akey, temperature, eDensity, abundanceName=self.AbundanceName)
                 thisIon.intensity(wvlRange=wvlRange, allLines=allLines, em=em)
                 self.IonsCalculated.append(akey)
                 if 'errorMessage' not in  list(thisIon.Intensity.keys()):
@@ -277,7 +277,7 @@ class bunch(_ionTrails, _specTrails):
 
     one of the convenient things is that all of the instantiated ion classes, determined through such keywords as 'elementList',
     'ionList', and 'minAbund' are kept in a dictionary self.IonInstances where self.IonInstances['mg_7'] is the class instance of
-    chianti.core.ion for 'mg_7'.  All its methods and attributes are available.
+    ChiantiPy.core.ion for 'mg_7'.  All its methods and attributes are available.
 
     includes elemental abundances and ionization equilibria
 
@@ -397,7 +397,7 @@ class bunch(_ionTrails, _specTrails):
 #            if minAbund < minAbundAll:
 #                minAbund = minAbundAll
 #        self.minAbund = minAbund
-        ionInfo = chio.masterListInfo()
+#        ionInfo = chio.masterListInfo()
         #        #
 #        self.Intensity = {'ionS':[], 'lvl1':[], 'lvl2':[], 'wvl':np.ndarray, 'pretty1':np.ndarray, 'pretty2':np.ndarray, 'intensity':np.zeros((nTempDen, 0),'float64'), 'obs':np.ndarray }
         self.IonsCalculated = []
@@ -416,7 +416,7 @@ class bunch(_ionTrails, _specTrails):
 
             if verbose:
                 print(' calculating %s'%(ionS))
-            thisIon = chianti.core.ion(ionS, temperature, eDensity, abundance=abundAll[Z-1])
+            thisIon = ChiantiPy.core.ion(ionS, temperature, eDensity, abundance=abundAll[Z-1])
             thisIon.intensity(wvlRange=wvlRange, allLines = allLines,  em=em)
             self.IonsCalculated.append(ionS)
             #
@@ -441,6 +441,3 @@ class bunch(_ionTrails, _specTrails):
         dt=t2-t1
         print(' elapsed seconds = %12.3f'%(dt.seconds))
         return
-    #
-    # -------------------------------------------------------------------------
-    #

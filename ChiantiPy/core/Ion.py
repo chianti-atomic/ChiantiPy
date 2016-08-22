@@ -578,9 +578,6 @@ class ion(_ionTrails, _specTrails):
         #
         # -------------------------------------------------------------------------------------
         #
-        #
-        # -------------------------------------------------------------------------------------
-        #
     def rrRate(self):
         '''Provide the radiative recombination rate coefficient as a function of temperature (K).'''
         if hasattr(self, 'Temperature'):

@@ -54,7 +54,7 @@ class ipymspectrum(_ionTrails, _specTrails):
     specified wavelength array
 
     the default filter is gaussianR with a resolving power of 100.  Other filters,
-    such as gaussian, box and lorentz, are available in chianti.filters.  When using the box filter,
+    such as gaussian, box and lorentz, are available in ChiantiPy.filters.  When using the box filter,
     the width should equal the wavelength interval to keep the units of the continuum and line
     spectrum the same.
 
@@ -360,7 +360,7 @@ def doAll(inpt):
         wavelength = inpt[3]
         abund = inpt[4]
         em = inpt[5]
-        FF = chianti.core.continuum(ionS, temperature, abundance=abund, em=em)
+        FF = ChiantiPy.core.continuum(ionS, temperature, abundance=abund, em=em)
         FF.freeFree(wavelength)
         # can not do a deep copy of
 #        return [ionS, calcType, copy.deepcopy(cont)]
@@ -370,7 +370,7 @@ def doAll(inpt):
         wavelength = inpt[3]
         abund = inpt[4]
         em = inpt[5]
-        cont = chianti.core.continuum(ionS, temperature, abundance=abund, em=em)
+        cont = ChiantiPy.core.continuum(ionS, temperature, abundance=abund, em=em)
         cont.freeBound(wavelength)
         return [ionS, calcType, copy.deepcopy(cont)]
     elif calcType == 'line':
@@ -383,7 +383,7 @@ def doAll(inpt):
         abund = inpt[7]
         em = inpt[8]
         doContinuum = inpt[9]
-        thisIon = chianti.core.ion(ionS, temperature, density, abundance=abund)
+        thisIon = ChiantiPy.core.ion(ionS, temperature, density, abundance=abund)
         thisIon.intensity(wvlRange = wvlRange, allLines = allLines, em=em)
         if 'errorMessage' not in thisIon.Intensity.keys():
             thisIon.spectrum(wavelength,  filter=filter, allLines=allLines)

@@ -2,7 +2,7 @@ from datetime import datetime
 import numpy as np
 import matplotlib.pyplot as plt
 np.seterr(over='ignore')
-#import chianti.core as ch
+#import ChiantiPy.core as ch
 import ChiantiPy
 import ChiantiPy.tools.data as chdata
 import ChiantiPy.tools.constants as const
@@ -32,7 +32,7 @@ class radLoss(_specTrails):
     specified wavelength array
 
     the default filter is gaussianR with a resolving power of 1000.  Other filters,
-    such as gaussian, box and lorentz, are available in chianti.filters.  When using the box filter,
+    such as gaussian, box and lorentz, are available in ChiantiPy.filters.  When using the box filter,
     the width should equal the wavelength interval to keep the units of the continuum and line
     spectrum the same.
 
@@ -130,7 +130,7 @@ class radLoss(_specTrails):
                     print(' calculating ff continuum for :  %s'%(akey))
                 if 'ff' in self.Todo[akey]:
                     # need to skip the neutral
-                        cont = chianti.core.continuum(akey, temperature, abundanceName=self.AbundanceName)
+                        cont = ChiantiPy.core.continuum(akey, temperature, abundanceName=self.AbundanceName)
                         cont.freeFreeLoss()
                         freeFreeLoss += cont.FreeFreeLoss['rate']
     #                if nTempDen == 1:
@@ -147,13 +147,13 @@ class radLoss(_specTrails):
                     if hasattr(cont, 'FreeFreeLoss'):
                         cont.freeBoundLoss()
                     else:
-                        cont = chianti.core.continuum(akey, temperature, abundanceName=self.AbundanceName)
+                        cont = ChiantiPy.core.continuum(akey, temperature, abundanceName=self.AbundanceName)
                         cont.freeBoundLoss()
                     if 'errorMessage' not in list(cont.FreeBoundLoss.keys()):
                         #  an fblvl file exists for this ions
                         freeBoundLoss += cont.FreeBoundLoss['rate']
 #                except:
-#                    cont = chianti.core.continuum(akey, temperature, abundanceName=self.AbundanceName)
+#                    cont = ChiantiPy.core.continuum(akey, temperature, abundanceName=self.AbundanceName)
 #                    cont.freeBoundLoss()
 #                if 'errorMessage' not in list(cont.FreeBound.keys()):
 #                    #  an fblvl file exists for this ions
@@ -167,7 +167,7 @@ class radLoss(_specTrails):
             if 'line' in self.Todo[akey]:
                 if verbose:
                     print(' calculating spectrum for  :  %s'%(akey))
-                thisIon = chianti.core.ion(akey, temperature, eDensity, abundanceName=self.AbundanceName)
+                thisIon = ChiantiPy.core.ion(akey, temperature, eDensity, abundanceName=self.AbundanceName)
                 thisIon.intensity(allLines=allLines)
                 self.IonsCalculated.append(akey)
                 if 'errorMessage' not in  list(thisIon.Intensity.keys()):
@@ -216,7 +216,7 @@ class radLoss(_specTrails):
 #                    if ionstageTest and ioneqTest and doContinuum:
 #                        # ionS is the target ion, cannot be the neutral for the continuum
 #                        print(' calculating continuum for %s'%(ionS))
-#                        cont = chianti.core.continuum(ionS, temperature, abund=abund)
+#                        cont = ChiantiPy.core.continuum(ionS, temperature, abund=abund)
 #                        cont.freeFreeLoss()
 #    #                   print dir(thisIon)
 #    #                   print ' wvl = ', thisIon.FreeFree['wvl']
@@ -235,7 +235,7 @@ class radLoss(_specTrails):
 ##                                freeBound[iTempDen] += cont.FreeBound['rate'][iTempDen]
 #                    if masterListTest and ioneqTest:
 #                        print(' calculating spectrum for  %s  '%(ionS))
-#                        thisIon = chianti.core.ion(ionS, temperature, density, abund=abund)
+#                        thisIon = ChiantiPy.core.ion(ionS, temperature, density, abund=abund)
 ##                       print ' dir = ', dir(thisIon)
 ##                        thisIon.emiss(wvlRange = wvlRange, allLines=allLines)
 #                        thisIon.boundBoundLoss( allLines=allLines)
@@ -255,7 +255,7 @@ class radLoss(_specTrails):
 #                    # get dielectronic lines
 #                    if masterListTestD and ioneqTestD:
 #                        print(' calculating spectrum for  %s '%(ionSd))
-#                        thisIon = chianti.core.ion(ionSd, temperature, density, abund=abund)
+#                        thisIon = ChiantiPy.core.ion(ionSd, temperature, density, abund=abund)
 ##                       print ' dir = ', dir(thisIon)
 ##                       have to do all lines for the dielectronic satellites
 ##                        thisIon.emiss(allLines=1)

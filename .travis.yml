@@ -10,11 +10,14 @@ env:
     - ASTROPY_VERSION='stable'
     - MAIN_CMD='python setup.py'
     - SETUP_CMD='install'
-    - CONDA_DEPENDENCIES='scipy matplotlib ipython ipyparallel pyqt'
+    - CONDA_DEPENDENCIES='scipy matplotlib ipython ipyparallel pyqt sphinx sphinx_rtd_theme'
   matrix:
-    - PYTHON_VERSION=2.7
-    - PYTHON_VERSION=3.4
-    - PYTHON_VERSION=3.5
+    - PYTHON_VERSION=2.7 SETUP_CMD='install'
+    - PYTHON_VERSION=3.4 SETUP_CMD='install'
+    - PYTHON_VERSION=3.5 SETUP_CMD='install'
+    - PYTHON_VERSION=2.7 SETUP_CMD='build_sphinx'
+    - PYTHON_VERSION=3.4 SETUP_CMD='build_sphinx'
+    - PYTHON_VERSION=3.5 SETUP_CMD='build_sphinx'
 #install the ci helpers
 install:
   - git clone https://github.com/astropy/ci-helpers.git

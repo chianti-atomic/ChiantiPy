@@ -702,18 +702,18 @@ def fblvlRead(filename, verbose=False):
                 print((s1[i]))
 #            inpt=FortranLine(s1[i],elvlcFormat)
             inpt = header_line.read(s1[i])
-            lvl[i]=inpt[0]
-            conf[i]=inpt[1].strip()
-            pqn[i]=inpt[2]
-            l[i]=inpt[3]
-            spd[i]=inpt[4].strip()
-            mult[i]=inpt[5]
+            lvl[i] = int(inpt[0])
+            conf[i] = inpt[1].strip()
+            pqn[i] = int(inpt[2])
+            l[i] = int(inpt[3])
+            spd[i] = inpt[4].strip()
+            mult[i] = int(inpt[5])
             if inpt[6] == 0.:
-                ecm[i]=inpt[7]
+                ecm[i] = float(inpt[7])
             else:
-                ecm[i]=inpt[6]
-                ecmth[i]=inpt[7]
-        ref=[]
+                ecm[i] = float(inpt[6])
+                ecmth[i] = float(inpt[7])
+        ref = []
         for i in range(nlvls+1,len(s1)-1):
             s1a=s1[i][:-1]
             ref.append(s1a.strip())

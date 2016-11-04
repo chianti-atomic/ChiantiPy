@@ -4,13 +4,13 @@ import numpy as np
 from scipy import interpolate
 import time
 #
-import ChiantiPy.tools.data as chdata
 import matplotlib.pyplot as plt
 #    #
 import ChiantiPy.tools.filters as chfilters
 import ChiantiPy.tools.util as util
 import ChiantiPy.tools.io as io
 import ChiantiPy.tools.constants as const
+import ChiantiPy.tools.data as chdata
 import ChiantiPy.Gui as chGui
 from ._IonTrails import _ionTrails
 from ._SpecTrails import _specTrails

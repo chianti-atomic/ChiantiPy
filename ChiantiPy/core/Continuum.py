@@ -9,7 +9,7 @@ import ChiantiPy.tools.constants as const
 import ChiantiPy.Gui as chgui
 ip = chdata.Ip
 MasterList = chdata.MasterList
-#import chianti
+#
 class continuum:
     '''
     The top level class for continuum calculations.
@@ -337,7 +337,8 @@ class continuum:
         #
         nlvls = len(fblvl['lvl'])
         # pqn = principle quantum no. n
-        pqn = np.asarray(fblvl['pqn'], 'float64')
+#        pqn = np.asarray(fblvl['pqn'], 'float64')
+        pqn = fblvl['pqn']
         # l is angular moment quantum no. L
         l = fblvl['l']
         # energy level in inverse cm

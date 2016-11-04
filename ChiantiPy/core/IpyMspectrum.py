@@ -3,12 +3,13 @@ import copy
 #
 #
 import numpy as np
+from ipyparallel import Client
 import ChiantiPy
 import ChiantiPy.tools.data as chdata
 import ChiantiPy.tools.constants as const
 import ChiantiPy.tools.filters as chfilters
 import ChiantiPy.tools.util as util
-import ChiantiPy.tools.io as chio
+#import ChiantiPy.tools.io as chio
 import ChiantiPy.Gui as chgui
 #
 from ._IonTrails import _ionTrails
@@ -26,7 +27,6 @@ from ._SpecTrails import _specTrails
 # and remove the comment before 'from IPython import parallel'
 # in the following line
 # ***************************************
-from ipyparallel import Client
 
 # *****************************************
 
@@ -54,7 +54,7 @@ class ipymspectrum(_ionTrails, _specTrails):
     specified wavelength array
 
     the default filter is gaussianR with a resolving power of 100.  Other filters,
-    such as gaussian, box and lorentz, are available in chianti.filters.  When using the box filter,
+    such as gaussian, box and lorentz, are available in ChiantiPy.filters.  When using the box filter,
     the width should equal the wavelength interval to keep the units of the continuum and line
     spectrum the same.
 
@@ -96,7 +96,7 @@ class ipymspectrum(_ionTrails, _specTrails):
         #
         setupIntensity = 0
         #
-        masterlist = chdata.MasterList
+#        masterlist = chdata.MasterList
         self.Defaults = defaults
         #
         self.Temperature = np.asarray(temperature,'float64')
@@ -209,17 +209,22 @@ class ipymspectrum(_ionTrails, _specTrails):
 #                if verbose:
 #                    print(' doing line')
                 allInpt.append([akey, 'line', temperature, eDensity, wavelength, filter, allLines, abundance, em, doContinuum])
-        #
-        for anInpt in allInpt:
-            lbvAll.apply(doAll, anInpt)
-        lbvAll.wait()
-        lbvAll.get_result()
+        # - kpd
+#        for anInpt in allInpt:
+#            lbvAll.apply(doAll, anInpt)
+#        lbvAll.wait()
+#        lbvAll.get_result()
+        result = lbvAll.map_sync(doAll, allInpt)
         if verbose:
             print(' got all ff, fb, line results')
+#            print(' ions actually returned %5i'%(len(list(lbvAll.results.values()))))
+            print(' ions actually returned %5i'%(len(result)))
         ionsCalculated = []
-        #
-        for ijk in range(len(list(lbvAll.results.values()))):
-            out = list(lbvAll.results.values())[ijk]
+        # - kpd
+#        for ijk in range(len(list(lbvAll.results.values()))):
+#            out = list(lbvAll.results.values())[ijk]
+        for ijk in range(len(result)):
+            out = result[ijk]
             if type(out) != list:
                 print(' a problem has occured - this can be caused by')
                 print('running Python3 and not using ipcluster3')
@@ -360,7 +365,7 @@ def doAll(inpt):
         wavelength = inpt[3]
         abund = inpt[4]
         em = inpt[5]
-        FF = chianti.core.continuum(ionS, temperature, abundance=abund, em=em)
+        FF = ChiantiPy.core.continuum(ionS, temperature, abundance=abund, em=em)
         FF.freeFree(wavelength)
         # can not do a deep copy of
 #        return [ionS, calcType, copy.deepcopy(cont)]
@@ -370,7 +375,7 @@ def doAll(inpt):
         wavelength = inpt[3]
         abund = inpt[4]
         em = inpt[5]
-        cont = chianti.core.continuum(ionS, temperature, abundance=abund, em=em)
+        cont = ChiantiPy.core.continuum(ionS, temperature, abundance=abund, em=em)
         cont.freeBound(wavelength)
         return [ionS, calcType, copy.deepcopy(cont)]
     elif calcType == 'line':
@@ -383,7 +388,7 @@ def doAll(inpt):
         abund = inpt[7]
         em = inpt[8]
         doContinuum = inpt[9]
-        thisIon = chianti.core.ion(ionS, temperature, density, abundance=abund)
+        thisIon = ChiantiPy.core.ion(ionS, temperature, density, abundance=abund)
         thisIon.intensity(wvlRange = wvlRange, allLines = allLines, em=em)
         if 'errorMessage' not in thisIon.Intensity.keys():
             thisIon.spectrum(wavelength,  filter=filter, allLines=allLines)

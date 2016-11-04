@@ -2,30 +2,20 @@ from datetime import datetime
 import copy
 #
 import numpy as np
-
+#-kpd
+import ChiantiPy
 import ChiantiPy.tools.data as chdata
 import ChiantiPy.tools.constants as const
 import ChiantiPy.tools.filters as chfilters
 import ChiantiPy.tools.util as util
-import ChiantiPy.tools.io as chio
+#import ChiantiPy.tools.io as chio
 import ChiantiPy.Gui as chgui
 from ._IonTrails import _ionTrails
 from ._SpecTrails import _specTrails
 #
-#chInteractive = chdata.chInteractive
-#if chInteractive:
-#    import pylab as pl
-#else:
-#    import matplotlib
-#    matplotlib.use('Agg')
-#    import matplotlib.pyplot as pl
-
-try:
-    import multiprocessing as mp
-#    from chianti import mputil
-    import ChiantiPy.tools.mputil as mputil
-except:
-    print(' your version of Python does not support multiprocessing \n you will not be able to use mspectrum')
+import multiprocessing as mp
+#-kpd
+import ChiantiPy.tools.mputil as mputil
 #
 defaults = chdata.Defaults
 #
@@ -225,7 +215,9 @@ class mspectrum(_ionTrails, _specTrails):
         if doContinuum:
             ffProcesses = []
             for i in range(proc):
+                #-kpd
                 p = mp.Process(target=mputil.doFfQ, args=(ffWorkerQ, ffDoneQ))
+#                p = mp.Process(target=doFfQ, args=(ffWorkerQ, ffDoneQ))
                 p.start()
                 ffProcesses.append(p)
     #       timeout is not necessary
@@ -250,7 +242,9 @@ class mspectrum(_ionTrails, _specTrails):
         #
             fbProcesses = []
             for i in range(proc):
-                p = mp.Process(target=mputil.doFbQ, args=(fbWorkerQ, fbDoneQ))
+                #-kpd
+                p = mp.Process(target=mputil.doFbQ, args=(fbWorkerQ, fbDoneQ))                
+#                p = mp.Process(target=doFbQ, args=(fbWorkerQ, fbDoneQ))
                 p.start()
                 fbProcesses.append(p)
     #       timeout is not necessary
@@ -278,7 +272,9 @@ class mspectrum(_ionTrails, _specTrails):
         if ionWorkerQSize < proc:
             proc = ionWorkerQSize
         for i in range(proc):
+            #-kpd
             p = mp.Process(target=mputil.doIonQ, args=(ionWorkerQ, ionDoneQ))
+#            p = mp.Process(target=doIonQ, args=(ionWorkerQ, ionDoneQ))
             p.start()
             ionProcesses.append(p)
 #            ionWorkerQ.put('STOP')
@@ -365,3 +361,89 @@ class mspectrum(_ionTrails, _specTrails):
     #
     # -------------------------------------------------------------------------
     #
+    #-kpd
+#def doFfQ(inQ, outQ):
+#    """
+#    Multiprocessing helper for `ChiantiPy.core.continuum.freeFree`
+#
+#    Parameters
+#    -----------
+#    inQ : `~multiprocessing.Queue`
+#        Ion free-free emission jobs queued up by multiprocessing module
+#    outQ : `~multiprocessing.Queue`
+#        Finished free-free emission jobs
+#    """
+#    for inputs in iter(inQ.get, 'STOP'):
+#        ionS = inputs[0]
+#        temperature = inputs[1]
+#        wavelength = inputs[2]
+#        abund = inputs[3]
+#        em = inputs[4]
+#        #-kpd
+##        ff = ch.continuum(ionS, temperature, abundance=abund, em=em)
+#        ff = ChiantiPy.core.continuum(ionS, temperature, abundance=abund, em=em)
+#        ff.freeFree(wavelength)
+#        outQ.put(ff.FreeFree)
+#    return
+#
+#
+#def doFbQ(inQ, outQ):
+#    """
+#    Multiprocessing helper for `ChiantiPy.core.continuum.freeBound`
+#
+#    Parameters
+#    -----------
+#    inQ : `~multiprocessing.Queue`
+#        Ion free-bound emission jobs queued up by multiprocessing module
+#    outQ : `~multiprocessing.Queue`
+#        Finished free-bound emission jobs
+#    """
+#    for inputs in iter(inQ.get, 'STOP'):
+#        ionS = inputs[0]
+#        temperature = inputs[1]
+#        wavelength = inputs[2]
+#        abund = inputs[3]
+#        em = inputs[4]
+#        #-kpd
+##        fb = ch.continuum(ionS, temperature, abundance=abund, em=em)
+#        fb = ChiantiPy.core.continuum(ionS, temperature, abundance=abund, em=em)
+#        fb.freeBound(wavelength)
+#        outQ.put(fb.FreeBound)
+#    return
+#
+#
+#def doIonQ(inQueue, outQueue):
+#    """
+#    Multiprocessing helper for `ChiantiPy.core.ion` and `ChiantiPy.core.ion.twoPhoton`
+#
+#    Parameters
+#    -----------
+#    inQueue : `~multiprocessing.Queue`
+#        Jobs queued up by multiprocessing module
+#    outQueue : `~multiprocessing.Queue`
+#        Finished jobs
+#    """
+#    for inpts in iter(inQueue.get, 'STOP'):
+#        ionS = inpts[0]
+#        temperature = inpts[1]
+#        density = inpts[2]
+#        wavelength = inpts[3]
+#        wvlRange = [wavelength.min(), wavelength.max()]
+#        filter = inpts[4]
+#        allLines = inpts[5]
+#        abund = inpts[6]
+#        em = inpts[7]
+#        doContinuum = inpts[8]
+#        #-kpd
+##        thisIon = ch.ion(ionS, temperature, density, abundance=abund)
+#        thisIon = ChiantiPy.core.ion(ionS, temperature, density, abundance=abund)
+#        thisIon.intensity(wvlRange = wvlRange, allLines = allLines, em=em)
+#        if 'errorMessage' not in sorted(thisIon.Intensity.keys()):
+#            thisIon.spectrum(wavelength,  filter=filter)
+#        outList = [ionS, thisIon]
+#        if not thisIon.Dielectronic and doContinuum:
+#            if (thisIon.Z - thisIon.Ion) in [0, 1]:
+#                thisIon.twoPhoton(wavelength)
+#                outList.append(thisIon.TwoPhoton)
+#        outQueue.put(outList)
+#    return

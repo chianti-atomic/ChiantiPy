@@ -219,16 +219,19 @@ def convertName(name):
     """
     s2=name.split('_')
     els=s2[0].strip()
-    i1=const.El.index(els)+1
-    ions=s2[1].strip()
+    Z = int(const.El.index(els)+1)
+    ions = s2[1].strip()
     d=ions.find('d')
     if d >0 :
         dielectronic=True
-        ions=ions.replace('d','')
-    else: dielectronic=False
-    higher = zion2name(int(i1), int(ions)+1)
-    lower = zion2name(int(i1), int(ions)-1)
-    return {'Z':int(i1),'Ion':int(ions),'Dielectronic':dielectronic, 'Element':els, 'higher':higher, 'lower':lower}
+        ions = ions.replace('d','')
+    else:
+        dielectronic=False
+    stage = int(ions)
+    higher = zion2name(Z, stage+1)
+    lower = zion2name(Z, stage-1)
+    filename = zion2filename(Z, stage, dielectronic = dielectronic)
+    return {'Z':Z,'Ion':stage,'Dielectronic':dielectronic, 'Element':els, 'higher':higher, 'lower':lower, 'filename':filename}
 
 
 def ion2filename(ions):

@@ -113,6 +113,7 @@ class _specTrails(object):
         '''
         creates a list of ions for free-free, free-bound, and line intensity calculations
         if doing the radiative losses, accept all wavelength -> doWvlTest=0
+        the list is a dictionary self.Todo
         '''
         #
         masterlist = chdata.MasterList

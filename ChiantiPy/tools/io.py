@@ -143,7 +143,7 @@ def cireclvlRead(ions, filename=None, filetype='cilvl'):
         idx=aline.find('-1')
         iline += 1
     ndata = iline - 1
-    ntrans = ndata/2
+    ntrans = ndata//2
     #
 #    nref = 0
 #    idx = -1
@@ -702,18 +702,18 @@ def fblvlRead(filename, verbose=False):
                 print((s1[i]))
 #            inpt=FortranLine(s1[i],elvlcFormat)
             inpt = header_line.read(s1[i])
-            lvl[i]=inpt[0]
-            conf[i]=inpt[1].strip()
-            pqn[i]=inpt[2]
-            l[i]=inpt[3]
-            spd[i]=inpt[4].strip()
-            mult[i]=inpt[5]
+            lvl[i] = int(inpt[0])
+            conf[i] = inpt[1].strip()
+            pqn[i] = int(inpt[2])
+            l[i] = int(inpt[3])
+            spd[i] = inpt[4].strip()
+            mult[i] = int(inpt[5])
             if inpt[6] == 0.:
-                ecm[i]=inpt[7]
+                ecm[i] = float(inpt[7])
             else:
-                ecm[i]=inpt[6]
-                ecmth[i]=inpt[7]
-        ref=[]
+                ecm[i] = float(inpt[6])
+                ecmth[i] = float(inpt[7])
+        ref = []
         for i in range(nlvls+1,len(s1)-1):
             s1a=s1[i][:-1]
             ref.append(s1a.strip())
@@ -1540,6 +1540,28 @@ def splupsRead(ions, filename=None, filetype='splups'):
             return {"lvl1":lvl1,"lvl2":lvl2,"ttype":ttype,"gf":gf,"de":de,"cups":cups
                 ,"nspl":nspl,"splups":splups,"ref":ref, 'filename':splupsname}
 
+def trRead(ionS):
+    ''' read the files containing total recombination rates .trparams
+    '''
+    stuff = util.convertName(ionS)
+    filename = stuff['filename']
+    trname = filename + '.trparams'
+    if os.path.exists(trname):
+        temperature = []
+        rate = []
+        inpt = open(trname)
+        lines = inpt.readlines()
+        ndata = int(lines[0])
+        inpt.close()
+        for jline in range(1, ndata+1):
+            dummy = lines[jline].replace(os.linesep, '').split()
+            temperature.append(float(dummy[0]))
+            rate.append(float(dummy[1]))
+        return {'temperature':np.asarray(temperature, 'float64'), 'rate':np.asarray(rate, 'float64')}
+    else:
+        return 'file does not exist'
+        
+    
 
 def twophotonHRead():
     """

@@ -2,7 +2,7 @@
 Functions needed for standard Python multiprocessing module mspectrum
 """
 
-import ChiantiPy.core as ch
+import ChiantiPy
 
 def doFfQ(inQ, outQ):
     """
@@ -21,7 +21,7 @@ def doFfQ(inQ, outQ):
         wavelength = inputs[2]
         abund = inputs[3]
         em = inputs[4]
-        ff = ch.continuum(ionS, temperature, abundance=abund, em=em)
+        ff = ChiantiPy.core.continuum(ionS, temperature, abundance=abund, em=em)
         ff.freeFree(wavelength)
         outQ.put(ff.FreeFree)
     return
@@ -44,7 +44,7 @@ def doFbQ(inQ, outQ):
         wavelength = inputs[2]
         abund = inputs[3]
         em = inputs[4]
-        fb = ch.continuum(ionS, temperature, abundance=abund, em=em)
+        fb = ChiantiPy.core.continuum(ionS, temperature, abundance=abund, em=em)
         fb.freeBound(wavelength)
         outQ.put(fb.FreeBound)
     return
@@ -72,7 +72,7 @@ def doIonQ(inQueue, outQueue):
         abund = inpts[6]
         em = inpts[7]
         doContinuum = inpts[8]
-        thisIon = ch.ion(ionS, temperature, density, abundance=abund)
+        thisIon = ChiantiPy.core.ion(ionS, temperature, density, abundance=abund)
         thisIon.intensity(wvlRange = wvlRange, allLines = allLines, em=em)
         if 'errorMessage' not in sorted(thisIon.Intensity.keys()):
             thisIon.spectrum(wavelength,  filter=filter)

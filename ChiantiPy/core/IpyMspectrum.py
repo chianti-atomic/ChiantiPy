@@ -3,12 +3,13 @@ import copy
 #
 #
 import numpy as np
+from ipyparallel import Client
 import ChiantiPy
 import ChiantiPy.tools.data as chdata
 import ChiantiPy.tools.constants as const
 import ChiantiPy.tools.filters as chfilters
 import ChiantiPy.tools.util as util
-import ChiantiPy.tools.io as chio
+#import ChiantiPy.tools.io as chio
 import ChiantiPy.Gui as chgui
 #
 from ._IonTrails import _ionTrails
@@ -26,7 +27,6 @@ from ._SpecTrails import _specTrails
 # and remove the comment before 'from IPython import parallel'
 # in the following line
 # ***************************************
-from ipyparallel import Client
 
 # *****************************************
 
@@ -96,7 +96,7 @@ class ipymspectrum(_ionTrails, _specTrails):
         #
         setupIntensity = 0
         #
-        masterlist = chdata.MasterList
+#        masterlist = chdata.MasterList
         self.Defaults = defaults
         #
         self.Temperature = np.asarray(temperature,'float64')
@@ -209,17 +209,22 @@ class ipymspectrum(_ionTrails, _specTrails):
 #                if verbose:
 #                    print(' doing line')
                 allInpt.append([akey, 'line', temperature, eDensity, wavelength, filter, allLines, abundance, em, doContinuum])
-        #
-        for anInpt in allInpt:
-            lbvAll.apply(doAll, anInpt)
-        lbvAll.wait()
-        lbvAll.get_result()
+        # - kpd
+#        for anInpt in allInpt:
+#            lbvAll.apply(doAll, anInpt)
+#        lbvAll.wait()
+#        lbvAll.get_result()
+        result = lbvAll.map_sync(doAll, allInpt)
         if verbose:
             print(' got all ff, fb, line results')
+#            print(' ions actually returned %5i'%(len(list(lbvAll.results.values()))))
+            print(' ions actually returned %5i'%(len(result)))
         ionsCalculated = []
-        #
-        for ijk in range(len(list(lbvAll.results.values()))):
-            out = list(lbvAll.results.values())[ijk]
+        # - kpd
+#        for ijk in range(len(list(lbvAll.results.values()))):
+#            out = list(lbvAll.results.values())[ijk]
+        for ijk in range(len(result)):
+            out = result[ijk]
             if type(out) != list:
                 print(' a problem has occured - this can be caused by')
                 print('running Python3 and not using ipcluster3')

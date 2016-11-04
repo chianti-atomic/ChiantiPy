@@ -170,29 +170,13 @@ div#notebook {
 
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[1]:</div>
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s">&#39;XUVTOP&#39;</span><span class="p">]</span>
 </pre></div>
 
 </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt output_prompt">Out[1]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>&apos;/data2/svn/chianti/dbase/trunk&apos;</pre>
-</div>
-
-</div>
-
 </div>
 </div>
 
@@ -224,31 +208,17 @@ The current implementation uses Version 0.6.4 of ChiantiPy and version 8.0 of th
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[3]:</div>
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span class="kn">import</span> <span class="nn">chianti</span>
-<span class="kn">import</span> <span class="nn">chianti.core</span> <span class="k">as</span> <span class="nn">ch</span>
+<div class=" highlight hl-ipython3"><pre><span class="kn">import</span> <span class="nn">ChiantiPy</span>
+<span class="kn">import</span> <span class="nn">ChiantiPy.core</span> <span class="k">as</span> <span class="nn">ch</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="o">%</span><span class="k">matplotlib</span>
 </pre></div>
 
 </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Using matplotlib backend: Qt4Agg
-</pre>
-</div>
-</div>
-
 </div>
 </div>
 
@@ -265,10 +235,10 @@ The current implementation uses Version 0.6.4 of ChiantiPy and version 8.0 of th
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[5]:</div>
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span class="kn">import</span> <span class="nn">chianti.filters</span> <span class="k">as</span> <span class="nn">chfilters</span>
+<div class=" highlight hl-ipython3"><pre><span class="kn">import</span> <span class="nn">ChiantiPy.tools.filters</span> <span class="k">as</span> <span class="nn">chfilters</span>
 </pre></div>
 
 </div>
@@ -278,36 +248,20 @@ The current implementation uses Version 0.6.4 of ChiantiPy and version 8.0 of th
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[6]:</div>
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span class="n">chianti</span><span class="o">.</span><span class="n">Version</span>
+<div class=" highlight hl-ipython3"><pre><span class="n">ChiantiPy</span><span class="o">.</span><span class="n">__version__</span>
 </pre></div>
 
 </div>
 </div>
 </div>
 
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt output_prompt">Out[6]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>&apos;0.6.4&apos;</pre>
-</div>
-
-</div>
-
-</div>
-</div>
-
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[7]:</div>
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span class="kn">import</span> <span class="nn">IPython</span>
@@ -315,20 +269,6 @@ The current implementation uses Version 0.6.4 of ChiantiPy and version 8.0 of th
 </pre></div>
 
 </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre> IPython version = 4.1.0
-</pre>
-</div>
-</div>
-
 </div>
 </div>
 
@@ -345,7 +285,7 @@ The current implementation uses Version 0.6.4 of ChiantiPy and version 8.0 of th
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[8]:</div>
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span class="n">qtconsole</span>
@@ -368,7 +308,7 @@ The current implementation uses Version 0.6.4 of ChiantiPy and version 8.0 of th
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[9]:</div>
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span class="n">temp</span> <span class="o">=</span> <span class="mf">10.</span><span class="o">**</span><span class="p">(</span><span class="mf">5.8</span> <span class="o">+</span> <span class="mf">0.05</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">21.</span><span class="p">))</span>
@@ -392,7 +332,7 @@ The current implementation uses Version 0.6.4 of ChiantiPy and version 8.0 of th
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[10]:</div>
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span class="n">fe14</span> <span class="o">=</span> <span class="n">ch</span><span class="o">.</span><span class="n">ion</span><span class="p">(</span><span class="s">&#39;fe_14&#39;</span><span class="p">,</span> <span class="n">temperature</span><span class="o">=</span><span class="n">temp</span><span class="p">,</span> <span class="n">eDensity</span><span class="o">=</span><span class="n">edens</span><span class="p">)</span>
@@ -425,7 +365,7 @@ fe14 = ch.ion('fe_14', temp, edens)</p>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[11]:</div>
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span class="n">fe14</span><span class="o">.</span><span class="n">popPlot</span><span class="p">()</span>
@@ -578,27 +518,13 @@ fe14 = ch.ion('fe_14', temp, edens)</p>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[9]:</div>
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span class="n">fe14</span><span class="o">.</span><span class="n">intensityRatio</span><span class="p">(</span><span class="n">wvlRange</span><span class="o">=</span><span class="p">[</span><span class="mf">210.</span><span class="p">,</span> <span class="mf">225.</span><span class="p">])</span>
 </pre></div>
 
 </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre> ndens =     1 ntemp =    21
-</pre>
-</div>
-</div>
-
 </div>
 </div>
 
@@ -641,6 +567,16 @@ the intensityRatio as a function of temperature and density can be save to a tex
 </div>
 </div>
 
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>saves the ratio to the ascii file 'myratio.txt'</p>
+
+</div>
+</div>
 </div>
 <div class="cell border-box-sizing text_cell rendered">
 <div class="prompt input_prompt">
@@ -888,7 +824,7 @@ the intensityRatio as a function of temperature and density can be save to a tex
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[12]:</div>
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span class="k">del</span> <span class="n">fe14</span>
@@ -900,22 +836,6 @@ the intensityRatio as a function of temperature and density can be save to a tex
 </pre></div>
 
 </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt output_prompt">Out[12]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>[&lt;matplotlib.lines.Line2D at 0x7f81f4b3d240&gt;]</pre>
-</div>
-
-</div>
-
 </div>
 </div>
 
@@ -933,7 +853,7 @@ the intensityRatio as a function of temperature and density can be save to a tex
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[13]:</div>
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">fe14</span><span class="p">,</span><span class="s">&#39;Em&#39;</span><span class="p">):</span>
@@ -946,24 +866,10 @@ the intensityRatio as a function of temperature and density can be save to a tex
 </div>
 </div>
 
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre> Emission Measure =     1.00e+27
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[14]:</div>
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span class="n">fe14</span><span class="o">.</span><span class="n">spectrum</span><span class="p">(</span><span class="n">wvl</span><span class="p">,</span><span class="nb">filter</span><span class="o">=</span><span class="p">(</span><span class="n">chfilters</span><span class="o">.</span><span class="n">gaussian</span><span class="p">,</span><span class="o">.</span><span class="mi">4</span><span class="p">))</span>
@@ -972,22 +878,6 @@ the intensityRatio as a function of temperature and density can be save to a tex
 </pre></div>
 
 </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt output_prompt">Out[14]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>[&lt;matplotlib.lines.Line2D at 0x7f81f5138908&gt;]</pre>
-</div>
-
-</div>
-
 </div>
 </div>
 
@@ -1044,7 +934,7 @@ the intensityRatio as a function of temperature and density can be save to a tex
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[15]:</div>
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
@@ -1054,22 +944,6 @@ the intensityRatio as a function of temperature and density can be save to a tex
 </pre></div>
 
 </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt output_prompt">Out[15]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>&lt;matplotlib.text.Text at 0x7f81ecd0a278&gt;</pre>
-</div>
-
-</div>
-
 </div>
 </div>
 
@@ -1086,7 +960,7 @@ the intensityRatio as a function of temperature and density can be save to a tex
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[16]:</div>
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span class="k">del</span> <span class="n">fe14</span>
@@ -1102,7 +976,7 @@ the intensityRatio as a function of temperature and density can be save to a tex
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[17]:</div>
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span class="n">emeas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span><span class="s">&#39;float64&#39;</span><span class="p">)</span><span class="o">*</span><span class="mf">1.e+27</span>
@@ -1118,7 +992,7 @@ the intensityRatio as a function of temperature and density can be save to a tex
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[18]:</div>
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span class="k">for</span> <span class="n">akey</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">fe14</span><span class="o">.</span><span class="n">Spectrum</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
@@ -1129,25 +1003,10 @@ the intensityRatio as a function of temperature and density can be save to a tex
 </div>
 </div>
 
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>         .4
-         1.
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[19]:</div>
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span class="k">for</span> <span class="n">akey</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">fe14</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">[</span><span class="s">&#39;.4&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
@@ -1158,31 +1017,10 @@ the intensityRatio as a function of temperature and density can be save to a tex
 </div>
 </div>
 
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>   allLines
-         em
-     filter
- filterWidth
-  intensity
-        wvl
-     xlabel
-     ylabel
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[20]:</div>
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
@@ -1194,22 +1032,6 @@ the intensityRatio as a function of temperature and density can be save to a tex
 </pre></div>
 
 </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt output_prompt">Out[20]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>&lt;matplotlib.legend.Legend at 0x7f81ecd4bc18&gt;</pre>
-</div>
-
-</div>
-
 </div>
 </div>
 
@@ -1264,8 +1086,8 @@ the intensityRatio as a function of temperature and density can be save to a tex
 <div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span class="k">for</span> <span class="n">akey</span> <span class="ow">in</span>  <span class="n">chianti</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Defaults</span><span class="p">:</span>
-   <span class="nb">print</span><span class="p">(</span><span class="s">&#39; %10s - %s&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">akey</span><span class="p">,</span><span class="n">chianti</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Defaults</span><span class="p">[</span><span class="n">akey</span><span class="p">]))</span>
+<div class=" highlight hl-ipython3"><pre><span class="k">for</span> <span class="n">akey</span> <span class="ow">in</span>  <span class="n">ChiantiPy</span><span class="o">.</span><span class="n">tools</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Defaults</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+   <span class="nb">print</span><span class="p">(</span><span class="s">&#39; %10s - %s&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">akey</span><span class="p">,</span><span class="n">ChiantiPy</span><span class="o">.</span><span class="n">tools</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Defaults</span><span class="p">[</span><span class="n">akey</span><span class="p">]))</span>
 </pre></div>
 
 </div>
@@ -1294,7 +1116,7 @@ the intensityRatio as a function of temperature and density can be save to a tex
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[21]:</div>
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span class="n">t</span> <span class="o">=</span> <span class="mf">10.</span><span class="o">**</span><span class="p">(</span><span class="mf">5.0</span><span class="o">+</span><span class="mf">0.1</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">11</span><span class="p">))</span>
@@ -1303,21 +1125,6 @@ the intensityRatio as a function of temperature and density can be save to a tex
 </pre></div>
 
 </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre> elapsed seconds =        2.000
- ndens =     1 ntemp =    11
-</pre>
-</div>
-</div>
-
 </div>
 </div>
 
@@ -1344,7 +1151,7 @@ the intensityRatio as a function of temperature and density can be save to a tex
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[22]:</div>
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span class="n">dwvl</span> <span class="o">=</span> <span class="mf">0.01</span>
@@ -1359,12 +1166,24 @@ the intensityRatio as a function of temperature and density can be save to a tex
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[23]:</div>
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span class="n">bnch2</span><span class="o">=</span><span class="n">ch</span><span class="o">.</span><span class="n">bunch</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="mf">1.e+9</span><span class="p">,</span> <span class="n">wvlRange</span><span class="o">=</span><span class="p">[</span><span class="n">wvl</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span><span class="n">wvl</span><span class="o">.</span><span class="n">max</span><span class="p">()],</span> <span class="n">elementList</span><span class="o">=</span><span class="p">[</span><span class="s">&#39;ne&#39;</span><span class="p">,</span><span class="s">&#39;mg&#39;</span><span class="p">],</span> <span class="n">keepIons</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">em</span><span class="o">=</span><span class="mf">1.e+27</span><span class="p">)</span>
 <span class="n">bnch2</span><span class="o">.</span><span class="n">convolve</span><span class="p">(</span><span class="n">wvl</span><span class="p">,</span><span class="nb">filter</span><span class="o">=</span><span class="p">(</span><span class="n">chfilters</span><span class="o">.</span><span class="n">gaussian</span><span class="p">,</span><span class="mf">5.</span><span class="o">*</span><span class="n">dwvl</span><span class="p">))</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">wvl</span><span class="p">,</span> <span class="n">bnch2</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">[</span><span class="s">&#39;intensity&#39;</span><span class="p">][</span><span class="mi">6</span><span class="p">],</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;Total&#39;</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">wvl</span><span class="p">,</span> <span class="n">bnch2</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">[</span><span class="s">&#39;intensity&#39;</span><span class="p">][</span><span class="mi">6</span><span class="p">],</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;Total&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s">&#39;Temperature = %10.2e for t[6]&#39;</span><span class="o">%</span><span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="mi">6</span><span class="p">]))</span>
 </pre></div>
 
@@ -1372,34 +1191,10 @@ the intensityRatio as a function of temperature and density can be save to a tex
 </div>
 </div>
 
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre> elapsed seconds =       12.000
- elapsed seconds =    0.000e+00
-</pre>
-</div>
-</div>
-
-<div class="output_area"><div class="prompt output_prompt">Out[23]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>&lt;matplotlib.text.Text at 0x7f81eca240f0&gt;</pre>
-</div>
-
-</div>
-
-</div>
-</div>
-
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[24]:</div>
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span class="k">for</span> <span class="n">one</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">bnch2</span><span class="o">.</span><span class="n">IonInstances</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
@@ -1410,37 +1205,10 @@ the intensityRatio as a function of temperature and density can be save to a tex
 </div>
 </div>
 
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>mg_10
-mg_10d
-mg_3
-mg_4
-mg_5
-mg_6
-mg_8
-mg_9
-ne_10
-ne_2
-ne_3
-ne_5
-ne_6
-ne_8
-</pre>
-</div>
-</div>
-
-</div>
-</div>
-
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[25]:</div>
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">wvl</span><span class="p">,</span><span class="n">bnch2</span><span class="o">.</span><span class="n">IonInstances</span><span class="p">[</span><span class="s">&#39;mg_6&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">[</span><span class="s">&#39;intensity&#39;</span><span class="p">][</span><span class="mi">6</span><span class="p">],</span><span class="s">&#39;r&#39;</span><span class="p">,</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;mg_6&#39;</span><span class="p">)</span>
@@ -1450,48 +1218,16 @@ ne_8
 </div>
 </div>
 
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt output_prompt">Out[25]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>[&lt;matplotlib.lines.Line2D at 0x7f81f6a05f60&gt;]</pre>
-</div>
-
-</div>
-
-</div>
-</div>
-
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[26]:</div>
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s">&#39;upper left&#39;</span><span class="p">)</span>
 </pre></div>
 
 </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt output_prompt">Out[26]:</div>
-
-
-<div class="output_text output_subarea output_execute_result">
-<pre>&lt;matplotlib.legend.Legend at 0x7f81ece20a20&gt;</pre>
-</div>
-
-</div>
-
 </div>
 </div>
 
@@ -1539,7 +1275,7 @@ ne_8
 <span class="n">dens</span> <span class="o">=</span> <span class="mf">1.e+9</span>
 <span class="n">wvl</span> <span class="o">=</span> <span class="mf">200.</span> <span class="o">+</span> <span class="mf">0.05</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">2001</span><span class="p">)</span>
 <span class="n">emeasure</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.e+27</span> <span class="p">,</span><span class="mf">1.e+27</span><span class="p">]</span>
-<span class="n">s</span> <span class="o">=</span> <span class="n">ch</span><span class="o">.</span><span class="n">spectrum</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">dens</span><span class="p">,</span> <span class="n">wvl</span><span class="p">,</span> <span class="nb">filter</span> <span class="o">=</span> <span class="p">(</span><span class="n">chfilters</span><span class="o">.</span><span class="n">gaussian</span><span class="p">,</span><span class="o">.</span><span class="mi">2</span><span class="p">),</span> <span class="n">em</span> <span class="o">=</span> <span class="n">emeasure</span><span class="p">,</span> <span class="n">doContinuum</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">minAbund</span><span class="o">=</span><span class="mf">1.e-5</span><span class="p">)</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">ch</span><span class="o">.</span><span class="n">spectrum</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">dens</span><span class="p">,</span> <span class="n">wvl</span><span class="p">,</span> <span class="nb">filter</span> <span class="o">=</span> <span class="p">(</span><span class="n">chfilters</span><span class="o">.</span><span class="n">gaussian</span><span class="p">,</span><span class="o">.</span><span class="mi">2</span><span class="p">),</span> <span class="n">em</span> <span class="o">=</span> <span class="n">emeasure</span><span class="p">,</span> <span class="n">doContinuum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">minAbund</span><span class="o">=</span><span class="mf">1.e-5</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">311</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">wvl</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">[</span><span class="s">&#39;integrated&#39;</span><span class="p">])</span>
@@ -1611,7 +1347,7 @@ ne_8
 <div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span class="n">s</span> <span class="o">=</span> <span class="n">ch</span><span class="o">.</span><span class="n">ipymspectrum</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">dens</span><span class="p">,</span> <span class="n">wvl</span><span class="p">,</span> <span class="nb">filter</span> <span class="o">=</span> <span class="p">(</span><span class="n">chfilters</span><span class="o">.</span><span class="n">gaussian</span><span class="p">,</span><span class="o">.</span><span class="mi">2</span><span class="p">),</span> <span class="n">em</span> <span class="o">=</span> <span class="mf">1.e+27</span><span class="p">,</span> <span class="n">doContinuum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">minAbund</span><span class="o">=</span><span class="mf">1.e-5</span><span class="p">)</span>
+<div class=" highlight hl-ipython3"><pre><span class="n">s</span> <span class="o">=</span> <span class="n">ch</span><span class="o">.</span><span class="n">ipymspectrum</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">dens</span><span class="p">,</span> <span class="n">wvl</span><span class="p">,</span> <span class="nb">filter</span> <span class="o">=</span> <span class="p">(</span><span class="n">chfilters</span><span class="o">.</span><span class="n">gaussian</span><span class="p">,</span><span class="o">.</span><span class="mi">2</span><span class="p">),</span> <span class="n">em</span> <span class="o">=</span> <span class="n">emeasure</span><span class="p">,</span> <span class="n">doContinuum</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">minAbund</span><span class="o">=</span><span class="mf">1.e-5</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">wvl</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">Spectrum</span><span class="p">[</span><span class="s">&#39;integrated&#39;</span><span class="p">])</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s">&#39;Integrated&#39;</span><span class="p">)</span>
@@ -1629,9 +1365,21 @@ ne_8
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>Using a 4 core processor running at about 3.5 GHz:</p>
 <ul>
-<li>For a minAbund of 1.e-4, the spectra of 25 ions were calculated in ?? s. On a single processor it took 39s.</li>
-<li>For a minAbund of 1.e-5, then the spectra of 100 ions would be calculated in 57 s. The previous example with the single processor spectrum class took about  209 s on the same computer.</li>
-<li>For a minAbund of 1.e-6, then the spectra of 170 ions would be calculated in ?? s.</li>
+<li>For a minAbund of 1.e-4, the spectra of 25 ions were calculated in 68 s. On a single processor it took 118 s.</li>
+<li>For a minAbund of 1.e-5, then the spectra of 100 ions would be calculated in 72 s. The previous example with the single processor spectrum class took about  129 s on the same computer.</li>
+<li>For a minAbund of 1.e-6, then the spectra of 170 ions would be calculated in 90 s.  On a single processor it took 183 s.</li>
+</ul>
+<p>Using only 3 cores:</p>
+<ul>
+<li>For a minAbund of 1.e-5, then the spectra of 100 ions would be calculated in 73 s.</li>
+</ul>
+<p>Using only 2 cores:</p>
+<ul>
+<li>For a minAbund of 1.e-5, then the spectra of 100 ions would be calculated in 88 s.</li>
+</ul>
+<p>Using only 1 core, with ch.spectrum:</p>
+<ul>
+<li>For a minAbund of 1.e-5, then the spectra of 100 ions would be calculated in 133 s.</li>
 </ul>
 
 </div>
@@ -1797,7 +1545,7 @@ ne_8
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[10]:</div>
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span class="n">temp</span> <span class="o">=</span> <span class="mf">10.</span><span class="o">**</span><span class="p">(</span><span class="mf">4.</span><span class="o">+</span><span class="mf">0.05</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">81</span><span class="p">))</span>
@@ -1807,20 +1555,6 @@ ne_8
 </pre></div>
 
 </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre> elapsed seconds =   4.75e+02
-</pre>
-</div>
-</div>
-
 </div>
 </div>
 
@@ -1838,7 +1572,7 @@ ne_8
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[12]:</div>
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span class="k">for</span> <span class="n">akey</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">rl</span><span class="o">.</span><span class="n">RadLoss</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
@@ -1846,24 +1580,6 @@ ne_8
 </pre></div>
 
 </div>
-</div>
-</div>
-
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre> abundance 
- density 
- minAbund 
- rate 
- temperature 
-</pre>
-</div>
-</div>
-
 </div>
 </div>
 

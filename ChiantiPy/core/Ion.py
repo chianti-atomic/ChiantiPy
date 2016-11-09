@@ -457,7 +457,7 @@ class ion(_ionTrails, _specTrails):
                 easplom=self.Easplom
             except:
 #                self.splomRead()
-                self.Easplom = util.splomRead(self.IonStr, ea=1)
+                self.Easplom = io.splomRead(self.IonStr, ea=1)
                 easplom =self.Easplom
             #
             # multiplicity of ground level already included

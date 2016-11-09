@@ -12,6 +12,7 @@ env:
     - MAIN_CMD='python setup.py'
     - SETUP_CMD='install'
     - CONDA_DEPENDENCIES='scipy matplotlib ipython ipyparallel pyqt sphinx sphinx_rtd_theme'
+    - PYQT_VERSION='4.11.4'
   matrix:
     - PYTHON_VERSION=2.7 SETUP_CMD='install'
     - PYTHON_VERSION=3.4 SETUP_CMD='install'

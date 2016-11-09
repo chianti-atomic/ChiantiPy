@@ -3,7 +3,7 @@ import copy
 #
 import numpy as np
 #-kpd
-import ChiantiPy
+#import ChiantiPy
 import ChiantiPy.tools.data as chdata
 import ChiantiPy.tools.constants as const
 import ChiantiPy.tools.filters as chfilters
@@ -96,7 +96,7 @@ class mspectrum(_ionTrails, _specTrails):
             #masterlist = alist
         self.Defaults = defaults
         #
-        masterlist = chdata.MasterList
+#        masterlist = chdata.MasterList
         self.Defaults = defaults
         self.Temperature = np.asarray(temperature, 'float64')
         nTemp = self.Temperature.size

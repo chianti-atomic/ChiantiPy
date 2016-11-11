@@ -2497,13 +2497,6 @@ class ion(_ionTrails, _specTrails):
                     pop[itemp] = thispop[ci:ci+nlvls]
                 except np.linalg.LinAlgError:
                     pop[itemp] = np.zeros(nlvls, 'float64')
-#                    print ' error in matrix inversion, setting populations to zero at T = ', ('%8.2e')%(temperature[itemp])
-#                thispop=np.linalg.solve(popmat,b)
-#                if rec:
-#                    pop[itemp] = thispop[ci:ci+nlvls+rec-1]
-#                else:
-#                    pop[itemp] = thispop[ci:]
-#                pop[itemp] = thispop[ci:ci+nlvls]
             #
         pop=np.where(pop >0., pop,0.)
         self.Population={"temperature":temperature,"eDensity":eDensity,"population":pop, "protonDensity":protonDensity, "ci":ci, "rec":rec}
@@ -2699,10 +2692,6 @@ class ion(_ionTrails, _specTrails):
             xlabel='Temperature (K)'
             plt.xlabel(xlabel,fontsize=fontsize)
             plt.ylabel(ylabel,fontsize=fontsize)
-#            plt.title(title,fontsize=fontsize)
-#            plt.xlim(temperature.min(),temperature.max())
-#            yl=plt.ylim()
-#            plt.ylim(ymin,1.2)
             plt.axis([temperature.min(),temperature.max(), ymin, 1.2])
             plt.text(0.1, 0.5,title, horizontalalignment='center', verticalalignment='center', fontsize=fontsize,  transform = ax.transAxes)
             #
@@ -2711,20 +2700,6 @@ class ion(_ionTrails, _specTrails):
             plt.xlabel(xlabel, fontsize=fontsize)
             plt.loglog(eDensity,pop[:,toplvl[0]], visible=False)
             ax2.xaxis.tick_top()
-#            plt.figure()
-#            for lvl in toplvl:
-#                plt.loglog(eDensity,pop[:,lvl-1])
-#                skip = min(3, ntemp)
-#                start=divmod(lvl,ndens)[1]
-#                for idens in range(start,ndens,ndens//skip):
-#                    plt.text(eDensity[idens],pop[idens,lvl-1],str(lvl))
-#            xlabel=r'Electron Density (cm$^{-3}$)'
-#            plt.xlabel(xlabel,fontsize=fontsize)
-#            plt.ylabel(ylabel,fontsize=fontsize)
-#            plt.title(title,fontsize=fontsize)
-#            plt.xlim(eDensity.min(),eDensity.max())
-#            yl=plt.ylim()
-#            plt.ylim(yl[0],1.2)
         if outFile:
             plt.savefig(outFile)
         self.Population['toplvl'] = toplvl
@@ -2738,7 +2713,7 @@ class ion(_ionTrails, _specTrails):
 
         wvlRange can be set to limit the calculation to a particular wavelength range
 
-        units:  ergs cm^-3 s^-1 str^-1
+        units:  ergs s^-1 str^-1
 
         Does not include elemental abundance or ionization fraction
 
@@ -2808,16 +2783,14 @@ class ion(_ionTrails, _specTrails):
 #                temperature = np.repeat(self.Temperature, ntempden)
 #            else:
 #                temperature = self.Temperature
-            if self.EDensity.size < ntempden:
-                eDensity = np.repeat(self.EDensity, ntempden)
-            else:
-                eDensity = self.EDensity
+#            if self.EDensity.size < ntempden:
+#                eDensity = np.repeat(self.EDensity, ntempden)
+#            else:
+#                eDensity = self.EDensity
         except:
 #            nlvls=len(pop)
             ntempden=1
             em=np.zeros(nwvl,'Float64')
-            eDensity = self.EDensity
-#            temperature = self.Temperature
         #
         plotLabels={}
         #
@@ -3063,11 +3036,6 @@ class ion(_ionTrails, _specTrails):
                 index = ntemp/2
                 print('using index = %5i specifying temperature =  %10.2e'%(index, temperature[index]))
                 self.Message = 'using index = %5i specifying temperature =  %10.2e'%(index, temperature[index])
-#            if chInteractive:
-#                print 'using index = %5i specifying temperature =  %10.2e'%(index, temperature[index])
-#            else:
-#                self.Message = 'using index = %5i specifying temperature =  %10.2e'%(index, temperature[index])
-            emiss=emiss[:, index]
             dstr=' -  Density = %10.2e (cm$^{-3}$)' % eDensity
             tstr=' -  T = %10.2e (K)' % temperature[index]
         elif ndens > 1 and ntemp == 1:
@@ -3075,10 +3043,6 @@ class ion(_ionTrails, _specTrails):
                 index = ntemp/2
                 print('using index =%5i specifying eDensity = %10.2e'%(index, eDensity[index]))
                 self.Message = 'using index =%5i specifying eDensity = %10.2e'%(index, eDensity[index])
-#            if chInteractive:
-#                print 'using index =%5i specifying eDensity = %10.2e'%(index, eDensity[index])
-#            else:
-#                self.Message = 'using index =%5i specifying eDensity = %10.2e'%(index, eDensity[index])
             emiss=emiss[:, index]
             dstr=' -  Density = %10.2e (cm$^{-3}$)' % eDensity[index]
             tstr=' -  T = %10.2e (K)' % temperature
@@ -3087,10 +3051,6 @@ class ion(_ionTrails, _specTrails):
                 index = ntemp/2
                 print('using index = %5i specifying temperature = %10.2e, eDensity =  %10.2e'%(index, temperature[index], eDensity[index]))
                 self.Message = 'using index = %5i specifying temperature = %10.2e, eDensity =  %10.2e'%(index, temperature[index], eDensity[index])
-#             if chInteractive:
-#                print 'using index = %5i specifying temperature = %10.2e, eDensity =  %10.2e'%(index, temperature[index], eDensity[index])
-#            else:
-#                self.Message = 'using index = %5i specifying temperature = %10.2e, eDensity =  %10.2e'%(index, temperature[index], eDensity[index])
             emiss=emiss[:, index]
             dstr=' -  Density = %10.2e (cm$^{-3}$)' % eDensity[index]
             tstr=' -  T = %10.2e (K)' % temperature[index]
@@ -3133,10 +3093,6 @@ class ion(_ionTrails, _specTrails):
         ymin = 10.**(np.log10(emiss.min()).round(0)-0.5 )
         #
         plt.ion()
-#        if chInteractive:
-#            plt.ion()
-#        else:
-#            plt.ioff()
         #
         for idx in range(top):
             xx=[wvl[idx], wvl[idx]]
@@ -3170,8 +3126,6 @@ class ion(_ionTrails, _specTrails):
         choose a set of lines.
         """
         #
-        #        self.Emiss={"temperature":temperature,"density":density,"wvl":wvl,"emiss":em,
-        #        "plotLabels":plotLabels}
         #
         if hasattr(self, 'Emiss'):
             doEmiss = False
@@ -3381,12 +3335,6 @@ class ion(_ionTrails, _specTrails):
         else:
 #            plt.ylim(ymin, ymax)
             plt.title(desc,fontsize=fontsize)
-#       desc=title+' '+str(wvl[num_line])+' / '+str(wvl[den_line])+' '+desc_str
-#        plt.title(desc, fontsize=fontsize)
-#       plt.title(title+' '+str(wvl[num_line])+' / '+str(wvl[den_line])+' '+desc_str,fontsize=fontsize)
-#        plt.draw()
-#        plt.ioff()
-#        plt.show()
         #
         intensityRatioFileName=self.IonStr
         for aline in num_idx:

@@ -457,7 +457,7 @@ class ion(_ionTrails, _specTrails):
                 easplom=self.Easplom
             except:
 #                self.splomRead()
-                self.Easplom = util.splomRead(self.IonStr, ea=1)
+                self.Easplom = io.splomRead(self.IonStr, ea=1)
                 easplom =self.Easplom
             #
             # multiplicity of ground level already included
@@ -467,23 +467,26 @@ class ion(_ionTrails, _specTrails):
             omega = util.splomDescale(easplom, energy)
             #
             #  need to replicate neaev
-            ntrans=len(easplom['deryd'])
-            nsplom=easplom['splom'].shape[1]
-            x=0.25*np.arange(nsplom)
-            eaev=self.DiParams['eaev']
-            if len(eaev) ==1:
+            ntrans = len(easplom['deryd'])
+            nsplom = easplom['splom'].shape[1]
+#            x=0.25*np.arange(nsplom)
+            eaev = self.DiParams['eaev']
+            if len(eaev) == 1:
                 for itrans in range(ntrans):
                     eaev.append(eaev[0])
 
             totalCross = np.zeros_like(energy)
+
             ntrans = omega.shape[0]
+            partialCross = np.zeros((ntrans, energy.size), 'float64')
             for itrans in range(ntrans):
-                lvl1 = self.Easplom['lvl1'][itrans]
+#                lvl1 = self.Easplom['lvl1'][itrans]
                 #  the collision strengths have already by divided by the
                 #   statistical weight of the ground level 2j+1
                 cross = eaev[itrans]*const.bohrCross*omega[itrans]/(energy/const.ryd2Ev)
                 totalCross += cross
-            self.EaCross = {'energy':energy, 'cross':totalCross}
+                partialCross[itrans] = cross
+            self.EaCross = {'energy':energy, 'cross':totalCross, 'partial':partialCross}
             return
         #
         # -------------------------------------------------------------------------------------

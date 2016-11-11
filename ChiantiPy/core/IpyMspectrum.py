@@ -15,20 +15,6 @@ import ChiantiPy.Gui as chgui
 from ._IonTrails import _ionTrails
 from ._SpecTrails import _specTrails
 
-#from IPython import version_info
-#if version_info[0] < 4:
-    #from IPython import parallel
-#else:
-    #import ipyparallel as parallel
-#
-# *************************************
-# to make ChiantiPy work under IPython versions 2.x and 3.x
-# comment out the next line
-# and remove the comment before 'from IPython import parallel'
-# in the following line
-# ***************************************
-
-# *****************************************
 
     #
 defaults = chdata.Defaults
@@ -96,7 +82,6 @@ class ipymspectrum(_ionTrails, _specTrails):
         #
         setupIntensity = 0
         #
-#        masterlist = chdata.MasterList
         self.Defaults = defaults
         #
         self.Temperature = np.asarray(temperature,'float64')
@@ -146,8 +131,6 @@ class ipymspectrum(_ionTrails, _specTrails):
                 self.AbundanceName = abundanceName
             else:
                 abundChoices = list(chdata.Abundance.keys())
-#                for one in wvl[topLines]:
-#                    wvlChoices.append('%12.3f'%(one))
                 abundChoice = chgui.gui.selectorDialog(abundChoices,label='Select Abundance name')
                 abundChoice_idx = abundChoice.selectedIndex
                 self.AbundanceName = abundChoices[abundChoice_idx[0]]
@@ -159,17 +142,10 @@ class ipymspectrum(_ionTrails, _specTrails):
         self.AbundAll = abundAll
         self.MinAbund = minAbund
         #
-#        nonzed = abundAll > 0.
-#        minAbundAll = abundAll[nonzed].min()
-#        # if minAbund is even set
-#        if minAbund:
-#            if minAbund < minAbundAll:
-#                minAbund = minAbundAll
         #ionInfo = chio.masterListInfo()
         wavelength = np.asarray(wavelength)
         nWvl = wavelength.size
         self.Wavelength = wavelength
-#        wvlRange = [wavelength.min(), wavelength.max()]
         #
         #
         freeFree = np.zeros((self.NTempDen, nWvl), 'float64').squeeze()
@@ -198,31 +174,17 @@ class ipymspectrum(_ionTrails, _specTrails):
             if verbose:
                 print(' doing ion %s for the following processes %s'%(akey, self.Todo[akey]))
             if 'ff' in self.Todo[akey]:
-#                if verbose:
-#                    print(' doing ff')
                 allInpt.append([akey, 'ff', temperature, wavelength, abundance, em])
             if 'fb' in self.Todo[akey]:
-#                if verbose:
-#                    print(' doing fb')
                 allInpt.append([akey, 'fb', temperature, wavelength, abundance, em])
             if 'line' in self.Todo[akey]:
-#                if verbose:
-#                    print(' doing line')
                 allInpt.append([akey, 'line', temperature, eDensity, wavelength, filter, allLines, abundance, em, doContinuum])
-        # - kpd
-#        for anInpt in allInpt:
-#            lbvAll.apply(doAll, anInpt)
-#        lbvAll.wait()
-#        lbvAll.get_result()
+        #
         result = lbvAll.map_sync(doAll, allInpt)
         if verbose:
             print(' got all ff, fb, line results')
-#            print(' ions actually returned %5i'%(len(list(lbvAll.results.values()))))
-            print(' ions actually returned %5i'%(len(result)))
         ionsCalculated = []
-        # - kpd
-#        for ijk in range(len(list(lbvAll.results.values()))):
-#            out = list(lbvAll.results.values())[ijk]
+        #
         for ijk in range(len(result)):
             out = result[ijk]
             if type(out) != list:
@@ -253,22 +215,6 @@ class ipymspectrum(_ionTrails, _specTrails):
                 else:
                     print(thisFf['errorMessage'])
             #
-#            if calcType == 'ff':
-#                thisFf = out[2]
-#                if hasattr(thisFf, 'FreeFree'):
-#                    if 'errorMessage' not in sorted(thisFf.FreeFree.keys()):
-#                        if keepIons:
-#                            self.FfInstances[ionS] = thisFf
-#    #                    if nTempDen == 1:
-#    #                        freeFree += thisFf['rate']*em[0]
-#    #                    else:
-#    #                        for iTempDen in range(nTempDen):
-#    #                            freeFree[iTempDen] += thisFf['rate'][iTempDen]*em[iTempDen]
-#                        freeFree += thisFf.FreeFree['rate']
-#                    elif type(thisFf) == str:
-#                        print(' error in FfCont %s'%(thisFf))
-#                    else:
-#                        print(thisFf['errorMessage'])
             #
             elif calcType == 'fb':
                 thisFb = out[2]
@@ -302,11 +248,6 @@ class ipymspectrum(_ionTrails, _specTrails):
                         self.Intensity  = thisIntensity
                     #
                     lineSpectrum += thisIon.Spectrum['intensity']
-    #                if nTempDen == 1:
-    #                    lineSpectrum += thisSpectrum['intensity']
-    #                else:
-    #                    for iTempDen in range(nTempDen):
-    #                        lineSpectrum[iTempDen] += thisSpectrum['intensity'][iTempDen]
                    # check for two-photon emission
                     if len(out) == 4:
                         tp = out[3]
@@ -392,16 +333,9 @@ def doAll(inpt):
         thisIon.intensity(wvlRange = wvlRange, allLines = allLines, em=em)
         if 'errorMessage' not in thisIon.Intensity.keys():
             thisIon.spectrum(wavelength,  filter=filter, allLines=allLines)
-    #        outList = [ionS, thisIon.Spectrum]
-    #    outList = [ionS, thisIon.Spectrum, thisIon.Intensity]
-    #    outList = [ionS, thisIon]
-    #    outList = [ionS, ionS]
         outList = [ionS, calcType, copy.deepcopy(thisIon)]
         if not thisIon.Dielectronic and doContinuum:
             if (thisIon.Z - thisIon.Ion) in [0, 1]:
                 thisIon.twoPhoton(wavelength, em=em)
                 outList.append(thisIon.TwoPhoton)
         return outList
-#        else:
-#            outList=[ionS,  calcType, 'error in calculating line emissivity']
-#            return outList

@@ -12,7 +12,7 @@ import ChiantiPy.tools.util as util
 #import ChiantiPy.tools.io as chio
 import ChiantiPy.Gui as chgui
 #
-from ._IonTrails import _ionTrails
+from ._IonTrails import ionTrails
 from ._SpecTrails import _specTrails
 
 
@@ -23,7 +23,7 @@ defaults = chdata.Defaults
     #
     # -------------------------------------------------------------------------
     #
-class ipymspectrum(_ionTrails, _specTrails):
+class ipymspectrum(ionTrails, _specTrails):
     '''
     this is the multiprocessing version of spectrum for using inside an IPython Qtconsole or notebook.
 

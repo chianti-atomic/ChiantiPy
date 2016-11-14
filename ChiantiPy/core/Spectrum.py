@@ -10,12 +10,12 @@ import ChiantiPy.tools.util as util
 #
 import ChiantiPy.Gui as chGui
 #
-from ._IonTrails import _ionTrails
+from ._IonTrails import ionTrails
 from ._SpecTrails import _specTrails
 
 defaults = chdata.Defaults
 
-class spectrum(_ionTrails, _specTrails):
+class spectrum(ionTrails, _specTrails):
     '''
     Calculate the emission spectrum as a function of temperature and density.
 
@@ -268,7 +268,7 @@ class spectrum(_ionTrails, _specTrails):
     #
     # ----------------------------------------------------------------------------------------------
     #
-class bunch(_ionTrails, _specTrails):
+class bunch(ionTrails, _specTrails):
     '''
     Calculate the emission line spectrum as a function of temperature and density.
 

@@ -10,7 +10,7 @@ import ChiantiPy.tools.filters as chfilters
 import ChiantiPy.tools.util as util
 #import ChiantiPy.tools.io as chio
 import ChiantiPy.Gui as chgui
-from ._IonTrails import _ionTrails
+from ._IonTrails import ionTrails
 from ._SpecTrails import _specTrails
 #
 import multiprocessing as mp
@@ -25,7 +25,7 @@ defaults = chdata.Defaults
 #except:
 #    chInteractive = 1
 #
-class mspectrum(_ionTrails, _specTrails):
+class mspectrum(ionTrails, _specTrails):
     ''' this is the multiprocessing version of spectrum
     set proc to the desired number of processors, default=3
 

@@ -11,7 +11,7 @@ import ChiantiPy.Gui as chGui
 import ChiantiPy.tools.data as chdata
 
 
-class _ionTrails(object):
+class ionTrails(object):
     """
     Base class for `ChiantiPy.core.ion` and `ChiantiPy.core.spectrum`
     """
@@ -21,68 +21,74 @@ class _ionTrails(object):
         List the line intensities. Checks to see if there is an existing Intensity attribute. If it exists, then those values are used.
         Otherwise, the `intensity` method is called.
 
+        This method prints an ASCII table with the following columns:
+
+        1. Ion: the CHIANTI style notation for the ion, e.g. 'c_4' for C IV
+        2. lvl1:  the lower level of the transition in the CHIANTI .elvlc file
+        3. lvl2:  the upper level of the transition in the CHIANTI .elvlc file
+        4. lower:  the notation, usually in LS coupling, of the lower fine
+           structure level
+        5. upper:  the notation, usually in LS coupling, of the upper fine
+           structure level
+        6. Wvl(A):  the wavelength of the transition in units as specified in
+           the chiantirc file.
+        7. Intensity
+        8. A value:  the Einstein coefficient for spontaneous emission from
+           level 'j' to level 'i'
+        9. Obs: indicates whether the CHIANTI database considers this an
+           observed line or one obtained from theoretical energy levels
+
+        Regarding the intensity column, if 'flux' in the chiantirc file is set
+        to 'energy', the intensity is given by,
+
+        .. math::
+           I = \Delta E_{ij}n_jA_{ij}\mathrm{Ab}\\frac{1}{N_e}
+           \\frac{N(X^{+m})}{N(X)}\mathrm{EM},
+
+        in units of ergs cm\ :sup:`-2` s\ :sup:`-1` sr\ :sup:`-1`. If 'flux' is set to 'photon',
+
+        .. math::
+           I = n_jA_{ij}\mathrm{Ab}\\frac{1}{N_e}\\frac{N(X^{+m})}{N(X)}
+           \mathrm{EM},
+
+        where,
+
+        - :math:`\Delta E_{ij}` is the transition energy (ergs)
+        - :math:`n_j` is  the fractions of ions in level :math:`j`
+        - :math:`A_{ij}` is the Einstein coefficient for spontaneous emission
+          from level :math:`j` to level :math:`i` (in s\ :sup:`-1`)
+        - :math:`\mathrm{Ab}` is the abundance of the specified element
+          relative to hydrogen
+        - :math:`N_e` is the electron density (in cm\ :sup:`-3`)
+        - :math:`N(X^{+m})/N(X)` is the fractional ionization of ion as a
+          function of temperature
+        - :math:`\mathrm{EM}` is the emission measure integrated along the
+          line-of-sight, :math:`\int\mathrm{d}l\,N_eN_H` (cm\ :sup:`-5`) where
+          :math:`N_H` is the density of hydrogen (neutral + ionized)
+          (cm\ :sup:`-3`)
+
+        Note that if `relative` is set, the line intensity is relative to the
+        strongest line and so the output will be unitless.
+
         Parameters
         -----------
-        index:  `int`,optional
+        index :  `int`,optional
             Index the temperature or eDensity array to use.
             -1 (default) sets the specified value to the middle of the array
-        wvlRange: `tuple`
+        wvlRange : `tuple`
             Wavelength range
-        wvlRanges: a tuple, list or array that contains at least 2
+        wvlRanges : a tuple, list or array that contains at least 2
             2 element tuples, lists or arrays so that multiple
             wavelength ranges can be specified
-        top: `int`
+        top : `int`
             Number of lines to plot, sorted by descending magnitude.
-        normalize:
+        relative : `int`
             specifies whether to normalize to strongest line
             default (relative = 0) specified that the intensities should be
             their calculated values
-        outFile:  str
+        outFile : `str`
             specifies the file that the intensities should be output to
             default(outFile = 0) intensities are output to the terminal
-
-        Output
-        ------
-
-        outputs an ascii table with the following columns
-
-        Ion:  the CHIANTI style notation for the ion, such as, c_4 for C IV
-
-        lvl1:  the lower level of the transition in the CHIANTI .elvlc file
-
-        lvl2:  the upper level of the transition in the CHIANTI .elvlc file
-
-        lower:  the notation, usually in LS coupling, of the lower fine structure level
-
-        upper:  the notation, usually in LS coupling, of the upper fine structure level
-
-        Wvl(A):  the wavelength of the transition, usually in Angstroms.  However, other
-            units, such as 'nm' or 'kev' can be specified in the chiantirc file.
-
-        Intensity:
-            if flux set to 'energy' in chiantirc file (default)
-                intensity = (delta E)_ij * n_j * A_ij * Abund * Ioneq(T) * em
-                    where (delta E)_ij is the transition energy in ergs
-                    n_j:  the fractions of ions in level 'j'
-                    A_ij:  the Einstein coefficient for spontaneous emission from level 'j' to
-                        level 'i'
-                    Abund:  the abundance of the specified element relative to hydrogen 'H'
-                    em:  the line-of-sight emission measure -
-                        the integral of n_e * n_H dl along the line-of-sight
-                        n_e:  the electron density (cm^-3)
-                        n_H:  the density of hydrogen (neutral + ionized) (cm^-3)
-                        dl:  the line of sight (cm)
-            if flux set to 'photon' in chiantirc file
-                intensity = n_j * A_ij * Abund * Ioneq(T) * em
-            default(relative = 0):  the line intensity in ergs cm^-3 s^-1 str^-1
-            if relative > :  the line intensity relative to the strongest line in the
-                specified wavelength range(s)
-
-        A value:  the Einstein coefficient for spontaneous emission from level 'j' to
-            level 'i'
-
-        Obs:  indicates whether the CHIANTI database considers this an observed line or one obtained
-            from theoretical energy levels
         """
 
         if not hasattr(self, 'Intensity'):

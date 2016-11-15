@@ -157,9 +157,10 @@ class ion(ionTrails, specTrails):
             if self.EDensity.size > 1 and self.Temperature.size == 1:
                 self.Temperature = np.ones_like(self.EDensity)*self.Temperature
             elif self.EDensity.size == 1 and self.Temperature.size > 1:
-                elf.EDensity = np.ones_like(self.Temperature)*self.EDensity
+                self.EDensity = np.ones_like(self.Temperature)*self.EDensity
 
-        assert self.EDensity.size == self.Temperature.size,'Temperature and eDensity must have the same size.'
+        if hasattr(self,'EDensity') and hasattr(self,'Temperature'):
+            assert self.EDensity.size == self.Temperature.size,'Temperature and eDensity must have the same size.'
 
         if pDensity == 'default' and eDensity is not None:
             self.PDensity = self.ProtonDensityRatio*self.EDensity
@@ -196,14 +197,15 @@ class ion(ionTrails, specTrails):
         If ion is initiated with `setup=False`, call this method to do the
         setup at a later point.
         """
-        try:
+        if alternate_dir is not None:
             fileName = os.path.join(alternate_dir, self.IonStr)
             elvlcFileName = fileName+'.elvlc'
             wgfaFileName = fileName+'.wgfa'
-        except TypeError:
+        else:
             fileName = util.ion2filename(self.IonStr)
             elvlcFileName = None
             wgfaFileName = None
+
         # read in all data if in masterlist
         if self.IonStr in chdata.MasterList:
             self.Elvlc = io.elvlcRead(self.IonStr,filename=elvlcFileName)

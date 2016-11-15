@@ -8,7 +8,7 @@ import ChiantiPy.tools.data as chdata
 import ChiantiPy.tools.constants as const
 import ChiantiPy.tools.util as util
 import ChiantiPy.Gui as chgui
-from ._SpecTrails import _specTrails
+from ._SpecTrails import specTrails
 #
 defaults = chdata.Defaults
 #chInteractive = chdata.chInteractive
@@ -19,7 +19,7 @@ defaults = chdata.Defaults
 #    matplotlib.use('Agg')
 #    import matplotlib.pyplot as pl
 
-class radLoss(_specTrails):
+class radLoss(specTrails):
     '''
     Calculate the emission spectrum as a function of temperature and density.
 

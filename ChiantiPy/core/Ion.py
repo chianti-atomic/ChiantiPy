@@ -16,13 +16,13 @@ import ChiantiPy.tools.constants as const
 import ChiantiPy.tools.data as chdata
 import ChiantiPy.Gui as chGui
 from ._IonTrails import ionTrails
-from ._SpecTrails import _specTrails
+from ._SpecTrails import specTrails
 
 xuvtop = chdata.xuvtop
 heseqLvl2 = [-1,3,-1,-1,-1,5,6,6,-1,6,6,6,5,5,3,5,3,5,3,5,-1,-1,-1,-1,-1,4,-1,4,-1,4]
 
 
-class ion(ionTrails, _specTrails):
+class ion(ionTrails, specTrails):
     """
     The top level class for performing spectral calculations for an ion in the
     CHIANTI database.
@@ -306,7 +306,7 @@ class ion(ionTrails, _specTrails):
         drparamsFile = fileName +'.drparams'
         if os.path.isfile(drparamsFile):
             self.DrParams = io.drRead(self.IonStr)
-        
+
         rrparamsFile = fileName +'.rrparams'
         if os.path.isfile(rrparamsFile):
             self.RrParams = io.rrRead(self.IonStr)

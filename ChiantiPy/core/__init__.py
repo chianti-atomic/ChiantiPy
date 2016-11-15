@@ -6,7 +6,7 @@ that is found in the LICENSE file
 
 """
 from ._IonTrails import ionTrails
-from ._SpecTrails import _specTrails
+from ._SpecTrails import specTrails
 from .Spectrum import spectrum, bunch
 from .Mspectrum import mspectrum
 from .IpyMspectrum import ipymspectrum

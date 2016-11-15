@@ -1685,7 +1685,7 @@ def versionRead():
     return versionStr.strip()
 
 
-def wgfaRead(ions, filename=None, elvlcname=-1, total=False, verbose=False):
+def wgfaRead(ions, filename=None, elvlcname=0, total=False, verbose=False):
     """
     Read CHIANTI data from a .wgfa file.
 
@@ -1713,10 +1713,7 @@ def wgfaRead(ions, filename=None, elvlcname=-1, total=False, verbose=False):
     #
     if filename:
         wgfaname = filename
-        if elvlcname < 0:
-            elvlcname = 0
-            elvlc = 0
-        elif not elvlcname:
+        if not elvlcname:
             elvlcname = os.path.splitext(wgfaname)[0] + '.elvlc'
             if os.path.isfile(elvlcname):
                 elvlc = elvlcRead('', elvlcname)

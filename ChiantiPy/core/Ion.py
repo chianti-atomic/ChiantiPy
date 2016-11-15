@@ -108,8 +108,9 @@ class ion(ionTrails, _specTrails):
 
         self.IonStr=ionStr
         _tmp_convert_name = util.convertName(ionStr)
-        self.Z,self.Ion,self.Dielectronic = _tmp_convert_name['Z'],
-                    _tmp_convert_name['Ion'],_tmp_convert_name['Dielectronic']
+        self.Z = _tmp_convert_name['Z']
+        self.Ion = _tmp_convert_name['Ion']
+        self.Dielectronic = _tmp_convert_name['Dielectronic']
         self.Spectroscopic=util.zion2spectroscopic(self.Z,self.Ion)
         self.FileName=util.zion2filename(self.Z,
                                     self.Ion,dielectronic=self.Dielectronic )
@@ -158,8 +159,7 @@ class ion(ionTrails, _specTrails):
             elif self.EDensity.size == 1 and self.Temperature.size > 1:
                 elf.EDensity = np.ones_like(self.Temperature)*self.EDensity
 
-        assert self.EDensity.size == self.Temperature.size,
-                'Temperature and eDensity must have the same size.'
+        assert self.EDensity.size == self.Temperature.size,'Temperature and eDensity must have the same size.'
 
         if pDensity == 'default' and eDensity is not None:
             self.PDensity = self.ProtonDensityRatio*self.EDensity
@@ -181,48 +181,50 @@ class ion(ionTrails, _specTrails):
 
     def _setup(self, alternate_dir=None, verbose=False):
         """
-        If ion is initiated with setup=0, this allows the setup to be done at a
-        later point. perhaps, more importantly,  by setting alternate_dir to a
-        directorycotaining the necessary files for a ChiantiPy ion, it allows
-        one tosetup an ion with files not in the current Chianti directory
-        """
-        # read in all data if in masterlist
-        # if not, there should still be ionization and recombination rates
-        MasterList = chdata.MasterList
-        if self.IonStr in MasterList:
-            if alternate_dir is not None:
-                fileName = os.path.join(alternate_dir, self.IonStr)
-                self.Elvlc = io.elvlcRead('',filename=fileName+'.elvlc')
-                self.Wgfa = io.wgfaRead('',filename=fileName+'.wgfa', elvlcname=fileName+'.elvlc')
-                # read the splups file
-                if os.path.isfile(scupsfile):
-                    # happens the case of fe_3 and prob. a few others
-                    self.Scups = io.scupsRead('', filename=scupsfile)
-                    self.Nscups=len(self.Scups['lvl1'])
-                    nlvlScups = max(self.Scups['lvl2'])
-                    nlvlList.append(nlvlScups)
-                else:
-                    self.Nscups = 0
-                    nlvlScups = 0
-            else:
-                fileName = util.ion2filename(self.IonStr)
-                self.Elvlc = io.elvlcRead(self.IonStr)
-                self.Wgfa = io.wgfaRead(self.IonStr)
-                if os.path.isfile(scupsfile):
-                    # happens the case of fe_3 and prob. a few others
-                    self.Scups = io.scupsRead(self.IonStr)
-                    self.Nscups=len(self.Scups['lvl1'])
-                    nlvlScups = max(self.Scups['lvl2'])
-                    nlvlList.append(nlvlScups)
-                else:
-                    self.Nscups = 0
-                    nlvlScups = 0
+        Setup various CHIANTI files for the ion including .wgfa, .elvlc, .scups,
+        .psplups, .reclvl, .cilvl, and others.
 
+        Parameters
+        -----------
+        alternate_dir : `str`
+            directory cotaining the necessary files for a ChiantiPy ion; use to
+            setup an ion with files not in the current CHIANTI directory
+        verbose : `bool`
+
+        Notes
+        -----
+        If ion is initiated with `setup=False`, call this method to do the
+        setup at a later point.
+        """
+        try:
+            fileName = os.path.join(alternate_dir, self.IonStr)
+            elvlcFileName = fileName+'.elvlc'
+            wgfaFileName = fileName+'.wgfa'
+        except TypeError:
+            fileName = util.ion2filename(self.IonStr)
+            elvlcFileName = None
+            wgfaFileName = None
+        # read in all data if in masterlist
+        if self.IonStr in chdata.MasterList:
+            self.Elvlc = io.elvlcRead(self.IonStr,filename=elvlcFileName)
+            self.Wgfa = io.wgfaRead(self.IonStr,filename=wgfaFileName,
+                                    elvlcname=elvlcFileName)
             self.Nwgfa=len(self.Wgfa['lvl1'])
             nlvlWgfa = max(self.Wgfa['lvl2'])
             nlvlList =[nlvlWgfa]
             scupsfile = fileName + '.scups'
             cilvlfile = fileName +'.cilvl'
+            # read the scups/splups file
+            if os.path.isfile(scupsfile):
+                # happens the case of fe_3 and prob. a few others
+                self.Scups = io.scupsRead(self.IonStr, filename=scupsfile)
+                self.Nscups=len(self.Scups['lvl1'])
+                nlvlScups = max(self.Scups['lvl2'])
+                nlvlList.append(nlvlScups)
+            else:
+                self.Nscups = 0
+                nlvlScups = 0
+            # read cilvl file
             if os.path.isfile(cilvlfile):
                 self.Cilvl = io.cireclvlRead('',filename = fileName, filetype='cilvl')
                 self.Ncilvl=len(self.Cilvl['lvl1'])
@@ -248,6 +250,7 @@ class ion(ionTrails, _specTrails):
                 self.Npsplups=len(self.Psplups["lvl1"])
             else:
                 self.Npsplups = 0
+            # drparams file may not exist
             drparamsFile = fileName +'.drparams'
             if os.path.isfile(drparamsFile):
                 self.DrParams = io.drRead(self.IonStr)
@@ -259,16 +262,21 @@ class ion(ionTrails, _specTrails):
             #  elvlc file can have more levels than the rate level files
             self.Nlvls = min([nlvlElvlc, max(nlvlList)])
         else:
+            # if not in MasterList, there should still be ionization and
+            # recombination rates
             self.Elvlc = io.elvlcRead(self.IonStr, verbose=verbose)
 
-    def _setupIonrec(self, dir=0, verbose=0):
+    def _setupIonrec(self, alternate_dir=None, verbose=False):
         """
-        this allows a bare-bones ion object to be setup up with just the ionization and recombination rates
-        mainly for ions without a complete set of files - one that is not in the MasterList
+        Setup method for ion recombination and ionization rates.
+
+        Notes
+        ------
+        Allows a bare-bones ion object to be setup up with just the ionization and recombination rates. For ions without a complete set of files - one that is not in the MasterList.
         """
 
-        if dir:
-            fileName = os.path.join(dir, self.IonStr)
+        if alternate_dir:
+            fileName = os.path.join(alternate_dir, self.IonStr)
         else:
             fileName = util.ion2filename(self.IonStr)
         elvlcname=fileName+'.elvlc'
@@ -280,9 +288,10 @@ class ion(ionTrails, _specTrails):
                 # don't expect one for the bare ion
                 print(' Elvlc file missing for '+self.IonStr)
             return
-        file = fileName +'.cilvl'
-        if os.path.isfile(file):
-            self.Cilvl = io.cireclvlRead('',filename = fileName, filetype='cilvl')
+        cilvlFile = fileName +'.cilvl'
+        if os.path.isfile(cilvlFile):
+            self.Cilvl = io.cireclvlRead('',filename = fileName,
+                                            filetype='cilvl')
             self.Ncilvl=len(self.Cilvl['lvl1'])
         else:
             self.Ncilvl = 0
@@ -297,7 +306,7 @@ class ion(ionTrails, _specTrails):
         drparamsFile = fileName +'.drparams'
         if os.path.isfile(drparamsFile):
             self.DrParams = io.drRead(self.IonStr)
-        #
+        
         rrparamsFile = fileName +'.rrparams'
         if os.path.isfile(rrparamsFile):
             self.RrParams = io.rrRead(self.IonStr)

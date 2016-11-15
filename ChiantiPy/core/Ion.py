@@ -24,7 +24,8 @@ heseqLvl2 = [-1,3,-1,-1,-1,5,6,6,-1,6,6,6,5,5,3,5,3,5,3,5,-1,-1,-1,-1,-1,4,-1,4,
 
 class ion(ionTrails, _specTrails):
     """
-    The top level class for performing spectral calculations for an ion in the CHIANTI database.
+    The top level class for performing spectral calculations for an ion in the
+    CHIANTI database.
 
     Parameters
     ----------
@@ -41,14 +42,18 @@ class ion(ionTrails, _specTrails):
     rStar : `~numpy.float64` or `~numpy.ndarray`, optional
         Distance from the center of the star (in stellar radii)
     abundanceName : `str`, optional
-        Name of Chianti abundance file to use, without the '.abund' suffix, e.g. 'sun_photospheric_1998_grevesse'. Ignored if `abundance` is set.
+        Name of Chianti abundance file to use, without the '.abund' suffix,
+        e.g. 'sun_photospheric_1998_grevesse'. Ignored if `abundance` is set.
     abundance : `float or ~numpy.float64`, optional
         Elemental abundance relative to Hydrogen
     setup : `bool or str`, optional
         If True, run ion setup function
         Otherwise, provide a limited number of attributes of the selected ion
     em : `~numpy.float64` or `~numpy.ndarray`, optional
-        Emission Measure, for the line-of-sight emission measure (:math:`\mathrm{\int \, n_e \, n_H \, dl}`) (:math:`\mathrm{cm}^{-5}`.), for the volumetric emission measure :math:`\mathrm{\int \, n_e \, n_H \, dV}` (:math:`\mathrm{cm^{-3}}`).
+        Emission Measure, for the line-of-sight emission measure
+        (:math:`\mathrm{\int \, n_e \, n_H \, dl}`)
+        (:math:`\mathrm{cm}^{-5}`.), for the volumetric emission measure
+        :math:`\mathrm{\int \, n_e \, n_H \, dV}` (:math:`\mathrm{cm^{-3}}`).
 
     Attributes
     ----------
@@ -81,50 +86,52 @@ class ion(ionTrails, _specTrails):
     The `Defaults` dict should have the following keys:
 
     * `abundfile`, the elemental abundance file, unless specified in
-    'chiantirc' this defaults to `sun_photospheric_1998_grevesse`.
+      'chiantirc' this defaults to `sun_photospheric_1998_grevesse`.
     * `ioneqfile`, the ionization equilibrium file name.  Unless specified
-    in 'chiantirc' this is defaults to `chianti`.  Other choices are
-    availble in $XUVTOP/ioneq
+      in 'chiantirc' this is defaults to `chianti`.  Other choices are
+      availble in $XUVTOP/ioneq
     * `wavelength`, the units of wavelength (Angstroms, nm, or kev), unless
-    specified in the 'chiantirc' this is defaults to 'angstrom'.
+      specified in the 'chiantirc' this is defaults to 'angstrom'.
     * `flux`, specified whether the line intensities are give in energy or
-    photon fluxes, unless specified in the 'chiantirc' this is defaults to
-    `energy`.
+      photon fluxes, unless specified in the 'chiantirc' this is defaults to
+      `energy`.
     * `gui`, specifies whether to use gui selection widgets (True) or to
-    make selections on the command line (False).  Unless specified in the
-    'chiantirc' this is defaults to `False`.
+      make selections on the command line (False).  Unless specified in the
+      'chiantirc' this is defaults to `False`.
+
     """
 
 
-    def __init__(self, ionStr, temperature=None, eDensity=None, pDensity='default', radTemperature=0,  rStar=0, abundanceName=0, abundance=0,  verbose=0, setup=True, em=0):
+    def __init__(self, ionStr, temperature=None, eDensity=None,
+                pDensity='default', radTemperature=None, rStar=None,
+                abundance=None, setup=True, em=None):
 
         self.IonStr=ionStr
-        self.Z=util.convertName(ionStr)['Z']
-        self.Ion=util.convertName(ionStr)['Ion']
-        self.Dielectronic=util.convertName(ionStr)['Dielectronic']
+        _tmp_convert_name = util.convertName(ionStr)
+        self.Z,self.Ion,self.Dielectronic = _tmp_convert_name['Z'],
+                    _tmp_convert_name['Ion'],_tmp_convert_name['Dielectronic']
         self.Spectroscopic=util.zion2spectroscopic(self.Z,self.Ion)
-        self.FileName=util.zion2filename(self.Z, self.Ion,dielectronic=self.Dielectronic )
+        self.FileName=util.zion2filename(self.Z,
+                                    self.Ion,dielectronic=self.Dielectronic )
         self.Defaults=chdata.Defaults
 
-        if abundance:
-            self.Abundance=abundance
-        elif abundanceName:
-            if abundanceName in chdata.AbundanceList:
-                self.AbundanceName = abundanceName
-                self.Abundance = chdata.Abundance[self.AbundanceName]['abundance'][self.Z-1]
-            else:
-                abundChoices = chdata.AbundanceList
-                abundChoice = chGui.gui.selectorDialog(abundChoices,label='Select Abundance name')
-                abundChoice_idx = abundChoice.selectedIndex
-                self.AbundanceName = abundChoices[abundChoice_idx[0]]
-                self.Abundance = chdata.Abundance[self.AbundanceName]['abundance'][self.Z-1]
-                print(' Abundance chosen:  %s '%(self.AbundanceName))
+        if abundance is not None:
+            try:
+                self.Abundance=float(abundance)
+            except ValueError:
+                if abundance in chdata.AbundanceList:
+                    self.AbundanceName = abundance
+                else:
+                    abundChoices = chdata.AbundanceList
+                    abundChoice = chGui.gui.selectorDialog(abundChoices,label='Select Abundance name')
+                    abundChoice_idx = abundChoice.selectedIndex
+                    self.AbundanceName = abundChoices[abundChoice_idx[0]]
         else:
             self.AbundanceName = self.Defaults['abundfile']
+        if hasattr(self,'AbundanceName'):
             self.Abundance = chdata.Abundance[self.AbundanceName]['abundance'][self.Z-1]
 
         self.IoneqName = self.Defaults['ioneqfile']
-
         self.RadTemperature = radTemperature
         self.RStar = rStar
 
@@ -134,10 +141,8 @@ class ion(ionTrails, _specTrails):
             self.FIP = chdata.Ip[self.Z-1, 0]
             if self.Dielectronic:
                 self.UpperIp=chdata.Ip[self.Z-1, self.Ion-1]
-        if type(temperature) != type(None):
-            self.Temperature = np.array(temperature,'float64')
-            self.NTemp = self.Temperature.size
 
+        if temperature is not None: self.Temperature = np.array(temperature)
         self.IoneqAll = chdata.IoneqAll
         self.ioneqOne()
 
@@ -145,37 +150,19 @@ class ion(ionTrails, _specTrails):
         #  equilibria
         if pDensity == 'default':
             self.p2eRatio()
-        if type(eDensity) != type(None):
-            self.EDensity = np.asarray(eDensity,'float64')
-            self.NEDens = self.EDensity.size
-            ndens = self.EDensity.size
-            ntemp = self.Temperature.size
-            tst1 = ndens == ntemp
-            tst1a = ndens != ntemp
-            tst2 = ntemp > 1
-            tst3 = ndens > 1
-            tst4 = ndens > 1 and ntemp > 1
-            if tst1 and ntemp == 1:
-                self.NTempDen = 1
-            elif tst1a and (tst2 or tst3) and not tst4:
-                self.NTempDen = ntemp*ndens
-                if ntemp == self.NTempDen and ndens != self.NTempDen:
-                    self.EDensity = np.ones_like(self.Temperature)*self.EDensity
-                elif ndens == self.NTempDen and ntemp != self.NTempDen:
-                    self.Temperature = np.ones_like(self.EDensity)*self.Temperature
-            elif tst1 and tst4:
-                self.NTempDen = ntemp
+        if eDensity is not None:
+            self.EDensity = np.array(eDensity)
+            self.NTempDen = max(self.EDensity.size,self.Temperature.size)
+            if self.EDensity.size > 1 and self.Temperature.size == 1:
+                self.Temperature = np.ones_like(self.EDensity)*self.Temperature
+            elif self.EDensity.size == 1 and self.Temperature.size > 1:
+                elf.EDensity = np.ones_like(self.Temperature)*self.EDensity
 
-        if pDensity == 'default' and type(eDensity) != type(None):
-            if tst1 and tst2 and tst3:
-                self.PDensity = np.zeros((ntemp), 'float64')
-                for itemp in range(ntemp):
-                    self.PDensity[itemp] = self.ProtonDensityRatio[itemp]*self.EDensity[itemp]
-            elif tst2 and tst3 and not tst1:
-                print(' if both temperature and eDensity are arrays, they must be of the same size')
-                return
-            else:
-                self.PDensity = self.ProtonDensityRatio*self.EDensity
+        assert self.EDensity.size == self.Temperature.size,
+                'Temperature and eDensity must have the same size.'
+
+        if pDensity == 'default' and eDensity is not None:
+            self.PDensity = self.ProtonDensityRatio*self.EDensity
         else:
             self.PDensity = pDensity
 
@@ -183,16 +170,137 @@ class ion(ionTrails, _specTrails):
             if self.IonStr in chdata.MasterList:
                 self._setup()
             else:
-                self.setupIonrec()
+                self._setupIonrec()
 
-        if type(em) == int and em == 0:
-            pass
-        elif type(em) == float and em > 0.:
-            em = np.ones(self.NTempDen, 'float64')*em
-            self.Em = em
-        elif type(em) == list or type(em) == tuple or type(em) == np.ndarray:
-            em = np.asarray(em, 'float64')
-            self.Em = em
+        if em is not None:
+            em = np.array(em)
+            if em.size == 1:
+                self.Em = np.tile(em,self.NTempDen)
+            else:
+                self.Em = em
+
+    def _setup(self, alternate_dir=None, verbose=False):
+        """
+        If ion is initiated with setup=0, this allows the setup to be done at a
+        later point. perhaps, more importantly,  by setting alternate_dir to a
+        directorycotaining the necessary files for a ChiantiPy ion, it allows
+        one tosetup an ion with files not in the current Chianti directory
+        """
+        # read in all data if in masterlist
+        # if not, there should still be ionization and recombination rates
+        MasterList = chdata.MasterList
+        if self.IonStr in MasterList:
+            if alternate_dir is not None:
+                fileName = os.path.join(alternate_dir, self.IonStr)
+                self.Elvlc = io.elvlcRead('',filename=fileName+'.elvlc')
+                self.Wgfa = io.wgfaRead('',filename=fileName+'.wgfa', elvlcname=fileName+'.elvlc')
+                # read the splups file
+                if os.path.isfile(scupsfile):
+                    # happens the case of fe_3 and prob. a few others
+                    self.Scups = io.scupsRead('', filename=scupsfile)
+                    self.Nscups=len(self.Scups['lvl1'])
+                    nlvlScups = max(self.Scups['lvl2'])
+                    nlvlList.append(nlvlScups)
+                else:
+                    self.Nscups = 0
+                    nlvlScups = 0
+            else:
+                fileName = util.ion2filename(self.IonStr)
+                self.Elvlc = io.elvlcRead(self.IonStr)
+                self.Wgfa = io.wgfaRead(self.IonStr)
+                if os.path.isfile(scupsfile):
+                    # happens the case of fe_3 and prob. a few others
+                    self.Scups = io.scupsRead(self.IonStr)
+                    self.Nscups=len(self.Scups['lvl1'])
+                    nlvlScups = max(self.Scups['lvl2'])
+                    nlvlList.append(nlvlScups)
+                else:
+                    self.Nscups = 0
+                    nlvlScups = 0
+
+            self.Nwgfa=len(self.Wgfa['lvl1'])
+            nlvlWgfa = max(self.Wgfa['lvl2'])
+            nlvlList =[nlvlWgfa]
+            scupsfile = fileName + '.scups'
+            cilvlfile = fileName +'.cilvl'
+            if os.path.isfile(cilvlfile):
+                self.Cilvl = io.cireclvlRead('',filename = fileName, filetype='cilvl')
+                self.Ncilvl=len(self.Cilvl['lvl1'])
+                nlvlCilvl = max(self.Cilvl['lvl2'])
+                nlvlList.append(nlvlCilvl)
+            else:
+                self.Ncilvl = 0
+            #  .reclvl file may not exist
+            reclvlfile = fileName +'.reclvl'
+            if os.path.isfile(reclvlfile):
+                self.Reclvl = io.cireclvlRead('',filename=fileName,
+                                                filetype='reclvl')
+                self.Nreclvl = len(self.Reclvl['lvl1'])
+                nlvlReclvl = max(self.Reclvl['lvl2'])
+                nlvlList.append(nlvlReclvl)
+            else:
+                self.Nreclvl = 0
+            #  psplups file may not exist
+            psplupsfile = fileName +'.psplups'
+            if os.path.isfile(psplupsfile):
+                self.Psplups = io.splupsRead('', filename=psplupsfile,
+                                                filetype='psplups')
+                self.Npsplups=len(self.Psplups["lvl1"])
+            else:
+                self.Npsplups = 0
+            drparamsFile = fileName +'.drparams'
+            if os.path.isfile(drparamsFile):
+                self.DrParams = io.drRead(self.IonStr)
+            rrparamsFile = fileName +'.rrparams'
+            if os.path.isfile(rrparamsFile):
+                self.RrParams = io.rrRead(self.IonStr)
+            # need to determine the number of levels that can be populated
+            nlvlElvlc = len(self.Elvlc['lvl'])
+            #  elvlc file can have more levels than the rate level files
+            self.Nlvls = min([nlvlElvlc, max(nlvlList)])
+        else:
+            self.Elvlc = io.elvlcRead(self.IonStr, verbose=verbose)
+
+    def _setupIonrec(self, dir=0, verbose=0):
+        """
+        this allows a bare-bones ion object to be setup up with just the ionization and recombination rates
+        mainly for ions without a complete set of files - one that is not in the MasterList
+        """
+
+        if dir:
+            fileName = os.path.join(dir, self.IonStr)
+        else:
+            fileName = util.ion2filename(self.IonStr)
+        elvlcname=fileName+'.elvlc'
+        if os.path.isfile(elvlcname):
+            self.Elvlc = io.elvlcRead('',elvlcname)
+        else:
+            zstuff = util.convertName(self.IonStr)
+            if zstuff['Ion'] - zstuff['Z'] != 1:
+                # don't expect one for the bare ion
+                print(' Elvlc file missing for '+self.IonStr)
+            return
+        file = fileName +'.cilvl'
+        if os.path.isfile(file):
+            self.Cilvl = io.cireclvlRead('',filename = fileName, filetype='cilvl')
+            self.Ncilvl=len(self.Cilvl['lvl1'])
+        else:
+            self.Ncilvl = 0
+        #  .reclvl file may not exist
+        reclvlfile = fileName +'.reclvl'
+        if os.path.isfile(reclvlfile):
+            self.Reclvl = io.cireclvlRead('',filename=fileName, filetype='reclvl')
+            self.Nreclvl = len(self.Reclvl['lvl1'])
+        else:
+            self.Nreclvl = 0
+
+        drparamsFile = fileName +'.drparams'
+        if os.path.isfile(drparamsFile):
+            self.DrParams = io.drRead(self.IonStr)
+        #
+        rrparamsFile = fileName +'.rrparams'
+        if os.path.isfile(rrparamsFile):
+            self.RrParams = io.rrRead(self.IonStr)
 
     def diCross(self, energy=None, verbose=False):
         """
@@ -1167,134 +1275,6 @@ class ion(ionTrails, _specTrails):
         else:
             self.Upsilon = {'upsilon':ups, 'temperature':temperature, 'exRate':exRate, 'dexRate':dexRate, 'de':deAll}
 
-    def _setup(self, dir=0, verbose=0):
-        """
-        If ion is initiated with setup=0, this allows the setup to be done at a
-        later point. perhaps, more importantly,  by setting dir to a directory
-        cotaining the necessary files for a ChiantiPy ion, it allows one to
-        setup an ion with files not in the current Chianti directory
-        """
-        # read in all data if in masterlist
-        # if not, there should still be ionization and recombination rates
-        MasterList = chdata.MasterList
-        if self.IonStr in MasterList:
-            if dir:
-                fileName = os.path.join(dir, self.IonStr)
-                self.Elvlc = io.elvlcRead('',filename=fileName+'.elvlc')
-                self.Wgfa = io.wgfaRead('',filename=fileName+'.wgfa', elvlcname=fileName+'.elvlc')
-                self.Nwgfa=len(self.Wgfa['lvl1'])
-                nlvlWgfa = max(self.Wgfa['lvl2'])
-                nlvlList =[nlvlWgfa]
-                scupsfile = fileName + '.scups'
-                # read the splups file
-                if os.path.isfile(scupsfile):
-                    # happens the case of fe_3 and prob. a few others
-                    self.Scups = io.scupsRead('', filename=scupsfile)
-                    self.Nscups=len(self.Scups['lvl1'])
-                    nlvlScups = max(self.Scups['lvl2'])
-                    nlvlList.append(nlvlScups)
-                else:
-                    self.Nscups = 0
-                    nlvlScups = 0
-            else:
-                fileName = util.ion2filename(self.IonStr)
-                self.Elvlc = io.elvlcRead(self.IonStr)
-                self.Wgfa = io.wgfaRead(self.IonStr)
-                self.Nwgfa=len(self.Wgfa['lvl1'])
-                nlvlWgfa = max(self.Wgfa['lvl2'])
-                nlvlList =[nlvlWgfa]
-                scupsfile = fileName + '.scups'
-                if os.path.isfile(scupsfile):
-                    # happens the case of fe_3 and prob. a few others
-                    self.Scups = io.scupsRead(self.IonStr)
-                    self.Nscups=len(self.Scups['lvl1'])
-                    nlvlScups = max(self.Scups['lvl2'])
-                    nlvlList.append(nlvlScups)
-                else:
-                    self.Nscups = 0
-                    nlvlScups = 0
-            file = fileName +'.cilvl'
-            if os.path.isfile(file):
-                self.Cilvl = io.cireclvlRead('',filename = fileName, filetype='cilvl')
-                self.Ncilvl=len(self.Cilvl['lvl1'])
-                nlvlCilvl = max(self.Cilvl['lvl2'])
-                nlvlList.append(nlvlCilvl)
-            else:
-                self.Ncilvl = 0
-            #  .reclvl file may not exist
-            reclvlfile = fileName +'.reclvl'
-            if os.path.isfile(reclvlfile):
-                self.Reclvl = io.cireclvlRead('',filename=fileName, filetype='reclvl')
-                self.Nreclvl = len(self.Reclvl['lvl1'])
-                nlvlReclvl = max(self.Reclvl['lvl2'])
-                nlvlList.append(nlvlReclvl)
-            else:
-                self.Nreclvl = 0
-            #  psplups file may not exist
-            psplupsfile = fileName +'.psplups'
-            if os.path.isfile(psplupsfile):
-                self.Psplups = io.splupsRead('', filename=psplupsfile,  filetype='psplups')
-                self.Npsplups=len(self.Psplups["lvl1"])
-            else:
-                self.Npsplups = 0
-            drparamsFile = fileName +'.drparams'
-            if os.path.isfile(drparamsFile):
-                self.DrParams = io.drRead(self.IonStr)
-            rrparamsFile = fileName +'.rrparams'
-            if os.path.isfile(rrparamsFile):
-                self.RrParams = io.rrRead(self.IonStr)
-            # need to determine the number of levels that can be populated
-            nlvlElvlc = len(self.Elvlc['lvl'])
-            #  elvlc file can have more levels than the rate level files
-            self.Nlvls = min([nlvlElvlc, max(nlvlList)])
-        else:
-            try:
-                self.Elvlc = io.elvlcRead(self.IonStr, verbose=verbose)
-            except:
-                print(' the ion %s is not in the CHIANTI masterlist '%(self.IonStr))
-                print(' elvlc file NOT available for %s'%(self.IonStr))
-
-    def setupIonrec(self, dir=0, verbose=0):
-        """
-        this allows a bare-bones ion object to be setup up with just the ionization and recombination rates
-        mainly for ions without a complete set of files - one that is not in the MasterList
-        """
-
-        if dir:
-            fileName = os.path.join(dir, self.IonStr)
-        else:
-            fileName = util.ion2filename(self.IonStr)
-        elvlcname=fileName+'.elvlc'
-        if os.path.isfile(elvlcname):
-            self.Elvlc = io.elvlcRead('',elvlcname)
-        else:
-            zstuff = util.convertName(self.IonStr)
-            if zstuff['Ion'] - zstuff['Z'] != 1:
-                # don't expect one for the bare ion
-                print(' Elvlc file missing for '+self.IonStr)
-            return
-        file = fileName +'.cilvl'
-        if os.path.isfile(file):
-            self.Cilvl = io.cireclvlRead('',filename = fileName, filetype='cilvl')
-            self.Ncilvl=len(self.Cilvl['lvl1'])
-        else:
-            self.Ncilvl = 0
-        #  .reclvl file may not exist
-        reclvlfile = fileName +'.reclvl'
-        if os.path.isfile(reclvlfile):
-            self.Reclvl = io.cireclvlRead('',filename=fileName, filetype='reclvl')
-            self.Nreclvl = len(self.Reclvl['lvl1'])
-        else:
-            self.Nreclvl = 0
-
-        drparamsFile = fileName +'.drparams'
-        if os.path.isfile(drparamsFile):
-            self.DrParams = io.drRead(self.IonStr)
-        #
-        rrparamsFile = fileName +'.rrparams'
-        if os.path.isfile(rrparamsFile):
-            self.RrParams = io.rrRead(self.IonStr)
-
     def spectrum(self, wavelength, filter=(chfilters.gaussianR,1000.), label=0, allLines=1, em=0):
         """
         Calculates the line emission spectrum for the specified ion.
@@ -1359,8 +1339,7 @@ class ion(ionTrails, _specTrails):
                 idx = util.between(self.Intensity['wvl'], wvlRange)
                 if len(idx) == 0:
                     print(' no lines in wavelength range %12.2f - %12.2f'%(wavelength.min(), wavelength.max()))
-                    self.Spectrum = {'errorMessage':' no lines in wavelength
-                    range %12.2f - %12.2f'%(wavelength.min(), wavelength.max())}
+                    self.Spectrum = {'errorMessage':' no lines in wavelength range %12.2f - %12.2f'%(wavelength.min(), wavelength.max())}
                     return
                 for iwvl in idx:
                     wvlCalc = self.Intensity['wvl'][iwvl]

@@ -207,7 +207,7 @@ class spectrum(ionTrails, specTrails):
             if 'line' in self.Todo[akey]:
                 if verbose:
                     print(' calculating spectrum for  :  %s'%(akey))
-                thisIon = ChiantiPy.core.ion(akey, temperature, eDensity, abundanceName=self.AbundanceName)
+                thisIon = ChiantiPy.core.ion(akey, temperature, eDensity, abundance=self.AbundanceName)
                 thisIon.intensity(wvlRange=wvlRange, allLines=allLines, em=em)
                 self.IonsCalculated.append(akey)
                 if 'errorMessage' not in  list(thisIon.Intensity.keys()):

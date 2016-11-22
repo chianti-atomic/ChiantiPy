@@ -5,7 +5,7 @@ This is not yet an Astropy affiliated package, but it makes use of the Astropy p
 '''
 # Include this stuff for astropy affiliation
 # -------------------------------------------
-#from ._astropy_init import *
+from ._astropy_init import *
 #--------------------------------------------
 
 #if not _ASTROPY_SETUP_:

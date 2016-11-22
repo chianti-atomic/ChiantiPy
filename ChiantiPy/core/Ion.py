@@ -41,14 +41,12 @@ class ion(ionTrails, specTrails):
         Radiation black-body temperature (in Kelvin)
     rStar : `~numpy.float64` or `~numpy.ndarray`, optional
         Distance from the center of the star (in stellar radii)
-    abundanceName : `str`, optional
-        Name of Chianti abundance file to use, without the '.abund' suffix,
-        e.g. 'sun_photospheric_1998_grevesse'. Ignored if `abundance` is set.
-    abundance : `float or ~numpy.float64`, optional
-        Elemental abundance relative to Hydrogen
-    setup : `bool or str`, optional
-        If True, run ion setup function
-        Otherwise, provide a limited number of attributes of the selected ion
+    abundance : `float` or `str`, optional
+        Elemental abundance relative to Hydrogen or name of CHIANTI abundance file
+        to use, without the '.abund' suffix, e.g. 'sun_photospheric_1998_grevesse'.
+    setup : `bool` or `str`, optional
+        If True, run ion setup function. Otherwise, provide a limited number of
+        attributes of the selected ion
     em : `~numpy.float64` or `~numpy.ndarray`, optional
         Emission Measure, for the line-of-sight emission measure
         (:math:`\mathrm{\int \, n_e \, n_H \, dl}`)

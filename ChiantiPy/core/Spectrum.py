@@ -178,32 +178,17 @@ class spectrum(ionTrails, specTrails):
                     print(' calculating ff continuum for :  %s'%(akey))
                 FF = ChiantiPy.core.continuum(akey, temperature, abundanceName=self.AbundanceName, em=em)
                 FF.freeFree(wavelength)
-#                if nTempDen == 1:
-#                    freeFree += cont.FreeFree['rate']*em[0]
-#                else:
-#                    for iTempDen in range(nTempDen):
-#                        freeFree[iTempDen] += cont.FreeFree['rate'][iTempDen]*em[iTempDen]
-                freeFree += FF.FreeFree['rate']
+                if 'errorMessage' not in list(FF.FreeFree.keys()):
+                    freeFree += FF.FreeFree['rate']
+                    
             if 'fb' in self.Todo[akey]:
                 if verbose:
                     print(' calculating fb continuum for :  %s'%(akey))
-                try:
-                    FB = ChiantiPy.core.continuum(akey, temperature, abundanceName=self.AbundanceName, em=em)
-                    FB.freeBound(wavelength)
-                    if 'errorMessage' not in list(FB.FreeBound.keys()):
-                        #  an fblvl file exists for this ions
-                        freeBound += FB.FreeBound['rate']
-                except:
-                    cont = ChiantiPy.core.continuum(akey, temperature, abundanceName=self.AbundanceName)
-                    cont.freeBound(wavelength)
-#                if 'errorMessage' not in list(cont.FreeBound.keys()):
-#                    #  an fblvl file exists for this ions
-#                    if nTempDen == 1:
-#                        freeBound += cont.FreeBound['rate']*em[0]
-#                    else:
-#                        for iTempDen in range(nTempDen):
-#                            freeBound[iTempDen] += cont.FreeBound['rate'][iTempDen]*em[iTempDen]
-#                        freeBound += cont.FreeBound['rate']
+                FB = ChiantiPy.core.continuum(akey, temperature, abundanceName=self.AbundanceName, em=em)
+                FB.freeBound(wavelength)
+                if 'errorMessage' not in list(FB.FreeBound.keys()):
+                    #  an fblvl file exists for this ions
+                    freeBound += FB.FreeBound['rate']
             if 'line' in self.Todo[akey]:
                 if verbose:
                     print(' calculating spectrum for  :  %s'%(akey))

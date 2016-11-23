@@ -67,7 +67,7 @@ class mspectrum(ionTrails, specTrails):
     proc = the number of processors to use
     timeout - a small but non-zero value seems to be necessary
     '''
-    def __init__(self, temperature, eDensity, wavelength, filter=(chfilters.gaussianR, 1000.), label=0, elementList = 0, ionList = 0, minAbund=0, keepIons=0, abundanceName=0,  doContinuum=1, allLines = 1, em =0,  proc=3, verbose = 0,  timeout=0.1):
+    def __init__(self, temperature, eDensity, wavelength, filter=(chfilters.gaussianR, 1000.), label=0, elementList = 0, ionList = 0, minAbund=1.e-6, keepIons=0, abundanceName=0,  doContinuum=1, allLines = 1, em =0,  proc=3, verbose = 0,  timeout=0.1):
         #
         t1 = datetime.now()
         # creates Intensity dict from first ion calculated
@@ -229,13 +229,8 @@ class mspectrum(ionTrails, specTrails):
             #
             for iff in range(ffWorkerQSize):
                 thisFreeFree = ffDoneQ.get()
-#                freeFree += thisFreeFree['rate']
-#                if nTempDen ==1:
-#                    freeFree += thisFreeFree['rate']*em[0]
-#                else:
-#                    for iTempDen in range(nTempDen):
-#                        freeFree[iTempDen] += thisFreeFree['rate'][iTempDen]*em[iTempDen]
-                freeFree += thisFreeFree['rate']
+                if 'rate' in sorted(thisFreeFree.keys()):
+                    freeFree += thisFreeFree['rate']
             for p in ffProcesses:
                 if not isinstance(p, str):
                     p.terminate()
@@ -257,12 +252,6 @@ class mspectrum(ionTrails, specTrails):
             for ifb in range(fbWorkerQSize):
                 thisFreeBound = fbDoneQ.get()
                 if 'rate' in sorted(thisFreeBound.keys()):
-#                    freeBound += thisFreeBound['rate']
-#                    if nTempDen ==1:
-#                        freeBound += thisFreeBound['rate']*em[0]
-#                    else:
-#                        for iTempDen in range(nTempDen):
-#                            freeBound[iTempDen] += thisFreeBound['rate'][iTempDen]*em[iTempDen]
                     freeBound += thisFreeBound['rate']
             for p in fbProcesses:
                 if not isinstance(p, str):

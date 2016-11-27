@@ -21,6 +21,7 @@ density_3 = np.logspace(5,8,21)
 # setup an ion object to reuse in several tests
 tmp_ion = ion(test_ion,temperature=temperature_2,eDensity=density_2)
 
+
 #Check various ways to specify the temperature and density
 def test_temperature_density():
     # TODO: test case where neither are set/ one or the other is not set

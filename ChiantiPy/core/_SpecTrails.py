@@ -260,6 +260,9 @@ class specTrails(object):
                                 self.Todo[ionSd] = 'line'
                             if verbose:
                                 print(' for ion %s do : %s'%(ionSd, self.Todo[ionSd]))
+        if len(self.Todo.keys()) == 0:
+            print(' no elements have been selected')
+            print(' it is necessary to provide an elementList, an ionList, or set minAbund > 0.')
         return
     #
     # -------------------------------------------------------------------------

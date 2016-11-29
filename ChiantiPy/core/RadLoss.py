@@ -84,7 +84,7 @@ class radLoss(specTrails):
                 abundChoice = chgui.gui.selectorDialog(abundChoices,label='Select Abundance name')
                 abundChoice_idx = abundChoice.selectedIndex
                 self.AbundanceName = abundChoices[abundChoice_idx[0]]
-                abund = self.AbundanceName
+#                abund = self.AbundanceName
                 print(' Abundance chosen:  %s '%(self.AbundanceName))
         #
         abundAll = chdata.Abundance[self.AbundanceName]['abundance']
@@ -133,12 +133,6 @@ class radLoss(specTrails):
                         cont = ChiantiPy.core.continuum(akey, temperature, abundanceName=self.AbundanceName)
                         cont.freeFreeLoss()
                         freeFreeLoss += cont.FreeFreeLoss['rate']
-    #                if nTempDen == 1:
-    #                    freeFree += cont.FreeFreeLoss['rate']
-    #                else:
-    #                    for iTempDen in range(nTempDen):
-    #                        freeFree[iTempDen] += cont.FreeFree['rate'][iTempDen]*em[iTempDen]
-    #                freeFree += cont.FreeFree['rate']
                 if 'fb' in self.Todo[akey]:
                     if verbose:
                         print(' calculating fb continuum for :  %s'%(akey))
@@ -152,18 +146,6 @@ class radLoss(specTrails):
                     if 'errorMessage' not in list(cont.FreeBoundLoss.keys()):
                         #  an fblvl file exists for this ions
                         freeBoundLoss += cont.FreeBoundLoss['rate']
-#                except:
-#                    cont = ChiantiPy.core.continuum(akey, temperature, abundanceName=self.AbundanceName)
-#                    cont.freeBoundLoss()
-#                if 'errorMessage' not in list(cont.FreeBound.keys()):
-#                    #  an fblvl file exists for this ions
-#                    freeBoundLoss += cont.FreeBoundLoss['rate']
-#                    if nTempDen == 1:
-#                        freeBoundLoss += cont.FreeBoundLoss['rate']
-#                    else:
-#                        for iTempDen in range(nTempDen):
-#                            freeBound[iTempDen] += cont.FreeBound['rate'][iTempDen]*em[iTempDen]
-#                        freeBound += cont.FreeBound['rate']
             if 'line' in self.Todo[akey]:
                 if verbose:
                     print(' calculating spectrum for  :  %s'%(akey))
@@ -173,19 +155,7 @@ class radLoss(specTrails):
                 if 'errorMessage' not in  list(thisIon.Intensity.keys()):
                     self.Finished.append(akey)
                     thisIon.boundBoundLoss()
-#                    self.IonInstances[akey] = copy.deepcopy(thisIon)
-#                    if setupIntensity:
-#                        for bkey in self.Intensity:
-#                            self.Intensity[bkey] = np.hstack((copy.copy(self.Intensity[bkey]), thisIon.Intensity[bkey]))
-#                    else:
-#                        setupIntensity = 1
-#                        self.Intensity  = thisIon.Intensity
                     boundBoundLoss += thisIon.BoundBoundLoss['rate']
-#                            if nTempDen == 1:
-#                                lineSpectrum += thisIon.Spectrum['intensity']
-#                            else:
-#                                for iTempDen in range(nTempDen):
-#                                    lineSpectrum[iTempDen] += thisIon.Spectrum['intensity'][iTempDen]
                 else:
                     if verbose:
                         print(thisIon.Intensity['errorMessage'])
@@ -193,81 +163,6 @@ class radLoss(specTrails):
                 if (Z - ionstage) in [0, 1] and not dielectronic:
                     thisIon.twoPhotonLoss()
                     twoPhotonLoss += thisIon.TwoPhotonLoss['rate']
-
-#        for iz in range(31):
-#            abundance = chdata.Abundance['abundance'][iz-1]
-#            if abundance >= minAbund:
-#                print(' %5i %5s abundance = %10.2e '%(iz, const.El[iz-1],  abundance))
-#                #
-#                for ionstage in range(1, iz+2):
-#                    ionS = util.zion2name(iz, ionstage)
-##                   print ' ionS = ', ionS
-#                    masterListTest = ionS in masterlist
-#                    masterListInfoTest = ionS in sorted(ionInfo.keys())
-#                    if masterListTest or masterListInfoTest:
-#                        ioneqTest = (self.Temperature.max() >= ionInfo[ionS]['tmin']) and (self.Temperature.min() <= ionInfo[ionS]['tmax'])
-#                    # construct similar test for the dielectronic files
-#                    ionSd = util.zion2name(iz, ionstage, dielectronic=1)
-#                    masterListTestD = ionSd in masterlist
-#                    masterListInfoTestD = ionSd in sorted(ionInfo.keys())
-#                    if masterListTestD or masterListInfoTestD:
-#                        ioneqTestD = (self.Temperature.max() >= ionInfo[ionSd]['tmin']) and (self.Temperature.min() <=ionInfo[ionSd]['tmax'])
-#                    ionstageTest = ionstage > 1
-#                    if ionstageTest and ioneqTest and doContinuum:
-#                        # ionS is the target ion, cannot be the neutral for the continuum
-#                        print(' calculating continuum for %s'%(ionS))
-#                        cont = ChiantiPy.core.continuum(ionS, temperature, abund=abund)
-#                        cont.freeFreeLoss()
-#    #                   print dir(thisIon)
-#    #                   print ' wvl = ', thisIon.FreeFree['wvl']
-##                        if nTempDen ==1:
-#                        freeFreeLoss += cont.FreeFreeLoss['rate']
-##                        else:
-##                            for iTempDen in range(nTempDen):
-##                                freeFreeLoss[iTempDen] += cont.FreeFreeLoss['rate'][iTempDen]
-#                    #
-#                        cont.freeBoundLoss()
-#                        if 'errorMessage' not in sorted(cont.FreeBoundLoss.keys()):
-#                            #  an fblvl file exists for this ions
-##                            if nTempDen == 1:
-#                            freeBoundLoss += cont.FreeBoundLoss['rate']
-##                            else:
-##                                freeBound[iTempDen] += cont.FreeBound['rate'][iTempDen]
-#                    if masterListTest and ioneqTest:
-#                        print(' calculating spectrum for  %s  '%(ionS))
-#                        thisIon = ChiantiPy.core.ion(ionS, temperature, density, abund=abund)
-##                       print ' dir = ', dir(thisIon)
-##                        thisIon.emiss(wvlRange = wvlRange, allLines=allLines)
-#                        thisIon.boundBoundLoss( allLines=allLines)
-#                        # check that there are lines in this wavelength range
-#                        if 'errorMessage' not in  sorted(thisIon.BoundBoundLoss.keys()):
-#                            thisIon.boundBoundLoss()
-##                           intensity = thisIon.Intensity['intensity']
-##                            if nTempDen == 1:
-#                            boundBoundLoss += thisIon.BoundBoundLoss['rate']
-##                            else:
-##                                for iTempDen in range(nTempDen):
-##                                    lineSpectrum[iTempDen] += thisIon.Spectrum['intensity'][iTempDen]
-#                        # get 2 photon emission for H and He sequences
-#                        if (iz - ionstage) in [0, 1]:
-#                            thisIon.twoPhotonLoss()
-#                            twoPhotonLoss += thisIon.TwoPhotonLoss['rate']
-#                    # get dielectronic lines
-#                    if masterListTestD and ioneqTestD:
-#                        print(' calculating spectrum for  %s '%(ionSd))
-#                        thisIon = ChiantiPy.core.ion(ionSd, temperature, density, abund=abund)
-##                       print ' dir = ', dir(thisIon)
-##                       have to do all lines for the dielectronic satellites
-##                        thisIon.emiss(allLines=1)
-#                        thisIon.intensity(allLines=allLines)
-#                        # check that there are lines in this wavelength range - probably not redundant
-#                        if 'errorMessage' not in  sorted(thisIon.Intensity.keys()):
-#                            thisIon.boundBoundLoss()
-##                            if nTempDen == 1:
-#                            boundBoundLoss += thisIon.BoundBoundLoss['rate']
-##                            else:
-##                                for iTempDen in range(nTempDen):
-##                                    lineSpectrum[iTempDen] += thisIon.Spectrum['intensity'][iTempDen]
         self.FreeFreeLoss = freeFreeLoss
         self.FreeBoundLoss = freeBoundLoss
         self.BoundBoundLoss = boundBoundLoss
@@ -277,21 +172,25 @@ class radLoss(specTrails):
         t2 = datetime.now()
         dt=t2-t1
         print(' elapsed seconds = %10.2e'%(dt.seconds))
-        self.RadLoss = {'rate':total, 'temperature':self.Temperature, 'density':self.EDensity, 'minAbund':minAbund, 'abundance':self.AbundanceName}
+        xlabel = 'Temperature (K)'
+        ylabel = r'erg  s$^{-1}$ cm$^{3}$'
+        self.RadLoss = {'rate':total, 'temperature':self.Temperature, 'density':self.EDensity, 'minAbund':minAbund, 'abundance':self.AbundanceName, ylabel:ylabel, xlabel:xlabel}
     #
     # -------------------------------------------------------------------
     #
-    def radLossPlot(self):
+    def radLossPlot(self, title=0):
         '''
         to plot the radiative losses vs temperature
         '''
         fontsize = 16
         temp = self.RadLoss['temperature']
         rate = self.RadLoss['rate']
-        pl.loglog(temp, rate)
-        plt.xlabel('Temperature (K)',fontsize=fontsize)
-        plt.ylabel(r'erg  s$^{-1}$  ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$',fontsize=fontsize)
-#            title = 'Radiative loss rate,  minAbund = %6.1e'%(self.MinAbund)
-#            if self.Density.size == 1:
-#                title += ', density = %6.1e'%(self.Density)
-#            plt.title(title, fontsize=fontsize)
+        plt.loglog(rate, temp)
+#        plt.ylabel(r'erg  s$^{-1}$  ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$',fontsize=fontsize)
+        plt.xlabel(self.Radloss['xlabel'],fontsize=fontsize)
+        plt.ylabel(self.Radloss['ylabel'],fontsize=fontsize)
+        if title:
+            title = 'Radiative loss rate,  minAbund = %10.2e'%(self.MinAbund)
+            if self.Density.size == 1:
+                title += ', density = %10.2e'%(self.Density)
+            plt.title(title, fontsize=fontsize)

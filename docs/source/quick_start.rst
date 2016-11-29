@@ -8,7 +8,7 @@ Bring up a Python session (using > Python -i ), or better yet, an IPython sessio
 
 ::
 
-  import chianti.core as ch 
+  import ChiantiPy.core as ch 
   import numpy as np
   import matplotlib.pyplot as plt
 
@@ -48,8 +48,6 @@ Classes and function of ChiantiPy start with lower case letters.  Data/attribute
 ::
     
   fe14.populate() creates fe14.Population containing the level population information
-
-  fe14.emiss() creates fe14.Emiss containing the line emissivity information
   
   fe14.intensity() created fe14.Intensity contain the line intensities information
   
@@ -615,6 +613,6 @@ produces, in 446 s:
     
 the radiative losses are kept in the rl.RadLoss dictionary
 
-the **abundancdName** keyword argument can be set to the name of an available abundance file in XUVTOP/abund
+the **abundance** keyword argument can be set to the name of an available abundance file in XUVTOP/abund
 
 if abundanceName=1, a dialog will come up so that a abundance file can be selected

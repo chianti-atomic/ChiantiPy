@@ -157,8 +157,9 @@ class ion(ionTrails, specTrails):
             elif self.EDensity.size == 1 and self.Temperature.size > 1:
                 self.EDensity = np.ones_like(self.Temperature)*self.EDensity
 
-        if hasattr(self,'EDensity') and hasattr(self,'Temperature'):
-            assert self.EDensity.size == self.Temperature.size,'Temperature and eDensity must have the same size.'
+        if hasattr(self,'EDensity') and hasattr(self,'Temperature') \
+        and self.EDensity.size != self.Temperature.size:
+            raise ValueError('Temperature and density must be the same size.')
 
         if pDensity == 'default' and eDensity is not None:
             self.PDensity = self.ProtonDensityRatio*self.EDensity

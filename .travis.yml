@@ -11,12 +11,15 @@ env:
     - ASTROPY_VERSION='stable'
     - MAIN_CMD='python setup.py'
     - SETUP_CMD='install'
-    - CONDA_DEPENDENCIES='scipy matplotlib ipython ipyparallel pyqt sphinx sphinx_rtd_theme'
+    - CONDA_DEPENDENCIES='scipy matplotlib ipython ipyparallel pyqt sphinx sphinx_rtd_theme pytest'
     - PYQT_VERSION='4.11.4'
   matrix:
     - PYTHON_VERSION=2.7 SETUP_CMD='install'
     - PYTHON_VERSION=3.4 SETUP_CMD='install'
     - PYTHON_VERSION=3.5 SETUP_CMD='install'
+    - PYTHON_VERSION=2.7 SETUP_CMD='test'
+    - PYTHON_VERSION=3.4 SETUP_CMD='test'
+    - PYTHON_VERSION=3.5 SETUP_CMD='test'
     - PYTHON_VERSION=2.7 SETUP_CMD='build_sphinx'
     - PYTHON_VERSION=3.4 SETUP_CMD='build_sphinx'
     - PYTHON_VERSION=3.5 SETUP_CMD='build_sphinx'
@@ -24,8 +27,10 @@ env:
 install:
   - git clone https://github.com/astropy/ci-helpers.git
   - source ci-helpers/travis/setup_conda_${TRAVIS_OS_NAME}.sh
-#install the chianti database
+#install the chianti database and place rc file
 before_script:
+  - mkdir -p $HOME/.chianti
+  - cp chiantirc $HOME/.chianti
   - mkdir -p $XUVTOP
   - curl -L http://www.chiantidatabase.org/download/CHIANTI_8.0.2_data.tar.gz | tar xz -C $XUVTOP
 #run the setup commands

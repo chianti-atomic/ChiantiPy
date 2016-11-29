@@ -9,7 +9,7 @@ Prerequisites
 
 .. _CHIANTI: http://www.chiantidatabase.org/
 
-* Python_ (developed with versions 2.7 and 3.3)
+* Python_ (developed with versions 2.7 and 3.3, 3.4)
 
 .. _PYTHON:  http://www.python.org
 
@@ -27,7 +27,7 @@ Prerequisites
 
 * Matplotlib requires a GUI library
 
-  PyQt4_ or wxPython_ or PyGTK_
+  PyQt4_ or wxPython_ (not compatible with Python3) or PyGTK_
   
   Once one of these is installed, it must be set as the backend in your matplotlibrc file, e.g., backend:  Qt4Agg
 
@@ -37,7 +37,7 @@ Prerequisites
 
 .. _PyGTK:  http://www.pygtk.org/
 
-* IPython_ version 4 / Jupyter
+* IPython_ version 4 or 5 / Jupyter
   
 .. _IPython:  http://ipython.org
 

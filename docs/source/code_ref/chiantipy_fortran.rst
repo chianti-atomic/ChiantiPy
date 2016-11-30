@@ -1,4 +1,4 @@
-FortranFormat Routines
-=======================
+FortranFormat Reader Classes
+=============================
 
 .. automodapi:: ChiantiPy.fortranformat

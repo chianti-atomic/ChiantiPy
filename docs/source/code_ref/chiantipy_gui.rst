@@ -1,4 +1,4 @@
-ChiantiPy GUI Routines
+ChiantiPy GUI 
 =======================
 
 .. automodapi:: ChiantiPy.Gui

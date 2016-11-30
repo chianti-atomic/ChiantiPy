@@ -1,15 +1,16 @@
 from datetime import datetime
+
 import numpy as np
 import matplotlib.pyplot as plt
 np.seterr(over='ignore')
-#import ChiantiPy.core as ch
+
 import ChiantiPy
 import ChiantiPy.tools.data as chdata
 import ChiantiPy.tools.constants as const
 import ChiantiPy.tools.util as util
 import ChiantiPy.Gui as chgui
-from ._SpecTrails import specTrails
-#
+from ChiantiPy.base import specTrails
+
 defaults = chdata.Defaults
 #chInteractive = chdata.chInteractive
 #if chInteractive:

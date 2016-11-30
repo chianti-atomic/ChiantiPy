@@ -1,28 +1,21 @@
 from datetime import datetime
 import copy
-#
-#
+
 import numpy as np
 from ipyparallel import Client
+
 import ChiantiPy
 import ChiantiPy.tools.data as chdata
 import ChiantiPy.tools.constants as const
 import ChiantiPy.tools.filters as chfilters
 import ChiantiPy.tools.util as util
-#import ChiantiPy.tools.io as chio
 import ChiantiPy.Gui as chgui
-#
-from ._IonTrails import ionTrails
-from ._SpecTrails import specTrails
+from ChiantiPy.base import ionTrails
+from ChiantiPy.base import specTrails
 
-
-    #
 defaults = chdata.Defaults
-    #
-    #
-    #
-    # -------------------------------------------------------------------------
-    #
+
+
 class ipymspectrum(ionTrails, specTrails):
     '''
     this is the multiprocessing version of spectrum for using inside an IPython Qtconsole or notebook.

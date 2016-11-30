@@ -1,17 +1,16 @@
 import copy
 from datetime import datetime
+
 import numpy as np
+
 import ChiantiPy
 import ChiantiPy.tools.data as chdata
 import ChiantiPy.tools.constants as const
 import ChiantiPy.tools.filters as chfilters
 import ChiantiPy.tools.util as util
-#import ChiantiPy.tools.io as chio
-#
 import ChiantiPy.Gui as chGui
-#
-from ._IonTrails import ionTrails
-from ._SpecTrails import specTrails
+from ChiantiPy.base import ionTrails
+from ChiantiPy.base import specTrails
 
 defaults = chdata.Defaults
 
@@ -180,7 +179,7 @@ class spectrum(ionTrails, specTrails):
                 FF.freeFree(wavelength)
                 if 'errorMessage' not in list(FF.FreeFree.keys()):
                     freeFree += FF.FreeFree['rate']
-                    
+
             if 'fb' in self.Todo[akey]:
                 if verbose:
                     print(' calculating fb continuum for :  %s'%(akey))

@@ -6,7 +6,7 @@ import ChiantiPy.tools.data as chdata
 import ChiantiPy.tools.util as util
 import ChiantiPy.tools.io as chio
 import ChiantiPy.tools.constants as const
-import ChiantiPy.Gui as chgui
+import ChiantiPy.Gui as chGui
 ip = chdata.Ip
 MasterList = chdata.MasterList
 #
@@ -16,7 +16,7 @@ class continuum:
 
     includes methods for the calculation of the free-free and free-bound continua.
     '''
-    def __init__(self, ionStr,  temperature, abundance=0, abundanceName=0, em=0, verbose=0):
+    def __init__(self, ionStr,  temperature, abundance=None, em=0, verbose=0):
         nameDict = util.convertName(ionStr)
         self.Z = nameDict['Z']
         self.Ion = nameDict['Ion']
@@ -42,24 +42,20 @@ class continuum:
             temperature = np.asarray(temperature, 'float64')
             self.Temperature = temperature
         #
-        if abundance:
-            self.Abundance = abundance
-        elif abundanceName:
-            if abundanceName in sorted(chdata.Abundance.keys()):
-                self.AbundanceName = abundanceName
-                self.Abundance = chdata.Abundance[self.AbundanceName]['abundance'][self.Z-1]
-            else:
-                abundChoices = sorted(chdata.Abundance.keys())
-#                for one in wvl[topLines]:
-#                    wvlChoices.append('%12.3f'%(one))
-                abundChoice = chgui.gui.selectorDialog(abundChoices,label='Select Abundance name')
-                abundChoice_idx = abundChoice.selectedIndex
-                self.AbundanceName = abundChoices[abundChoice_idx[0]]
-                abundanceName = self.AbundanceName
-                print(' Abundance chosen:  %s '%(self.AbundanceName))
-                self.Abundance = chdata.Abundance[self.AbundanceName]['abundance'][self.Z-1]
+        if abundance is not None:
+            try:
+                self.Abundance=float(abundance)
+            except ValueError:
+                if abundance in chdata.AbundanceList:
+                    self.AbundanceName = abundance
+                else:
+                    abundChoices = chdata.AbundanceList
+                    abundChoice = chGui.gui.selectorDialog(abundChoices,label='Select Abundance name')
+                    abundChoice_idx = abundChoice.selectedIndex
+                    self.AbundanceName = abundChoices[abundChoice_idx[0]]
         else:
             self.AbundanceName = self.Defaults['abundfile']
+        if hasattr(self,'AbundanceName'):
             self.Abundance = chdata.Abundance[self.AbundanceName]['abundance'][self.Z-1]
         #
         self.ioneqOne()

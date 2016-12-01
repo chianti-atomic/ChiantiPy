@@ -1,30 +1,21 @@
 from datetime import datetime
 import copy
-#
+import multiprocessing as mp
+
 import numpy as np
-#-kpd
-#import ChiantiPy
+
 import ChiantiPy.tools.data as chdata
 import ChiantiPy.tools.constants as const
 import ChiantiPy.tools.filters as chfilters
 import ChiantiPy.tools.util as util
-#import ChiantiPy.tools.io as chio
 import ChiantiPy.Gui as chgui
-from ._IonTrails import ionTrails
-from ._SpecTrails import specTrails
-#
-import multiprocessing as mp
-#-kpd
+from ChiantiPy.base import ionTrails
+from ChiantiPy.base import specTrails
 import ChiantiPy.tools.mputil as mputil
-#
+
 defaults = chdata.Defaults
-#
-# the following is necessary to make chiantipy non interactive for the web
-#try:
-#    chInteractive = int(os.environ['CHIANTIPY_INTERACTIVE'])
-#except:
-#    chInteractive = 1
-#
+
+
 class mspectrum(ionTrails, specTrails):
     ''' this is the multiprocessing version of spectrum
     set proc to the desired number of processors, default=3
@@ -238,7 +229,7 @@ class mspectrum(ionTrails, specTrails):
             fbProcesses = []
             for i in range(proc):
                 #-kpd
-                p = mp.Process(target=mputil.doFbQ, args=(fbWorkerQ, fbDoneQ))                
+                p = mp.Process(target=mputil.doFbQ, args=(fbWorkerQ, fbDoneQ))
 #                p = mp.Process(target=doFbQ, args=(fbWorkerQ, fbDoneQ))
                 p.start()
                 fbProcesses.append(p)

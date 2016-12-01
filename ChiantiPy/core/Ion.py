@@ -15,8 +15,8 @@ import ChiantiPy.tools.io as io
 import ChiantiPy.tools.constants as const
 import ChiantiPy.tools.data as chdata
 import ChiantiPy.Gui as chGui
-from ._IonTrails import ionTrails
-from ._SpecTrails import specTrails
+from ChiantiPy.base import ionTrails
+from ChiantiPy.base import specTrails
 
 xuvtop = chdata.xuvtop
 heseqLvl2 = [-1,3,-1,-1,-1,5,6,6,-1,6,6,6,5,5,3,5,3,5,3,5,-1,-1,-1,-1,-1,4,-1,4,-1,4]

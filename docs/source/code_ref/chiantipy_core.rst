@@ -1,4 +1,4 @@
-ChiantiPy Core Routines
+ChiantiPy Core Classes
 ========================
 
 .. automodapi:: ChiantiPy.core

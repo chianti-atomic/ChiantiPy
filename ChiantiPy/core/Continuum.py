@@ -553,7 +553,7 @@ class continuum:
         #
         # for the ionization potential, must use that of the recombined ion
         #
-        iprcm = self.Ipr/const.invCm2Ev
+#        iprcm = self.Ipr/const.invCm2Ev
         #
         # get karzas-latter Gaunt factors
         if hasattr(self, 'Klgfb'):

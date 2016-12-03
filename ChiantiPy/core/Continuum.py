@@ -11,10 +11,23 @@ ip = chdata.Ip
 MasterList = chdata.MasterList
 #
 class continuum:
-    '''
-    The top level class for continuum calculations.
+    '''The top level class for continuum calculations.
 
     includes methods for the calculation of the free-free and free-bound continua.
+    Parameters
+    ----------
+    ionStr : `str`
+        CHIANTI notation for the given ion, e.g. 'fe_12' that corresponds to the `Fe XII` ion.
+    temperature : `~numpy.float64` or `~numpy.ndarray`, optional
+        Temperature array (Kelvin)
+    abundance : `float` or `str`, optional
+        Elemental abundance relative to Hydrogen or name of CHIANTI abundance file,
+        without the '.abund' suffix, e.g. 'sun_photospheric_1998_grevesse'.
+    em : `~numpy.float64` or `~numpy.ndarray`, optional
+        Emission Measure, for the line-of-sight emission measure
+        (:math:`\mathrm{\int \, n_e \, n_H \, dl}`)
+        (:math:`\mathrm{cm}^{-5}`.), for the volumetric emission measure
+        :math:`\mathrm{\int \, n_e \, n_H \, dV}` (:math:`\mathrm{cm^{-3}}`).
     '''
     def __init__(self, ionStr,  temperature, abundance=None, em=0, verbose=0):
         nameDict = util.convertName(ionStr)

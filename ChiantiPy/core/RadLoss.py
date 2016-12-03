@@ -8,17 +8,10 @@ import ChiantiPy
 import ChiantiPy.tools.data as chdata
 import ChiantiPy.tools.constants as const
 import ChiantiPy.tools.util as util
-import ChiantiPy.Gui as chgui
+import ChiantiPy.Gui as chGui
 from ChiantiPy.base import specTrails
 
 defaults = chdata.Defaults
-#chInteractive = chdata.chInteractive
-#if chInteractive:
-#    import pylab as pl
-#else:
-#    import matplotlib
-#    matplotlib.use('Agg')
-#    import matplotlib.pyplot as pl
 
 class radLoss(specTrails):
     '''
@@ -51,8 +44,12 @@ class radLoss(specTrails):
 
     em [for emission measure], can be a float or an array of the same length as the
     temperature/density.
+    
+    abundance: to select a particular set of abundances, set abundance to the name of a CHIANTI abundance file,
+        without the '.abund' suffix, e.g. 'sun_photospheric_1998_grevesse'
+        If set to a blank (''), a gui selection menu will popup and allow the selection of an set of abundances
     '''
-    def __init__(self, temperature, eDensity, elementList=0, ionList = 0, minAbund=0, doContinuum=1, abundanceName=0, verbose=0, allLines=1, keepIons=0):
+    def __init__(self, temperature, eDensity, elementList=0, ionList = 0, minAbund=0, doContinuum=1, abundance=None, verbose=0, allLines=1, keepIons=0):
         t1 = datetime.now()
         masterlist = chdata.MasterList
         # use the ionList but make sure the ions are in the database
@@ -73,31 +70,37 @@ class radLoss(specTrails):
         nDen = self.EDensity.size
         nTempDen = max([nTemp, nDen])
 
-        if not abundanceName:
-            self.AbundanceName = self.Defaults['abundfile']
-        else:
-            if abundanceName in sorted(chdata.Abundance.keys()):
-                self.AbundanceName = abundanceName
+        #
+        if abundance is not None:
+            if type(abundance) == str:
+                if abundance in chdata.AbundanceList:
+                    self.AbundanceName = abundance
+                else:
+                    abundChoices = chdata.AbundanceList
+                    abundChoice = chGui.gui.selectorDialog(abundChoices,label='Select Abundance name')
+                    abundChoice_idx = abundChoice.selectedIndex
+                    self.AbundanceName = abundChoices[abundChoice_idx[0]]
+                    if verbose:
+                        print(' %s abundances chosen'%(self.AbundanceName))
             else:
-                abundChoices = sorted(chdata.Abundance.keys())
-#                for one in wvl[topLines]:
-#                    wvlChoices.append('%12.3f'%(one))
-                abundChoice = chgui.gui.selectorDialog(abundChoices,label='Select Abundance name')
-                abundChoice_idx = abundChoice.selectedIndex
-                self.AbundanceName = abundChoices[abundChoice_idx[0]]
-#                abund = self.AbundanceName
-                print(' Abundance chosen:  %s '%(self.AbundanceName))
+                print(' keyword abundance must be a string, either a blank (\'\') or the name of an abundance file')
+                return
+        else:
+            self.AbundanceName = self.Defaults['abundfile']
+        if hasattr(self,'AbundanceName'):
+            self.Abundance = chdata.Abundance[self.AbundanceName]['abundance']
         #
-        abundAll = chdata.Abundance[self.AbundanceName]['abundance']
-        # needed by ionGate
-        self.AbundAll = abundAll
+#        abundAll = chdata.Abundance[self.AbundanceName]['abundance']
+#        # needed by ionGate
+        self.AbundAll = self.Abundance
         #
-        nonzed = abundAll > 0.
-        minAbundAll = abundAll[nonzed].min()
+        nonzed = self.Abundance > 0.
+        minAbundAll = self.Abundance[nonzed].min()
         # if minAbund is even set
         if minAbund:
             if minAbund < minAbundAll:
                 minAbund = minAbundAll
+        self.MinAbund = minAbund
 #        ionInfo = util.masterListInfo()
         #
         freeFreeLoss = np.zeros((nTempDen), 'float64').squeeze()
@@ -121,7 +124,7 @@ class radLoss(specTrails):
             Z = zStuff['Z']
             ionstage = zStuff['Ion']
             dielectronic = zStuff['Dielectronic']
-            abundance = chdata.Abundance[self.AbundanceName]['abundance'][Z - 1]
+            abundance = self.Abundance[Z - 1]
             if verbose:
                 print(' %5i %5s abundance = %10.2e '%(Z, const.El[Z-1],  abundance))
             if verbose:
@@ -131,7 +134,7 @@ class radLoss(specTrails):
                     print(' calculating ff continuum for :  %s'%(akey))
                 if 'ff' in self.Todo[akey]:
                     # need to skip the neutral
-                        cont = ChiantiPy.core.continuum(akey, temperature, abundanceName=self.AbundanceName)
+                        cont = ChiantiPy.core.continuum(akey, temperature, abundance=abundance)
                         cont.freeFreeLoss()
                         freeFreeLoss += cont.FreeFreeLoss['rate']
                 if 'fb' in self.Todo[akey]:
@@ -142,7 +145,7 @@ class radLoss(specTrails):
                     if hasattr(cont, 'FreeFreeLoss'):
                         cont.freeBoundLoss()
                     else:
-                        cont = ChiantiPy.core.continuum(akey, temperature, abundanceName=self.AbundanceName)
+                        cont = ChiantiPy.core.continuum(akey, temperature, abundance=abundance)
                         cont.freeBoundLoss()
                     if 'errorMessage' not in list(cont.FreeBoundLoss.keys()):
                         #  an fblvl file exists for this ions
@@ -150,7 +153,7 @@ class radLoss(specTrails):
             if 'line' in self.Todo[akey]:
                 if verbose:
                     print(' calculating spectrum for  :  %s'%(akey))
-                thisIon = ChiantiPy.core.ion(akey, temperature, eDensity, abundance=self.AbundanceName)
+                thisIon = ChiantiPy.core.ion(akey, temperature, eDensity, abundance=abundance)
                 thisIon.intensity(allLines=allLines)
                 self.IonsCalculated.append(akey)
                 if 'errorMessage' not in  list(thisIon.Intensity.keys()):
@@ -175,7 +178,7 @@ class radLoss(specTrails):
         print(' elapsed seconds = %10.2e'%(dt.seconds))
         xlabel = 'Temperature (K)'
         ylabel = r'erg  s$^{-1}$ cm$^{3}$'
-        self.RadLoss = {'rate':total, 'temperature':self.Temperature, 'density':self.EDensity, 'minAbund':minAbund, 'abundance':self.AbundanceName, ylabel:ylabel, xlabel:xlabel}
+        self.RadLoss = {'rate':total, 'temperature':self.Temperature, 'density':self.EDensity, 'minAbund':minAbund, 'abundance':self.AbundanceName, 'ylabel':ylabel, 'xlabel':xlabel}
     #
     # -------------------------------------------------------------------
     #
@@ -186,12 +189,12 @@ class radLoss(specTrails):
         fontsize = 16
         temp = self.RadLoss['temperature']
         rate = self.RadLoss['rate']
-        plt.loglog(rate, temp)
+        plt.loglog(temp, rate)
 #        plt.ylabel(r'erg  s$^{-1}$  ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$',fontsize=fontsize)
-        plt.xlabel(self.Radloss['xlabel'],fontsize=fontsize)
-        plt.ylabel(self.Radloss['ylabel'],fontsize=fontsize)
+        plt.xlabel(self.RadLoss['xlabel'],fontsize=fontsize)
+        plt.ylabel(self.RadLoss['ylabel'],fontsize=fontsize)
         if title:
             title = 'Radiative loss rate,  minAbund = %10.2e'%(self.MinAbund)
-            if self.Density.size == 1:
-                title += ', density = %10.2e'%(self.Density)
+            if self.EDensity.size == 1:
+                title += ', density = %10.2e'%(self.EDensity)
             plt.title(title, fontsize=fontsize)

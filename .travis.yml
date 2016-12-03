@@ -10,7 +10,6 @@ env:
     - NUMPY_VERSION='stable'
     - ASTROPY_VERSION='stable'
     - MAIN_CMD='python setup.py'
-    - SETUP_CMD='install'
     - CONDA_DEPENDENCIES='scipy matplotlib ipython ipyparallel pyqt sphinx sphinx_rtd_theme pytest'
     - PYQT_VERSION='4.11.4'
   matrix:

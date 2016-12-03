@@ -131,7 +131,7 @@ class radLoss(specTrails):
                     print(' calculating ff continuum for :  %s'%(akey))
                 if 'ff' in self.Todo[akey]:
                     # need to skip the neutral
-                        cont = ChiantiPy.core.continuum(akey, temperature, abundanceName=self.AbundanceName)
+                        cont = ChiantiPy.core.continuum(akey, temperature, abundance=self.AbundanceName)
                         cont.freeFreeLoss()
                         freeFreeLoss += cont.FreeFreeLoss['rate']
                 if 'fb' in self.Todo[akey]:
@@ -142,7 +142,7 @@ class radLoss(specTrails):
                     if hasattr(cont, 'FreeFreeLoss'):
                         cont.freeBoundLoss()
                     else:
-                        cont = ChiantiPy.core.continuum(akey, temperature, abundanceName=self.AbundanceName)
+                        cont = ChiantiPy.core.continuum(akey, temperature, abundance=self.AbundanceName)
                         cont.freeBoundLoss()
                     if 'errorMessage' not in list(cont.FreeBoundLoss.keys()):
                         #  an fblvl file exists for this ions

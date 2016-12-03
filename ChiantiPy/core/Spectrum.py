@@ -61,34 +61,20 @@ class spectrum(ionTrails, specTrails):
 
     em [for emission measure], can be a float or an array of the same length as the
     temperature/density
-    '''
-    def __init__(self, temperature, eDensity, wavelength, filter=(chfilters.gaussianR, 1000.), label=0, elementList = 0, ionList = 0, minAbund=0, doContinuum=1, em=0, keepIons=0,  abundanceName=0, verbose=0, allLines=1):
+    
+    keepIons:  set this to keep the ion instances that have been calculated in a dictionary self.IonInstances
+        with the keywords being the CHIANTI-style ion names
+        
+    abundance: to select a particular set of abundances, set abundance to the name of a CHIANTI abundance file,
+        without the '.abund' suffix, e.g. 'sun_photospheric_1998_grevesse'
+        If set to a blank (''), a gui selection menu will popup and allow the selection of an set of abundances
+    ''' 
+    def __init__(self, temperature, eDensity, wavelength, filter=(chfilters.gaussianR, 1000.), label=0, elementList = 0, ionList = 0, minAbund=0, doContinuum=1, em=0, keepIons=0,  abundance=None, verbose=0, allLines=1):
         #
         t1 = datetime.now()
         # creates Intensity dict from first ion calculated
         setupIntensity = 0
         #
-#        masterlist = chdata.MasterList
-        # use the ionList but make sure the ions are in the database
-        #if elementList:
-            #for i,  one in enumerate(elementList):
-                #elementList[i] = one.lower()
-            #alist = []
-            #for one in masterlist:
-                #stuff = util.convertName(one)
-                #if stuff['Element'] in  elementList:
-                    #alist.append(one)
-            #masterlist = alist
-        #elif ionList:
-            #alist=[]
-            #for one in ionList:
-                #if masterlist.count(one):
-                    #alist.append(one)
-                #else:
-                    #if verbose:
-                        #pstring = ' %s not in CHIANTI database'%(one)
-                        #print(pstring)
-            #masterlist = alist
         self.Defaults=defaults
         self.Temperature = np.asarray(temperature, 'float64')
         nTemp = self.Temperature.size
@@ -113,36 +99,50 @@ class spectrum(ionTrails, specTrails):
         #
         xlabel = 'Wavelength ('+self.Defaults['wavelength'] +')'
         #
-        #self.AbundanceName = defaults['abundfile']
-        #self.AbundanceAll = chdata.AbundanceAll
         #
-        if abundanceName:
-            if abundanceName in list(chdata.Abundance.keys()):
-                self.AbundanceName = abundanceName
+        if abundance is not None:
+            if type(abundance) == str:
+                if abundance in chdata.AbundanceList:
+                    self.AbundanceName = abundance
+                else:
+                    abundChoices = chdata.AbundanceList
+                    abundChoice = chGui.gui.selectorDialog(abundChoices,label='Select Abundance name')
+                    abundChoice_idx = abundChoice.selectedIndex
+                    self.AbundanceName = abundChoices[abundChoice_idx[0]]
             else:
-                abundChoices = list(chdata.Abundance.keys())
-#                for one in wvl[topLines]:
-#                    wvlChoices.append('%12.3f'%(one))
-                abundChoice = chGui.gui.selectorDialog(abundChoices,label='Select Abundance name')
-                abundChoice_idx = abundChoice.selectedIndex
-                self.AbundanceName = abundChoices[abundChoice_idx[0]]
-                abundanceName = self.AbundanceName
-                print((' Abundance chosen:  %s '%(self.AbundanceName)))
+                print(' keyword abundance must be a string, either a blank (\'\') or the name of an abundance file')
+                return
         else:
             self.AbundanceName = self.Defaults['abundfile']
+        if hasattr(self,'AbundanceName'):
+            self.Abundance = chdata.Abundance[self.AbundanceName]['abundance']
+#        if abundanceName:
+#            if abundanceName in list(chdata.Abundance.keys()):
+#                self.AbundanceName = abundanceName
+#            else:
+#                abundChoices = list(chdata.Abundance.keys())
+##                for one in wvl[topLines]:
+##                    wvlChoices.append('%12.3f'%(one))
+#                abundChoice = chGui.gui.selectorDialog(abundChoices,label='Select Abundance name')
+#                abundChoice_idx = abundChoice.selectedIndex
+#                self.AbundanceName = abundChoices[abundChoice_idx[0]]
+#                abundanceName = self.AbundanceName
+#                print((' Abundance chosen:  %s '%(self.AbundanceName)))
+#        else:
+#            self.AbundanceName = self.Defaults['abundfile']
         #
         abundAll = chdata.Abundance[self.AbundanceName]['abundance']
         # needed by ionGate
         self.AbundAll = abundAll
         #
-        nonzed = abundAll > 0.
-        minAbundAll = abundAll[nonzed].min()
+#        nonzed = abundAll > 0.
+#        minAbundAll = abundAll[nonzed].min()
         # if minAbund is even set
-        if minAbund:
-            if minAbund < minAbundAll:
-                minAbund = minAbundAll
-        else:
-            minAbund = minAbundAll
+#        if minAbund:
+#            if minAbund < minAbundAll:
+#                minAbund = minAbundAll
+#        else:
+#            minAbund = minAbundAll
         self.MinAbund = minAbund
 #        ionInfo = chio.masterListInfo()
         wavelength = np.asarray(wavelength)
@@ -167,7 +167,7 @@ class spectrum(ionTrails, specTrails):
             Z = zStuff['Z']
             ionstage = zStuff['Ion']
             dielectronic = zStuff['Dielectronic']
-            abundance = chdata.Abundance[self.AbundanceName]['abundance'][Z - 1]
+            abundance = self.Abundance[Z - 1]
             if verbose:
                 print(' %5i %5s abundance = %10.2e '%(Z, const.El[Z-1],  abundance))
             if verbose:

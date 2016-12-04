@@ -86,18 +86,20 @@ class spectrum(ionTrails, specTrails):
         #
         if type(em) == int and em == 0:
             em = np.ones(self.NTempDen, 'float64')
+            ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
         elif type(em) == float and em > 0.:
             em = np.ones(self.NTempDen, 'float64')*em
+            ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ $'
         elif type(em) == list or type(em) == tuple:
             em = np.asarray(em, 'float64')
+            ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ $'
         self.Em = em
         #
-        if self.Em.any() > 0.:
-            ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ $'
-        else:
-            ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
         #
-        xlabel = 'Wavelength ('+self.Defaults['wavelength'] +')'
+        if self.Defaults['wavelength'] == 'angstrom':
+            xlabel = 'Wavelength ('+self.Defaults['wavelength'].capitalize() +')'
+        else:
+            xlabel = 'Wavelength ('+self.Defaults['wavelength'] +')'
         #
         #
         if abundance is not None:
@@ -116,35 +118,12 @@ class spectrum(ionTrails, specTrails):
             self.AbundanceName = self.Defaults['abundfile']
         if hasattr(self,'AbundanceName'):
             self.Abundance = chdata.Abundance[self.AbundanceName]['abundance']
-#        if abundanceName:
-#            if abundanceName in list(chdata.Abundance.keys()):
-#                self.AbundanceName = abundanceName
-#            else:
-#                abundChoices = list(chdata.Abundance.keys())
-##                for one in wvl[topLines]:
-##                    wvlChoices.append('%12.3f'%(one))
-#                abundChoice = chGui.gui.selectorDialog(abundChoices,label='Select Abundance name')
-#                abundChoice_idx = abundChoice.selectedIndex
-#                self.AbundanceName = abundChoices[abundChoice_idx[0]]
-#                abundanceName = self.AbundanceName
-#                print((' Abundance chosen:  %s '%(self.AbundanceName)))
-#        else:
-#            self.AbundanceName = self.Defaults['abundfile']
         #
         abundAll = chdata.Abundance[self.AbundanceName]['abundance']
         # needed by ionGate
         self.AbundAll = abundAll
         #
-#        nonzed = abundAll > 0.
-#        minAbundAll = abundAll[nonzed].min()
-        # if minAbund is even set
-#        if minAbund:
-#            if minAbund < minAbundAll:
-#                minAbund = minAbundAll
-#        else:
-#            minAbund = minAbundAll
         self.MinAbund = minAbund
-#        ionInfo = chio.masterListInfo()
         wavelength = np.asarray(wavelength)
         nWvl = wavelength.size
         self.Wavelength = wavelength
@@ -206,11 +185,6 @@ class spectrum(ionTrails, specTrails):
                         setupIntensity = 1
                         self.Intensity  = thisIon.Intensity
                     lineSpectrum += thisIon.Spectrum['intensity']
-#                            if nTempDen == 1:
-#                                lineSpectrum += thisIon.Spectrum['intensity']
-#                            else:
-#                                for iTempDen in range(nTempDen):
-#                                    lineSpectrum[iTempDen] += thisIon.Spectrum['intensity'][iTempDen]
                 else:
                     if verbose:
                         print(thisIon.Intensity['errorMessage'])
@@ -238,20 +212,15 @@ class spectrum(ionTrails, specTrails):
         if type(label) == type(''):
             if hasattr(self, 'Spectrum'):
                 self.Spectrum[label] = {'wavelength':wavelength, 'intensity':total.squeeze(), 'filter':filter[0].__name__,   'width':filter[1], 'integrated':integrated, 'em':em, 'ions':self.IonsCalculated,
-                'Abundance':self.AbundanceName, 'xlabel':xlabel, 'ylabel':ylabel}
+                'Abundance':self.AbundanceName, 'xlabel':xlabel, 'ylabel':ylabel, 'minAbund':minAbund}
             else:
                 self.Spectrum = {label:{'wavelength':wavelength, 'intensity':total.squeeze(), 'filter':filter[0].__name__,   'width':filter[1], 'integrated':integrated, 'em':em, 'ions':self.IonsCalculated,
-                'Abundance':self.AbundanceName, 'xlabel':xlabel, 'ylabel':ylabel}}
+                'Abundance':self.AbundanceName, 'xlabel':xlabel, 'ylabel':ylabel}, 'minAbund':minAbund}
         else:
             self.Spectrum ={'wavelength':wavelength, 'intensity':total.squeeze(), 'filter':filter[0].__name__,   'width':filter[1], 'integrated':integrated,  'ions':self.IonsCalculated,
-            'Abundance':self.AbundanceName, 'xlabel':xlabel, 'ylabel':ylabel}
-        #
-        # -----------------------------------------------------------------------
-        #
-#        self.Spectrum ={'wavelength':wavelength, 'intensity':total.squeeze(), 'filter':filter[0].__name__,   'width':filter[1], 'ions':self.IonsCalculated, 'Abundance':self.AbundanceName}
-    #
-    # ----------------------------------------------------------------------------------------------
-    #
+            'Abundance':self.AbundanceName, 'xlabel':xlabel, 'ylabel':ylabel, 'minAbund':minAbund}
+
+
 class bunch(ionTrails, specTrails):
     '''
     Calculate the emission line spectrum as a function of temperature and density.
@@ -336,24 +305,6 @@ class bunch(ionTrails, specTrails):
             em = np.asarray(em, 'float64')
         self.Em = em
         #
-        #if em != 0:
-            #if type(em) == type(float):
-                #if nTempDen > 1:
-                    #em = np.ones_like(self.Temperature)*em
-                    #nEm = nTempDen
-                #else:
-                    #nEm = 1
-            #else:
-                #em = np.asarray(em, 'float64')
-                #nEm = em.size
-                #if nEm != nTempDen:
-                    #print(' the emission measure array must be the same size as the temperature/density array')
-                    #return
-        #else:
-            #nEm = 0
-        #self.NEm = nEm
-        #self.AbundanceName = defaults['abundfile']
-        #self.AbundanceAll = chdata.AbundanceAll
         #
         if abundanceName:
             if abundanceName in list(chdata.Abundance.keys()):
@@ -383,7 +334,6 @@ class bunch(ionTrails, specTrails):
 #        self.minAbund = minAbund
 #        ionInfo = chio.masterListInfo()
         #        #
-#        self.Intensity = {'ionS':[], 'lvl1':[], 'lvl2':[], 'wvl':np.ndarray, 'pretty1':np.ndarray, 'pretty2':np.ndarray, 'intensity':np.zeros((nTempDen, 0),'float64'), 'obs':np.ndarray }
         self.IonsCalculated = []
         if keepIons:
             self.IonInstances = {}

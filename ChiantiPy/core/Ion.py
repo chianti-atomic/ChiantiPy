@@ -901,50 +901,35 @@ class ion(ionTrails, specTrails):
 
     def p2eRatio(self):
         """
-        Calculates the proton density to electron density ratio.
+        Calculates the proton density to electron density ratio using Eq. 7 of [1]_.
 
+        Notes
+        ------
         Uses the abundance and ionization equilibrium.
-        """
 
+        References
+        ----------
+        .. [1] Young, P. R. et al., 2003, ApJS, `144, 135 <http://adsabs.harvard.edu/abs/2003ApJS..144..135Y>`_
+        """
         if hasattr(self, 'Temperature'):
             temperature=self.Temperature
         else:
             temperature = self.IoneqAll['ioneqTemperature']
         if not hasattr(self, 'AbundanceName'):
-            self.AbundanceName = self.Defaults['abundfile']
+            AbundanceName = self.Defaults['abundfile']
+        else:
+            AbundanceName = self.AbundanceName
 
-        nTemp=temperature.size
-        eDensity=np.zeros(nTemp,'Float64')
-        pDensity=np.zeros(nTemp,'Float64')
-        ionDensity=0.
-        anEl = 0
-        ion = 1
-        good = self.IoneqAll['ioneqAll'][anEl,ion]  > 0.
-        y2 = interpolate.splrep(np.log(self.IoneqAll['ioneqTemperature'][good]),np.log(self.IoneqAll['ioneqAll'][anEl,ion,good]),s=0)
-        bad1 = np.log(temperature) < np.log(self.IoneqAll['ioneqTemperature'][good].min())
-        bad2 = np.log(temperature) > np.log(self.IoneqAll['ioneqTemperature'][good].max())
-        bad=np.logical_or(bad1,bad2)
-        goodt=np.logical_not(bad)
-        thisIoneq=np.where(goodt,10.**interpolate.splev(np.log(temperature),y2,der=0),0.)
-        pDensity+=chdata.Abundance[self.AbundanceName]['abundance'][anEl]*thisIoneq
-        El=[iEl for iEl in range(50) if chdata.Abundance[self.AbundanceName]['abundance'][iEl] > 0.]
-        for anEl in El:
-            ionDensity+=chdata.Abundance[self.AbundanceName]['abundance'][anEl]
-            for ion in range(1,anEl+2):
-                good = self.IoneqAll['ioneqAll'][anEl,ion]  > 0.
-                y2 = interpolate.splrep(np.log(self.IoneqAll['ioneqTemperature'][good]),np.log(self.IoneqAll['ioneqAll'][anEl,ion,good]),s=0)
-                bad1 = np.log(temperature) < np.log(self.IoneqAll['ioneqTemperature'][good].min())
-                bad2 = np.log(temperature) > np.log(self.IoneqAll['ioneqTemperature'][good].max())
-                bad = np.logical_or(bad1,bad2)
-                goodt = np.logical_not(bad)
-                # for temperatures outside the range of the ioneq, the default
-                # is set to 1, since this is the denominator
-                thisIoneq=np.where(goodt,10.**interpolate.splev(np.log(temperature),y2,der=0),1.)
-                eDensity+=float(ion)*chdata.Abundance[self.AbundanceName]['abundance'][anEl]*thisIoneq
-        self.ProtonDensityRatio=pDensity/eDensity
-        self.EDensity=eDensity
-        self.IonDensity=ionDensity
-        self.IonDensityRatio=ionDensity/eDensity
+        tmp_abundance = io.abundanceRead(abundancename=AbundanceName)
+        abundance = tmp_abundance['abundance'][tmp_abundance['abundance']>0]
+        denominator = np.zeros(len(self.IoneqAll['ioneqTemperature']))
+        for i in range(len(abundance)):
+            for z in range(1,i+2):
+                denominator += z*self.IoneqAll['ioneqAll'][i,z,:]*abundance[i]
+
+        p2eratio = abundance[0]*self.IoneqAll['ioneqAll'][0,1,:]/denominator
+        nots = interpolate.splrep(np.log10(self.IoneqAll['ioneqTemperature']),p2eratio,s=0)
+        self.ProtonDensityRatio = interpolate.splev(np.log10(temperature),nots,der=0,ext=1)
 
     def upsilonDescale(self, prot=0, diel=0):
         """

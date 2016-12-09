@@ -364,7 +364,7 @@ class ion(ionTrails, specTrails):
                 goode=energy > self.DiParams['ev1'][ifac]
                 if goode.sum() > 0:
                     dum=np.ones(len(energy))
-                    btenergy, btdum=util.scale_bti(energy[goode],dum[goode],
+                    btenergy, btdum = util.scale_bti(energy[goode],dum[goode],
                         self.DiParams['btf'][ifac], self.DiParams['ev1'][ifac])
                     # these interpolations were made with the scipy routine
                     # used here

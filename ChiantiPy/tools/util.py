@@ -338,6 +338,7 @@ def splomDescale(splom, energy):
     for isplom in range(0,nsplom):
         #
         sx1 = energy/(splom['deryd'][isplom]*const.ryd2Ev)
+        print(' %5i  %12.2e %12.2e'%(isplom, splom['deryd'][isplom], splom['deryd'][isplom]*const.ryd2Ev))
         good = sx1 >= 1.
         # make sure there are some valid energies above the threshold
         if good.sum():
@@ -348,7 +349,7 @@ def splomDescale(splom, energy):
                 sx = 1. - np.log(c_curr)/np.log(sx1[good] - 1. + c_curr)
                 y2 = interpolate.splrep(sxint,splom['splom'][:, isplom],s=0)  #allow smoothing,s=0)
                 som = interpolate.splev(sx,y2,der=0)
-                omega[isplom, nbad:] = som*np.log(sx -1. + np.exp(1.))
+                omega[isplom, nbad:] = som*np.log(sx1[good] -1. + np.exp(1.))
             #
             elif splom['ttype'][isplom] == 2:
                 sx =(sx1[good] - 1.)/(sx1[good] -1. + c_curr)

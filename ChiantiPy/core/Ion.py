@@ -513,7 +513,7 @@ class ion(ionTrails, specTrails):
         """
 
         if self.DiParams['info']['neaev'] == 0:
-            # FIXME: throw an error here?
+            # the excitation-autionization for this ion does not exist
             return
         else:
             if not energy.all():

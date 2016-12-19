@@ -518,9 +518,9 @@ class ion(ionTrails, specTrails):
         else:
             if not energy.all():
                 energy=self.Ip*10.**(0.05*np.arange(31))
-            try:
-                easplom=self.Easplom
-            except: #FIXME: what exception should be caught?
+            if hasattr(self, 'Easplom'):
+                easplom = self.Easplom
+            else:
                 self.Easplom = io.splomRead(self.IonStr, ea=1)
                 easplom =self.Easplom
             # multiplicity of ground level already included
@@ -941,10 +941,10 @@ class ion(ionTrails, specTrails):
 
         if prot:
             ce = 0
-            try:
-                nscups=len(self.Psplups["lvl1"])
-            except:
-                self.Psplups=io.splupsRead(self.IonStr,filetype='psplups')
+            if hasattr(self, 'Psplups'):
+                nscups = len(self.Psplups["lvl1"])
+            else:
+                self.Psplups = io.splupsRead(self.IonStr,filetype='psplups')
                 if type(self.Psplups) == type(None):
                     self.PUpsilon = None
                     return
@@ -952,9 +952,9 @@ class ion(ionTrails, specTrails):
                     nscups = len(self.Cilvl["lvl1"])
         elif diel:
             ce = 0
-            try:
+            if hasattr(self, 'DielSplups'):
                 nsplups = len(self.DielSplups["lvl1"])
-            except:
+            else:
                 self.DielSplups = io.scupsRead(self.IonStr)
                 if type(self.DielSplups) == type(None):
                     self.DielUpsilon = None
@@ -963,9 +963,9 @@ class ion(ionTrails, specTrails):
                     nscups = len(self.Scups["lvl1"])
         else:
             ce=1
-            try:
-                nscups=len(self.Scups["lvl1"])
-            except:
+            if hasattr(self, 'Scups'):
+                nscups = len(self.Scups["lvl1"])
+            else:
                 self.Scups = io.scupsRead(self.IonStr)
                 if not self.Scups['status']:
                     self.Upsilon = None
@@ -1102,10 +1102,10 @@ class ion(ionTrails, specTrails):
 
         if prot:
             ce = 0
-            try:
-                nsplups=len(self.Psplups["lvl1"])
-            except:
-                self.Psplups=io.splupsRead(self.IonStr,filetype='psplups')
+            if hasattr(self, 'Psplups'):
+                nsplups = len(self.Psplups["lvl1"])
+            else:
+                self.Psplups = io.splupsRead(self.IonStr,filetype='psplups')
                 if type(self.Psplups) == type(None):
                     self.PUpsilon = None
                     return
@@ -1113,9 +1113,9 @@ class ion(ionTrails, specTrails):
                     nsplups = len(self.Cilvl["lvl1"])
         elif diel:
             ce = 0
-            try:
+            if hasattr(self, 'DielSplups'):
                 nsplups = len(self.DielSplups["lvl1"])
-            except:
+            else:
                 self.DielSplups = io.splupsRead(self.IonStr,filetype='splups')
                 if type(self.DielSplups) == type(None):
                     self.DielUpsilon = None
@@ -1124,9 +1124,9 @@ class ion(ionTrails, specTrails):
                     nsplups = len(self.DielSplups["lvl1"])
         else:
             ce=1
-            try:
+            if hasattr(self, 'Splups'):
                 nsplups=len(self.Splups["lvl1"])
-            except:
+            else:
                 self.Splups = io.splupsRead(self.IonStr)
                 if type(self.Splups) == type(None):
                     self.Upsilon = None
@@ -2672,6 +2672,7 @@ class ion(ionTrails, specTrails):
         else:
             self.ioneqOne()
             thisIoneq=self.IoneqOne
+        # should probably replace this with an if statement based on len of em.shape
         try:
             nwvl, ntempden = em.shape
             intensity = np.zeros((ntempden, nwvl),'Float64')
@@ -2939,9 +2940,9 @@ class ion(ionTrails, specTrails):
         #
         gAbund=self.Abundance
         #
-        try:
-            thisIoneq=self.IoneqOne
-        except:
+        if hasattr(self, 'IoneqOne'):
+            thisIoneq = self.IoneqOne
+        else:
             self.ioneqOne()
             thisIoneq=self.IoneqOne
         if verbose:
@@ -2998,10 +2999,10 @@ class ion(ionTrails, specTrails):
             self.TwoPhoton = {'emiss':np.zeros(nWvl, 'float4'), 'wvl':wvl}
             return
         else:
-            try:
+            if hasattr(self, 'Population'):
                 pop = self.Population['population']
                 nTempDens = max(self.Temperature.size, self.EDensity.size)
-            except:
+            else:
                 self.populate()
                 pop = self.Population['population']
                 nTempDens = max(self.Temperature.size, self.EDensity.size)
@@ -3087,20 +3088,20 @@ class ion(ionTrails, specTrails):
             self.TwoPhoton = {'emiss':np.zeros(nWvl, 'float64'), 'wvl':wvl}
             return
         else:
-            try:
-                ab=self.Abundance
-            except:
+            if hasattr(self, 'Abundance'):
+                ab = self.Abundance
+            else:
                 self.Abundance = io.abundanceRead()
-                ab=self.Abundance
-            try:
-                thisIoneq=self.IoneqOne
-            except:
+                ab = self.Abundance
+            if hasattr(self, 'IoneqOne'):
+                thisIoneq = self.IoneqOne
+            else:
                 self.ioneqOne()
-                thisIoneq=self.IoneqOne
-            try:
+                thisIoneq = self.IoneqOne
+            if hasattr(self, 'Population'):
                 pop = self.Population['population']
                 nTempDens = max(self.Temperature.size, self.EDensity.size)
-            except:
+            else:
                 self.populate()
                 pop = self.Population['population']
                 nTempDens = max(self.Temperature.size, self.EDensity.size)
@@ -3864,9 +3865,9 @@ class ioneq(ion):
         oplot="ioneqfilename" such as 'mazzotta'
         or if oplot=True or oplot=1 and a widget will come up so that a file can be selected.
         '''
-        try:
+        if hasattr(self, 'Ioneq'):
             ioneq = getattr(self, 'Ioneq')
-        except:
+        else:
             print(' must first load or calculate and ionization equilibrium')
             return
 

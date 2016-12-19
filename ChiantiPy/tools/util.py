@@ -334,10 +334,10 @@ def splomDescale(splom, energy):
         omega = np.zeros(nsplom,"float64")
     #
     dx = 1./(float(nspl)-1.)
-    sxint = dx*np.arange(nspl)
+    sxint = dx*np.arange(nspl)  # IDL sx
     for isplom in range(0,nsplom):
         #
-        sx1 = energy/(splom['deryd'][isplom]*const.ryd2Ev)
+        sx1 = energy/(splom['deryd'][isplom]*const.ryd2Ev)  # IDL x_int
         print(' %5i  %12.2e %12.2e'%(isplom, splom['deryd'][isplom], splom['deryd'][isplom]*const.ryd2Ev))
         good = sx1 >= 1.
         # make sure there are some valid energies above the threshold
@@ -346,7 +346,7 @@ def splomDescale(splom, energy):
             c_curr = splom['c'][isplom]
             #
             if splom['ttype'][isplom] == 1:
-                sx = 1. - np.log(c_curr)/np.log(sx1[good] - 1. + c_curr)
+                sx = 1. - np.log(c_curr)/np.log(sx1[good] - 1. + c_curr)  # IDL sx_int
                 y2 = interpolate.splrep(sxint,splom['splom'][:, isplom],s=0)  #allow smoothing,s=0)
                 som = interpolate.splev(sx,y2,der=0)
                 omega[isplom, nbad:] = som*np.log(sx1[good] -1. + np.exp(1.))
@@ -430,16 +430,16 @@ def listFiles(path):
 
 def scale_bti(evin,crossin,f,ev1):
     """
-    Apply ionization scaling of [1]_ to energy and cross-section.
+    Apply ionization scaling of [1]_,[2]_ to energy and cross-section.
 
     Parameters
     ----------
     evin : array-like
-        Energy
+        Energy - same units as ev1
     crossin : array-like
         Cross-section
-    f : array-like
-    ev1 : array-like
+    f : float -  the bt scale factor
+    ev1 : array-like (usually in eV)
 
     Returns
     -------
@@ -448,7 +448,8 @@ def scale_bti(evin,crossin,f,ev1):
 
     Notes
     -----
-    Need more details here. Not clear which equations are being used.
+    This is the scaling used in the Dere (2007) calculation of cross sections.  It was derived from
+    similar scalings derived in reference [1]
 
     See Also
     --------
@@ -457,10 +458,11 @@ def scale_bti(evin,crossin,f,ev1):
     References
     ----------
     .. [1] Burgess, A. and Tully, J. A., 1992, A&A, `254, 436 <http://adsabs.harvard.edu/abs/1992A%26A...254..436B>`_
+    .. [2] Dere, K. P., 2007, A&A, 466, 771, '<http://adsabs.harvard.edu/abs/2007A%26A...466..771D>'
     """
-    u=evin/ev1
-    bte=1.-np.log(f)/np.log(u-1.+f)
-    btx=u*crossin*(ev1**2)/(np.log(u)+1.)
+    u = evin/ev1
+    bte = 1.-np.log(f)/np.log(u-1.+f)
+    btx = u*crossin*(ev1**2)/(np.log(u)+1.)
     return [bte,btx]
 
 
@@ -494,9 +496,9 @@ def descale_bti(bte,btx,f,ev1):
     ----------
     .. [1] Burgess, A. and Tully, J. A., 1992, A&A, `254, 436 <http://adsabs.harvard.edu/abs/1992A%26A...254..436B>`_
     """
-    u=1.-f+np.exp(np.log(f)/(1.-bte))
-    energy=u*ev1
-    cross=(np.log(u)+1.)*btx/(u*ev1**2)
+    u = 1.-f + np.exp(np.log(f)/(1. - bte))
+    energy = u*ev1
+    cross = (np.log(u)+1.)*btx/(u*ev1**2)
     return [energy,cross]
 
 

@@ -448,17 +448,16 @@ def scale_bti(evin,crossin,f,ev1):
 
     Notes
     -----
-    This is the scaling used in the Dere (2007) calculation of cross sections.  It was derived from
-    similar scalings derived in reference [1]
+    This is the scaling used and discussed in the Dere (2007) calculation [2] of cross sections.  It was derived from similar scalings derived in reference [1]
 
     See Also
     --------
-    descale_bti : Descale ionization energy and cross-section
+    scale_bti : Descale ionization energy and cross-section
 
     References
     ----------
     .. [1] Burgess, A. and Tully, J. A., 1992, A&A, `254, 436 <http://adsabs.harvard.edu/abs/1992A%26A...254..436B>`_
-    .. [2] Dere, K. P., 2007, A&A, 466, 771, '<http://adsabs.harvard.edu/abs/2007A%26A...466..771D>'
+    .. [2] Dere, K. P., 2007, A&A, `466, 771, <http://adsabs.harvard.edu/abs/2007A%26A...466..771D>`_
     """
     u = evin/ev1
     bte = 1.-np.log(f)/np.log(u-1.+f)

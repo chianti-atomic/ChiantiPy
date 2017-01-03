@@ -434,12 +434,14 @@ def scale_bti(evin,crossin,f,ev1):
 
     Parameters
     ----------
-    evin : array-like
+    evin : float
         Energy - same units as ev1
     crossin : array-like
         Cross-section
-    f : float -  the bt scale factor
-    ev1 : array-like (usually in eV)
+    f : float -  the scale factor
+    ev1 : float
+        the ionization potential
+        units - the same as evin
 
     Returns
     -------
@@ -475,8 +477,10 @@ def descale_bti(bte,btx,f,ev1):
         Scaled energy
     btx : array-like
         Scaled cross-section
-    f : array-like
-    ev1 : array-like
+    f : float
+        Scaling parameter
+    ev1 : float
+        ionization potential - units determine the output energy units
 
     Returns
     -------
@@ -485,15 +489,16 @@ def descale_bti(bte,btx,f,ev1):
 
     Notes
     -----
-    Need more details here. Not clear which equations are being used.
+    This is the scaling used and discussed in the Dere (2007) calculation [2] of cross sections.  It was derived from similar scalings derived in reference [1]
 
     See Also
     --------
-    scale_bti : Apply ionization scaling for energy and cross-section
+    scale_bti : Descale ionization energy and cross-section
 
     References
     ----------
     .. [1] Burgess, A. and Tully, J. A., 1992, A&A, `254, 436 <http://adsabs.harvard.edu/abs/1992A%26A...254..436B>`_
+    .. [2] Dere, K. P., 2007, A&A, `466, 771, <http://adsabs.harvard.edu/abs/2007A%26A...466..771D>`_
     """
     u = 1.-f + np.exp(np.log(f)/(1. - bte))
     energy = u*ev1

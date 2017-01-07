@@ -145,14 +145,6 @@ def cireclvlRead(ions, filename=None, filetype='cilvl'):
     ndata = iline - 1
     ntrans = ndata//2
     #
-#    nref = 0
-#    idx = -1
-#    while idx < 0:
-#        aline=lines[iline][0:5]
-#        idx=aline.find('-1')
-#        iline += 1
-#        nref += 1
-#    nref -= 1
     #
     # need to find the maximum number of temperatures, not all lines are the same
     #
@@ -276,15 +268,7 @@ def diRead(ions, filename=None):
     if neaev:
         line=input.readline()
         eacoef=line.split()
-#            print ' eaev = ', type(eacoef), eacoef
         eaev=[float(avalue) for avalue in eacoef]
-#            print ' eaev = ', type(eaev), eaev
-#            print ' eaev = ', type(eaev), eaev
-#            if len(eaev) == 1:
-#                eaev=float(eaev[0])
-#                eaev=np.asarray(eaev, 'float32')
-#            else:
-#                eaev=np.asarray(eaev, 'float32')
     else:
         eaev=0.
     hdr=input.readlines()
@@ -415,70 +399,8 @@ def eaRead(ions, filename=None):
         for i in range(nsplups+1,len(s1)):
             s1a=s1[i][:-1]
             ref.append(s1a.strip())
-#        self.EaParams={"lvl1":lvl1,"lvl2":lvl2,"ttype":ttype,"gf":gf,"de":de,"cups":cups
-#                ,"nspl":nspl,"splups":splups,"ref":ref}
-        return {"lvl1":lvl1,"lvl2":lvl2,"ttype":ttype,"gf":gf,"de":de,"cups":cups
+    return {"lvl1":lvl1,"lvl2":lvl2,"ttype":ttype,"gf":gf,"de":de,"cups":cups
                 ,"nspl":nspl,"splups":splups,"ref":ref}
-
-
-def easplomRead(ions, filename=0, extension='.splom'):
-    """
-    Read CHIANTI splom files for `ions`.
-
-    Notes
-    -----
-    Currently only works for 5 point spline fit files. `splomRead` probably does just as good a job - this function may be redundant.
-    """
-    #
-    #
-    if filename:
-        input = open(filename)
-    else:
-        fname=ion2filename(ions)
-        omname=fname+extension
-        input=open(omname,'r')
-    lines=input.readlines()
-    input.close()
-    format=FortranFormat('5i3,8e10.3')
-    data=5
-    iline=0
-    lvl1=[]
-    lvl2=[]
-    ttype=[]
-    gf=[]
-    de=[]
-    om=[]
-    z=1
-    while z > 0:
-        omdat1=FortranLine(lines[iline],format)
-        z=omdat1[0]
-        if z > 0:
-            l1=omdat1[2]
-            l2=omdat1[3]
-            ttype1=omdat1[4]
-            gf1=omdat1[5]
-            de1=omdat1[6]
-            btf1=omdat1[7]
-            om1=omdat1[8:]
-            #
-            lvl1.append(l1)
-            lvl2.append(l2)
-            ttype.append(ttype1)
-            gf.append(gf1)
-            de.append(de1)
-            om.append(om1)
-        iline=iline+1
-    omout=np.asarray(om,'Float64')
-    ref=lines[iline:-1]
-#        omout=np.transpose(omout)
-#    if extension == '.omdat':
-#        Splom={"lvl1":lvl1,"lvl2":lvl2,'ttype':ttype,"gf":gf, "deryd":de,"omega":omout, 'ref':ref}
-#        return Splom
-#    elif  extension == '.easplom':
-#        Easplom={"lvl1":lvl1,"lvl2":lvl2,'ttype':ttype,"gf":gf, "deryd":de,"omega":omout, 'ref':ref}
-#        return Easplom
-    Splom={"lvl1":lvl1,"lvl2":lvl2,'ttype':ttype,"gf":gf, "deryd":de,"omega":omout, 'ref':ref}
-    return Splom
 
 
 def elvlcRead(ions, filename=None, getExtended=False, verbose=False, useTh=True):
@@ -575,8 +497,6 @@ def elvlcRead(ions, filename=None, getExtended=False, verbose=False, useTh=True)
     for i in range(nlvls+1,len(s1)):
         s1a=s1[i]
         ref.append(s1a.strip())
-#    self.const.Elvlc={"lvl":lvl,"conf":conf,"term":term,"spin":spin,"l":l,"spd":spd,"j":j
-#            ,"mult":mult,"ecm":ecm,"eryd":eryd,"ecmth":ecmth,"erydth":erydth,"ref":ref}
     info = {"lvl":lvl,"conf":conf, "term":term,'label':label, "spin":spin, "spd":spd, "l":l, "j":j,
              'mult':mult, "ecm":ecm, 'eryd':eryd,'erydth':erydth, "ecmth":ecmth, "ref":ref,
              "pretty":pretty, 'status':status, 'filename':elvlname}
@@ -944,53 +864,6 @@ def ioneqRead(ioneqname='', verbose=False):
         ioneqRef.append(one[:-1])  # gets rid of the \n
     del s1
     return {'ioneqname':ioneqname,'ioneqAll':ioneqAll,'ioneqTemperature':ioneqTemperature,'ioneqRef':ioneqRef}
-
-
-#def ionrecdatRead(filename):
-#    """
-#    read chianti ionxdat, ionizdat, recombdat files and return
-#    {"ev":ev,"cross":cross,"crosserr":crosserr,"ref":ref}
-#    as of 10/28/2014, this routine does not seem to be used any more
-#    """
-#    #
-#    input=open(filename,'r')
-#    ionrec=input.readlines()
-#    dum=input.close()
-#    #
-#    # first get the number of data lines
-#    ndata=2
-#    iline=0
-#    while ndata > 1:
-#        s2=ionrec[iline].split()
-#        ndata=len(s2)
-#        iline=iline+1
-#    nline=iline-1
-#    #
-#    x=np.zeros(nline,'Float64')
-#    y=np.zeros(nline,'Float64')
-#    yerr=np.zeros(nline,'Float64')
-#    #
-#    for iline in range(0,nline):
-#        ndata=len
-#        s2=ionrec[iline].split()
-#        ndata=len(s2)
-#        if ndata == 2:
-#            x[iline]=float(s2[0])
-#            y[iline]=float(s2[1])
-#            yerr[iline]=float(0.)
-#        else:
-#            x[iline]=float(s2[0])
-#            y[iline]=float(s2[1])
-#            yerr[iline]=float(s2[2])
-#    #
-#    ref=[]
-#    for iline in range(nline+1,len(ionrec)-1):
-#        s1a=ionrec[iline][:-1]
-#        ref.append(s1a.strip())
-#
-#
-#    ionrecdat={"x":x,"y":y,"yerr":yerr,"ref":ref}
-#    return ionrecdat
 
 
 def ipRead(verbose=False):

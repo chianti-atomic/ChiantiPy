@@ -555,15 +555,16 @@ class ion(ionTrails, specTrails):
             self.DiParams = io.diRead(self.IonStr)
         if self.DiParams['info']['neaev'] == 0:
             #FIXME: raise an error here?
+            # basically, this means that this method should not be invoked
             return
         else:
             if hasattr(self, 'Temperature'):
                 temperature=self.Temperature
             else:
-                bte=0.1*np.arange(10)
-                bte[0]=0.01
+                btT=0.1*np.arange(10)
+                btT[0]=0.01
                 dum=np.ones(10, 'Float64')
-                [temperature, dum]=util.descale_bt(bte, dum, self.EaParams['cups'][0], self.DiParams['de'][0])
+                [temperature, dum] = util.descale_bt(btT, dum, self.EaParams['cups'][0], self.DiParams['de'][0])
                 self.Temperature=temperature
             if hasattr(self, 'EaParams'):
                 eaparams=self.EaParams

@@ -450,61 +450,21 @@ def scale_bti(evin,crossin,f,ev1):
 
     Notes
     -----
-    This is the scaling used and discussed in the Dere (2007) calculation [2] of cross sections.  It was derived from similar scalings derived in reference [1]
+    This is the scaling used and discussed in the Dere (2007) calculation [1] of cross sections.  It was derived from similar scalings derived in reference [2]
 
     See Also
     --------
-    scale_bti : Descale ionization energy and cross-section
+    descale_bti : Descale ionization energy and cross-section
 
     References
     ----------
-    .. [1] Burgess, A. and Tully, J. A., 1992, A&A, `254, 436 <http://adsabs.harvard.edu/abs/1992A%26A...254..436B>`_
-    .. [2] Dere, K. P., 2007, A&A, `466, 771, <http://adsabs.harvard.edu/abs/2007A%26A...466..771D>`_
+    .. [1] Dere, K. P., 2007, A&A, `466, 771, <http://adsabs.harvard.edu/abs/2007A%26A...466..771D>`_
+    .. [2] Burgess, A. and Tully, J. A., 1992, A&A, `254, 436 <http://adsabs.harvard.edu/abs/1992A%26A...254..436B>`_
     """
     u = evin/ev1
     bte = 1.-np.log(f)/np.log(u-1.+f)
     btx = u*crossin*(ev1**2)/(np.log(u)+1.)
     return [bte,btx]
-
-
-def descale_bti(bte,btx,f,ev1):
-    """
-    Apply ionization descaling of [1]_ to energy and cross-section.
-
-    Parameters
-    ----------
-    bte : array-like
-        Scaled energy
-    btx : array-like
-        Scaled cross-section
-    f : float
-        Scaling parameter
-    ev1 : float
-        ionization potential - units determine the output energy units
-
-    Returns
-    -------
-    [energy,cross] : `list`
-        Descaled energy and cross-section
-
-    Notes
-    -----
-    This is the scaling used and discussed in the Dere (2007) calculation [2] of cross sections.  It was derived from similar scalings derived in reference [1]
-
-    See Also
-    --------
-    scale_bti : Descale ionization energy and cross-section
-
-    References
-    ----------
-    .. [1] Burgess, A. and Tully, J. A., 1992, A&A, `254, 436 <http://adsabs.harvard.edu/abs/1992A%26A...254..436B>`_
-    .. [2] Dere, K. P., 2007, A&A, `466, 771, <http://adsabs.harvard.edu/abs/2007A%26A...466..771D>`_
-    """
-    u = 1.-f + np.exp(np.log(f)/(1. - bte))
-    energy = u*ev1
-    cross = (np.log(u)+1.)*btx/(u*ev1**2)
-    return [energy,cross]
-
 
 def descale_bt(bte,btomega,f,ev1):
     """
@@ -542,6 +502,45 @@ def descale_bt(bte,btomega,f,ev1):
     return [energy,omega]
 
 
+def descale_bti(bte,btx,f,ev1):
+    """
+    Apply ionization descaling of [1]_ to energy and cross-section.
+
+    Parameters
+    ----------
+    bte : array-like
+        Scaled energy
+    btx : array-like
+        Scaled cross-section
+    f : float
+        Scaling parameter
+    ev1 : float
+        ionization potential - units determine the output energy units
+
+    Returns
+    -------
+    [energy,cross] : `list`
+        Descaled energy and cross-section
+
+    Notes
+    -----
+    This is the scaling used and discussed in the Dere (2007) calculation [1] of cross sections.  It was derived from similar scalings provided by reference [2]
+
+    See Also
+    --------
+    scale_bti : Descale ionization energy and cross-section
+
+    References
+    ----------
+    .. [1] Dere, K. P., 2007, A&A, `466, 771, <http://adsabs.harvard.edu/abs/2007A%26A...466..771D>`_
+    .. [2] Burgess, A. and Tully, J. A., 1992, A&A, `254, 436 <http://adsabs.harvard.edu/abs/1992A%26A...254..436B>`_
+    """
+    u = 1.-f + np.exp(np.log(f)/(1. - bte))
+    energy = u*ev1
+    cross = (np.log(u)+1.)*btx/(u*ev1**2)
+    return [energy,cross]
+
+
 def scale_bt(evin,omega,f,ev1):
     """
     Apply excitation scaling of [1]_ to energy and collision strength.
@@ -574,3 +573,28 @@ def scale_bt(evin,omega,f,ev1):
     bte=1.-np.log(f)/np.log(u-1.+f)
     btomega=omega/(np.log(u)-1.+np.exp(1.))
     return [bte,btomega]
+    
+def scale_classical(x, y, ip):
+    """
+    to apply the 'classical' scaling to the input data
+    
+    Parameters
+    ----------
+    
+    x: array-like
+        x can be the energy or the temperature.  Typically, the energy is
+        in the same  units as the ionization potential
+    y:  array like
+        y can be the ionization cross-section, ionization rate, or a recombination
+        rate
+    ip:  float
+        the ionization potential.  Typically in eV.
+        
+    Returns
+    -------
+    {'csx':csx, 'csy':csy}
+    """
+    csx = x/ip
+    csy = y*ip**2
+    out = {'csx':csx, 'csy':csy}
+    return out

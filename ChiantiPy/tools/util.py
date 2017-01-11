@@ -338,7 +338,6 @@ def splomDescale(splom, energy):
     for isplom in range(0,nsplom):
         #
         sx1 = energy/(splom['deryd'][isplom]*const.ryd2Ev)  # IDL x_int
-        print(' %5i  %12.2e %12.2e'%(isplom, splom['deryd'][isplom], splom['deryd'][isplom]*const.ryd2Ev))
         good = sx1 >= 1.
         # make sure there are some valid energies above the threshold
         if good.sum():
@@ -574,27 +573,45 @@ def scale_bt(evin,omega,f,ev1):
     btomega=omega/(np.log(u)-1.+np.exp(1.))
     return [bte,btomega]
     
-def scale_classical(x, y, ip):
+    
+def scale_classical(inDict, ip):
     """
     to apply the 'classical' scaling to the input data
     
     Parameters
     ----------
     
-    x: array-like
-        x can be the energy or the temperature.  Typically, the energy is
-        in the same  units as the ionization potential
-    y:  array like
-        y can be the ionization cross-section, ionization rate, or a recombination
-        rate
+    inDict: dictionary
+        the input dictionary should have the following key pairs
+            energy and cross
+            or
+            temperature and rate
+    energy:  array-like
+        energy values of the cross-section
+    cross:  array-like
+        a cross-section
+    temperature:  array-like
+    rate:  array-like
     ip:  float
         the ionization potential.  Typically in eV.
         
     Returns
+        the following keys are added to inDict
     -------
-    {'csx':csx, 'csy':csy}
+    {'csEnergy', 'csCross', 'ip'} or {'csTemperature', 'csRate', 'ip'}
     """
-    csx = x/ip
-    csy = y*ip**2
-    out = {'csx':csx, 'csy':csy}
-    return out
+    if ('energy' and 'cross') in inDict.keys():
+        csEnergy = inDict['energy']/ip
+        csCross = inDict['cross']*ip**2
+        inDict['csEnergy'] = csEnergy
+        inDict['csCross'] = csCross
+        inDict['ip'] = ip
+    elif ('temperature' and 'rate') in inDict.keys():
+        csTemperature = inDict['temperature']/ip
+        csRate = inDict['rate']*ip**2
+        inDict['csTemperature'] = csTemperature
+        inDict['csRate'] = csRate
+        inDict['ip'] = ip
+    else:
+        print(' input dict does not have the correct keys')
+    return

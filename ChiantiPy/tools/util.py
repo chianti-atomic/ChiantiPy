@@ -20,6 +20,7 @@ from datetime import date
 
 import numpy as np
 from scipy import interpolate
+from scipy.special import expn
 
 import ChiantiPy.tools.constants as const
 
@@ -573,7 +574,43 @@ def scale_bt(evin,omega,f,ev1):
     btomega=omega/(np.log(u)-1.+np.exp(1.))
     return [bte,btomega]
     
+def scale_bt_rate(inDict, ip, f=1.7):
+    """
+    to apply a Burgess-Tully type scaling to ionization rates and temperatures
     
+    Apply ionization descaling of [1]_ .
+    The result of the scaling is to return a scaled temperature between 0 and 1 and a slowly varying scaled rate as a function of scaled temperature.  In addition, the scaled rates vary slowly along an iso-electronic sequence.
+    
+    Parameters
+    ----------
+    
+    inDict: dictionary
+        the input dictionary should have the following key pairs
+            temperature and rate
+    temperature:  array-like
+    rate:  array-like
+    ip:  float
+        the ionization potential in eV.
+    f:  float
+        the scaling parameter, 1.7 generally works well
+    Returns
+        the following keys are added to inDict
+        btTemperature and btRate
+    References
+    ----------
+    .. [1] Dere, K. P., 2007, A&A, `466, 771, <http://adsabs.harvard.edu/abs/2007A%26A...466..771D>`_
+    """
+    if ('temperature' and 'rate') in inDict.keys():
+        rT = inDict['temperature']*const.boltzmannEv/ip
+        btTemperature = 1. - np.log(f)/np.alog(rT + f)
+        btRate = np.sqrt(rT)*inDict['rate']*ip**1.5/(expn(1,1./rT))
+        inDict['btTemperature'] = btTemperature
+        inDict['btRate'] = btRate
+        inDict['ip'] = ip
+    else:
+        print(' input dict does not have the correct keys')
+    return
+
 def scale_classical(inDict, ip):
     """
     to apply the 'classical' scaling to the input data

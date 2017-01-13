@@ -576,6 +576,8 @@ class ion(ionTrails, specTrails):
             #  need to replicate neaev
             nups = len(eaparams['de'])
             tev = const.boltzmannEv*temperature
+            ntemp = temperature.size
+            partial = np.zeros((nups, ntemp), 'float64')
             earate = np.zeros(temperature.size, 'Float64')
             eaev = self.DiParams['eaev']
             if len(eaev) == 1:
@@ -586,8 +588,10 @@ class ion(ionTrails, specTrails):
                 x0 = const.ryd2Ev*eaparams['de'][iups]/tev
                 #  upsilon has already been divided by the statistical weight
                 # of the ground level 2j+1
-                earate += eaev[iups]*8.63e-6*eaparams['ups'][iups]*np.exp(-x0)/(np.sqrt(temperature))
-            self.EaRate = {'rate':earate, 'temperature':temperature}
+                earate1 = eaev[iups]*const.collision*eaparams['ups'][iups]*np.exp(-x0)/(np.sqrt(temperature)) 
+                partial[iups] = earate1
+                earate += earate1
+            self.EaRate = {'rate':earate, 'temperature':temperature, 'partial':partial}
 
     def ionizCross(self, energy=0):
         """
@@ -986,7 +990,7 @@ class ion(ionTrails, specTrails):
 
         eryd = np.asarray(self.Elvlc["eryd"])
         erydth = np.asarray(self.Elvlc["erydth"])
-        elvlc = np.where(eryd > =  0.,eryd,erydth)
+        elvlc = np.where(eryd >= 0.,eryd,erydth)
         temp = np.asarray(temperature)
         ntemp = temp.size
         if ntemp > 1:
@@ -2243,7 +2247,7 @@ class ion(ionTrails, specTrails):
         #
         title = self.Spectroscopic
         #
- =         if hasattr(self, 'Emiss'):
+        if hasattr(self, 'Emiss'):
             em = self.Emiss
         else:
             try:

@@ -232,7 +232,9 @@ def convertName(name):
     higher = zion2name(Z, stage+1)
     lower = zion2name(Z, stage-1)
     filename = zion2filename(Z, stage, dielectronic = dielectronic)
-    return {'Z':Z,'Ion':stage,'Dielectronic':dielectronic, 'Element':els, 'higher':higher, 'lower':lower, 'filename':filename}
+    iso = Z - stage + 1
+    isoEl = const.El[iso - 1].capitalize()
+    return {'Z':Z,'Ion':stage,'Dielectronic':dielectronic, 'Element':els.capitalize(), 'higher':higher, 'lower':lower, 'filename':filename, 'iso':iso, 'isoEl':isoEl}
 
 
 def ion2filename(ions):

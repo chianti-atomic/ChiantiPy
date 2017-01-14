@@ -1,22 +1,10 @@
 """
-Utility functions, many for reading the CHIANTI database files.
+Utility functions
 
 Notes
 -----
 Some of these functions can be replaced by roman numeral and periodic table lookup libraries.
 """
-
-import os, fnmatch
-#from types import *
-#try:
-#    # for Python 3 import
-#    import configparser
-#except ImportError:
-#    # for Python 2 import
-#    import ConfigParser as configparser
-##from ConfigParser import *
-import pickle
-from datetime import date
 
 import numpy as np
 from scipy import interpolate

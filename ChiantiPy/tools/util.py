@@ -20,6 +20,7 @@ from datetime import date
 
 import numpy as np
 from scipy import interpolate
+from scipy.special import expn
 
 import ChiantiPy.tools.constants as const
 
@@ -231,7 +232,9 @@ def convertName(name):
     higher = zion2name(Z, stage+1)
     lower = zion2name(Z, stage-1)
     filename = zion2filename(Z, stage, dielectronic = dielectronic)
-    return {'Z':Z,'Ion':stage,'Dielectronic':dielectronic, 'Element':els, 'higher':higher, 'lower':lower, 'filename':filename}
+    iso = Z - stage + 1
+    isoEl = const.El[iso - 1].capitalize()
+    return {'Z':Z,'Ion':stage,'Dielectronic':dielectronic, 'Element':els.capitalize(), 'higher':higher, 'lower':lower, 'filename':filename, 'iso':iso, 'isoEl':isoEl}
 
 
 def ion2filename(ions):
@@ -338,7 +341,6 @@ def splomDescale(splom, energy):
     for isplom in range(0,nsplom):
         #
         sx1 = energy/(splom['deryd'][isplom]*const.ryd2Ev)  # IDL x_int
-        print(' %5i  %12.2e %12.2e'%(isplom, splom['deryd'][isplom], splom['deryd'][isplom]*const.ryd2Ev))
         good = sx1 >= 1.
         # make sure there are some valid energies above the threshold
         if good.sum():
@@ -574,27 +576,81 @@ def scale_bt(evin,omega,f,ev1):
     btomega=omega/(np.log(u)-1.+np.exp(1.))
     return [bte,btomega]
     
-def scale_classical(x, y, ip):
+def scale_bt_rate(inDict, ip, f=1.7):
+    """
+    to apply a Burgess-Tully type scaling to ionization rates and temperatures
+    
+    Apply ionization descaling of [1]_ .
+    The result of the scaling is to return a scaled temperature between 0 and 1 and a slowly varying scaled rate as a function of scaled temperature.  In addition, the scaled rates vary slowly along an iso-electronic sequence.
+    
+    Parameters
+    ----------
+    
+    inDict: dictionary
+        the input dictionary should have the following key pairs
+            temperature and rate
+    temperature:  array-like
+    rate:  array-like
+    ip:  float
+        the ionization potential in eV.
+    f:  float
+        the scaling parameter, 1.7 generally works well
+    Returns
+        the following keys are added to inDict
+        btTemperature and btRate
+    References
+    ----------
+    .. [1] Dere, K. P., 2007, A&A, `466, 771, <http://adsabs.harvard.edu/abs/2007A%26A...466..771D>`_
+    """
+    if ('temperature' and 'rate') in inDict.keys():
+        rT = inDict['temperature']*const.boltzmannEv/ip
+        btTemperature = 1. - np.log(f)/np.log(rT + f)
+        btRate = np.sqrt(rT)*inDict['rate']*ip**1.5/(expn(1,1./rT))
+        inDict['btTemperature'] = btTemperature
+        inDict['btRate'] = btRate
+        inDict['ip'] = ip
+    else:
+        print(' input dict does not have the correct keys')
+    return
+
+def scale_classical(inDict, ip):
     """
     to apply the 'classical' scaling to the input data
     
     Parameters
     ----------
     
-    x: array-like
-        x can be the energy or the temperature.  Typically, the energy is
-        in the same  units as the ionization potential
-    y:  array like
-        y can be the ionization cross-section, ionization rate, or a recombination
-        rate
+    inDict: dictionary
+        the input dictionary should have the following key pairs
+            energy and cross
+            or
+            temperature and rate
+    energy:  array-like
+        energy values of the cross-section
+    cross:  array-like
+        a cross-section
+    temperature:  array-like
+    rate:  array-like
     ip:  float
         the ionization potential.  Typically in eV.
         
     Returns
+        the following keys are added to inDict
     -------
-    {'csx':csx, 'csy':csy}
+    {'csEnergy', 'csCross', 'ip'} or {'csTemperature', 'csRate', 'ip'}
     """
-    csx = x/ip
-    csy = y*ip**2
-    out = {'csx':csx, 'csy':csy}
-    return out
+    if ('energy' and 'cross') in inDict.keys():
+        csEnergy = inDict['energy']/ip
+        csCross = inDict['cross']*ip**2
+        inDict['csEnergy'] = csEnergy
+        inDict['csCross'] = csCross
+        inDict['ip'] = ip
+    elif ('temperature' and 'rate') in inDict.keys():
+        csTemperature = inDict['temperature']/ip
+        csRate = inDict['rate']*ip**2
+        inDict['csTemperature'] = csTemperature
+        inDict['csRate'] = csRate
+        inDict['ip'] = ip
+    else:
+        print(' input dict does not have the correct keys')
+    return

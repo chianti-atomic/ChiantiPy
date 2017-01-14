@@ -602,7 +602,7 @@ def scale_bt_rate(inDict, ip, f=1.7):
     """
     if ('temperature' and 'rate') in inDict.keys():
         rT = inDict['temperature']*const.boltzmannEv/ip
-        btTemperature = 1. - np.log(f)/np.alog(rT + f)
+        btTemperature = 1. - np.log(f)/np.log(rT + f)
         btRate = np.sqrt(rT)*inDict['rate']*ip**1.5/(expn(1,1./rT))
         inDict['btTemperature'] = btTemperature
         inDict['btRate'] = btRate

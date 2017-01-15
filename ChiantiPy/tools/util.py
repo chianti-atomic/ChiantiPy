@@ -4,8 +4,9 @@ Utility functions
 Notes
 -----
 Some of these functions can be replaced by roman numeral and periodic table lookup libraries.
+some functions using os.walk can be replaced by os.path
 """
-
+import os
 import numpy as np
 from scipy import interpolate
 from scipy.special import expn
@@ -401,7 +402,7 @@ def listFiles(path):
     -----
     This can be replaced by functions in `os.path`.
     """
-    alist=os.walk(path)
+    alist = os.walk(path)
 #    print(' getting file list')
     listname=[]
     for (dirpath,dirnames,filenames) in alist:

@@ -23,15 +23,15 @@ def between(array,limits):
     array : `~numpy.ndarray`
     limits : `list` or `tuple` of length 2
     """
-    array=np.asarray(array)
-    nlines=len(array)
-#    hi=np.where(array >= limits[0],range(1,nlines+1),0)
-#    lo=np.where(array <= limits[1],range(1,nlines+1),0)
-    hi=np.where(array >= limits[0],list(range(1,nlines+1)),0)
-    lo=np.where(array <= limits[1],list(range(1,nlines+1)),0)
+    array = np.asarray(array)
+    nlines = len(array)
+#    hi = np.where(array >= limits[0],range(1,nlines+1),0)
+#    lo = np.where(array <= limits[1],range(1,nlines+1),0)
+    hi = np.where(array >= limits[0],list(range(1,nlines+1)),0)
+    lo = np.where(array <= limits[1],list(range(1,nlines+1)),0)
 
-    hilo=hi&lo
-    out=[a -1  for a in hilo if a > 0]
+    hilo = hi&lo
+    out = [a -1  for a in hilo if a > 0]
     return out
 
 
@@ -40,9 +40,9 @@ def z2element(z):
     Convert atomic number `z` to its elemental symbol.
     """
     if z-1 < len(const.El):
-        thisel=const.El[z-1]
+        thisel = const.El[z-1]
     else:
-        thisel=''
+        thisel = ''
     return thisel
 
 
@@ -59,7 +59,7 @@ def spectroscopic2name(el,roman):
     """
     elu = el.lower()
     romanu = roman.upper()
-    idx =const.Ionstage.index(romanu)
+    idx = const.Ionstage.index(romanu)
     gname = elu+'_'+str(idx+1)
     return gname
 
@@ -79,9 +79,9 @@ def zion2name(z,ion, dielectronic=False):
     elif ion == z+2:
         thisone = 0
     elif (z-1 < len(const.El)) and (ion <= z+1):
-        thisone=const.El[z-1]+'_'+str(ion)
+        thisone = const.El[z-1]+'_'+str(ion)
         if dielectronic:
-            thisone+='d'
+            thisone += 'd'
     else:
         # this should not actually happen
         thisone = 0
@@ -103,19 +103,19 @@ def zion2dir(z,ion, dielectronic=False, xuvtop=''):
     if xuvtop:
         dir = xuvtop
     else:
-        dir=os.environ["XUVTOP"]
+        dir = os.environ["XUVTOP"]
     if (z-1 < len(const.El)) and (ion <= z+1):
-        thisel=const.El[z-1]
+        thisel = const.El[z-1]
     else:
-        thisel=''
+        thisel = ''
     if z-1 < len(const.El):
-        thisone=const.El[z-1]+'_'+str(ion)
+        thisone = const.El[z-1]+'_'+str(ion)
         if dielectronic:
-            thisone+='d'
+            thisone += 'd'
     else:
-        thisone=''
+        thisone = ''
     if thisel != '' :
-        fname=os.path.join(dir,thisel,thisone)
+        fname = os.path.join(dir,thisel,thisone)
     return fname
 
 
@@ -134,19 +134,19 @@ def zion2filename(z,ion, dielectronic=False, xuvtop=''):
     if xuvtop:
         dir = xuvtop
     else:
-        dir=os.environ["XUVTOP"]
+        dir = os.environ["XUVTOP"]
     if (z-1 < len(const.El)) and (ion <= z+1):
-        thisel=const.El[z-1]
+        thisel = const.El[z-1]
     else:
-        thisel=''
+        thisel = ''
     if z-1 < len(const.El):
-        thisone=const.El[z-1]+'_'+str(ion)
+        thisone = const.El[z-1]+'_'+str(ion)
         if dielectronic:
-            thisone+='d'
+            thisone += 'd'
     else:
-        thisone=''
+        thisone = ''
     if thisel != '' :
-        fname=os.path.join(dir,thisel,thisone,thisone)
+        fname = os.path.join(dir,thisel,thisone,thisone)
     return fname
 
 
@@ -160,19 +160,19 @@ def zion2localFilename(z,ion, dielectronic=False):
     ion : `int`
     dielectronic : `bool`, optional
     """
-    dir='.'
+    dir = '.'
     if (z-1 < len(const.El)) and (ion <= z+1):
-        thisel=const.El[z-1]
+        thisel = const.El[z-1]
     else:
-        thisel=''
+        thisel = ''
     if z-1 < len(const.El):
-        thisone=const.El[z-1]+'_'+str(ion)
+        thisone = const.El[z-1]+'_'+str(ion)
         if dielectronic:
-            thisone+='d'
+            thisone += 'd'
     else:
-        thisone=''
+        thisone = ''
     if thisel != '' :
-        fname=os.path.join(dir,thisel,thisone,thisone)
+        fname = os.path.join(dir,thisel,thisone,thisone)
     return fname
 
 
@@ -187,9 +187,9 @@ def zion2spectroscopic(z,ion, dielectronic=False):
     dielectronic : `bool`, optional
     """
     if (z-1 < len(const.El)) and (ion <= z+1):
-        spect=const.El[z-1].capitalize()+' '+const.Ionstage[ion-1]
+        spect = const.El[z-1].capitalize()+' '+const.Ionstage[ion-1]
         if dielectronic:
-            spect+=' d'
+            spect += ' d'
     else:  spect = ''
     return spect
 
@@ -207,16 +207,16 @@ def convertName(name):
     {'Z', 'Ion', 'Dielectronic', 'Element', 'higher', 'lower'} : `dict`
         `higher` and `lower` are the Chianti-style names for the higher and lower ionization stages, respectively.
     """
-    s2=name.split('_')
-    els=s2[0].strip()
+    s2 = name.split('_')
+    els = s2[0].strip()
     Z = int(const.El.index(els)+1)
     ions = s2[1].strip()
-    d=ions.find('d')
+    d = ions.find('d')
     if d >0 :
-        dielectronic=True
+        dielectronic = True
         ions = ions.replace('d','')
     else:
-        dielectronic=False
+        dielectronic = False
     stage = int(ions)
     higher = zion2name(Z, stage+1)
     lower = zion2name(Z, stage-1)
@@ -230,10 +230,10 @@ def ion2filename(ions):
     """
     Convert ion name string to generic directory-file name.
     """
-    dir=os.environ["XUVTOP"]
-    zion=convertName(ions)
-    el=z2element(zion['Z'])
-    fname=os.path.join(dir,el,ions,ions)
+    dir = os.environ["XUVTOP"]
+    zion = convertName(ions)
+    el = z2element(zion['Z'])
+    fname = os.path.join(dir,el,ions,ions)
     return fname
 
 
@@ -241,7 +241,7 @@ def el2z(els):
     """
     Convert elemental symbol to atomic number
     """
-    z=const.El.index(els.lower())+1
+    z = const.El.index(els.lower())+1
     return z
 
 
@@ -270,29 +270,29 @@ def qrp(z,u):
     .. [1] Fontes, C. et al., 1999, PhRvA, `59, 1329 <http://adsabs.harvard.edu/abs/1999PhRvA..59.1329F>`_
     """
     #
-    aa=1.13  # aa stands for A in equ 2.12
+    aa = 1.13  # aa stands for A in equ 2.12
     #
     if z >= 16 :
         # use Fontes Z=20, N=1 parameters
-        dd=3.70590
-        c=-0.28394
-        d=1.95270
-        cc=0.20594
+        dd = 3.70590
+        c = -0.28394
+        d = 1.95270
+        cc = 0.20594
     else:
     # use Fontes Z=10, N=2 parameters
-        dd=3.82652
-        c=-0.80414
-        d=2.32431
-        cc=0.14424
+        dd = 3.82652
+        c = -0.80414
+        d = 2.32431
+        cc = 0.14424
     #
     if z > 20:
-        cc+=((z-20.)/50.5)**1.11
+        cc += ((z-20.)/50.5)**1.11
     #
-    bu=u <= 1.
-    q=np.ma.array(u, 'Float64', mask=bu, fill_value=0.)
+    bu = u <= 1.
+    q = np.ma.array(u, 'Float64', mask=bu, fill_value=0.)
     #
     #
-    q=(aa*np.ma.log(u) + dd*(1.-1./u)**2 + cc*u*(1.-1./u)**4 + (c/u+d/u**2)*(1.-1/u))/u
+    q = (aa*np.ma.log(u) + dd*(1.-1./u)**2 + cc*u*(1.-1./u)**4 + (c/u+d/u**2)*(1.-1/u))/u
     #
     q.set_fill_value(0.)  # I don't know why this is necessary
     return q  #  .set_fill_value(0.)
@@ -316,8 +316,8 @@ def splomDescale(splom, energy):
     """
     #
     #
-    nenergy=energy.size
-    nsplom=len(splom['deryd'])
+    nenergy = energy.size
+    nsplom = len(splom['deryd'])
     # for these files, there are 5 spline points
     nspl = 5
     if nenergy > 1:
@@ -345,7 +345,7 @@ def splomDescale(splom, energy):
             elif splom['ttype'][isplom] == 2:
                 sx =(sx1[good] - 1.)/(sx1[good] -1. + c_curr)
                 y2 = interpolate.splrep(sxint,splom['splom'][:, isplom],s=0)  #allow smoothing,s=0)
-                som=interpolate.splev(sx,y2,der=0)
+                som = interpolate.splev(sx,y2,der=0)
                 omega[isplom, nbad:] = som
             #
             elif splom['ttype'][isplom] == 3:
@@ -357,7 +357,7 @@ def splomDescale(splom, energy):
             elif splom['ttype'][isplom] == 4:
                 sx = 1. - np.log(c_curr)/np.log(sx1[good] -1. + c_curr)
                 y2 = interpolate.splrep(sxint,splom['splom'][:, isplom],s=0)  #allow smoothing,s=0)
-                som=interpolate.splev(sx,y2,der=0)
+                som = interpolate.splev(sx,y2,der=0)
                 omega[isplom, nbad:] = som*np.log(sx1[good] -1. + c_curr)
             #
             #
@@ -369,7 +369,7 @@ def splomDescale(splom, energy):
             pass
     #
     #
-    omega=np.where(omega > 0.,omega,0.)
+    omega = np.where(omega > 0.,omega,0.)
     #
     return omega
 
@@ -404,16 +404,16 @@ def listFiles(path):
     """
     alist = os.walk(path)
 #    print(' getting file list')
-    listname=[]
+    listname = []
     for (dirpath,dirnames,filenames) in alist:
         if len(dirnames) == 0:
             for f in filenames:
-                file=os.path.join(dirpath,f)
+                file = os.path.join(dirpath,f)
                 if os.path.isfile(file):
                     listname.append(file)
         else:
             for f in filenames:
-                file=os.path.join(dirpath,f)
+                file = os.path.join(dirpath,f)
                 if os.path.isfile(file):
                     listname.append(file)
     return listname
@@ -487,9 +487,9 @@ def descale_bt(bte,btomega,f,ev1):
     ----------
     .. [1] Burgess, A. and Tully, J. A., 1992, A&A, `254, 436 <http://adsabs.harvard.edu/abs/1992A%26A...254..436B>`_
     """
-    u=1.-f+np.exp(np.log(f)/(1.-bte))
-    energy=u*ev1
-    omega=(np.log(u)-1.+np.exp(1.))*btomega
+    u = 1.-f+np.exp(np.log(f)/(1.-bte))
+    energy = u*ev1
+    omega = (np.log(u)-1.+np.exp(1.))*btomega
     return [energy,omega]
 
 
@@ -560,9 +560,9 @@ def scale_bt(evin,omega,f,ev1):
     ----------
     .. [1] Burgess, A. and Tully, J. A., 1992, A&A, `254, 436 <http://adsabs.harvard.edu/abs/1992A%26A...254..436B>`_
     """
-    u=evin/ev1
-    bte=1.-np.log(f)/np.log(u-1.+f)
-    btomega=omega/(np.log(u)-1.+np.exp(1.))
+    u = evin/ev1
+    bte = 1.-np.log(f)/np.log(u-1.+f)
+    btomega = omega/(np.log(u)-1.+np.exp(1.))
     return [bte,btomega]
     
 def scale_bt_rate(inDict, ip, f=1.7):

@@ -9,11 +9,13 @@ import ChiantiPy.tools.constants as const
 import ChiantiPy.Gui as chGui
 ip = chdata.Ip
 MasterList = chdata.MasterList
-#
-class continuum:
-    '''The top level class for continuum calculations.
 
-    includes methods for the calculation of the free-free and free-bound continua.
+
+class continuum:
+    """
+    The top level class for continuum calculations. Includes methods for the calculation of the
+    free-free and free-bound continua.
+
     Parameters
     ----------
     ionStr : `str`
@@ -24,11 +26,11 @@ class continuum:
         Elemental abundance relative to Hydrogen or name of CHIANTI abundance file,
         without the '.abund' suffix, e.g. 'sun_photospheric_1998_grevesse'.
     em : `~numpy.float64` or `~numpy.ndarray`, optional
-        Emission Measure, for the line-of-sight emission measure
-        (:math:`\mathrm{\int \, n_e \, n_H \, dl}`)
-        (:math:`\mathrm{cm}^{-5}`.), for the volumetric emission measure
-        :math:`\mathrm{\int \, n_e \, n_H \, dV}` (:math:`\mathrm{cm^{-3}}`).
-    '''
+        Line-of-sight emission measure (:math:`\int\mathrm{d}l\,n_en_H`), in units of :math:`\mathrm{cm}^{-5}`, or the volumetric emission measure
+        (:math:`\int\mathrm{d}V\,n_en_H`) in units of :math:`\mathrm{cm}^{-3}`.
+    """
+
+
     def __init__(self, ionStr,  temperature, abundance=None, em=0, verbose=0):
         nameDict = util.convertName(ionStr)
         self.Z = nameDict['Z']
@@ -82,19 +84,26 @@ class continuum:
         elif type(em) == list or type(em) == tuple or type(em) == np.ndarray:
             em = np.asarray(em, 'float64')
             self.Em = em
-        #
-        #----------------------------------------------------------------------------------------
-        #
-    def freeBoundEmiss(self, wvl, verner=1):
-        '''Calculates the free-bound (radiative recombination) continuum emissivity of an ion.
 
-        Uses the Gaunt factors of Karzas, W.J, Latter, R, 1961, ApJS, 6, 167
-        for recombination to the ground level, the photoionization cross sections of
-        Verner and Yakovlev, 1995, A&ASS, 109, 125
-        are used to develop the free-bound cross section
-        provides emissivity = ergs cm^-2 s^-1 str^-1 Angstrom ^-1 for an individual ion
-        does not include the elemental abundance or ionization fraction
-        the specified ion is the target ion'''
+    def freeBoundEmiss(self, wvl, verner=1):
+        """
+        Calculates the free-bound (radiative recombination) continuum emissivity of an ion.
+        Provides emissivity in units of ergs :math:`\mathrm{cm}^{-2}` :math:`\mathrm{s}^{-1}` :math:`\mathrm{str}^{-1}` :math:`\mathrm{\AA}^{-1}` for an individual ion.
+
+        Notes
+        -----
+        - Uses the Gaunt factors of [1]_ for recombination to the ground level
+        - Uses the photoionization cross sections of [2]_ to develop the free-bound cross section
+        - Does not include the elemental abundance or ionization fraction
+        - The specified ion is the target ion
+
+        References
+        ----------
+        .. [1] Karzas and Latter, 1961, ApJSS, `6, 167
+            <http://adsabs.harvard.edu/abs/1961ApJS....6..167K>`_
+        .. [2] Verner & Yakovlev, 1995, A&AS, `109, 125
+            <http://adsabs.harvard.edu/abs/1995A%26AS..109..125V>`_
+        """
         #
         wvl = np.asarray(wvl, 'float64')
         temperature = self.Temperature
@@ -278,21 +287,26 @@ class continuum:
             #fbRate.fill_value = 0.
             #self.FreeBoundEmiss = {'emiss':fbRate.data, 'temperature':temperature,'wvl':wvl}
             self.FreeBoundEmiss = {'errorMessage':' this is the case of a single wavelength'}
-            #
-            # ----------------------------------------------------------------------------
-            #
+
     def freeBound(self, wvl, verner=1):
-        '''
-        to calculate the free-bound (radiative recombination) continuum rate coefficient of an ion, where
-        the ion is taken to be the recombined ion,
-        including the elemental abundance and the ionization equilibrium population
-        uses the Gaunt factors of Karzas, W.J, Latter, R, 1961, ApJS, 6, 167
-        for recombination to the ground level, the photoionization cross sections of
-        Verner and Yakovlev, 1995, A&ASS, 109, 125
-        are used to develop the free-bound cross section
-        includes the elemental abundance and the ionization fraction
-        provides emissivity = ergs cm^-2 s^-1 str^-1 Angstrom ^-1
-        '''
+        """
+        Calculate the free-bound (radiative recombination) continuum rate coefficient of an ion,
+        where the ion is taken to be the recombined ion, including the elemental abundance and the
+        ionization equilibrium population. Provides emissivity in units of ergs :math:`\mathrm{cm}^{-2}` :math:`\mathrm{s}^{-1}` :math:`\mathrm{str}^{-1}` :math:`\mathrm{\AA}^{-1}`
+
+        Notes
+        -----
+        - Uses the Gaunt factors of [1]_ for recombination to the ground level,
+        - The photoionization cross sections of [2]_ are used to develop the free-bound cross section
+
+        References
+        ----------
+        .. [1] Karzas and Latter, 1961, ApJSS, `6, 167
+            <http://adsabs.harvard.edu/abs/1961ApJS....6..167K>`_
+        .. [2] Verner & Yakovlev, 1995, A&AS, `109, 125
+            <http://adsabs.harvard.edu/abs/1995A%26AS..109..125V>`_
+        """
+
         wvl = np.asarray(wvl, 'float64')
         temperature = self.Temperature
         #
@@ -492,19 +506,24 @@ class continuum:
             #fbRate.fill_value = 0.
             #self.FreeBound = {'rate':fbRate.data, 'temperature':temperature,'wvl':wvl, 'em':self.Em}
             self.FreeBoundEmiss = {'errorMessage':' this is the case of a single wavelength'}
-        #
-        # ----------------------------------------------------------------------------------------
-        #
-            #
+
     def freeBoundLoss(self):
-        '''
-        to calculate the free-bound (radiative recombination) energy loss rate coefficient of an ion,
-        the ion is taken to be the recombined iion,
-        including the elemental abundance and the ionization equilibrium population
-        uses the Gaunt factors of Karzas, W.J, Latter, R, 1961, ApJS, 6, 167
-        provides rate = ergs cm^-2 s^-1
-        '''
-        #
+        """
+        Calculate the free-bound (radiative recombination) energy loss rate coefficient of an ion.
+        The ion is taken to be the recombined ion including the elemental abundance and the
+        ionization equilibrium population.
+
+        Notes
+        -----
+        Uses the Gaunt factors of [1]_ and provides the rate in units of ergs
+        :math:`\mathrm{cm}^{-2}` :math:`\mathrm{s}^{-1}`
+
+        References
+        ----------
+        .. [1] Karzas and Latter, 1961, ApJSS, `6, 167
+            <http://adsabs.harvard.edu/abs/1961ApJS....6..167K>`_
+        """
+
         temperature = self.Temperature
         #
         if hasattr(self, 'Fblvl'):
@@ -598,14 +617,21 @@ class continuum:
         else:
             fbRate = np.zeros((nTemp),'float64')
         self.FreeBoundLoss = {'rate':fbRate, 'temperature':temperature}
-        #
-        # ----------------------------------------------------------------------------------------
-        #
-    def vernerCross(self,wvl):
-        '''Calculates the photoionization cross section.
 
-        The data are from Verner and Yakovlev
-        the cross section refers to the next lower ionization stage'''
+    def vernerCross(self,wvl):
+        """
+        Calculates the photoionization cross section using data from [1]_.
+
+        Notes
+        -----
+        The cross section refers to the next lower ionization stage
+
+        References
+        ----------
+        .. [1] Verner & Yakovlev, 1995, A&AS, `109, 125
+            <http://adsabs.harvard.edu/abs/1995A%26AS..109..125V>`_
+        """
+
         try:
             vernerDat = self.VernerDat
         except:
@@ -628,17 +654,16 @@ class continuum:
         vCross.fill_value = 0.
         # cross-section will be output in cm^2
         self.VernerCross = vCross*1.e-18
-        #
-        # ----------------------------------------------------------------------------------------
-        #
-    def freeFree(self, wvl):
-        '''
-        Calculates the free-free emission for a single ion.
 
-        Includes elemental abundance and ionization equilibrium population
-        and the emission measure (em) if specified
-        Uses Itoh where valid and Sutherland elsewhere
-        '''
+    def freeFree(self, wvl):
+        """
+        Calculates the free-free emission for a single ion. Includes elemental abundance and ionization equilibrium population and the emission measure (`em`) if specified.
+
+        Notes
+        -----
+        Uses `itoh` where valid and `sutherland` elsewhere.
+        """
+
         em=self.Em
         temperature = self.Temperature
         nTemp = temperature.size
@@ -704,13 +729,17 @@ class continuum:
                 for it in range(nTemp):
                     ffRate[it] = (em[it]*const.freeFree*(self.Z)**2*abund*gIoneq[it]*ff[it])  #  .squeeze()
             self.FreeFree = {'rate':ffRate, 'temperature':self.Temperature,'wvl':wvl,'ff':ff}
-        #
-        # ----------------------------------------------------------------------------------------
-        #
+
     def freeFreeEmiss(self, wvl):
-        '''Calculates the free-free emissivity for a single ion.
-        does not include element abundance or ionization fraction
-        Uses Itoh where valid and Sutherland elsewhere'''
+        """
+        Calculates the free-free emissivity for a single ion. Does not include element abundance or
+        ionization fraction
+
+        Notes
+        -----
+        Uses `itoh` where valid and `sutherland` elsewhere.
+        """
+
         if self.Ion == 1:
             self.FreeFreeEmiss = {'errorMessage':' freefree is not produced by neutrals'}
         else:
@@ -725,17 +754,15 @@ class continuum:
             #
             ffRate = (const.freeFree*(self.Z)**2*ff).squeeze()
             self.FreeFree = {'rate':ffRate, 'temperature':self.Temperature,'wvl':wvl}
-        #
-        # ----------------------------------------------------------------------------------------
-        #
+
     def freeFreeLoss(self):
-        '''
-        Calculates the total free-free emission for a single ion.
+        """
+        Calculates the total free-free emission for a single ion. Includes elemental abundance and
+        ionization equilibrium population.
 
-        Includes elemental abundance and ionization equilibrium population.
-
-        Uses Itoh where valid and Sutherland elsewhere
-        '''
+        .. warning:: Currently does not use `itoh` or `sutherland` and approximates Gaunt factor as
+                    1.2. If this is acceptable, we can remove this warning.
+        """
         temperature = self.Temperature
         #print(' doing freeFreeLoss for %s'%(self.IonStr))
         #
@@ -786,14 +813,29 @@ class continuum:
             #else:
             ffRate = const.freeFreeLoss*(self.Z)**2*abund*gIoneq*gff*np.sqrt(temperature)
             self.FreeFreeLoss = {'rate':ffRate, 'temperature':temperature}
-        #
-        # ----------------------------------------------------------------------------------------
-        #
-    def klgfbInterp(self, wvl, n, l):
-        '''A Python version of the CHIANTI IDL procedure karzas_xs.
 
-        Interpolates free-bound gaunt factor of Karzas and Latter, (1961, Astrophysical Journal
-        Supplement Series, 6, 167) as a function of wavelength (wvl).'''
+    def klgfbInterp(self, wvl, n, l):
+        """
+        Interpolates free-bound gaunt factor of [1]_ as a function of wavelength.
+
+        Parameters
+        ----------
+        wvl : array-like
+        n : `int`
+            Principal quantum number of the electron being removed in the ionization
+        l : `int`
+            Orbital angular momentum of the electron being removed in the ionization
+
+        Notes
+        -----
+        A Python version of the CHIANTI IDL procedure `karzas_xs.pro <http://www.chiantidatabase.org/idl/continuum/karzas_xs.pro>`_
+
+        References
+        ----------
+        .. [1] Karzas and Latter, 1961, ApJSS, `6, 167
+            <http://adsabs.harvard.edu/abs/1961ApJS....6..167K>`_
+        """
+
         try:
             klgfb = self.Klgfb
         except:
@@ -806,13 +848,20 @@ class continuum:
         gf = interpolate.splev(sclE, spl)
         return gf
 
-        #
-        # ----------------------------------------------------------------------------------------
-        #
     def itoh(self, wvl):
-        '''Calculates free-free emission with the free-free gaunt factors of Itoh et al. (ApJS 128, 125, 2000).
+        """
+        Calculates free-free emission with the free-free gaunt factors of [1]_.
 
-        the relativistic values are valid for 6. < log10(T) < 8.5 and -4. < log10(u) < 1.'''
+        Notes
+        -----
+        The relativistic values are valid for :math:`6<\log_{10}(T)< 8.5` and :math:`-4<\log_{10}(u)<1`
+
+        References
+        ----------
+        .. [1] Itoh, N. et al., 2000, ApJS, `128, 125
+            <http://adsabs.harvard.edu/abs/2000ApJS..128..125I>`_
+        """
+
         wvl = np.array(wvl, 'float64')
         try:
             itohCoef = self.ItohCoef
@@ -926,14 +975,18 @@ class continuum:
                 rad.mask = nonValid
                 rad.set_fill_value(0.)
                 return {'itohGff':g, 'itohFf':rad}
-        #
-        # - - - - - - - - - - - - - - - - - - - - - - -
-        #
-    def sutherland(self, wvl):
-        '''Calculates the free-free continuum using the free-free gaunt factor calculations of Sutherland, 1998, MNRAS, 300, 321.
 
-        the wavelengths (wvl) will be sorted, first thing'''
-        #
+    def sutherland(self, wvl):
+        """
+        Calculates the free-free continuum using the free-free gaunt factor calculations of
+        [1]_.
+
+        References
+        ----------
+        .. [1] Sutherland, R. S., 1998, MNRAS, `300, 321
+            <http://adsabs.harvard.edu/abs/1998MNRAS.300..321S>`_
+        """
+
         wvl = np.array(wvl, 'float64')
         nWvl = wvl.size
 #       factor = 5.44436e-39
@@ -1062,9 +1115,7 @@ class continuum:
             #errorMessage = 'invalid Temperature/Wavlength in continuum.sutherland'
             #print(errorMessage)
             #return {'errorMessage':errorMessage}
-        #
-        # ----------------------------------------------------------------------------------------
-        #
+
     def ioneqOne(self):
         '''Provide the ionization equilibrium for the selected ion as a function of temperature.
         returned in self.IoneqOne
@@ -1106,6 +1157,3 @@ class continuum:
             ioneqOne = 0.
         #
         self.IoneqOne = ioneqOne
-        #
-        # -------------------------------------------------------------------------------------
-        #

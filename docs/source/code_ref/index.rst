@@ -7,7 +7,7 @@ API Reference
 .. toctree::
    :maxdepth: 1
 
-   chiantipy
+   .. chiantipy
    chiantipy_tools
    chiantipy_base
    chiantipy_core

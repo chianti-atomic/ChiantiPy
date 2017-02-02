@@ -20,8 +20,8 @@ def between(array,limits):
 
     Parameters
     ----------
-    array : `~numpy.ndarray`
-    limits : `list` or `tuple` of length 2
+    array : 'list` or ~numpy.ndarray`
+    limits : `list`, `tuple` or ~numpy.ndarray` of length 2
     """
     array = np.asarray(array)
     nlines = len(array)

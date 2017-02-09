@@ -3748,14 +3748,14 @@ class ionWeb(ion):
             self.intensityRatioSave(outFile = txtFile)
 
 
-class ioneq(ion):
+class ioneq():
     '''
     Reads, calculates, and/or plots the ionization equilibrium for an element as a function of temperature.
     The variable z is the atomic number of the element.  Acceptable values are from 1 to 30.
     '''
 
 
-    def __init__(self,z,  verbose=False):
+    def __init__(self, z, verbose=False):
         self.Z = z
 
     def load(self, ioneqName):

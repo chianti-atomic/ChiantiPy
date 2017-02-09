@@ -18,8 +18,9 @@ class spectrum(ionTrails, specTrails):
     '''
     Calculate the emission spectrum as a function of temperature and density.
 
-    one of the convenient things is that all of the instantiated ion classes, determined through such keywords as 'elementList',
-    'ionList', and 'minAbund' are kept in a dictionary self.IonInstances where self.IonInstances['mg_7'] is the class instance of
+    one of the convenient things is that all of the instantiated ion classes, determined 
+    through such keywords as 'elementList', 'ionList', and 'minAbund' are kept in a 
+    dictionary self.IonInstances where self.IonInstances['mg_7'] is the class instance of
     ChiantiPy.core.ion for 'mg_7'.  All its methods and attributes are available.
 
     includes elemental abundances and ionization equilibria
@@ -33,12 +34,12 @@ class spectrum(ionTrails, specTrails):
     specified wavelength array
 
     the default filter is gaussianR with a resolving power of 1000.  Other filters,
-    such as gaussian, box and lorentz, are available in ChiantiPy.tools.filters.  When using the box filter,
-    the width should equal the wavelength interval to keep the units of the continuum and line
-    spectrum the same.
+    such as gaussian, box and lorentz, are available in ChiantiPy.tools.filters.  When 
+    using the box filter, the width should equal the wavelength interval to keep the units 
+    of the continuum and line spectrum the same.
 
-    Inherited methods include 'intensityList', 'intensityRatio' (between lines of different ions), 'intensityRatioSave'
-    and 'convolve'
+    Inherited methods include 'intensityList', 'intensityRatio' (between lines of different ions), 
+    'intensityRatioSave' and 'convolve'
 
     A selection of elements can be make with elementList a list containing the names of elements
     that are desired to be included, e.g., ['fe','ni']
@@ -48,8 +49,10 @@ class spectrum(ionTrails, specTrails):
 
     Both elementList and ionList can not be specified at the same time
 
-    a minimum abundance can be specified so that the calculation can be speeded up by excluding
-    elements with a low abundance. With solar photospheric abundances -
+    a minimum abundance can be specified so that the calculation can be speeded up
+    by excluding elements with a low abundance. The default of minAbund is 1.e-6
+    
+    With solar photospheric abundances -
 
     setting minAbund = 1.e-4 will include H, He, C, O, Ne
     setting minAbund = 2.e-5 adds  N, Mg, Si, S, Fe
@@ -57,19 +60,22 @@ class spectrum(ionTrails, specTrails):
 
     Setting doContinuum =0 will skip the continuum calculation.
 
-    Setting em will multiply the spectrum at each temperature by the value of em.
+    Setting em [for emission measure] will multiply the spectrum at each temperature
+    by the value of em.
 
-    em [for emission measure], can be a float or an array of the same length as the
+    em [for emission measure] can be a float or an array of the same length as the
     temperature/density
     
-    keepIons:  set this to keep the ion instances that have been calculated in a dictionary self.IonInstances
-        with the keywords being the CHIANTI-style ion names
+    keepIons:  set this to keep the ion instances that have been calculated in a dictionary 
+    self.IonInstances with the keywords being the CHIANTI-style ion names
         
-    abundance: to select a particular set of abundances, set abundance to the name of a CHIANTI abundance file,
-        without the '.abund' suffix, e.g. 'sun_photospheric_1998_grevesse'
-        If set to a blank (''), a gui selection menu will popup and allow the selection of an set of abundances
+    abundance: to select a particular set of abundances, set abundance to the name of a 
+    CHIANTI abundance file, without the '.abund' suffix, e.g. 'sun_photospheric_1998_grevesse'
+    
+    If set to a blank (''), a gui selection menu will popup and allow the selection of an 
+    set of abundances
     ''' 
-    def __init__(self, temperature, eDensity, wavelength, filter=(chfilters.gaussianR, 1000.), label=0, elementList = 0, ionList = 0, minAbund=0, doContinuum=1, em=0, keepIons=0,  abundance=None, verbose=0, allLines=1):
+    def __init__(self, temperature, eDensity, wavelength, filter=(chfilters.gaussianR, 1000.), label=0, elementList = 0, ionList = 0, minAbund=1.e-6, doContinuum=1, em=0, keepIons=0,  abundance=None, verbose=0, allLines=1):
         #
         t1 = datetime.now()
         # creates Intensity dict from first ion calculated

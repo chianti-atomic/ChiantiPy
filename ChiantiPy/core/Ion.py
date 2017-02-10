@@ -216,6 +216,7 @@ class ion(ionTrails, specTrails):
             nlvlList = [nlvlWgfa]
             scupsfile = fileName + '.scups'
             cilvlfile = fileName +'.cilvl'
+            reclvlfile = fileName +'.reclvl'
             # read the scups/splups file
             if os.path.isfile(scupsfile):
                 # happens the case of fe_3 and prob. a few others
@@ -235,7 +236,6 @@ class ion(ionTrails, specTrails):
             else:
                 self.Ncilvl = 0
             #  .reclvl file may not exist
-            reclvlfile = fileName +'.reclvl'
             if os.path.isfile(reclvlfile):
                 self.Reclvl = io.cireclvlRead('',filename=fileName,
                                                 filetype='reclvl')
@@ -937,7 +937,7 @@ class ion(ionTrails, specTrails):
         nots = interpolate.splrep(np.log10(self.IoneqAll['ioneqTemperature']),p2eratio,s=0)
         self.ProtonDensityRatio = interpolate.splev(np.log10(temperature),nots,der=0,ext=1)
 
-    def upsilonDescale(self, prot=0, diel=0):
+    def upsilonDescale(self, prot=0):
         """
         Provides the temperatures and effective collision strengths (upsilons)
         set prot for proton rates
@@ -956,17 +956,6 @@ class ion(ionTrails, specTrails):
                     return
                 else:
                     nscups = len(self.Cilvl["lvl1"])
-        elif diel:
-            ce = 0
-            if hasattr(self, 'DielSplups'):
-                nsplups = len(self.DielSplups["lvl1"])
-            else:
-                self.DielSplups = io.scupsRead(self.IonStr)
-                if type(self.DielSplups) == type(None):
-                    self.DielUpsilon = None
-                    return
-                else:
-                    nscups = len(self.Scups["lvl1"])
         else:
             ce=1
             if hasattr(self, 'Scups'):
@@ -1076,12 +1065,6 @@ class ion(ionTrails, specTrails):
                 fmult1 = float(self.Elvlc["mult"][l1idx])
                 fmult2 = float(self.Elvlc["mult"][l2idx])
                 dexRate[iscups] = const.collision*ups[iscups]/(fmult2*np.sqrt(temp))
-                exRate[iscups] = const.collision*ups[iscups]*np.exp(-ekt)/(fmult1*np.sqrt(temp))
-            elif diel:
-                de = np.abs((elvlc[l2idx] - self.Ip/const.ryd2Ev) - elvlc[l1idx])
-                ekt = (de*const.ryd2erg)/(const.boltzmann*temp)
-                fmult1 = float(self.Elvlc["mult"][l1idx])
-                fmult2 = float(self.Elvlc["mult"][l2idx])
                 exRate[iscups] = const.collision*ups[iscups]*np.exp(-ekt)/(fmult1*np.sqrt(temp))
             elif prot:
                 de = np.abs(elvlc[l2idx]- elvlc[l1idx])
@@ -1498,7 +1481,7 @@ class ion(ionTrails, specTrails):
                     rad[l2+ci,l2+ci] -= self.Wgfa["avalue"][iwgfa]*stemFactor
 
         if self.Nscups:
-            self.upsilonDescale(diel=self.Dielectronic)
+            self.upsilonDescale()
             #ups = self.Upsilon['upsilon']
             exRate = self.Upsilon['exRate']
             dexRate = self.Upsilon['dexRate']

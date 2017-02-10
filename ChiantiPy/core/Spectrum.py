@@ -231,21 +231,26 @@ class bunch(ionTrails, specTrails):
     '''
     Calculate the emission line spectrum as a function of temperature and density.
 
-    'bunch' is very similar to 'spectrum' except that continuum is not calculated and the spectrum
-    is not convolved over a filter.  However, this can be done with the inherited convolve method
+    'bunch' is very similar to 'spectrum' except that continuum is not calculated and 
+    the spectrum is not convolved over a filter.  However, this can be done with the 
+    inherited convolve method
 
-    one of the convenient things is that all of the instantiated ion classes, determined through such keywords as 'elementList',
-    'ionList', and 'minAbund' are kept in a dictionary self.IonInstances where self.IonInstances['mg_7'] is the class instance of
-    ChiantiPy.core.ion for 'mg_7'.  All its methods and attributes are available.
+    one of the convenient things is that all of the instantiated ion classes, 
+    determined through such keywords as 'elementList', 'ionList', and 'minAbund' are 
+    kept in a dictionary self.IonInstances where self.IonInstances['mg_7'] is the 
+    class instance of ChiantiPy.core.ion for 'mg_7'.  All its methods and attributes 
+    are available.
 
     includes elemental abundances and ionization equilibria
 
-    the set of abundances, a file in $XUVTOP/abundance, can be set with the keyword argument 'abundanceName'
+    the set of abundances, a file in $XUVTOP/abundance, can be set with the keyword 
+    argument 'abundanceName'
+    
     temperature and density can be arrays but, unless the size of either is one (1),
     the two must have the same size
 
-    Inherited methods include 'intensityList', 'intensityRatio' (between lines of different ions), and 'intensityRatioSave'
-    and 'convolve'.
+    Inherited methods include 'intensityList', 'intensityRatio' (between lines of different 
+    ions), and 'intensityRatioSave' and 'convolve'.
 
     A selection of elements can be make with elementList a list containing the names of elements
     that are desired to be included, e.g., ['fe','ni']
@@ -261,6 +266,9 @@ class bunch(ionTrails, specTrails):
     setting minAbund = 1.e-4 will include H, He, C, O, Ne
     setting minAbund = 2.e-5 adds  N, Mg, Si, S, Fe
     setting minAbund = 1.e-6 adds  Na, Al, Ar, Ca, Ni
+    
+    At least one of elementList, ionList, or minAbund must be set in order for 'bunch' to include
+    any ions.
 
     Setting em will multiply the spectrum at each temperature by the value of em.
 

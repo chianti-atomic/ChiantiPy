@@ -1569,15 +1569,17 @@ def wgfaRead(ions, filename=None, elvlcname=0, total=False, verbose=False):
     filename : `str`
         Custom filename, will override that specified by `ions`
     elvlcname : `str`
-        If specified, the lsj term labels are returned in the `pretty1` and `pretty2` keys of `Wgfa`
+        If specified, the lsj term labels are returned in the 'pretty1' and 'pretty2' 
+        keys of 'Wgfa' dict
     total : `bool`
-        Return the level 2 avalue data in `Wgfa`
+        Return the level 2 avalue data in 'Wgfa'
     verbose : `bool`
 
     Returns
     -------
     Wgfa : `dict`
-        Information read from the .wgfa file. The dictionary structure is {"lvl1","lvl2","wvl","gf","avalue","ref","ionS","filename"}
+        Information read from the .wgfa file. The dictionary structure is 
+        {"lvl1","lvl2","wvl","gf","avalue","ref","ionS","filename"}
 
     See Also
     --------

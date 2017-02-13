@@ -248,6 +248,7 @@ If the fe14 **ion** object had be instantiated (created) with a temperature and 
 
 
 ::
+
   import numpy as np
   t = 10.**(5.8+0.1*np.arange(11))
   dens = 1.e+9

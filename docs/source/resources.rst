@@ -23,13 +23,21 @@ chiantipy-users_
 Forums
 ======
 
-Help_
+Help_ on Sourceforge
 
 .. _Help:  https://sourceforge.net/projects/chiantipy/forums/forum/907391
 
-`Open discussion`_
+`Open discussion`_  on Sourceforge
 
 .. _Open discussion:  https://sourceforge.net/projects/chiantipy/forums/forum/907390
+
+`The CHIANTI Google group`_
+
+.. _The CHIANTI Google group: https://groups.google.com/forum/#!forum/chianti
+
+As code development has moved to Github_, the Sourceforge site will soon be deactivated
+
+.. _Github:  https://github.com/chianti-atomic/ChiantiPy
 
 The Wiki
 ========

@@ -21,13 +21,13 @@ Prerequisites
 
 .. _Scipy:  http://www.scipy.org/
 
-* Matplotlib_ (developed with 1.5)
+* Matplotlib_ (developed with 1.5 and 2.0)
 
 .. _Matplotlib:  http://matplotlib.sourceforge.net/
 
 * Matplotlib requires a GUI library
 
-  PyQt4_ or wxPython_ (not compatible with Python3) or PyGTK_
+  PyQt4_ or wxPython_ (not compatible with Python3)
   
   Once one of these is installed, it must be set as the backend in your matplotlibrc file, e.g., backend:  Qt4Agg
 
@@ -35,12 +35,12 @@ Prerequisites
 
 .. _wxPython:  http://www.wxpython.org/
 
-.. _PyGTK:  http://www.pygtk.org/
 
-* IPython_ version 4 or 5 / Jupyter
+* (not really a prerequisite but **extremely** useful) IPython_ version 4 or 5 and Jupyter_
   
 .. _IPython:  http://ipython.org
 
+.. _Jupyter: http://jupyter.readthedocs.io/en/latest/
 
 
 Install the CHIANTI database
@@ -124,8 +124,22 @@ or on a Mac, with the Anaconda package
 
 **Thanks to Peter Young (GMU) for providing the instructions for installation on Mac and Windows**
 
-Note - ChiantiPy interactions with Matplotlib
----------------------------------------------------
+Note - ChiantiPy interactions with various GUI backends
+-------------------------------------------------------
 
-Some of the ChiantiPy methods ask the user to make a selection.  With ChiantiPy, this can be done within the command line shell or with gui dialog widgets using PyQt4 or wxPython.  Matplotlib needs to have a backend specified.  The default is 'GTK' and ChiantiPy will use the command line shell for user input.  If the Matplotlib backend is specified to be 'Qt4Agg', then the PyQt4 widget set will be used by ChiantiPy.  If the Matplotlib backend is specified to be 'WXAgg' then the wxPython widget set will be used by ChiantiPy.  If the Matplotlib backend is set to something other than the 3 values previously discussed, the command line shell will be used.
+First, Matplotlib requires a GUI backend and can be specified by the user in the matplotlibrc file.  This is currently found in the  $HOME/.config/matplotlib.  
+
+ChiantiPy also uses a set of GUI dialog widgets using PyQt4 or wxPython (for Python 2).  Selections can also be made via the command line.  The user choice is specified in the $HOME/.chianti/chiantirc file if one has been copied there.  Otherwise, the default GUI is to use the command line.
+
+In order for the ChiantiPy dialog widget to be used, a backend for them must be initiated.  If you choose the same backend for matplotlib as for the ChiantiPy widgets, then running %matplotlib in an IPython or Jupyter session will do the trick.  In an interactive Python session, invoking a matplotlib command first should also do the trick.
+
+If you choose to use a GUI backend other than that used for matplotlib, the in an IPython or a Jupyter command the following magic commands are available to start the backend:
+
+::
+
+  %gui qt
+  %gui wx
+
+
+ChiantiPy has mostly been tested with the Qt4 backend for Matplotlib and using the ChiantiPy Qt4 widgets.
 

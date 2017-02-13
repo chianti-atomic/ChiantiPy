@@ -31,15 +31,15 @@ class ion(ionTrails, specTrails):
     ----------
     ionStr : `str`
         CHIANTI notation for the given ion, e.g. 'fe_12' that corresponds to the `Fe XII` ion.
-    temperature : `~numpy.float64` or `~numpy.ndarray`, optional
+    temperature : `float` or `~numpy.ndarray`, optional
         Temperature array (Kelvin)
-    eDensity : `~numpy.float64` or `~numpy.ndarray`, optional
+    eDensity : `float` or `~numpy.ndarray`, optional
         Electron density array (:math:`\mathrm{cm^{-3}}` )
-    pDensity : `~numpy.float64` or `~numpy.ndarray`, optional
+    pDensity : `float` or `~numpy.ndarray`, optional
         Proton density (:math:`\mathrm{cm}^{-3}` )
-    radTemperature : `~numpy.float64` or `~numpy.ndarray`, optional
+    radTemperature : `float` or `~numpy.ndarray`, optional
         Radiation black-body temperature (in Kelvin)
-    rStar : `~numpy.float64` or `~numpy.ndarray`, optional
+    rStar : `float` or `~numpy.ndarray`, optional
         Distance from the center of the star (in stellar radii)
     abundance : `float` or `str`, optional
         Elemental abundance relative to Hydrogen or name of CHIANTI abundance file
@@ -47,7 +47,7 @@ class ion(ionTrails, specTrails):
     setup : `bool` or `str`, optional
         If True, run ion setup function. Otherwise, provide a limited number of
         attributes of the selected ion
-    em : `~numpy.float64` or `~numpy.ndarray`, optional
+    em : `float` or `~numpy.ndarray`, optional
         Emission Measure, for the line-of-sight emission measure
         (:math:`\mathrm{\int \, n_e \, n_H \, dl}`)
         (:math:`\mathrm{cm}^{-5}`.), for the volumetric emission measure
@@ -69,12 +69,12 @@ class ion(ionTrails, specTrails):
     Filename : `str`
         the complete name of the file `generic` filename in the CHIANTI
         database, such as `$XUVTOP/fe/fe_12/fe_12`.
-    Ip : `~numpy.float64`
+    Ip : `float`
         the ionization potential of the ion
-    Fip : `~numpy.float64`
+    FIP : `float`
         the first ionization potential of the element
     Defaults : `dict`
-        these are specified by the software unless a `chiantirc` file is found
+        these are specified by the software unless a *chiantirc* file is found
         in '$HOME/.chianti':
 
     Notes
@@ -83,19 +83,19 @@ class ion(ionTrails, specTrails):
 
     The `Defaults` dict should have the following keys:
 
-    * `abundfile`, the elemental abundance file, unless specified in
-      'chiantirc' this defaults to `sun_photospheric_1998_grevesse`.
-    * `ioneqfile`, the ionization equilibrium file name.  Unless specified
-      in 'chiantirc' this is defaults to `chianti`.  Other choices are
+    * *abundfile*, the elemental abundance file, unless specified in
+      *chiantirc* this defaults to *sun_photospheric_1998_grevesse*.
+    * *ioneqfile*, the ionization equilibrium file name.  Unless specified
+      in 'chiantirc' this is defaults to *chianti*.  Other choices are
       availble in $XUVTOP/ioneq
-    * `wavelength`, the units of wavelength (Angstroms, nm, or kev), unless
+    * *wavelength*, the units of wavelength (Angstroms, nm, or kev), unless
       specified in the 'chiantirc' this is defaults to 'angstrom'.
-    * `flux`, specified whether the line intensities are give in energy or
+    * *flux*, specified whether the line intensities are give in energy or
       photon fluxes, unless specified in the 'chiantirc' this is defaults to
-      `energy`.
-    * `gui`, specifies whether to use gui selection widgets (True) or to
+      *energy*.
+    * *gui*, specifies whether to use gui selection widgets (True) or to
       make selections on the command line (False).  Unless specified in the
-      'chiantirc' this is defaults to `False`.
+      'chiantirc' this is defaults to *False*.
 
     """
 
@@ -2626,13 +2626,13 @@ class ion(ionTrails, specTrails):
 
         BoundBoundLoss : `dict` with the keys below.
 
-            `wvlRange` : identical to the input value.
+            *wvlRange* : identical to the input value.
 
-            `rate` : the radiative loss rate (:math:`\mathrm{erg \, cm^{-3}} \, \mathrm{s}^{-1}`) per unit emission measure.
+            *rate* : the radiative loss rate (:math:`\mathrm{erg \, cm^{-3}} \, \mathrm{s}^{-1}`) per unit emission measure.
 
-            `temperature` : (K).
+            *temperature* : (K).
 
-            `eDensity` : electron density (:math:`\mathrm{cm^{-3}}`)
+            *eDensity* : electron density (:math:`\mathrm{cm^{-3}}`)
 
 
         """

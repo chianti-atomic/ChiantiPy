@@ -169,9 +169,9 @@ class ion(ionTrails, specTrails):
 
         if setup:
             if self.IonStr in chdata.MasterList:
-                self._setup()
+                self.setup()
             else:
-                self._setupIonrec()
+                self.setupIonrec()
 
         if em is not None:
             em = np.array(em)
@@ -180,7 +180,7 @@ class ion(ionTrails, specTrails):
             else:
                 self.Em = em
 
-    def _setup(self, alternate_dir=None, verbose=False):
+    def setup(self, alternate_dir=None, verbose=False):
         """
         Setup various CHIANTI files for the ion including .wgfa, .elvlc, .scups,
         .psplups, .reclvl, .cilvl, and others.
@@ -268,7 +268,7 @@ class ion(ionTrails, specTrails):
             # recombination rates
             self.Elvlc = io.elvlcRead(self.IonStr, verbose=verbose)
 
-    def _setupIonrec(self, alternate_dir=None, verbose=False):
+    def setupIonrec(self, alternate_dir=None, verbose=False):
         """
         Setup method for ion recombination and ionization rates.
 

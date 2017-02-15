@@ -127,9 +127,9 @@ or on a Mac, with the Anaconda package
 Note - ChiantiPy interactions with various GUI backends
 -------------------------------------------------------
 
-First, Matplotlib requires a GUI backend and can be specified by the user in the matplotlibrc file.  This is currently found in the  $HOME/.config/matplotlib.  
+First, Matplotlib requires a GUI backend and can be specified by the user in the matplotlibrc file.  Matplotlib expects to find this file in  $HOME/.config/matplotlib, although it might require that you copy it to that directory.
 
-ChiantiPy also uses a set of GUI dialog widgets using PyQt4 or wxPython (for Python 2).  Selections can also be made via the command line.  The user choice is specified in the $HOME/.chianti/chiantirc file if one has been copied there.  Otherwise, the default GUI is to use the command line.
+ChiantiPy also uses a set of GUI dialog widgets using PyQt4 or wxPython (for Python 2).  Selections can also be made via the command line.  The user choice is specified in the $HOME/.chianti/chiantirc file if one has been copied there.  Otherwise, the default GUI is to use the command line.  A default chiantirc file is included with the distribution.
 
 In order for the ChiantiPy dialog widget to be used, a backend for them must be initiated.  If you choose the same backend for matplotlib as for the ChiantiPy widgets, then running %matplotlib in an IPython or Jupyter session will do the trick.  In an interactive Python session, invoking a matplotlib command first should also do the trick.
 

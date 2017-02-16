@@ -24,7 +24,7 @@ CHIANTI is developed and maintained by scientists at George Mason University (US
    tutorial
    code_ref/index
    notes
-   cheat
+   IDL_intro
    resources
    changelog
    bugs

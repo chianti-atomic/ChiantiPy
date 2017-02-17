@@ -12,7 +12,6 @@ import ChiantiPy.tools.util as util
 import ChiantiPy.tools.io as chio
 import ChiantiPy.tools.data as chdata
 import ChiantiPy.tools.constants as const
-defaults = chdata.Defaults
 
 
 class specTrails(object):
@@ -24,7 +23,7 @@ class specTrails(object):
     def __init__(self, temperature, density):
         self.Temperature = temperature
         self.EDensity = density
-        self.AbundanceName = defaults['abundfile']
+        self.AbundanceName = chdata.Defaults['abundfile']
         self.AbundAll = chdata.Abundance[self.AbundanceName]['abundance']
         #
         # ---------------------------------------------------------------------------

@@ -61,12 +61,12 @@ import subprocess
 #check if on readthedocs
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 
-if on_rtd:
-    os.environ['XUVTOP'] = os.path.join(os.getcwd(),'chianti_dbase')
-    if not os.path.exists(os.environ['XUVTOP']):
-        os.makedirs(os.environ['XUVTOP'])
-    #note: when version changes, we'll need to update this
-    subprocess.call('curl -L http://www.chiantidatabase.org/download/CHIANTI_8.0.2_data.tar.gz | tar xz -C '+os.environ['XUVTOP'], shell=True)
+#if on_rtd:
+#    os.environ['XUVTOP'] = os.path.join(os.getcwd(),'chianti_dbase')
+#    if not os.path.exists(os.environ['XUVTOP']):
+#        os.makedirs(os.environ['XUVTOP'])
+#    #note: when version changes, we'll need to update this
+#    subprocess.call('curl -L http://www.chiantidatabase.org/download/CHIANTI_8.0.2_data.tar.gz | tar xz -C '+os.environ['XUVTOP'], shell=True)
 
 # -- Module Mocking -------------------------------------------------------------
 #if on_rtd:

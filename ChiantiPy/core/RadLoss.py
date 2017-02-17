@@ -11,7 +11,6 @@ import ChiantiPy.tools.util as util
 import ChiantiPy.Gui as chGui
 from ChiantiPy.base import specTrails
 
-defaults = chdata.Defaults
 
 class radLoss(specTrails):
     '''
@@ -44,7 +43,7 @@ class radLoss(specTrails):
 
     em [for emission measure], can be a float or an array of the same length as the
     temperature/density.
-    
+
     abundance: to select a particular set of abundances, set abundance to the name of a CHIANTI abundance file,
         without the '.abund' suffix, e.g. 'sun_photospheric_1998_grevesse'
         If set to a blank (''), a gui selection menu will popup and allow the selection of an set of abundances
@@ -63,7 +62,7 @@ class radLoss(specTrails):
                         pstring = ' %s not in CHIANTI database'%(one)
                         print(pstring)
             masterlist = alist
-        self.Defaults=defaults
+        self.Defaults=chdata.Defaults
         self.Temperature = np.asarray(temperature, 'float64')
         nTemp = self.Temperature.size
         self.EDensity = np.asarray(eDensity, 'float64')

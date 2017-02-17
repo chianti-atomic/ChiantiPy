@@ -12,14 +12,13 @@ import ChiantiPy.Gui as chGui
 from ChiantiPy.base import ionTrails
 from ChiantiPy.base import specTrails
 
-defaults = chdata.Defaults
 
 class spectrum(ionTrails, specTrails):
     '''
     Calculate the emission spectrum as a function of temperature and density.
 
-    one of the convenient things is that all of the instantiated ion classes, determined 
-    through such keywords as 'elementList', 'ionList', and 'minAbund' are kept in a 
+    one of the convenient things is that all of the instantiated ion classes, determined
+    through such keywords as 'elementList', 'ionList', and 'minAbund' are kept in a
     dictionary self.IonInstances where self.IonInstances['mg_7'] is the class instance of
     ChiantiPy.core.ion for 'mg_7'.  All its methods and attributes are available.
 
@@ -34,11 +33,11 @@ class spectrum(ionTrails, specTrails):
     specified wavelength array
 
     the default filter is gaussianR with a resolving power of 1000.  Other filters,
-    such as gaussian, box and lorentz, are available in ChiantiPy.tools.filters.  When 
-    using the box filter, the width should equal the wavelength interval to keep the units 
+    such as gaussian, box and lorentz, are available in ChiantiPy.tools.filters.  When
+    using the box filter, the width should equal the wavelength interval to keep the units
     of the continuum and line spectrum the same.
 
-    Inherited methods include 'intensityList', 'intensityRatio' (between lines of different ions), 
+    Inherited methods include 'intensityList', 'intensityRatio' (between lines of different ions),
     'intensityRatioSave' and 'convolve'
 
     A selection of elements can be make with elementList a list containing the names of elements
@@ -51,7 +50,7 @@ class spectrum(ionTrails, specTrails):
 
     a minimum abundance can be specified so that the calculation can be speeded up
     by excluding elements with a low abundance. The default of minAbund is 1.e-6
-    
+
     With solar photospheric abundances -
 
     setting minAbund = 1.e-4 will include H, He, C, O, Ne
@@ -65,23 +64,23 @@ class spectrum(ionTrails, specTrails):
 
     em [for emission measure] can be a float or an array of the same length as the
     temperature/density
-    
-    keepIons:  set this to keep the ion instances that have been calculated in a dictionary 
+
+    keepIons:  set this to keep the ion instances that have been calculated in a dictionary
     self.IonInstances with the keywords being the CHIANTI-style ion names
-        
-    abundance: to select a particular set of abundances, set abundance to the name of a 
+
+    abundance: to select a particular set of abundances, set abundance to the name of a
     CHIANTI abundance file, without the '.abund' suffix, e.g. 'sun_photospheric_1998_grevesse'
-    
-    If set to a blank (''), a gui selection menu will popup and allow the selection of an 
+
+    If set to a blank (''), a gui selection menu will popup and allow the selection of an
     set of abundances
-    ''' 
+    '''
     def __init__(self, temperature, eDensity, wavelength, filter=(chfilters.gaussianR, 1000.), label=0, elementList = 0, ionList = 0, minAbund=1.e-6, doContinuum=1, em=0, keepIons=0,  abundance=None, verbose=0, allLines=1):
         #
         t1 = datetime.now()
         # creates Intensity dict from first ion calculated
         setupIntensity = 0
         #
-        self.Defaults=defaults
+        self.Defaults=chdata.Defaults
         self.Temperature = np.asarray(temperature, 'float64')
         nTemp = self.Temperature.size
         self.EDensity = np.asarray(eDensity, 'float64')
@@ -231,25 +230,25 @@ class bunch(ionTrails, specTrails):
     '''
     Calculate the emission line spectrum as a function of temperature and density.
 
-    'bunch' is very similar to 'spectrum' except that continuum is not calculated and 
-    the spectrum is not convolved over a filter.  However, this can be done with the 
+    'bunch' is very similar to 'spectrum' except that continuum is not calculated and
+    the spectrum is not convolved over a filter.  However, this can be done with the
     inherited convolve method
 
-    one of the convenient things is that all of the instantiated ion classes, 
-    determined through such keywords as 'elementList', 'ionList', and 'minAbund' are 
-    kept in a dictionary self.IonInstances where self.IonInstances['mg_7'] is the 
-    class instance of ChiantiPy.core.ion for 'mg_7'.  All its methods and attributes 
+    one of the convenient things is that all of the instantiated ion classes,
+    determined through such keywords as 'elementList', 'ionList', and 'minAbund' are
+    kept in a dictionary self.IonInstances where self.IonInstances['mg_7'] is the
+    class instance of ChiantiPy.core.ion for 'mg_7'.  All its methods and attributes
     are available.
 
     includes elemental abundances and ionization equilibria
 
-    the set of abundances, a file in $XUVTOP/abundance, can be set with the keyword 
+    the set of abundances, a file in $XUVTOP/abundance, can be set with the keyword
     argument 'abundanceName'
-    
+
     temperature and density can be arrays but, unless the size of either is one (1),
     the two must have the same size
 
-    Inherited methods include 'intensityList', 'intensityRatio' (between lines of different 
+    Inherited methods include 'intensityList', 'intensityRatio' (between lines of different
     ions), and 'intensityRatioSave' and 'convolve'.
 
     A selection of elements can be make with elementList a list containing the names of elements
@@ -266,7 +265,7 @@ class bunch(ionTrails, specTrails):
     setting minAbund = 1.e-4 will include H, He, C, O, Ne
     setting minAbund = 2.e-5 adds  N, Mg, Si, S, Fe
     setting minAbund = 1.e-6 adds  Na, Al, Ar, Ca, Ni
-    
+
     At least one of elementList, ionList, or minAbund must be set in order for 'bunch' to include
     any ions.
 
@@ -284,7 +283,7 @@ class bunch(ionTrails, specTrails):
         # creates Intensity dict from first ion calculated
         setupIntensity = 0
         #
-        self.Defaults=defaults
+        self.Defaults=chdata.Defaults
         temperature = np.asarray(temperature, 'float64')
         self.Temperature = temperature
         eDensity = np.asarray(eDensity, 'float64')

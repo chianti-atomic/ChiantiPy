@@ -7,8 +7,6 @@ import ChiantiPy.tools.util as util
 import ChiantiPy.tools.io as chio
 import ChiantiPy.tools.constants as const
 import ChiantiPy.Gui as chGui
-ip = chdata.Ip
-MasterList = chdata.MasterList
 
 
 class continuum:
@@ -48,6 +46,7 @@ class continuum:
                 print(' for %s this is the neutral ions an does not produce a continuum'%(ionStr))
             return
         #  the Ip is only relevant to the free-free methods
+        ip = chdata.Ip
 #        self.Ip = ip[self.Z-1, self.Ion-1]
         self.Ipr = ip[self.Z-1, self.Ion-2]
         #

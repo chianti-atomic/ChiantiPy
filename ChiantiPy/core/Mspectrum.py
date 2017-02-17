@@ -13,8 +13,6 @@ from ChiantiPy.base import ionTrails
 from ChiantiPy.base import specTrails
 import ChiantiPy.tools.mputil as mputil
 
-defaults = chdata.Defaults
-
 
 class mspectrum(ionTrails, specTrails):
     ''' this is the multiprocessing version of spectrum
@@ -64,10 +62,7 @@ class mspectrum(ionTrails, specTrails):
         # creates Intensity dict from first ion calculated
         setupIntensity = 0
         #
-        self.Defaults = defaults
-        #
-#        masterlist = chdata.MasterList
-        self.Defaults = defaults
+        self.Defaults = chdata.Defaults
         self.Temperature = np.asarray(temperature, 'float64')
         nTemp = self.Temperature.size
         self.EDensity = np.asarray(eDensity, 'float64')

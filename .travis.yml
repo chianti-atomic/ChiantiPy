@@ -7,10 +7,11 @@ env:
   global:
     - XUVTOP=$HOME"/chianti_dbase"
     - PYTHON_VERSION=2.7
-    - NUMPY_VERSION='stable'
+    #- NUMPY_VERSION='stable'
     - ASTROPY_VERSION='stable'
     - MAIN_CMD='python setup.py'
     - CONDA_DEPENDENCIES='scipy matplotlib ipython ipyparallel pyqt sphinx sphinx_rtd_theme pytest'
+    - NUMPY_VERSION='1.11'
     - PYQT_VERSION='4.11.4'
   matrix:
     - PYTHON_VERSION=2.7 SETUP_CMD='install'
@@ -19,9 +20,9 @@ env:
     - PYTHON_VERSION=2.7 SETUP_CMD='test'
     - PYTHON_VERSION=3.4 SETUP_CMD='test'
     - PYTHON_VERSION=3.5 SETUP_CMD='test'
-    - PYTHON_VERSION=2.7 SETUP_CMD='build_sphinx'
-    - PYTHON_VERSION=3.4 SETUP_CMD='build_sphinx'
-    - PYTHON_VERSION=3.5 SETUP_CMD='build_sphinx'
+    - PYTHON_VERSION=2.7 SETUP_CMD='build_docs'
+    - PYTHON_VERSION=3.4 SETUP_CMD='build_docs'
+    - PYTHON_VERSION=3.5 SETUP_CMD='build_docs'
 #install the ci helpers
 install:
   - git clone https://github.com/astropy/ci-helpers.git
@@ -31,7 +32,7 @@ before_script:
   - mkdir -p $HOME/.chianti
   - cp chiantirc $HOME/.chianti
   - mkdir -p $XUVTOP
-  - curl -L http://www.chiantidatabase.org/download/CHIANTI_8.0.2_data.tar.gz | tar xz -C $XUVTOP
+  - if [[ "$SETUP_CMD" == "test" ]]; then curl -L http://www.chiantidatabase.org/download/CHIANTI_8.0.2_data.tar.gz | tar xz -C $XUVTOP; fi
 #run the setup commands
 script:
   - $MAIN_CMD $SETUP_CMD

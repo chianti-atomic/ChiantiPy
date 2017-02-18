@@ -18,7 +18,6 @@ import ChiantiPy.Gui as chGui
 from ChiantiPy.base import ionTrails
 from ChiantiPy.base import specTrails
 
-xuvtop = chdata.xuvtop
 heseqLvl2 = [-1,3,-1,-1,-1,5,6,6,-1,6,6,6,5,5,3,5,3,5,3,5,-1,-1,-1,-1,-1,4,-1,4,-1,4]
 
 
@@ -582,7 +581,7 @@ class ion(ionTrails, specTrails):
                 x0 = const.ryd2Ev*eaparams['de'][iups]/tev
                 #  upsilon has already been divided by the statistical weight
                 # of the ground level 2j+1
-                earate1 = eaev[iups]*const.collision*eaparams['ups'][iups]*np.exp(-x0)/(np.sqrt(temperature)) 
+                earate1 = eaev[iups]*const.collision*eaparams['ups'][iups]*np.exp(-x0)/(np.sqrt(temperature))
                 partial[iups] = earate1
                 earate += earate1
             self.EaRate = {'rate':earate, 'temperature':temperature, 'partial':partial}

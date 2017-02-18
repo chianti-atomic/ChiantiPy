@@ -13,8 +13,6 @@ import ChiantiPy.Gui as chgui
 from ChiantiPy.base import ionTrails
 from ChiantiPy.base import specTrails
 
-defaults = chdata.Defaults
-
 
 class ipymspectrum(ionTrails, specTrails):
     '''
@@ -75,7 +73,7 @@ class ipymspectrum(ionTrails, specTrails):
         #
         setupIntensity = 0
         #
-        self.Defaults = defaults
+        self.Defaults = chdata.Defaults
         #
         self.Temperature = np.asarray(temperature,'float64')
         self.EDensity = np.asarray(eDensity,'float64')

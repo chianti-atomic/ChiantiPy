@@ -205,67 +205,61 @@ class ion(ionTrails, specTrails):
             elvlcFileName = None
             wgfaFileName = None
 
-        # read in all data if in masterlist
-        if self.IonStr in chdata.MasterList:
-            self.Elvlc = io.elvlcRead(self.IonStr,filename=elvlcFileName)
-            self.Wgfa = io.wgfaRead(self.IonStr,filename=wgfaFileName,
-                                    elvlcname = elvlcFileName)
-            self.Nwgfa = len(self.Wgfa['lvl1'])
-            nlvlWgfa = max(self.Wgfa['lvl2'])
-            nlvlList = [nlvlWgfa]
-            scupsfile = fileName + '.scups'
-            cilvlfile = fileName +'.cilvl'
-            reclvlfile = fileName +'.reclvl'
-            # read the scups/splups file
-            if os.path.isfile(scupsfile):
-                # happens the case of fe_3 and prob. a few others
-                self.Scups = io.scupsRead(self.IonStr, filename=scupsfile)
-                self.Nscups = len(self.Scups['lvl1'])
-                nlvlScups = max(self.Scups['lvl2'])
-                nlvlList.append(nlvlScups)
-            else:
-                self.Nscups = 0
-                nlvlScups = 0
-            # read cilvl file
-            if os.path.isfile(cilvlfile):
-                self.Cilvl = io.cireclvlRead('',filename = fileName, filetype='cilvl')
-                self.Ncilvl = len(self.Cilvl['lvl1'])
-                nlvlCilvl = max(self.Cilvl['lvl2'])
-                nlvlList.append(nlvlCilvl)
-            else:
-                self.Ncilvl = 0
-            #  .reclvl file may not exist
-            if os.path.isfile(reclvlfile):
-                self.Reclvl = io.cireclvlRead('',filename=fileName,
-                                                filetype='reclvl')
-                self.Nreclvl = len(self.Reclvl['lvl1'])
-                nlvlReclvl = max(self.Reclvl['lvl2'])
-                nlvlList.append(nlvlReclvl)
-            else:
-                self.Nreclvl = 0
-            #  psplups file may not exist
-            psplupsfile = fileName +'.psplups'
-            if os.path.isfile(psplupsfile):
-                self.Psplups = io.splupsRead('', filename=psplupsfile,
-                                                filetype='psplups')
-                self.Npsplups = len(self.Psplups["lvl1"])
-            else:
-                self.Npsplups = 0
-            # drparams file may not exist
-            drparamsFile = fileName +'.drparams'
-            if os.path.isfile(drparamsFile):
-                self.DrParams = io.drRead(self.IonStr)
-            rrparamsFile = fileName +'.rrparams'
-            if os.path.isfile(rrparamsFile):
-                self.RrParams = io.rrRead(self.IonStr)
-            # need to determine the number of levels that can be populated
-            nlvlElvlc = len(self.Elvlc['lvl'])
-            #  elvlc file can have more levels than the rate level files
-            self.Nlvls = min([nlvlElvlc, max(nlvlList)])
+        self.Elvlc = io.elvlcRead(self.IonStr,filename=elvlcFileName)
+        self.Wgfa = io.wgfaRead(self.IonStr,filename=wgfaFileName,
+                                elvlcname = elvlcFileName)
+        self.Nwgfa = len(self.Wgfa['lvl1'])
+        nlvlWgfa = max(self.Wgfa['lvl2'])
+        nlvlList = [nlvlWgfa]
+        scupsfile = fileName + '.scups'
+        cilvlfile = fileName +'.cilvl'
+        reclvlfile = fileName +'.reclvl'
+        # read the scups/splups file
+        if os.path.isfile(scupsfile):
+            # happens the case of fe_3 and prob. a few others
+            self.Scups = io.scupsRead(self.IonStr, filename=scupsfile)
+            self.Nscups = len(self.Scups['lvl1'])
+            nlvlScups = max(self.Scups['lvl2'])
+            nlvlList.append(nlvlScups)
         else:
-            # if not in MasterList, there should still be ionization and
-            # recombination rates
-            self.Elvlc = io.elvlcRead(self.IonStr, verbose=verbose)
+            self.Nscups = 0
+            nlvlScups = 0
+        # read cilvl file
+        if os.path.isfile(cilvlfile):
+            self.Cilvl = io.cireclvlRead('',filename = fileName, filetype='cilvl')
+            self.Ncilvl = len(self.Cilvl['lvl1'])
+            nlvlCilvl = max(self.Cilvl['lvl2'])
+            nlvlList.append(nlvlCilvl)
+        else:
+            self.Ncilvl = 0
+        #  .reclvl file may not exist
+        if os.path.isfile(reclvlfile):
+            self.Reclvl = io.cireclvlRead('',filename=fileName,
+                                            filetype='reclvl')
+            self.Nreclvl = len(self.Reclvl['lvl1'])
+            nlvlReclvl = max(self.Reclvl['lvl2'])
+            nlvlList.append(nlvlReclvl)
+        else:
+            self.Nreclvl = 0
+        #  psplups file may not exist
+        psplupsfile = fileName +'.psplups'
+        if os.path.isfile(psplupsfile):
+            self.Psplups = io.splupsRead('', filename=psplupsfile,
+                                            filetype='psplups')
+            self.Npsplups = len(self.Psplups["lvl1"])
+        else:
+            self.Npsplups = 0
+        # drparams file may not exist
+        drparamsFile = fileName +'.drparams'
+        if os.path.isfile(drparamsFile):
+            self.DrParams = io.drRead(self.IonStr)
+        rrparamsFile = fileName +'.rrparams'
+        if os.path.isfile(rrparamsFile):
+            self.RrParams = io.rrRead(self.IonStr)
+        # need to determine the number of levels that can be populated
+        nlvlElvlc = len(self.Elvlc['lvl'])
+        #  elvlc file can have more levels than the rate level files
+        self.Nlvls = min([nlvlElvlc, max(nlvlList)])
 
     def setupIonrec(self, alternate_dir=None, verbose=False):
         """

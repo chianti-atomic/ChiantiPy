@@ -605,7 +605,7 @@ class ion(ionTrails, specTrails):
         if self.DiParams['info']['neaev'] == 0:
             ionizCross = self.DiCross['cross']
         else:
-            ionizCross = self.DiCross['cross']+self.EaCross['cross']
+            ionizCross = self.DiCross['cross'] + self.EaCross['cross']
         self.IonizCross = {'cross':ionizCross, 'energy':energy}
 
     def ionizRate(self):

@@ -229,7 +229,7 @@ def diRead(ions, filename=None):
         zion = util.convertName(ions)
         if zion['Z'] < zion['Ion']:
             print(' this is a bare nucleus that has no ionization rate')
-            return
+            return {'errorMessage':'diParams do not exist for this ion'}
         #
         fname = util.ion2filename(ions)
         paramname = fname+'.diparams'

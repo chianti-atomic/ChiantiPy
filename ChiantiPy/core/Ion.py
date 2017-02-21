@@ -312,12 +312,15 @@ class ion(ionTrails, specTrails):
         incident electron energy in eV, puts values into DiCross
         """
         iso = self.Z - self.Ion + 1
-        if type(energy) == type(None):
-            btenergy = 0.1*np.arange(10)
-            btenergy[0] = 0.01
-            dum = np.ones(len(btenergy))
-            [energy, dum] = util.descale_bti(btenergy, dum, 2., self.Ip)
-        energy = np.asarray(energy, 'float64')
+#        if energy == None:
+#            btenergy = 0.1*np.arange(10)
+#            btenergy[0] = 0.01
+#            dum = np.ones(len(btenergy))
+#            [energy, dum] = util.descale_bti(btenergy, dum, 2., self.Ip)
+        if energy == None:
+            energy = self.Ip*10.**(0.025*np.arange(101))
+        else:
+            energy = np.asarray(energy, 'float64')
         #
         if iso == 1 and self.Z >= 6:
             #  hydrogenic sequence
@@ -333,6 +336,8 @@ class ion(ionTrails, specTrails):
             qr = util.qrp(self.Z,u)*ff
             bb = 1.  # hydrogenic
             qh = bb*a_bohr*qr/ev1ryd**2
+            self.DiParams = {}
+            self.DiParams['info'] = {'neaev':0}
             self.DiCross = {'energy':energy, 'cross':qh}
         elif iso == 2 and self.Z >= 10:
             #  use
@@ -348,6 +353,8 @@ class ion(ionTrails, specTrails):
             qr = util.qrp(self.Z,u)*ff
             bb = 2.  # helium-like
             qh = bb*a_bohr*qr/ev1ryd**2
+            self.DiParams = {}
+            self.DiParams['info'] = {'neaev':0}
             self.DiCross = {'energy':energy, 'cross':qh}
         else:
             if not hasattr(self, 'DiParams'):
@@ -391,7 +398,7 @@ class ion(ionTrails, specTrails):
             return
         #   gauss laguerre n = 12
         # FIXME: no need to do this by hand, scipy has GL routines
-        ngl = 12
+#        ngl = 12
         xgl = np.asarray([0.115722117358021,0.611757484515131,1.512610269776419,2.833751337743509
             ,4.599227639418353,6.844525453115181,9.621316842456871,13.006054993306350
             ,17.116855187462260,22.151090379396983,28.487967250983992,37.099121044466926], 'float64')
@@ -499,46 +506,59 @@ class ion(ionTrails, specTrails):
         self.EaParams['ups'] = ups
         return ups
 
-    def eaCross(self, energy=0, verbose=False):
+    def eaCross(self, energy=None, verbose=False):
         """
         Provide the excitation-autoionization cross section.
 
         Energy is given in eV.
         """
 
-        if self.DiParams['info']['neaev'] == 0:
-            # the excitation-autionization for this ion does not exist
-            return
-        else:
-            if not energy.all():
-                energy = self.Ip*10.**(0.05*np.arange(31))
-            if hasattr(self, 'Easplom'):
-                easplom = self.Easplom
+        if not hasattr(self, 'DiParams'):
+            self.DiParams = io.diRead(self.IonStr)
+            if 'errorMessage' in self.DiParams.keys():
+                #  this is a H-like or He-like ion
+                # the excitation-autionization for this ion does not exist
+                if verbose:
+                    print(' there is no EA cross section for this ion')
+                self.EaCross = {'errorMessage':'there is no EA cross-section'}
+                return
+            elif self.DiParams['info']['neaev'] == 0:
+                # the excitation-autionization for this ion does not exist
+                if verbose:
+                    print(' there is no EA cross section for this ion')
+                self.EaCross = {'errorMessage':'there is no EA cross-section'}
+                return
+                
             else:
-                self.Easplom = io.splomRead(self.IonStr, ea=1)
-                easplom = self.Easplom
-            # multiplicity of ground level already included
-            #  splomDescale takes care of when energy < threshold
-            omega = util.splomDescale(easplom, energy)
-            #  need to replicate neaev
-            ntrans = len(easplom['deryd'])
-            nsplom = easplom['splom'].shape[1]
-            eaev = self.DiParams['eaev']
-            if len(eaev) == 1:
-                for itrans in range(ntrans):
-                    eaev.append(eaev[0])
+                if hasattr(self, 'Easplom'):
+                    easplom = self.Easplom
+                else:
+                    self.Easplom = io.splomRead(self.IonStr, ea=1)
+                    easplom = self.Easplom
+                if type(energy) == type(None):
+                    energy = self.Easplom['deryd'][0]*const.ryd2Ev*1.01*10.**(0.025*np.arange(101))
+                # multiplicity of ground level already included
+                #  splomDescale takes care of when energy < threshold
+                omega = util.splomDescale(easplom, energy)
+                #  need to replicate neaev
+                ntrans = len(easplom['deryd'])
+                eaev = self.DiParams['eaev']
+                if len(eaev) == 1:
+                    for itrans in range(ntrans):
+                        eaev.append(eaev[0])
 
-            totalCross = np.zeros_like(energy)
-            ntrans = omega.shape[0]
-            partialCross = np.zeros((ntrans, energy.size), 'float64')
-            for itrans in range(ntrans):
-                #  the collision strengths have already by divided by the
-                #  statistical weight of the ground level 2j+1
-                cross = eaev[itrans]*const.bohrCross*omega[itrans]/(energy/const.ryd2Ev)
-                totalCross += cross
-                partialCross[itrans] = cross
-            self.EaCross = {'energy':energy, 'cross':totalCross,
-                            'partial':partialCross}
+                totalCross = np.zeros_like(energy)
+                ntrans = omega.shape[0]
+                partialCross = np.zeros((ntrans, energy.size), 'float64')
+                for itrans in range(ntrans):
+                    #  the collision strengths have already by divided by the
+                    #  statistical weight of the ground level 2j+1
+                    print(' energy min = %12.2e'%(energy.min()))
+                    cross = eaev[itrans]*const.bohrCross*omega[itrans]/(energy/const.ryd2Ev)
+                    totalCross += cross
+                    partialCross[itrans] = cross
+                self.EaCross = {'energy':energy, 'cross':totalCross,
+                                'partial':partialCross}
 
     def eaRate(self):
         """
@@ -586,7 +606,7 @@ class ion(ionTrails, specTrails):
                 earate += earate1
             self.EaRate = {'rate':earate, 'temperature':temperature, 'partial':partial}
 
-    def ionizCross(self, energy=0):
+    def ionizCross(self, energy=None):
         """
         Provides the total ionization cross section.
 
@@ -594,17 +614,20 @@ class ion(ionTrails, specTrails):
         -----
         uses `diCross`  and `eaCross`.
         """
+        if energy == None:
+            energy = self.Ip*10.**(0.025*np.arange(101))
+        else:
+            energy = np.asarray(energy, 'float64')
+            
         if self.Z < self.Ion:
-            self.IonizRate = {'rate':np.zeros_like(self.Temperature), 'temperature':self.Temperature}
+            self.IonizCross = {'cross':np.zeros_like(energy), 'energy':energy}
             return
-        if not energy.all():
-            energy = self.Ip*10.**(0.025*np.arange(401))
 
         self.diCross(energy)
-        self.eaCross(energy)
         if self.DiParams['info']['neaev'] == 0:
             ionizCross = self.DiCross['cross']
         else:
+            self.eaCross(energy)
             ionizCross = self.DiCross['cross'] + self.EaCross['cross']
         self.IonizCross = {'cross':ionizCross, 'energy':energy}
 

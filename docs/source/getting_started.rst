@@ -96,6 +96,12 @@ In order to be compatible with the latest version (8.0) of the CHIANTI atomic da
 ::
 
   pip install ChiantiPy
+  
+or
+
+::
+
+  pip3 install ChiantiPy
 
 
 I have not tried this with ChiantiPy, myself.

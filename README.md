@@ -16,7 +16,7 @@ The following dependencies are required to run ChiantiPy,
 * [Scipy](https://www.scipy.org/)
 * [Matplotlib](http://matplotlib.org/)
 * [IPython](http://ipython.org)
-* [ipyparallel](https://github.com/ipython/ipyparallel)
+* [ipyparallel](https://github.com/ipython/ipyparallel) (if you want to do parallel computing in Jupyter)
 
 Optionally, if you'd like to use the GUI interface,
 

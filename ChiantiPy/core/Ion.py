@@ -317,7 +317,7 @@ class ion(ionTrails, specTrails):
 #            btenergy[0] = 0.01
 #            dum = np.ones(len(btenergy))
 #            [energy, dum] = util.descale_bti(btenergy, dum, 2., self.Ip)
-        if energy == None:
+        if type(energy) == type(None):
             energy = self.Ip*10.**(0.025*np.arange(101))
         else:
             energy = np.asarray(energy, 'float64')
@@ -515,50 +515,57 @@ class ion(ionTrails, specTrails):
 
         if not hasattr(self, 'DiParams'):
             self.DiParams = io.diRead(self.IonStr)
-            if 'errorMessage' in self.DiParams.keys():
-                #  this is a H-like or He-like ion
-                # the excitation-autionization for this ion does not exist
-                if verbose:
-                    print(' there is no EA cross section for this ion')
-                self.EaCross = {'errorMessage':'there is no EA cross-section'}
-                return
-            elif self.DiParams['info']['neaev'] == 0:
-                # the excitation-autionization for this ion does not exist
-                if verbose:
-                    print(' there is no EA cross section for this ion')
-                self.EaCross = {'errorMessage':'there is no EA cross-section'}
-                return
-                
+        if 'errorMessage' in self.DiParams.keys():
+            #  this is a H-like or He-like ion
+            # the excitation-autionization for this ion does not exist
+            if verbose:
+                print(' there is no EA cross section for this ion')
+            self.EaCross = {'errorMessage':'there is no EA cross-section'}
+            if type(energy) != type(None):
+                self.EaCross['energy'] = energy
+                self.EaCross['cross'] = np.zeros_like(energy)
+            return
+        elif self.DiParams['info']['neaev'] == 0:
+            # the excitation-autionization for this ion does not exist
+            if verbose:
+                print(' there is no EA cross section for this ion')
+            self.EaCross = {'errorMessage':'there is no EA cross-section'}
+            if type(energy) != type(None):
+                self.EaCross['energy'] = energy
+                self.EaCross['cross'] = np.zeros_like(energy)
+            return
+            
+        else:
+            if verbose:
+                print('got here')
+            if hasattr(self, 'Easplom'):
+                easplom = self.Easplom
             else:
-                if hasattr(self, 'Easplom'):
-                    easplom = self.Easplom
-                else:
-                    self.Easplom = io.splomRead(self.IonStr, ea=1)
-                    easplom = self.Easplom
-                if type(energy) == type(None):
-                    energy = self.Easplom['deryd'][0]*const.ryd2Ev*1.01*10.**(0.025*np.arange(101))
-                # multiplicity of ground level already included
-                #  splomDescale takes care of when energy < threshold
-                omega = util.splomDescale(easplom, energy)
-                #  need to replicate neaev
-                ntrans = len(easplom['deryd'])
-                eaev = self.DiParams['eaev']
-                if len(eaev) == 1:
-                    for itrans in range(ntrans):
-                        eaev.append(eaev[0])
-
-                totalCross = np.zeros_like(energy)
-                ntrans = omega.shape[0]
-                partialCross = np.zeros((ntrans, energy.size), 'float64')
+                self.Easplom = io.splomRead(self.IonStr, ea=1)
+                easplom = self.Easplom
+            if type(energy) == type(None):
+                energy = self.Easplom['deryd'][0]*const.ryd2Ev*1.01*10.**(0.025*np.arange(101))
+            # multiplicity of ground level already included
+            #  splomDescale takes care of when energy < threshold
+            omega = util.splomDescale(easplom, energy)
+            #  need to replicate neaev
+            ntrans = len(easplom['deryd'])
+            eaev = self.DiParams['eaev']
+            if len(eaev) == 1:
                 for itrans in range(ntrans):
-                    #  the collision strengths have already by divided by the
-                    #  statistical weight of the ground level 2j+1
-                    print(' energy min = %12.2e'%(energy.min()))
-                    cross = eaev[itrans]*const.bohrCross*omega[itrans]/(energy/const.ryd2Ev)
-                    totalCross += cross
-                    partialCross[itrans] = cross
-                self.EaCross = {'energy':energy, 'cross':totalCross,
-                                'partial':partialCross}
+                    eaev.append(eaev[0])
+
+            totalCross = np.zeros_like(energy)
+            ntrans = omega.shape[0]
+            partialCross = np.zeros((ntrans, energy.size), 'float64')
+            for itrans in range(ntrans):
+                #  the collision strengths have already by divided by the
+                #  statistical weight of the ground level 2j+1
+                cross = eaev[itrans]*const.bohrCross*omega[itrans]/(energy/const.ryd2Ev)
+                totalCross += cross
+                partialCross[itrans] = cross
+            self.EaCross = {'energy':energy, 'cross':totalCross,
+                            'partial':partialCross}
 
     def eaRate(self):
         """
@@ -614,8 +621,8 @@ class ion(ionTrails, specTrails):
         -----
         uses `diCross`  and `eaCross`.
         """
-        if energy == None:
-            energy = self.Ip*10.**(0.025*np.arange(101))
+        if type(energy) == type(None):
+            energy = self.Ip*1.01*10.**(0.025*np.arange(101))
         else:
             energy = np.asarray(energy, 'float64')
             
@@ -626,6 +633,7 @@ class ion(ionTrails, specTrails):
         self.diCross(energy)
         if self.DiParams['info']['neaev'] == 0:
             ionizCross = self.DiCross['cross']
+            self.EaCross = {'errorMessage':'there is no EA cross-section', 'energy':energy, 'cross':np.zeros_like(energy)}
         else:
             self.eaCross(energy)
             ionizCross = self.DiCross['cross'] + self.EaCross['cross']

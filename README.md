@@ -23,7 +23,8 @@ The following two are extremely useful for running Python programs
 If you want to do parallel computing in Jupyter
 
 * [ipyparallel](https://github.com/ipython/ipyparallel)
-Optionally, if you'd like to use the GUI interface,
+
+Optionally, if you'd like to use the GUI interfaces,
 
 * [PyQt4](https://riverbankcomputing.com/software/pyqt/intro) and/or
 * [wxPython](http://www.wxpython.org/)

@@ -20,7 +20,7 @@ The following two are extremely useful for running Python programs
 * [IPython](http://ipython.org)
 * [Jupyter](http://jupyter.org/)
 
- If you want to do parallel computing in Jupyter
+If you want to do parallel computing in Jupyter
 
 * [ipyparallel](https://github.com/ipython/ipyparallel)
 Optionally, if you'd like to use the GUI interface,

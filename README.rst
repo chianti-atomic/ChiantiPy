@@ -1,7 +1,8 @@
 ChiantiPy
 =========
 
-|Build Status| |Documentation Status|
+| |Build Status|
+| |Documentation Status|
 
 ChiantiPy is the Python interface to the `CHIANTI atomic
 database <http://www.chiantidatabase.org>`__ for astrophysical
@@ -30,7 +31,8 @@ The following dependencies are required to run ChiantiPy,
 -  `Scipy <https://www.scipy.org/>`__
 -  `Matplotlib <http://matplotlib.org/>`__
 -  `IPython <http://ipython.org>`__
--  `ipyparallel <https://github.com/ipython/ipyparallel>`__
+-  `ipyparallel <https://github.com/ipython/ipyparallel>`__ (if you want
+   to do parallel computing in Jupyter)
 
 Optionally, if you'd like to use the GUI interface,
 
@@ -45,13 +47,13 @@ database <http://www.chiantidatabase.org/chianti_download.html>`__.
 Assuming you've placed the CHIANTI tree in ``$HOME``, set the
 environment variable in your ``.bashrc`` file,
 
-.. code:: Shell
+.. code:: shell
 
     export XUVTOP=$HOME/chianti/dbase
 
 Finally, clone and install the source from GitHub,
 
-.. code:: Shell
+.. code:: shell
 
     $ git clone --recursive https://github.com/chianti-atomic/ChiantiPy.git
     $ cd ChiantiPy
@@ -64,7 +66,7 @@ As a quick example, we'll calculate the populations of the top 10 levels
 of Fe XIV as a function of temperature at constant density and plot
 them:
 
-.. code:: Python
+.. code:: python
 
     >>> import ChiantiPy.core as ch
     >>> import numpy as np

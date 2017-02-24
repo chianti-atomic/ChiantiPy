@@ -26,15 +26,17 @@ Installation
 The following dependencies are required to run ChiantiPy,
 
 -  `Python <https://www.python.org/>`__ (2.7,3)
--  `Astropy <http://www.astropy.org/>`__
 -  `Numpy <http://www.numpy.org/>`__
 -  `Scipy <https://www.scipy.org/>`__
 -  `Matplotlib <http://matplotlib.org/>`__
--  `IPython <http://ipython.org>`__
--  `ipyparallel <https://github.com/ipython/ipyparallel>`__ (if you want
-   to do parallel computing in Jupyter)
+-  `ipyparallel <https://github.com/ipython/ipyparallel>`__
 
-Optionally, if you'd like to use the GUI interface,
+The following two are extremely useful for running Python programs
+
+-  `IPython <http://ipython.org>`__
+-  `Jupyter <http://jupyter.org/>`__
+
+Optionally, if you'd like to use the GUI interfaces,
 
 -  `PyQt4 <https://riverbankcomputing.com/software/pyqt/intro>`__ and/or
 -  `wxPython <http://www.wxpython.org/>`__

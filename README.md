@@ -11,18 +11,15 @@ CHIANTI provides a database of atomic data that can be used to interpret the emi
 The following dependencies are required to run ChiantiPy,
 
 * [Python](https://www.python.org/) (2.7,3)
-* [Astropy](http://www.astropy.org/)
 * [Numpy](http://www.numpy.org/)
 * [Scipy](https://www.scipy.org/)
 * [Matplotlib](http://matplotlib.org/)
+* [ipyparallel](https://github.com/ipython/ipyparallel)
 
 The following two are extremely useful for running Python programs
 * [IPython](http://ipython.org)
 * [Jupyter](http://jupyter.org/)
 
-If you want to do parallel computing in Jupyter
-
-* [ipyparallel](https://github.com/ipython/ipyparallel)
 
 Optionally, if you'd like to use the GUI interfaces,
 

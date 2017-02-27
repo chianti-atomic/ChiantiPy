@@ -280,14 +280,18 @@ def diRead(ions, filename=None):
     return DiParams
 
 
-def drRead(ions):
+def drRead(ions, filename=None):
     """
     Read CHIANTI dielectronic recombination .drparams files
+    if filename is set, then reads that file
     """
     #
     #
-    fname = util.ion2filename(ions)
-    paramname = fname+'.drparams'
+    if filename:
+        paramname = filename
+    else:
+        fname = util.ion2filename(ions)
+        paramname = fname+'.drparams'
     if os.path.isfile(paramname):
         input = open(paramname,'r')
         #  need to read first line and see how many elements
@@ -1098,7 +1102,7 @@ def photoxRead(ions):
     return {'lvl1':lvl1, 'lvl2':lvl2,'energy':energy, 'cross':cross,  'ref':ref}
 
 
-def rrRead(ions):
+def rrRead(ions, filename=None):
     """
     Read CHIANTI radiative recombination .rrparams files
 
@@ -1108,8 +1112,11 @@ def rrRead(ions):
     """
     #
     #
-    fname = util.ion2filename(ions)
-    paramname = fname+'.rrparams'
+    if filename:
+        paramname = filename
+    else:
+        fname = util.ion2filename(ions)
+        paramname = fname+'.rrparams'
     if os.path.isfile(paramname):
         input = open(paramname,'r')
         #  need to read first line and see how many elements
@@ -1558,7 +1565,7 @@ def versionRead():
     return versionStr.strip()
 
 
-def wgfaRead(ions, filename=None, elvlcname=0, total=False, verbose=False):
+def wgfaRead(ions, filename=None, elvlcname=0, auto=False, total=False, verbose=False):
     """
     Read CHIANTI data from a .wgfa file.
 
@@ -1571,8 +1578,11 @@ def wgfaRead(ions, filename=None, elvlcname=0, total=False, verbose=False):
     elvlcname : `str`
         If specified, the lsj term labels are returned in the 'pretty1' and 'pretty2' 
         keys of 'Wgfa' dict
+    auto :  `bool`
+        specifies that a file of autoionization values (.auto) will be read
+        these have the format as a .wgfa file
     total : `bool`
-        Return the level 2 avalue data in 'Wgfa'
+        Return the summed level 2 avalue data in 'Wgfa'
     verbose : `bool`
 
     Returns
@@ -1596,6 +1606,15 @@ def wgfaRead(ions, filename=None, elvlcname=0, total=False, verbose=False):
                 elvlc = 0
         else:
             elvlc = elvlcRead('',elvlcname)
+    
+    elif auto:
+        fname = util.ion2filename(ions)
+        wgfaname = fname+'.auto'
+        elvlcname = fname + '.elvlc'
+        if os.path.isfile(elvlcname):
+            elvlc = elvlcRead('', elvlcname)
+        else:
+            elvlc = 0
 
     else:
         fname = util.ion2filename(ions)

@@ -509,7 +509,7 @@ def elvlcRead(ions, filename=None, getExtended=False, verbose=False, useTh=True)
     return info
 
 
-def elvlcWrite(info, outfile=None, addLvl=0, includeRyd=False):
+def elvlcWrite(info, outfile=None, addLvl=0, includeRyd=False,  includeEv=False):
     '''
     Write Chianti data to .elvlc file.
 
@@ -565,24 +565,25 @@ def elvlcWrite(info, outfile=None, addLvl=0, includeRyd=False):
         info['eryd'] = [x*const.invCm2ryd for x in info['ecm']]
     if 'erydth 'not in info:
         info['erydth'] = [x*const.invCm2ryd for x in info['ecmth']]
+    if 'eV' not in info:
+        info['eV'] = [x*const.invCm2Ev for x in info['ecm']]
+    if 'eVth 'not in info:
+        info['eVth'] = [x*const.invCm2Ev for x in info['ecmth']]
    #
     out = open(elvlcName, 'w')
     for i,  aterm in enumerate(info['term']):
         thisTerm = aterm.ljust(29)
         thisLabel = info['label'][i].ljust(4)
 #        print, ' len of thisTerm = ', len(thisTerm)
+        pstring = '%7i%30s%5s%5i%5s%5.1f%15.3f%15.3f'%(i+1+addLvl, thisTerm, thisLabel, info['spin'][i], info['spd'][i],info['j'][i],  info['ecm'][i], info['ecmth'][i])        
         if includeRyd:
-            pstring = '%7i%30s%5s%5i%5s%5.1f%15.3f%15.3f , %15.8f , %15.8f \n'%(i+1+addLvl, thisTerm, thisLabel, info['spin'][i], info['spd'][i],info['j'][i],  info['ecm'][i], info['ecmth'][i], info['eryd'][i], info['erydth'][i])
-        else:
-            pstring = '%7i%30s%5s%5i%5s%5.1f%15.3f%15.3f \n'%(i+1+addLvl, thisTerm, thisLabel, info['spin'][i], info['spd'][i],info['j'][i],  info['ecm'][i], info['ecmth'][i])
+             pstring += ' , %15.8f , %15.8f'%(info['eryd'][i], info['erydth'][i])
+        if includeEv:
+             pstring += ' , %15.8f , %15.8f'%(info['eV'][i], info['eVth'][i])
+        pstring += '\n'
         out.write(pstring)
     out.write(' -1\n')
     out.write('%filename:  ' + os.path.split(elvlcName)[1] + '\n')
-#    info['ref'].append(' produced as a part of the \'CHIANTI\' atomic database for astrophysical spectroscopy')
-#    today = date.today()
-#    info['ref'].append(' K. Dere (GMU) - ' + today.strftime('%Y %B %d'))
-#    for one in info['ref']:
-#        out.write(one+'\n')
     for aref in info['ref']:
         out.write(aref + '\n')
     out.write(' -1 \n')

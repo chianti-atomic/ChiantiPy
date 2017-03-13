@@ -534,6 +534,8 @@ def elvlcWrite(info, outfile=None, addLvl=0, includeRyd=False,  includeEv=False)
         Add a constant value to the index of all levels
     includeRyd : `bool`
         If True, write the Rydberg energies in the extended area, delimited by a comma
+    includeEv : `bool`
+        If True, write the energies in eV in the extended area, delimited by a comma
 
     Notes
     -----

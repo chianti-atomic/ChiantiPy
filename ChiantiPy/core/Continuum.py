@@ -654,6 +654,53 @@ class continuum:
         # cross-section will be output in cm^2
         self.VernerCross = vCross*1.e-18
 
+    def freeFree_new(self,wvl):
+        """
+        First pass at `freeFree` refactor.
+        """
+        if self.Ion == 1:
+            raise ValueError('free-free emission cannot be produced by neutrals.')
+
+        # calculate gaunt factor
+        ff_sutherland = self.sutherland_new(wvl)
+        ff_itoh = self.itoh_new(wvl)
+        # combine based on temperature domain
+
+
+    def itoh_new(self, wavelength):
+        """
+        First pass at itoh refactor
+        """
+        # read in itoh coefficients
+        itoh_coefficients = chio.itohRead()['itohCoef'][self.Z - 1].reshape(11,11)
+        # normalized temperature and energy
+        scaled_temperature = (np.log10(self.Temperature) - 7.25)/1.25
+        norm_energy = const.planck*const.light*1.e+8/const.boltzmann/np.outer(self.Temperature,
+                                                                        wavelength)
+        scaled_energy = (np.log10(norm_energy) + 1.5)/2.5
+
+        # calculate gaunt factor
+        gaunt_factor = np.zeros((len(self.Temperature), len(wavelength)))
+        for j in range(itoh_coefficients.shape[0]):
+            for i in range(itoh_coefficients.shape[1]):
+                gaunt_factor += itoh_coefficients[i,j]*(scaled_temperature**i)*(scaled_energy**j)
+        full_factor = gaunt_factor*np.exp(-norm_energy)/np.outer(np.sqrt(self.Temperature),(wavelength**2))
+
+        # if outside of acceptable range, set to None
+        valid_temperatures = np.logical_and(np.log10(self.Temperature)>=6.0,
+                                            np.log10(self.Temperature)<=8.5)
+        valid_energies = np.logical_and(np.log10(u)>=-4.0,np.log10(u)<=1.0)
+        valid_range = valid_temperatures.reshape(valid_temperatures.shape[0],1)*valid_energies
+
+        return np.where(valid_range,gaunt_factor,None),
+               np.where(valid_range,full_factor,None)
+
+    def sutherland_new(self,wvl):
+        """
+        First pass at sutherland refactor
+        """
+        pass
+
     def freeFree(self, wvl):
         """
         Calculates the free-free emission for a single ion. Includes elemental abundance and ionization equilibrium population and the emission measure (`em`) if specified.

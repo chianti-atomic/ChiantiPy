@@ -214,7 +214,7 @@ class ionTrails(object):
             outpt.close()
 
 
-    def intensityPlot(self, index=-1,  wvlRange=None,  top=10, linLog='lin', relative=0,  verbose=0, plotFile = 0, em=0 ):
+    def intensityPlot(self, index=-1, wvlRange=None, top=10, linLog='lin', relative=False, verbose=False, plotFile=0, em=0 ):
         """
         Plot the line intensities. Uses `Intensity` if it already exists. If
         not, call the `intensity` method.
@@ -239,14 +239,14 @@ class ionTrails(object):
         em:  emission measure
             if an Intensity attribute needs be created, then the emission measure is applied
         """
-
-        title=self.Spectroscopic
-        if hasattr(self, 'Intensity'):
-            intens = self.Intensity['intensity']
+        if hasattr(self, 'Spectroscopic'):
+            title = self.Spectroscopic
         else:
+            title = ''
+            
+        if not hasattr(self, 'Intensity'):
             try:
                 self.intensity(em=em)
-                intens = self.Intensity['intensity']
             except:
                 print(' emissivities not calculated and emiss() is unable to calculate them')
                 print(' perhaps the temperature and/or eDensity are not set')

@@ -246,6 +246,8 @@ class Continuum:
             fb_emiss *= self.ioneq_one(**kwargs)[:,np.newaxis]
         if ch_data.Defaults['flux'] == 'photon':
             fb_emiss /= photon_energy
+        # the final units should be per angstrom
+        fb_emiss /= 1e8
 
         return fb_emiss
 

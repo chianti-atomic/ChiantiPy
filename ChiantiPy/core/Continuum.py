@@ -42,7 +42,7 @@ class Continuum:
         self.temperature = np.array(temperature)
 
         # Throw exception if neutral
-        if self.Ion == 1:
+        if self.z_ion == 1:
             raise ValueError('{} is a neutral ion and does not produce a continuum'.format(ion_string))
 
         # Read ionization potential

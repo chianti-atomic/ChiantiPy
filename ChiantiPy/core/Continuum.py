@@ -200,7 +200,6 @@ class Continuum:
         """
         # calculate the photon energy in erg
         photon_energy = ch_const.planck*(1.e8*ch_const.light)/wavelength
-        # define the numerical prefactor
         prefactor = (2./np.sqrt(2.*np.pi)/(4.*np.pi)/(ch_const.planck*(ch_const.light**3)
                      * (ch_const.emass*ch_const.boltzmann)**(3./2.)))
         # read the free-bound level information for the recombined and recombining ion

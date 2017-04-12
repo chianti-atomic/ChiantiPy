@@ -38,7 +38,6 @@ class Continuum:
         nameDict = ch_util.convertName(ion_string)
         self.Z = nameDict['Z']
         self.z_ion = nameDict['Ion']
-        self.Dielectronic = 0
         self.temperature = np.array(temperature)
 
         # Throw exception if neutral
@@ -100,11 +99,11 @@ class Continuum:
                      * np.sqrt(2.*np.pi/3./ch_const.emass/ch_const.boltzmann)
                      * (ch_const.fine*ch_const.planck/np.pi)**3)
         # include temperature dependence
-        prefactor *= self.Z**2/np.sqrt(self.Temperature)
+        prefactor *= self.Z**2/np.sqrt(self.temperature)
         if include_abundance:
             prefactor *= self.abundance
         if include_ioneq:
-            prefactor *= self.ioneq_one(**kwargs)[:,np.newaxis]
+            prefactor *= self.ioneq_one(**kwargs)
         # define exponential factor
         exp_factor = np.exp(-ch_const.planck*(1.e8*ch_const.light)/ch_const.boltzmann
                             / np.outer(self.temperature, wavelength))/(wavelength**2)
@@ -175,7 +174,7 @@ class Continuum:
         gf_sutherland = map_coordinates(gf_sutherland_data['gff'],
                                         [i_gamma_squared.flatten(), i_lower_u.flatten()]).reshape(lower_u.shape)
 
-        return np.where(gf_sutherland<0.,0.,gf_sutherland)
+        return np.where(gf_sutherland < 0., 0., gf_sutherland)
 
     def free_bound(self, wavelength, include_abundance=True, include_ioneq=True, use_verner=True, **kwargs):
         """
@@ -304,32 +303,32 @@ class Continuum:
         # cross-section, convert to cm^2
         cross_section = (kl_constant*energy_factor*gaunt_factor/n)*1e-18
 
-        return np.where(photon_energy>=ionization_potential, cross_section, 0.)
+        return np.where(photon_energy >= ionization_potential, cross_section, 0.)
 
-    def ioneq_one(self,**kwargs):
+    def ioneq_one(self, **kwargs):
         '''
         Provide the ionization equilibrium for the selected ion as a function of temperature.
         returned in self.IoneqOne
         this is a duplicate of the method ion.ioneqOne
         '''
 
-        ioneqAll = chio.ioneqRead(ioneqname = kwargs.get('ioneqfile', chdata.Defaults['ioneqfile']))
+        ioneqAll = ch_io.ioneqRead(ioneqname=kwargs.get('ioneqfile', ch_data.Defaults['ioneqfile']))
         ioneqTemperature = ioneqAll['ioneqTemperature']
         ioneq_one = np.zeros_like(self.temperature)
-        thisIoneq=ioneqAll['ioneqAll'][self.Z-1,self.z_ion-1-self.Dielectronic].squeeze()
+        thisIoneq = ioneqAll['ioneqAll'][self.Z-1,self.z_ion-1].squeeze()
 
-        gioneq=thisIoneq > 0.
-        goodt1=self.temperature >= ioneqTemperature[gioneq].min()
-        goodt2=self.temperature <= ioneqTemperature[gioneq].max()
-        goodt=np.logical_and(goodt1,goodt2)
-        y2=interpolate.splrep(np.log(ioneqTemperature[gioneq]),np.log(thisIoneq[gioneq]),s=0)
+        gioneq = thisIoneq > 0.
+        goodt1 = self.temperature >= ioneqTemperature[gioneq].min()
+        goodt2 = self.temperature <= ioneqTemperature[gioneq].max()
+        goodt = np.logical_and(goodt1, goodt2)
+        y2 = splrep(np.log(ioneqTemperature[gioneq]), np.log(thisIoneq[gioneq]), s=0)
 
         if goodt.sum() > 0:
-            if self.Temperature.size > 1:
-                gIoneq=interpolate.splev(np.log(self.temperature[goodt]),y2)   #,der=0)
+            if self.temperature.size > 1:
+                gIoneq = splev(np.log(self.temperature[goodt]), y2)   #,der=0)
                 ioneq_one[goodt] = np.exp(gIoneq)
             else:
-                gIoneq=interpolate.splev(np.log(self.temperature),y2)
+                gIoneq = splev(np.log(self.temperature), y2)
                 ioneq_one = np.exp(gIoneq)
         else:
             ioneq_one = 0.

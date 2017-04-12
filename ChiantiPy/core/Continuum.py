@@ -7,6 +7,7 @@ import numpy as np
 from scipy.interpolate import splev, splrep
 from scipy.ndimage import map_coordinates
 
+from .Ion import ioneq
 import ChiantiPy.tools.data as ch_data
 import ChiantiPy.tools.util as ch_util
 import ChiantiPy.tools.io as ch_io
@@ -313,26 +314,8 @@ class Continuum:
         returned in self.IoneqOne
         this is a duplicate of the method ion.ioneqOne
         '''
-
-        ioneqAll = ch_io.ioneqRead(ioneqname=kwargs.get('ioneqfile', ch_data.Defaults['ioneqfile']))
-        ioneqTemperature = ioneqAll['ioneqTemperature']
-        ioneq_one = np.zeros_like(self.temperature)
-        thisIoneq = ioneqAll['ioneqAll'][self.Z-1,self.z_ion-1].squeeze()
-
-        gioneq = thisIoneq > 0.
-        goodt1 = self.temperature >= ioneqTemperature[gioneq].min()
-        goodt2 = self.temperature <= ioneqTemperature[gioneq].max()
-        goodt = np.logical_and(goodt1, goodt2)
-        y2 = splrep(np.log(ioneqTemperature[gioneq]), np.log(thisIoneq[gioneq]), s=0)
-
-        if goodt.sum() > 0:
-            if self.temperature.size > 1:
-                gIoneq = splev(np.log(self.temperature[goodt]), y2)   #,der=0)
-                ioneq_one[goodt] = np.exp(gIoneq)
-            else:
-                gIoneq = splev(np.log(self.temperature), y2)
-                ioneq_one = np.exp(gIoneq)
-        else:
-            ioneq_one = 0.
-
-        return ioneq_one
+        tmp = ioneq(self.Z)
+        tmp.load(kwargs.get('ioneqfile', ch_data.Defaults['ioneqfile']))
+        ionization_equilibrium = splev(self.temperature,
+                                       splrep(tmp.Temperature, tmp.Ioneq[self.z_ion,:]), ext=1)
+        return np.where(ionization_equilibrium < 0., 0., ionization_equilibrium)

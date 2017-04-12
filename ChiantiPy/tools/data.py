@@ -12,6 +12,8 @@ Descriptions for `keywordArgs`:
 - `distance` : distance from the central source
 '''
 import os
+import glob
+import traceback
 import warnings
 
 import ChiantiPy.tools.io as chio
@@ -21,25 +23,20 @@ try:
     Defaults = chio.defaultsRead()
     Ip = chio.ipRead()
     MasterList = chio.masterListRead()
-    IoneqAll = chio.ioneqRead(ioneqname = Defaults['ioneqfile'])
+    IoneqAll = chio.ioneqRead(ioneqname=Defaults['ioneqfile'])
     ChiantiVersion = chio.versionRead()
-    keywordArgs = ['temperature','eDensity','hDensity', 'pDensity','radTemperature',
-                    'rStar', 'distance']
-    AbundanceDefault = chio.abundanceRead(abundancename = Defaults['abundfile'])
-    abunddir = os.path.join(xuvtop,'abundance')
-    filelist = os.listdir(abunddir)
+    keywordArgs = ['temperature', 'eDensity', 'hDensity', 'pDensity', 'radTemperature',
+                   'rStar', 'distance']
+    AbundanceDefault = chio.abundanceRead(abundancename=Defaults['abundfile'])
 
     AbundanceList = []
-    for one in filelist:
-        fname = os.path.join(abunddir,one)
-        if os.path.isfile(fname):
-            AbundanceList.append(os.path.splitext(one)[0])
-
-    Abundance = {AbundanceList[0]:chio.abundanceRead(abundancename = AbundanceList[0])}
-    for one in AbundanceList[1:]:
-        Abundance[one] = chio.abundanceRead(abundancename = one)
-except (KeyError,IOError) as e:
-    if isinstance(e,KeyError):
+    for fname in glob.glob(os.path.join(xuvtop, 'abundance', '*.abund')):
+        AbundanceList.append(os.path.splitext(os.path.basename(fname))[0])
+    Abundance = {abundance: chio.abundanceRead(abundancename=abundance)
+                 for abundance in AbundanceList}
+except (KeyError, IOError) as e:
+    print(traceback.format_exc())
+    if isinstance(e, KeyError):
         warnings.warn(
             'XUVTOP environment variable not set. You will not be able to access any data from the CHIANTI database.')
     else:

@@ -227,8 +227,11 @@ class Continuum:
             if i == 0 and use_verner:
                 cross_section = self.verner_cross_section(photon_energy)
             else:
-                cross_section = self.karzas_cross_section()
-            scaled_energy = np.exp(-np.outer(1./(ch_const.boltzmann*self.temperature),photon_energy - ip))
+                cross_section = self.karzas_cross_section(photon_energy, ip,
+                                                          recombined_fblvl['pqn'][i],
+                                                          recombined_fblvl['l'][i])
+            scaled_energy = np.exp(-np.outer(1./(ch_const.boltzmann*self.temperature),
+                                             photon_energy - ip))
             # the exponential term can go to infinity for low temperatures
             # but if the cross-section is zero this does not matter
             scaled_energy[:,np.where(cross_section == 0.0)] = 1.0

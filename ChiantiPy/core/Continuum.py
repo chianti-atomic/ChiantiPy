@@ -95,7 +95,7 @@ class Continuum:
         and the emission measure if specified.
         """
         # define the numerical prefactor
-        prefactor = (1.e8*ch_const.light/3./ch_const.emass
+        prefactor = (4.*1.e8*ch_const.light/3./ch_const.emass
                      * np.sqrt(2.*np.pi/3./ch_const.emass/ch_const.boltzmann)
                      * (ch_const.fine*ch_const.planck/np.pi)**3)
         # include temperature dependence
@@ -134,7 +134,7 @@ class Continuum:
             <http://adsabs.harvard.edu/abs/2000ApJS..128..125I>`_
         """
         # calculate scaled energy and temperature
-        lower_u = ch_const.planck*(1.e8*ch_const.light)/ch_const.boltzmann/np.outer(self.temperature,wavelength)
+        lower_u = ch_const.planck*(1.e8*ch_const.light)/ch_const.boltzmann/np.outer(self.temperature, wavelength)
         upper_u = 1./2.5*(np.log10(lower_u) + 1.5)
         t = 1./1.25*(np.log10(self.temperature) - 7.25)
         # read in Itoh coefficients

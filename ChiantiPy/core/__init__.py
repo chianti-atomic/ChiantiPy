@@ -8,7 +8,7 @@ that is found in the LICENSE file
 from .Spectrum import spectrum, bunch
 from .Mspectrum import mspectrum
 from .IpyMspectrum import ipymspectrum
-from .Continuum import continuum
+from .Continuum import Continuum
 from .RadLoss import radLoss
 from .Ion import ion
 from .Ion import ioneq

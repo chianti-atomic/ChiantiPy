@@ -40,12 +40,7 @@ class Continuum:
         self.Z = nameDict['Z']
         self.stage = nameDict['Ion']
         self.temperature = np.array(temperature)
-
-        # Throw exception if neutral
-        #if self.stage == 1:
-        #    raise ValueError('{} is a neutral ion and does not produce a continuum'.format(ion_string))
-
-        # Read ionization potential
+        self.emission_measure = np.array(emission_measure)
         self.ionization_potential = ch_data.Ip[self.Z-1, self.stage-1]*ch_const.ev2Erg
         # Set abundance
         if abundance is not None:
@@ -63,12 +58,6 @@ class Continuum:
             self.abundance_name = ch_data.Defaults['abundfile']
         if not hasattr(self, 'abundance'):
             self.abundance = ch_data.Abundance[self.abundance_name]['abundance'][self.Z-1]
-
-        # Make sure emission measure is an array if not None
-        if emission_measure:
-            self.emission_measure = np.array(emission_measure)
-        else:
-            self.emission_measure = emission_measure
 
     def free_free(self, wavelength, include_abundance=True, include_ioneq=True, **kwargs):
         """
@@ -105,6 +94,8 @@ class Continuum:
             prefactor *= self.abundance
         if include_ioneq:
             prefactor *= self.ioneq_one(**kwargs)
+        if self.emission_measure:
+            prefactor *= self.emission_measure
         # define exponential factor
         exp_factor = np.exp(-ch_const.planck*(1.e8*ch_const.light)/ch_const.boltzmann
                             / np.outer(self.temperature, wavelength))/(wavelength**2)
@@ -243,6 +234,8 @@ class Continuum:
             fb_emiss *= self.abundance
         if include_ioneq:
             fb_emiss *= self.ioneq_one(**kwargs)[:,np.newaxis]
+        if self.emission_measure:
+            fb_emiss *= self.emission_measure
         if ch_data.Defaults['flux'] == 'photon':
             fb_emiss /= photon_energy
         # the final units should be per angstrom

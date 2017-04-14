@@ -96,9 +96,9 @@ class Continuum:
         and the emission measure if specified.
         """
         # define the numerical prefactor
-        prefactor = (4.*1.e8*ch_const.light/3./ch_const.emass
-                     * np.sqrt(2.*np.pi/3./ch_const.emass/ch_const.boltzmann)
-                     * (ch_const.fine*ch_const.planck/np.pi)**3)
+        prefactor = ((ch_const.light*1e8)/3./ch_const.emass
+                     * (ch_const.fine*ch_const.planck/np.pi)**3
+                     * np.sqrt(2.*np.pi/3./ch_const.emass/ch_const.boltzmann))
         # include temperature dependence
         prefactor *= self.Z**2/np.sqrt(self.temperature)
         if include_abundance:

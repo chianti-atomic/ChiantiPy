@@ -38,15 +38,15 @@ class Continuum:
     def __init__(self, ion_string,  temperature, abundance=None, emission_measure=None):
         nameDict = ch_util.convertName(ion_string)
         self.Z = nameDict['Z']
-        self.z_ion = nameDict['Ion']
+        self.stage = nameDict['Ion']
         self.temperature = np.array(temperature)
 
         # Throw exception if neutral
-        if self.z_ion == 1:
-            raise ValueError('{} is a neutral ion and does not produce a continuum'.format(ion_string))
+        #if self.stage == 1:
+        #    raise ValueError('{} is a neutral ion and does not produce a continuum'.format(ion_string))
 
         # Read ionization potential
-        self.ionization_potential = ch_data.Ip[self.Z-1, self.z_ion-1]*ch_const.ev2Erg
+        self.ionization_potential = ch_data.Ip[self.Z-1, self.stage-1]*ch_const.ev2Erg
         # Set abundance
         if abundance is not None:
             try:
@@ -204,10 +204,10 @@ class Continuum:
         prefactor = (2./np.sqrt(2.*np.pi)/(4.*np.pi)/(ch_const.planck*(ch_const.light**3)
                      * (ch_const.emass*ch_const.boltzmann)**(3./2.)))
         # read the free-bound level information for the recombined and recombining ion
-        recombined_fblvl = ch_io.fblvlRead('.'.join([ch_util.zion2filename(self.Z, self.z_ion), 'fblvl']))
-        recombining_fblvl = ch_io.fblvlRead('.'.join([ch_util.zion2filename(self.Z, self.z_ion+1), 'fblvl']))
+        recombined_fblvl = ch_io.fblvlRead('.'.join([ch_util.zion2filename(self.Z, self.stage), 'fblvl']))
+        recombining_fblvl = ch_io.fblvlRead('.'.join([ch_util.zion2filename(self.Z, self.stage+1), 'fblvl']))
         if 'errorMessage' in recombined_fblvl:
-            raise ValueError('No free-bound information available for {}'.format(ch_util.zion2name(self.Z, self.z_ion)))
+            raise ValueError('No free-bound information available for {}'.format(ch_util.zion2name(self.Z, self.stage)))
         # get the multiplicity of the ground state of the recombining ion
         if 'errorMessage' in recombining_fblvl:
             omega_0 = 1.
@@ -230,12 +230,11 @@ class Continuum:
                 cross_section = self.karzas_cross_section(photon_energy, ip,
                                                           recombined_fblvl['pqn'][i],
                                                           recombined_fblvl['l'][i])
-            scaled_energy = np.exp(-np.outer(1./(ch_const.boltzmann*self.temperature),
-                                             photon_energy - ip))
+            scaled_energy = np.outer(1./(ch_const.boltzmann*self.temperature), photon_energy - ip)
             # the exponential term can go to infinity for low temperatures
             # but if the cross-section is zero this does not matter
-            scaled_energy[:,np.where(cross_section == 0.0)] = 1.0
-            sum_factor += omega_i/omega_0*scaled_energy*cross_section
+            scaled_energy[:,np.where(cross_section == 0.0)] = 0.0
+            sum_factor += omega_i/omega_0*np.exp(-scaled_energy)*cross_section
 
         # combine factors
         fb_emiss = prefactor*energy_over_temp_factor*sum_factor
@@ -268,14 +267,14 @@ class Continuum:
         """
         # read verner data
         verner_info = ch_io.vernerRead()
-        eth = verner_info['eth'][self.Z,self.z_ion]*ch_const.ev2Erg
-        yw = verner_info['yw'][self.Z,self.z_ion]
-        ya = verner_info['ya'][self.Z,self.z_ion]
-        p = verner_info['p'][self.Z,self.z_ion]
+        eth = verner_info['eth'][self.Z,self.stage]*ch_const.ev2Erg
+        yw = verner_info['yw'][self.Z,self.stage]
+        ya = verner_info['ya'][self.Z,self.stage]
+        p = verner_info['p'][self.Z,self.stage]
         # convert from megabarn to cm^2
-        sigma0 = verner_info['sig0'][self.Z,self.z_ion]*1e-18
-        e0 = verner_info['e0'][self.Z,self.z_ion]*ch_const.ev2Erg
-        q = 5.5 + verner_info['l'][self.Z,self.z_ion] - 0.5*p
+        sigma0 = verner_info['sig0'][self.Z,self.stage]*1e-18
+        e0 = verner_info['e0'][self.Z,self.stage]*ch_const.ev2Erg
+        q = 5.5 + verner_info['l'][self.Z,self.stage] - 0.5*p
 
         # scaled photon energy
         y = photon_energy/e0
@@ -319,5 +318,5 @@ class Continuum:
         tmp = ioneq(self.Z)
         tmp.load(kwargs.get('ioneqfile', ch_data.Defaults['ioneqfile']))
         ionization_equilibrium = splev(self.temperature,
-                                       splrep(tmp.Temperature, tmp.Ioneq[self.z_ion,:]), ext=1)
+                                       splrep(tmp.Temperature, tmp.Ioneq[self.stage,:]), ext=1)
         return np.where(ionization_equilibrium < 0., 0., ionization_equilibrium)

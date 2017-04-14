@@ -8,7 +8,9 @@ References
 
 Notes
 -----
-Many of these can be replaced by the `~astropy.constants` module. Elemental symbols can be removed in favor of the periodictable module. Spectroscopic roman numerals can be removed in favor of roman module. The Gauss-Laguerre weights can be calculated by `~numpy.polynomial.laguerre.laggauss`.
+Many of these can be replaced by the `~astropy.constants` module. Elemental symbols can be removed
+in favor of the periodictable module. Spectroscopic roman numerals can be removed in favor of roman
+module. The Gauss-Laguerre weights can be calculated by `~numpy.polynomial.laguerre.laggauss`.
 """
 
 import numpy as np
@@ -46,18 +48,6 @@ boltzmannRyd = boltzmannEv/ryd2Ev
 #
 # collision produces the 8.63e-6 factor
 collision = planck**2/((2.*pi*emass)**1.5*np.sqrt(boltzmann))
-#
-freeFree = 1.e+8*(light/(3.*emass))*(fine*planck/pi)**3*np.sqrt((2.*pi)/(3.*emass*boltzmann))
-#
-sutherland = (2./(3.*np.sqrt(3.)))*np.sqrt(pi/(2.*boltzmann*emass**3))*(planck*fine/pi)**3
-#
-freeBound = 1.e+8*(8.*fine*(planck**3))/(3.*np.sqrt(3.)*np.pi*(emass**4)*light)*(emass/(2.*np.pi*boltzmann))**1.5
-#
-verner = (1.e-8/(planck*light**3*emass**3))*(emass/(2.*pi*boltzmann))**1.5
-#
-freeFreeLoss = (8./3.)*np.sqrt(pi*boltzmann/(6.*emass**3))*(planck/pi)**2*fine**3
-#
-freeBoundLoss = ((16.*fine*(planck**2))/(3.*pi*np.sqrt(3.)*(emass**3)*(light**2)))*np.sqrt(emass/(2.*pi*boltzmann))
 #
 # astronomical
 luminositySun = 3.86e+33 # ergs/s

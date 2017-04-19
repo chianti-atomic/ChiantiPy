@@ -248,7 +248,7 @@ class Continuum(object):
         # thermal energy scaled by H ionization potential
         scaled_energy = ch_const.ryd2erg/ch_const.boltzmann/self.temperature
         # set variables used in Eq. 16 of Mewe et al.(1986)
-        n_0 = recombined_fblvl[0]
+        n_0 = recombined_fblvl['pqn'][0]
         z_0 = np.sqrt(self.ionization_potential/ch_const.ryd2erg)*n_0
 
         # calculate zeta_0, the number of vacancies in the recombining ion
@@ -266,7 +266,7 @@ class Continuum(object):
         f_2 = (0.9*zeta_0*(z_0**4)/(n_0**5)*np.exp(scaled_energy*(z_0**2)/(n_0**2))
                + 0.42/(n_0**1.5)*(self.stage**4)*np.exp(scaled_energy*(self.stage**2)/((n_0 + 1)**2)))
 
-        return scaled_energy*f2*self.abundance*self.ioneq_one(**kwargs)
+        return scaled_energy*f_2*self.abundance*self.ioneq_one(**kwargs)
 
     def calculate_free_bound_emission(self, wavelength, include_abundance=True, include_ioneq=True, use_verner=True, **kwargs):
         """

@@ -85,7 +85,7 @@ class Continuum(object):
         gaunt_factor = splev(np.log(gamma_squared),
                              splrep(gf_kl_info['g2'],gf_kl_info['gffint']), ext=3)
         # calculate numerical constant
-        prefactor = (4.*(ch_const.alpha**3)*(ch_const.planck**2)/3./(np.pi**2)/ch_const.emass
+        prefactor = (4.*(ch_const.fine**3)*(ch_const.planck**2)/3./(np.pi**2)/ch_const.emass
                      * np.sqrt(2.*np.pi*ch_const.boltzmann/3./ch_const.emass))
 
         self.free_free_loss = prefactor*(self.Z**2)*np.sqrt(self.temperature)*gaunt_factor
@@ -214,7 +214,7 @@ class Continuum(object):
 
         return np.where(gf_sutherland < 0., 0., gf_sutherland)
 
-    def calculate_free_bound_loss(self, wavelength, **kwargs):
+    def calculate_free_bound_loss(self, **kwargs):
         """
         Calculate the free-bound energy loss rate of an ion.
 

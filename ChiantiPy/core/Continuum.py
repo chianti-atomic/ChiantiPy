@@ -265,8 +265,9 @@ class Continuum(object):
         else:
             zeta_0 = self.Z - self.stage + 1
 
-        f_2 = (0.9*zeta_0*(z_0**4)/(n_0**5)*np.exp(scaled_energy*(z_0**2)/(n_0**2))
-               + 0.42/(n_0**1.5)*(self.stage**4)*np.exp(scaled_energy*(self.stage**2)/((n_0 + 1)**2)))
+        ip = self.ionization_potential - recombined_fblvl['ecm'][0]*ch_const.planck*ch_const.light
+        f_2 = (0.9*zeta_0*(z_0**4)/(n_0**5)*np.exp(scaled_energy*(z_0**2)/(n_0**2) - ip/ch_const.boltzmann/self.temperature)
+               + 0.42/(n_0**1.5)*(self.stage**4))
 
         return scaled_energy*f_2*self.abundance*self.ioneq_one(**kwargs)
 

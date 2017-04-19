@@ -87,6 +87,8 @@ class Continuum(object):
         # calculate numerical constant
         prefactor = (4.*(ch_const.fine**3)*(ch_const.planck**2)/3./(np.pi**2)/ch_const.emass
                      * np.sqrt(2.*np.pi*ch_const.boltzmann/3./ch_const.emass))
+        # include abundance and ionization equilibrium
+        prefactor *= self.abundance*self.ioneq_one(**kwargs)
 
         self.free_free_loss = prefactor*(self.Z**2)*np.sqrt(self.temperature)*gaunt_factor
 

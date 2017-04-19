@@ -15,7 +15,7 @@ import ChiantiPy.tools.constants as ch_const
 import ChiantiPy.Gui as chGui
 
 
-class Continuum:
+class Continuum(object):
     """
     The top level class for continuum calculations. Includes methods for the calculation of the
     free-free and free-bound continua.
@@ -25,7 +25,7 @@ class Continuum:
     ionStr : `str`
         CHIANTI notation for the given ion, e.g. 'fe_12' that corresponds to the `Fe XII` ion.
     temperature : array-like
-        Temperature  (Kelvin)
+        In units of Kelvin
     abundance : `float` or `str`, optional
         Elemental abundance relative to Hydrogen or name of CHIANTI abundance file,
         without the '.abund' suffix, e.g. 'sun_photospheric_1998_grevesse'.
@@ -59,9 +59,58 @@ class Continuum:
         if not hasattr(self, 'abundance'):
             self.abundance = ch_data.Abundance[self.abundance_name]['abundance'][self.Z-1]
 
-    def free_free(self, wavelength, include_abundance=True, include_ioneq=True, **kwargs):
+    def calculate_free_free_loss(self, **kwargs):
+        """
+        Calculate the free-free energy loss rate of an ion.
+
+        The free-free radiative loss rate is given by Eq. 5.15a of [1]_. Writing the numerical
+        constant in terms of the fine structure constant :math:`\\alpha`,
+
+        .. math::
+           \\frac{dW}{dtdV} = \\frac{4\\alpha^3h^2}{3\pi^2m_e}\left(\frac{2\pi k_B}{3m_e}\\right)^{1/2}Z^2T^{1/2}\bar{g}_B
+
+        where where :math:`Z` is the nuclear charge, :math:`T` is the electron temperature, and
+        :math:`\\bar{g}_{B}` is the wavelength-averaged and velocity-averaged Gaunt factor. The
+        Gaunt factor is calculated using the methods of [2]_. Note that this expression for the
+        loss rate is just the integral over wavelength of Eq. 5.14a of [1]_, the free-free emission.
+
+        References
+        ----------
+        .. [2] Karzas and Latter, 1961, ApJSS, `6, 167
+            <http://adsabs.harvard.edu/abs/1961ApJS....6..167K>`_
+        """
+        # interpolate wavelength-averaged K&L gaunt factors
+        gf_kl_info = ch_io.gffintRead()
+        gamma_squared = self.ionization_potential/ch_const.boltzmann/self.temperature
+        gaunt_factor = splev(np.log(gamma_squared),
+                             splrep(gf_kl_info['g2'],gf_kl_info['gffint']), ext=3)
+        # calculate numerical constant
+        prefactor = (4.*(ch_const.alpha**3)*(ch_const.planck**2)/3./(np.pi**2)/ch_const.emass
+                     * np.sqrt(2.*np.pi*ch_const.boltzmann/3./ch_const.emass))
+
+        self.free_free_loss = prefactor*(self.Z**2)*np.sqrt(self.temperature)*gaunt_factor
+
+    def calculate_free_free_emission(self, wavelength, include_abundance=True, include_ioneq=True, **kwargs):
         """
         Calculates the free-free emission for a single ion.
+
+        The free-free emission for the given ion is calculated according Eq. 5.14a of [1]_,
+        substituting :math:`\\nu=c/\lambda`, dividing by the solid angle, and writing the numerical
+        constant in terms of the fine structure constant :math:`\\alpha`,
+
+        .. math::
+           \\frac{dW}{dtdVd\lambda} = \\frac{c}{3m_e}\left(\\frac{\\alpha h}{\pi}\\right)^3\left(\\frac{2\pi}{3m_ek_B}\\right)^{1/2}\\frac{Z^2}{\lambda^2T^{1/2}}\exp{\left(-\\frac{hc}{\lambda k_BT}\\right)}\\bar{g}_{ff},
+
+        where :math:`Z` is the nuclear charge, :math:`T` is the electron temperature, and
+        :math:`\\bar{g}_{ff}` is the velocity-averaged Gaunt factor. The Gaunt factor is estimated
+        using the methods of [2]_ and [3]_, depending on the temperature and energy regime. See
+        `itoh_gaunt_factor` and `sutherland_gaunt_factor` for more details.
+
+        The free-free emission is in units of erg
+        :math:`\mathrm{cm}^3\mathrm{s}^{-1}\mathrm{\AA}^{-1}\mathrm{str}^{-1}`. If the emission
+        measure has been set, the units will be multiplied by :math:`\mathrm{cm}^{-5}` or
+        :math:`\mathrm{cm}^{-3}`, depending on whether it is the line-of-sight or volumetric
+        emission measure, respectively.
 
         Parameters
         ----------
@@ -72,17 +121,14 @@ class Continuum:
         include_ioneq : `bool`, optional
             If True, include the ionization equilibrium in the final output
 
-        The free-free emission for the given ion is calculated according Eq. [some no] of [1]_,
-
-                    Need some equations here...
-
-        where .... The gaunt factors, , are estimated using the methods of [2]_ and [3]_,
-        depending on the temperature and energy regime.
-
-        Notes
-        -----
-        Can include elemental abundance and ionization equilibrium population
-        and the emission measure if specified.
+        References
+        ----------
+        .. [1] Rybicki and Lightman, 1979, Radiative Processes in Astrophysics,
+            `(Wiley-VCH) <http://adsabs.harvard.edu/abs/1986rpa..book.....R>`_
+        .. [2] Itoh, N. et al., 2000, ApJS, `128, 125
+            <http://adsabs.harvard.edu/abs/2000ApJS..128..125I>`_
+        .. [3] Sutherland, R. S., 1998, MNRAS, `300, 321
+            <http://adsabs.harvard.edu/abs/1998MNRAS.300..321S>`_
         """
         # define the numerical prefactor
         prefactor = ((ch_const.light*1e8)/3./ch_const.emass
@@ -108,7 +154,7 @@ class Continuum:
         if ch_data.Defaults['flux'] == 'photon':
             energy_factor = ch_const.planck*(1.e8*ch_const.light)/wavelength
 
-        return prefactor[:,np.newaxis]*exp_factor*gf/energy_factor
+        self.free_free_emission = prefactor[:,np.newaxis]*exp_factor*gf/energy_factor
 
     def itoh_gaunt_factor(self, wavelength):
         """
@@ -168,7 +214,61 @@ class Continuum:
 
         return np.where(gf_sutherland < 0., 0., gf_sutherland)
 
-    def free_bound(self, wavelength, include_abundance=True, include_ioneq=True, use_verner=True, **kwargs):
+    def calculate_free_bound_loss(self, wavelength, **kwargs):
+        """
+        Calculate the free-bound energy loss rate of an ion.
+
+            Need some equations here...
+
+        References
+        ----------
+        """
+        # Calculate Gaunt factor according to Mewe
+        gaunt_factor = self.mewe_gaunt_factor()
+        # Numerical prefactor
+        prefactor = (8./3.*np.sqrt(np.pi/6.)*(ch_const.planck**2)*(ch_const.fine**3)/(np.pi**2)
+                     * (ch_const.boltzmann**(1./2.))/(ch_const.emass**(3./2.)))
+
+        self.free_bound_loss = gaunt_factor*np.sqrt(self.temperature)*prefactor
+
+    def mewe_gaunt_factor(self, **kwargs):
+        """
+        Calculate the Gaunt factor according to [1]_.
+
+            Need some equations here.
+
+        References
+        ----------
+        .. [1]
+        """
+        # read in free-bound level information for the recombined ion
+        recombined_fblvl = ch_io.fblvlRead('.'.join([ch_util.zion2filename(self.Z, self.stage), 'fblvl']))
+        if 'errorMessage' in recombined_fblvl:
+            raise ValueError('No free-bound information available for {}'.format(ch_util.zion2name(self.Z, self.stage)))
+        # thermal energy scaled by H ionization potential
+        scaled_energy = ch_const.ryd2erg/ch_const.boltzmann/self.temperature
+        # set variables used in Eq. 16 of Mewe et al.(1986)
+        n_0 = recombined_fblvl[0]
+        z_0 = np.sqrt(self.ionization_potential/ch_const.ryd2erg)*n_0
+
+        # calculate zeta_0, the number of vacancies in the recombining ion
+        # see zeta_0 function in chianti/idl/continuum/fb_rad_loss.pro and
+        # Table 1 of Mewe et al. (1986)
+        if self.Z - self.stage > 22:
+            zeta_0 = self.Z - self.stage + 55
+        elif 8 < self.Z - self.stage <= 22:
+            zeta_0 = self.Z - self.stage + 27
+        elif 0 < self.Z - self.stage <= 8:
+            zeta_0 = self.Z - self.stage + 9
+        else:
+            zeta_0 = self.Z - self.stage + 1
+
+        f_2 = (0.9*zeta_0*(z_0**4)/(n_0**5)*np.exp(scaled_energy*(z_0**2)/(n_0**2))
+               + 0.42/(n_0**1.5)*(self.stage**4)*np.exp(scaled_energy*(self.stage**2)/((n_0 + 1)**2)))
+
+        return scaled_energy*f2*self.abundance*self.ioneq_one(**kwargs)
+
+    def calculate_free_bound_emission(self, wavelength, include_abundance=True, include_ioneq=True, use_verner=True, **kwargs):
         """
         Calculates the free-bound (radiative recombination) continuum emissivity of an ion.
         Provides emissivity in units of ergs :math:`\mathrm{cm}^{-2}` :math:`\mathrm{s}^{-1}`
@@ -229,7 +329,7 @@ class Continuum:
 
         # combine factors
         fb_emiss = prefactor*energy_over_temp_factor*sum_factor
-        # include abundance, ionization equilibrium, photon conversion
+        # include abundance, ionization equilibrium, photon conversion, emission measure
         if include_abundance:
             fb_emiss *= self.abundance
         if include_ioneq:
@@ -241,7 +341,7 @@ class Continuum:
         # the final units should be per angstrom
         fb_emiss /= 1e8
 
-        return fb_emiss
+        self.free_bound_emission = fb_emiss
 
     def verner_cross_section(self, photon_energy):
         """

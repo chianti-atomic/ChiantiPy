@@ -192,38 +192,20 @@ class ipymspectrum(ionTrails, specTrails):
             #
             if calcType == 'ff':
                 thisFf = out[2]
-                if 'errorMessage' not in sorted(thisFf.keys()):
-                    if keepIons:
-                        self.FfInstances[ionS] = thisFf
-#                    if nTempDen == 1:
-#                        freeFree += thisFf['rate']*em[0]
-#                    else:
-#                        for iTempDen in range(nTempDen):
-#                            freeFree[iTempDen] += thisFf['rate'][iTempDen]*em[iTempDen]
-                    freeFree += thisFf['rate']
-                elif type(thisFf) == str:
-                    print(' error in FfCont %s'%(thisFf))
-                else:
-                    print(thisFf['errorMessage'])
-            #
-            #
+                if keepIons:
+                    self.FfInstances[ionS] = thisFf
+                freeFree += thisFf
             elif calcType == 'fb':
                 thisFb = out[2]
                 if verbose:
                     print(' fb ion = %s'%(ionS))
                 if hasattr(thisFb, 'FreeBound'):
-                    if 'errorMessage' not in sorted(thisFb.FreeBound.keys()):
+                    if 'errorMessage' not in sorted(thisFb.keys()):
                         if keepIons:
                             self.FbInstances[ionS] = thisFb
-                        #                        if nTempDen == 1:
-#                            freeBound += thisFbCont.FreeBound['rate']*em[0]
-#                        else:
-#                            for iTempDen in range(nTempDen):
-#                                freeBound[iTempDen] += thisFbCont.FreeBound['rate'][iTempDen]*em[iTempDen]
-                        freeBound += thisFb.FreeBound['rate']
+                        freeBound += thisFb['rate']
                     else:
-                        print(thisFb.FreeBound['errorMessage'])
-            #
+                        print(thisFb['errorMessage'])
             elif calcType == 'line':
                 thisIon = out[2]
                 if not 'errorMessage' in sorted(thisIon.Intensity.keys()):
@@ -297,19 +279,22 @@ def doAll(inpt):
         wavelength = inpt[3]
         abund = inpt[4]
         em = inpt[5]
-        FF = ChiantiPy.core.continuum(ionS, temperature, abundance=abund, em=em)
-        FF.freeFree(wavelength)
+        FF = ChiantiPy.core.Continuum(ionS, temperature, abundance=abund, emission_measure=em)
+        FF.calculate_free_free_emission(wavelength)
         # can not do a deep copy of
 #        return [ionS, calcType, copy.deepcopy(cont)]
-        return [ionS, calcType, copy.copy(FF.FreeFree)]
+        return [ionS, calcType, copy.copy(FF.free_free_emission)]
     elif calcType == 'fb':
         temperature = inpt[2]
         wavelength = inpt[3]
         abund = inpt[4]
         em = inpt[5]
-        cont = ChiantiPy.core.continuum(ionS, temperature, abundance=abund, em=em)
-        cont.freeBound(wavelength)
-        return [ionS, calcType, copy.deepcopy(cont)]
+        cont = ChiantiPy.core.Continuum(ionS, temperature, abundance=abund, emission_measure=em)
+        try:
+            cont.calculate_free_bound_emission(wavelength)
+            return [ionS, calcType, {'rate': cont.calculate_free_bound_emission}]
+        except ValueError:
+            return [ionS, calcType, {'errorMessage': 'No free-bound information available.'}]
     elif calcType == 'line':
         temperature = inpt[2]
         density = inpt[3]

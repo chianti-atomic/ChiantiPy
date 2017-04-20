@@ -159,19 +159,20 @@ class spectrum(ionTrails, specTrails):
             if 'ff' in self.Todo[akey]:
                 if verbose:
                     print(' calculating ff continuum for :  %s'%(akey))
-                FF = ChiantiPy.core.continuum(akey, temperature, abundance=abundance, em=em)
-                FF.freeFree(wavelength)
-                if 'errorMessage' not in list(FF.FreeFree.keys()):
-                    freeFree += FF.FreeFree['rate']
+                FF = ChiantiPy.core.Continuum(akey, temperature, abundance=abundance, emission_measure=em)
+                FF.calculate_free_free_emission(wavelength)
+                freeFree += FF.free_free_emission
 
             if 'fb' in self.Todo[akey]:
                 if verbose:
                     print(' calculating fb continuum for :  %s'%(akey))
-                FB = ChiantiPy.core.continuum(akey, temperature, abundance=abundance, em=em)
-                FB.freeBound(wavelength)
-                if 'errorMessage' not in list(FB.FreeBound.keys()):
-                    #  an fblvl file exists for this ions
-                    freeBound += FB.FreeBound['rate']
+                FB = ChiantiPy.core.Continuum(akey, temperature, abundance=abundance, emission_measure=em)
+                try:
+                    FB.calculate_free_bound_emission(wavelength)
+                    freeBound += FB.free_bound_emission
+                except ValueError:
+                    # free-bound information not available for all ions
+                    pass
             if 'line' in self.Todo[akey]:
                 if verbose:
                     print(' calculating spectrum for  :  %s'%(akey))

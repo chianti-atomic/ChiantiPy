@@ -4,7 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 np.seterr(over='ignore')
 
-import ChiantiPy
+from .Continuum import Continuum
+from .Ion import ion
 import ChiantiPy.tools.data as chdata
 import ChiantiPy.tools.constants as const
 import ChiantiPy.tools.util as util
@@ -133,28 +134,23 @@ class radLoss(specTrails):
                     print(' calculating ff continuum for :  %s'%(akey))
                 if 'ff' in self.Todo[akey]:
                     # need to skip the neutral
-                        cont = ChiantiPy.core.continuum(akey, temperature, abundance=abundance)
-#                        cont = ChiantiPy.core.continuum(akey, temperature, abundance=self.AbundanceName)
-                        cont.freeFreeLoss()
-                        freeFreeLoss += cont.FreeFreeLoss['rate']
+                    cont = Continuum(akey, temperature, abundance=abundance)
+                    cont.calculate_free_free_loss()
+                    freeFreeLoss += cont.free_free_loss
                 if 'fb' in self.Todo[akey]:
                     if verbose:
                         print(' calculating fb continuum for :  %s'%(akey))
-    #                try:
-                    # does cont already exist - i.e did we create it for ff
-                    if hasattr(cont, 'FreeFreeLoss'):
-                        cont.freeBoundLoss()
-                    else:
-                        cont = ChiantiPy.core.continuum(akey, temperature, abundance=abundance)
-#                        cont = ChiantiPy.core.continuum(akey, temperature, abundance=self.AbundanceName)
-                        cont.freeBoundLoss()
-                    if 'errorMessage' not in list(cont.FreeBoundLoss.keys()):
-                        #  an fblvl file exists for this ions
-                        freeBoundLoss += cont.FreeBoundLoss['rate']
+                    cont = Continuum(akey, temperature, abundance=abundance)
+                    try:
+                        cont.calculate_free_bound_loss()
+                        freeBoundLoss += cont.free_bound_loss
+                    except ValueError:
+                        # account for case where there is no free-bound information available
+                        pass
             if 'line' in self.Todo[akey]:
                 if verbose:
                     print(' calculating spectrum for  :  %s'%(akey))
-                thisIon = ChiantiPy.core.ion(akey, temperature, eDensity, abundance=abundance)
+                thisIon = ion(akey, temperature, eDensity, abundance=abundance)
                 thisIon.intensity(allLines=allLines)
                 self.IonsCalculated.append(akey)
                 if 'errorMessage' not in  list(thisIon.Intensity.keys()):

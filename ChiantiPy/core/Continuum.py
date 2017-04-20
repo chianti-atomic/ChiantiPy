@@ -23,7 +23,7 @@ class Continuum(object):
     Parameters
     ----------
     ionStr : `str`
-        CHIANTI notation for the given ion, e.g. 'fe_12' that corresponds to the `Fe XII` ion.
+        CHIANTI notation for the given ion, e.g. 'fe_12' that corresponds to the Fe XII ion.
     temperature : array-like
         In units of Kelvin
     abundance : `float` or `str`, optional
@@ -270,7 +270,7 @@ class Continuum(object):
 
         in units of erg :math:`\mathrm{cm}^3\,\mathrm{s}^{-1}` where :math:`G_{fb}` is the free-bound Gaunt factor as
         given by Eq. 15 of [2]_ (see `mewe_gaunt_factor` for more details) and :math:`C_{ff}` is the numerical constant
-        as given in Eq. 4 of [1]_ and can be written in terms of the fine structure constant :math:`\\alpha`, in units
+        as given in Eq. 4 of [1]_ and can be written in terms of the fine structure constant :math:`\\alpha`,
 
         .. math::
            C_{ff}\\frac{k}{hc} = \\frac{8}{3}\left(\\frac{\pi}{6}\\right)^{1/2}\\frac{h^2\\alpha^3}{\pi^2}\\frac{k_B}{m_e^{3/2}} \\approx 1.43\\times10^{-27}
@@ -310,6 +310,10 @@ class Continuum(object):
         of the CHIANTI IDL library. Note that in the expression for :math:`G_{fb}`, we have not included
         the :math:`N_H/n_e` factor.
 
+        Raises
+        ------
+        ValueError
+            If no .fblvl file is available for this ion
 
         References
         ----------
@@ -381,6 +385,11 @@ class Continuum(object):
             If True, include the ionization equilibrium in the final output
         use_verner : `bool`, optional
             If True, cross-sections of ground-state transitions using [2]_, i.e. `verner_cross_section`
+
+        Raises
+        ------
+        ValueError
+            If no .fblvl file is available for this ion
 
         References
         ----------
@@ -534,7 +543,7 @@ class Continuum(object):
         """
         Calculate the equilibrium fractional ionization of the ion as a function of temperature.
 
-        Uses the ~`ioneq` module and does a first-order spline interpolation to the data. An
+        Uses the `ChiantiPy.core.ioneq` module and does a first-order spline interpolation to the data. An
         ionization equilibrium file can be passed as a keyword argument, `ioneqfile`. This can
         be passed through as a keyword argument to any of the functions that uses the
         ionization equilibrium.

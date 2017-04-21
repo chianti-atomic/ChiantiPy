@@ -177,8 +177,7 @@ class mspectrum(ionTrails, specTrails):
             #
             for iff in range(ffWorkerQSize):
                 thisFreeFree = ffDoneQ.get()
-                if 'rate' in sorted(thisFreeFree.keys()):
-                    freeFree += thisFreeFree['rate']
+                freeFree += thisFreeFree
             for p in ffProcesses:
                 if not isinstance(p, str):
                     p.terminate()
@@ -195,8 +194,7 @@ class mspectrum(ionTrails, specTrails):
             #
             for ifb in range(fbWorkerQSize):
                 thisFreeBound = fbDoneQ.get()
-                if 'rate' in sorted(thisFreeBound.keys()):
-                    freeBound += thisFreeBound['rate']
+                freeBound += thisFreeBound
             for p in fbProcesses:
                 if not isinstance(p, str):
                     p.terminate()

@@ -258,7 +258,7 @@ class ion(ionTrails, specTrails):
             self.DrParams = io.drRead(self.IonStr, filename=drParamsFile)
         if os.path.isfile(rrParamsFile):
             self.RrParams = io.rrRead(self.IonStr,filename=rrParamsFile)
-            
+
         #  .auto file may not exist
         if os.path.isfile(autofile):
             self.Auto = io.wgfaRead(self.IonStr,filename=autofile, auto=True)
@@ -276,7 +276,8 @@ class ion(ionTrails, specTrails):
 
         Notes
         ------
-        Allows a bare-bones ion object to be setup up with just the ionization and recombination rates. For ions without a complete set of files - one that is not in the MasterList.
+        Allows a bare-bones ion object to be setup up with just the ionization and recombination
+        rates. For ions without a complete set of files - one that is not in the MasterList.
         """
 
         if alternate_dir:
@@ -290,7 +291,8 @@ class ion(ionTrails, specTrails):
             zstuff = util.convertName(self.IonStr)
             if zstuff['Ion'] - zstuff['Z'] != 1:
                 # don't expect one for the bare ion
-                print(' Elvlc file missing for '+self.IonStr)
+                if verbose:
+                    print(' Elvlc file missing for '+self.IonStr)
             return
         cilvlFile = fileName +'.cilvl'
         if os.path.isfile(cilvlFile):
@@ -543,7 +545,7 @@ class ion(ionTrails, specTrails):
                 self.EaCross['energy'] = energy
                 self.EaCross['cross'] = np.zeros_like(energy)
             return
-            
+
         else:
             if verbose:
                 print('got here')
@@ -634,7 +636,7 @@ class ion(ionTrails, specTrails):
             energy = self.Ip*1.01*10.**(0.025*np.arange(101))
         else:
             energy = np.asarray(energy, 'float64')
-            
+
         if self.Z < self.Ion:
             self.IonizCross = {'cross':np.zeros_like(energy), 'energy':energy}
             return
@@ -1403,7 +1405,7 @@ class ion(ionTrails, specTrails):
         nscups = self.Nscups
         npsplups = self.Npsplups
         nauto = self.Nauto
-        
+
         if 'temperature' in kwargs.keys():
             self.Temperature = np.asarray(kwargs['temperature'])
             temperature = self.Temperature
@@ -1538,7 +1540,7 @@ class ion(ionTrails, specTrails):
         ntemp = temp.size
         dens = self.EDensity
         ndens = dens.size
-#        cc = const.collision*self.EDensity        
+#        cc = const.collision*self.EDensity
         if not hasattr(self, 'Higher'):
             nameStuff = util.convertName(self.IonStr)
             z = nameStuff['Z']
@@ -3098,7 +3100,7 @@ class ion(ionTrails, specTrails):
                         emiss[it, goodWvl] = f*pop[it, l2]*distr/self.EDensity[it]
                 self.TwoPhotonEmiss = {'wvl':wvl, 'emiss':emiss}
 
-    def twoPhoton(self, wvl, em=0):
+    def twoPhoton(self, wvl, em=0, verbose=False):
         '''
         to calculate the two-photon continuum - only for hydrogen- and helium-like ions
         includes the elemental abundance and the ionization equilibrium
@@ -3123,7 +3125,8 @@ class ion(ionTrails, specTrails):
         nWvl = wvl.size
         if self.Z - self.Ion > 1 or self.Dielectronic:
             # this is not a hydrogen-like or helium-like ion
-            print(' not doing 2 photon for %s'%(self.IonStr))
+            if verbose:
+                print(' not doing 2 photon for %s'%(self.IonStr))
             self.TwoPhoton = {'emiss':np.zeros(nWvl, 'float64'), 'wvl':wvl}
             return
         else:

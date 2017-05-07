@@ -112,6 +112,155 @@ def convertName(name):
     return {'Z':int(i1),'Ion':int(ions),'Dielectronic':dielectronic, 'Element':els, 'higher':higher, 'lower':lower}
 
 
+def autoRead(ions, filename=None, total=True, verbose=False):
+    """
+    Read CHIANTI autoionization rates from a .auto file.
+
+    Parameters
+    ----------
+    ions : `str`
+        Ion, e.g. 'c_5' for C V
+    filename : `str`
+        Custom filename, will override that specified by `ions`
+    elvlcname : `str`
+        If specified, the lsj term labels are returned in the 'pretty1' and 'pretty2' 
+        keys of 'Wgfa' dict
+    total : `bool`
+        Return the summed level 2 autoionization rates in 'Auto'
+    verbose : `bool`
+
+    Returns
+    -------
+    Auto : `dict`
+        Information read from the .wgfa file. The dictionary structure is 
+        {"lvl1", "lvl2", "avalue", "pretty1", "pretty2", "ref","ionS", "filename"}
+
+    """
+    #
+    if filename:
+        autoname = filename
+    
+    else:
+        fname = util.ion2filename(ions)
+        autoname = fname+'.auto'
+    #
+    input = open(autoname,'r')
+    s1 = input.readlines()
+    input.close()
+    nwvl = 0
+    ndata = 2
+    while ndata > 1:
+        s1a = s1[nwvl]
+        s2 = s1a.split()
+        ndata = len(s2)
+        nwvl += 1
+    nwvl -= 1
+    if verbose:
+        print((' nwvl = %10i ndata = %4i'%(nwvl, ndata)))
+    lvl1 = [0]*nwvl
+    lvl2 = [0]*nwvl
+    avalue = [0.]*nwvl
+    pretty1  =  ['']*nwvl
+    pretty2  =  ['']*nwvl
+    #
+    if verbose:
+        print((' nwvl  =  %10i'%(nwvl)))
+    #
+    wgfaFormat = '(2i7,e12.2,a30,3x,a30)'
+    header_line = FortranRecordReader(wgfaFormat)
+    for ivl in range(nwvl):
+        if verbose:
+            print('%5i  %s'%(ivl, s1[ivl].strip()))
+#        inpt=FortranLine(s1[ivl],wgfaFormat)
+        inpt = header_line.read(s1[ivl])
+        lvl1[ivl] = inpt[0]
+        lvl2[ivl] = inpt[1]
+        avalue[ivl] = inpt[2]
+        pretty1[ivl] = inpt[3].strip()
+        pretty2[ivl] = inpt[4].strip()
+
+    ref = []
+    # should skip the last '-1' in the file
+    for i in range(nwvl+1,len(s1)):
+        s1a = s1[i]
+        ref.append(s1a.strip())
+    Auto = {"lvl1":lvl1, "lvl2":lvl2, "avalue":avalue, "ref":ref, 'ionS':ions, 'filename':autoname, 'pretty1':pretty1, 'pretty2':pretty2}
+    if total:
+        avalueLvl = [0.]*max(lvl2)
+        for iwvl in range(nwvl):
+            avalueLvl[lvl2[iwvl] -1] += avalue[iwvl]
+        Auto['avalueLvl'] = np.asarray(avalueLvl)
+
+    #
+    return Auto
+
+
+def autoWrite(info, outfile = None, minBranch = None):
+    """
+    Write data to a CHIANTI .wgfa file
+
+    Parameters
+    ----------
+    info : `dict`
+        Should contain the following: 
+        ionS, the Chianti style name of the ion such as c_4 for C IV, 
+        lvl1, the lower level, the ground level is 1, 
+        lvl2, the upper level, wvl, the wavelength (in Angstroms), 
+        avalue, the autoionization rate, 
+        pretty1, descriptive text of the lower level (optional), 
+        pretty2, descriptive text of the upper level (optiona), 
+        ref, reference text, a list of strings
+    outfile : `str`
+    minBranch : `~numpy.float64`
+        The transition must have a branching ratio greater than the specified to be written to the file
+    """
+    #
+#    gname = info['ionS']
+    if outfile:
+        wgfaname = outfile
+    else:
+        print(' output filename not specified, no file will be created')
+        return
+#        wgfaname = gname + '.wgfa'
+    print((' wgfa file name = ', wgfaname))
+    if minBranch == None:
+        minBranch = 0.
+    else:
+        info['ref'].append(' minimum branching ratio = %10.2e'%(minBranch))
+    out = open(wgfaname, 'w')
+    #ntrans = len(info['lvl1'])
+    nlvl = max(info['lvl2'])
+    totalAvalue = np.zeros(nlvl, 'float64')
+    if 'pretty1' in info:
+        pformat = '%7i%7i%12.2e%30s - %30s'
+    else:
+        pformat = '%%7i%7i%12.2e'
+    for itrans, avalue in enumerate(info['avalue']):
+        # for autoionization transitions, lvl1 can be less than zero
+        if abs(info['lvl1'][itrans]) > 0 and info['lvl2'][itrans] > 0:
+            totalAvalue[info['lvl2'][itrans] -1] += avalue
+
+    for itrans, avalue in enumerate(info['avalue']):
+        if avalue > 0.:
+            branch = avalue/totalAvalue[info['lvl2'][itrans] -1]
+        else:
+            branch = 0.
+        if branch > minBranch and abs(info['lvl1'][itrans]) > 0 and info['lvl2'][itrans] > 0:
+            if 'pretty1' in info:
+                # generally only useful with NIST data
+                lbl2 =  info['pretty2'][itrans]
+                pstring = pformat%(info['lvl1'][itrans], info['lvl2'][itrans], avalue, info['pretty1'][itrans].rjust(30), lbl2.ljust(30))
+                out.write(pstring+'\n')
+            else:
+                pstring = pformat%(info['lvl1'][itrans], info['lvl2'][itrans], avalue)
+                out.write(pstring+'\n')
+    out.write(' -1\n')
+    out.write('%filename:  ' + wgfaname + '\n')
+    for one in info['ref']:
+        out.write(one+'\n')
+    out.write(' -1 \n')
+    out.close()
+
 def cireclvlRead(ions, filename=None, filetype='cilvl'):
     """
     Read Chianti cilvl, reclvl, or rrlvl files and return data
@@ -484,7 +633,7 @@ def elvlcRead(ions, filename=None, getExtended=False, verbose=False, useTh=True)
         mult[i] = 2.*inpt[5] + 1.
         ecm[i] = inpt[6]
         ecmth[i] = inpt[7]
-        if ecm[i] == 0.:
+        if ecm[i] < 0.:
             if useTh:
                 ecm[i] = ecmth[i]
         stuff = term[i].strip() + ' %1i%1s%3.1f'%( spin[i], spd[i], j[i])
@@ -494,8 +643,8 @@ def elvlcRead(ions, filename=None, getExtended=False, verbose=False, useTh=True)
             if cnt > 0:
                 idx = s1[i].index(',')
                 extended[i] = s1[i][idx+1:]
-    eryd = [x*const.invCm2ryd for x in ecm]
-    erydth = [x*const.invCm2ryd for x in ecmth]
+    eryd = [ecm[i]*const.invCm2ryd if ecm[i] > 0. else -1. for i in range(nlvls)]
+    erydth = [ecmth[i]*const.invCm2ryd if ecmth[i] > 0. else -1. for i in range(nlvls)]
     ref = []
     # this should skip the last '-1' in the file
     for i in range(nlvls+1,len(s1)):
@@ -1568,7 +1717,7 @@ def versionRead():
     return versionStr.strip()
 
 
-def wgfaRead(ions, filename=None, elvlcname=0, auto=False, total=False, verbose=False):
+def wgfaRead(ions, filename=None, elvlcname=0, total=False, verbose=False):
     """
     Read CHIANTI data from a .wgfa file.
 
@@ -1581,9 +1730,6 @@ def wgfaRead(ions, filename=None, elvlcname=0, auto=False, total=False, verbose=
     elvlcname : `str`
         If specified, the lsj term labels are returned in the 'pretty1' and 'pretty2' 
         keys of 'Wgfa' dict
-    auto :  `bool`
-        specifies that a file of autoionization values (.auto) will be read
-        these have the format as a .wgfa file
     total : `bool`
         Return the summed level 2 avalue data in 'Wgfa'
     verbose : `bool`
@@ -1610,15 +1756,6 @@ def wgfaRead(ions, filename=None, elvlcname=0, auto=False, total=False, verbose=
         else:
             elvlc = elvlcRead('',elvlcname)
     
-    elif auto:
-        fname = util.ion2filename(ions)
-        wgfaname = fname+'.auto'
-        elvlcname = fname + '.elvlc'
-        if os.path.isfile(elvlcname):
-            elvlc = elvlcRead('', elvlcname)
-        else:
-            elvlc = 0
-
     else:
         fname = util.ion2filename(ions)
         wgfaname = fname+'.wgfa'
@@ -1686,7 +1823,7 @@ def wgfaRead(ions, filename=None, elvlcname=0, auto=False, total=False, verbose=
         avalueLvl = [0.]*max(lvl2)
         for iwvl in range(nwvl):
             avalueLvl[lvl2[iwvl] -1] += avalue[iwvl]
-        Wgfa['avalueLvl'] = avalueLvl
+        Wgfa['avalueLvl'] = np.asarray(avalueLvl)
 
     if elvlc:
         Wgfa['pretty1'] = pretty1
@@ -1702,10 +1839,19 @@ def wgfaWrite(info, outfile = None, minBranch = 0.):
     Parameters
     ----------
     info : `dict`
-        Should contain the following: ionS, the Chianti style name of the ion such as c_4 for C IV, lvl1, the lower level, the ground level is 1, lvl2, the upper level, wvl, the wavelength (in Angstroms), gf,the weighted oscillator strength, avalue, the A value, pretty1, descriptive text of the lower level (optional), pretty2, descriptive text of the upper level (optiona), ref, reference text, a list of strings
+        Should contain the following keys: 
+        ionS, the Chianti style name of the ion such as c_4 for C IV, 
+        lvl1, the lower level, the ground level is 1, 
+        lvl2, the upper level, 
+        wvl, the wavelength (in Angstroms), 
+        gf,the weighted oscillator strength, 
+        avalue, the A value, 
+        pretty1, descriptive text of the lower level (optional), 
+        pretty2, descriptive text of the upper level (optiona), 
+        ref, reference text, a list of strings
     outfile : `str`
     minBranch : `~numpy.float64`
-        The transition must have a branching ratio greater than the specified to be written to the file
+        The transition must have a branching ratio greater than the specified minBranchto be written to the file
     """
     #
 #    gname = info['ionS']

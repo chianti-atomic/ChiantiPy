@@ -1556,7 +1556,6 @@ class ion(ionTrails, specTrails):
         dens = self.EDensity
         ndens = dens.size
 #        cc = const.collision*self.EDensity
-     
         #
         # (4 pi a0^2)^(3/2) = 6.6011e-24 (Badnell et al, 2003, A&A 406, 1151
         coef1 = 6.6011e-24*(const.hartree/(2.*const.boltzmann*self.Temperature))**1.5

@@ -1453,7 +1453,10 @@ class ion(ionTrails, specTrails):
         elif hasattr(self, 'RadTemperature') and hasattr(self, 'RStar'):
             radTemperature = self.RadTemperature
             rStar = self.RStar
-
+        if self.Nreclvl or self.Nauto:
+            rec = 1
+        else:
+            rec = 0
         # the Dielectronic test should eventually go away
         if popCorrect and (not self.Dielectronic):
             if self.Ncilvl:

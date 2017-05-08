@@ -1,5 +1,5 @@
 """
-ChiantiPy - CHIANTI Python package Calculates various aspects of emission line
+ChiantiPy - CHIANTI Python package Calculates various aspects of emission lines
 and continua from the CHIANTI atomic database for astrophysical spectroscopy.
 """
 # This is not yet an Astropy affiliated package, but it makes use of the Astropy
@@ -38,6 +38,6 @@ except ImportError:
 # Note this if statement is only here to allow chiantipy to be imported before
 # it's compiled.
 if not _ASTROPY_SETUP_:
-    # For ChiantiPy
+    ## For ChiantiPy
     from . import version
     Version = version._last_generated_version

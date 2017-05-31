@@ -2106,20 +2106,20 @@ class ion(ionTrails, specTrails):
             tstr = ' -  T = %10.2e (K)' %(temperature)
         elif ndens == 1 and ntemp > 1:
             if index < 0:
-                index = ntemp/2
+                index = ntemp//2
             print('using index = %5i specifying temperature =  %10.2e'%(index, temperature[index]))
             self.Message = 'using index = %5i specifying temperature  =   %10.2e'%(index, temperature[index])
 
             emiss = emiss[:, index]
         elif ndens > 1 and ntemp == 1:
             if index < 0:
-                index = ntemp/2
+                index = ntemp//2
             print('using index =%5i specifying eDensity = %10.2e'%(index, eDensity[index]))
             self.Message = 'using index = %5i specifying eDensity = %10.2e'%(index, eDensity[index])
             emiss = emiss[:, index]
         elif ndens > 1 and ntemp > 1:
             if index < 0:
-                index = ntemp/2
+                index = ntemp//-1232
             print('using index = %5i specifying temperature = %10.2e, eDensity =  %10.2e'%(index, temperature[index], eDensity[index]))
             self.Message = 'using index = %5i specifying temperature = %10.2e, eDensity =  %10.2e'%(index, temperature[index], eDensity[index])
             emiss = emiss[:, index]
@@ -3731,7 +3731,7 @@ class ioneq():
     def __init__(self, z, verbose=False):
         self.Z = z
 
-    def load(self, ioneqName):
+    def load(self, ioneqName='chianti'):
         '''
         read in an existing file ionization equilibrium file
         ioneqName should be something like 'chianti', or 'chianti_version6'

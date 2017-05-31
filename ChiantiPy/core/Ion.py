@@ -1,5 +1,5 @@
 """
-Ion and ionization equilibrium classes
+Ion class
 """
 import os
 import copy
@@ -1475,12 +1475,12 @@ class ion(ionTrails, specTrails):
                 lowMult = lower.Elvlc['mult']
             else:
                 ci = 0
-                
+
             if self.Nreclvl or self.Nauto:
                 rec = 1
             else:
                 rec = 0
-                                
+
             if self.Nreclvl:
                 reclvl = self.Reclvl
                 if hasattr(self, 'ReclvlRate'):
@@ -1497,7 +1497,7 @@ class ion(ionTrails, specTrails):
             higher = ion(highers, temperature=self.Temperature, eDensity=self.EDensity, setup=0)
             higher.setupIonrec()
             higher.recombRate()
-            
+
         #  the populating matrix for radiative transitions
         rad = np.zeros((nlvls+ci+rec,nlvls+ci+rec),"float64")
 
@@ -1539,12 +1539,12 @@ class ion(ionTrails, specTrails):
             #ups = self.Upsilon['upsilon']
             exRate = self.Upsilon['exRate']
             dexRate = self.Upsilon['dexRate']
-            
+
         if npsplups:
             self.upsilonDescaleSplups(prot=1)
             pexRate = self.PUpsilon['exRate']
             pdexRate = self.PUpsilon['dexRate']
-            
+
         if self.Nauto:
             branch = np.zeros_like(self.Auto['avalueLvl'])
             # first get branching ratio
@@ -1560,7 +1560,7 @@ class ion(ionTrails, specTrails):
         #
         # (4 pi a0^2)^(3/2) = 6.6011e-24 (Badnell et al, 2003, A&A 406, 1151
         coef1 = 6.6011e-24*(const.hartree/(2.*const.boltzmann*self.Temperature))**1.5
-        coef2 = (const.planck)**3/(2.*const.pi*const.emass*const.boltzmann*self.Temperature)**1.5            
+        coef2 = (const.planck)**3/(2.*const.pi*const.emass*const.boltzmann*self.Temperature)**1.5
 
         #
 #        if npsplups:
@@ -1619,21 +1619,21 @@ class ion(ionTrails, specTrails):
                 popmat[1, 0] += (self.EDensity*lower.IonizRate['rate'] - ciTot)
                 popmat[0, 0] -= (self.EDensity*lower.IonizRate['rate'] - ciTot)
             if rec:
-                
+
                 popmat[-1,  ci] += self.EDensity*self.IonizRate['rate']
                 popmat[ci, ci] -= self.EDensity*self.IonizRate['rate']
-                
+
                 if self.Nreclvl:
                     recTot = reclvlRate['rate'].sum(axis=0)
                 else:
                     recTot = 0.
-                    
+
                 for itrans in range(self.Nreclvl):
                     lvl1 = reclvl['lvl2'][itrans]-1
                     lvl2 = reclvl['lvl2'][itrans]-1
                     popmat[lvl2+ci, -1] += self.EDensity*reclvlRate['rate'][itrans]
                     popmat[-1, -1] -= self.EDensity*reclvlRate['rate'][itrans]
-                    
+
                 if verbose:
                     print(' recTot:  %12.2e  RrRate:  %12.2e'%(recTot, higher.RecombRate['rate']))
                 # next 2 lines take care of overbooking
@@ -1649,21 +1649,21 @@ class ion(ionTrails, specTrails):
                         upperIdx = higher.Elvlc['lvl'].index(self.Auto['lvl1'][i])
                         gUpper = float(higher.Elvlc['mult'][upperIdx])
                         gLower = float(self.Elvlc['mult'][elvl2idx])
-                        
-                        #ecm1 = self.Higher.Elvlc['ecmth'][l1]                        
+
+                        #ecm1 = self.Higher.Elvlc['ecmth'][l1]
                         ecm2 = self.Elvlc['ecm'][elvl2idx]
-                        
+
                         if ecm2 < 0.:
                             ecm2 = self.Elvlc['ecmth'][elvl2idx]
                         de1 = ecm2*const.invCm2Erg - self.Ip*const.ev2Erg
                         dekt1 = de1/(const.boltzmann*self.Temperature)
                         expkt = np.exp(-dekt1)
-                        
+
                         if higher.Elvlc['lvl'][upperIdx] == 1:
                             dielRate = coef2*gLower*expkt*avalue/(2.*gUpper)
                             popmat[ci + l2, -1] += self.EDensity*dielRate
                             drTot += self.EDensity*dielRate*branch[elvl2idx]
-                            
+
                 if higher.RecombRate['rate'] > (recTot + drTot):
                     popmat[ci, -1] += self.EDensity*(higher.RecombRate['rate'] - recTot - drTot)
                     popmat[-1, -1] -= self.EDensity*(higher.RecombRate['rate'] - recTot - drTot)
@@ -1685,7 +1685,7 @@ class ion(ionTrails, specTrails):
             except np.linalg.LinAlgError:
                 pop = np.zeros(nlvls, 'float64')
                 errorMessage.append('linealgError for singe T')
-                
+
         elif ntemp>1  and ntemp==ndens:
             if verbose:
                 print(' doing both ntemp: %5i  ndens:  %5i'%(ntemp, ndens))
@@ -1717,11 +1717,11 @@ class ion(ionTrails, specTrails):
                         popmat[lvl2+ci, lvl1] += self.EDensity[itemp]*self.CilvlRate['rate'][itrans, itemp]
                         popmat[lvl1, lvl1] -= self.EDensity[itemp]*self.CilvlRate['rate'][itrans, itemp]
                         ciTot += self.EDensity[itemp]*self.CilvlRate['rate'][itrans, itemp]
-                
+
                     popmat[1, 0] += (self.EDensity[itemp]*lower.IonizRate['rate'][itemp] - ciTot)
                     popmat[0, 0] -= (self.EDensity[itemp]*lower.IonizRate['rate'][itemp] - ciTot)
                 if rec:
-                    
+
                     popmat[-1,  ci] += self.EDensity[itemp]*self.IonizRate['rate'][itemp]
                     popmat[ci, ci] -= self.EDensity[itemp]*self.IonizRate['rate'][itemp]
 
@@ -1729,13 +1729,13 @@ class ion(ionTrails, specTrails):
                         recTot = self.ReclvlRate['rate'][:, itemp].sum()
                     else:
                         recTot = 0.
-                    
+
                     for itrans in range(self.Nreclvl):
                         lvl1 = reclvl['lvl1'][itrans]-1
                         lvl2 = reclvl['lvl2'][itrans]-1
                         popmat[lvl2+ci, -1] += self.EDensity[itemp]*self.ReclvlRate['rate'][itrans, itemp]
                         popmat[-1, -1] -= self.EDensity[itemp]*self.ReclvlRate['rate'][itrans,itemp]
-                        
+
                 #
                 drTot = 0.
                 if self.Nauto:
@@ -1755,12 +1755,12 @@ class ion(ionTrails, specTrails):
                         de1 = ecm2*const.invCm2Erg - self.Ip*const.ev2Erg
                         dekt1 = de1/(const.boltzmann*self.Temperature[itemp])
                         expkt = np.exp(-dekt1)
-                        
+
                         if higher.Elvlc['lvl'][upperIdx] == 1:
                             dielRate = coef2[itemp]*gLower*expkt*avalue/(2.*gUpper)
                             popmat[ci + l2, -1] += self.EDensity[itemp]*dielRate
                             drTot += self.EDensity[itemp]*dielRate*branch[elvl2idx]
-                            
+
                     if higher.RecombRate['rate'][itemp] > (recTot + drTot):
                         popmat[ci, -1] += self.EDensity[itemp]*(higher.RecombRate['rate'][itemp] - recTot - drTot)
                         popmat[-1, -1] -= self.EDensity[itemp]*(higher.RecombRate['rate'][itemp] - recTot - drTot)
@@ -1782,7 +1782,7 @@ class ion(ionTrails, specTrails):
                     errorMessage.append('linealgError for T index %5i'%(itemp))
             #
                 pop = np.where(pop > 0., pop, 0.)
-                
+
         self.Population = {"temperature":temperature,"eDensity":eDensity,"population":pop, "protonDensity":protonDensity, "ci":ci, "rec":rec, 'popmat':popmat}
         if len(errorMessage) > 0:
             self.Population['errorMessage'] = errorMessage
@@ -3208,701 +3208,3 @@ class ion(ionTrails, specTrails):
                         rate[it] = f*pop[it, l2]*ab*thisIoneq[it]/eDensity[it]
                 self.TwoPhotonLoss = {'temperature':self.Temperature,'eDensity':self.EDensity,'rate':rate}
 
-class ionWeb(ion):
-    """
-    a class that contains methods to be used for 'Chianti on the Web'
-    """
-    def gofntSelectLines(self,wvlRange=0, top=10,  saveFile=0):
-        """Provide a selection of lines for calculating the 'so-called' G(T) function.
-
-        Given as a function of both temperature and eDensity.
-
-        Only the top( set by 'top') brightest lines are plotted."""
-
-        if hasattr(self, 'Emiss'):
-            doEmiss = False
-            em = self.Emiss
-        else:
-            doEmiss = True
-
-        if doEmiss:
-            # new values of temperature or eDensity
-            self.emiss()
-            em = self.Emiss
-
-        if not hasattr(self, 'Abundance'):
-            self.Abundance = io.abundanceRead()
-        #
-        fontsize = 12
-        emiss = em["emiss"]
-        wvl = em["wvl"]
-        temperature = self.Temperature
-        eDensity = self.EDensity
-        plotLabels = em["plotLabels"]
-        xLabel = plotLabels["xLabel"]
-        yLabel = plotLabels["yLabel"]
-
-        # find which lines are in the wavelength range if it is set
-        if type(wvlRange) != type(1):
-            igvl = util.between(wvl,wvlRange)
-        else:
-            igvl = range(len(wvl))
-        nlines = len(igvl)
-        if nlines == 0:
-            print(' no lines in selected interval')
-            self.message = ' no lines in selected interval'
-            return
-        # find the top most intense lines
-        if (top > nlines) or (top == 0):
-            top = nlines
-        maxEmiss = np.zeros(nlines,'Float64')
-        for iline in range(nlines):
-            maxEmiss[iline] = emiss[igvl[iline]].max()
-        for iline in range(nlines):
-            if maxEmiss[iline] >= maxEmiss.max():
-                maxAll = emiss[igvl[iline]]
-                maxIndex = igvl[iline]
-        line = range(nlines)
-        igvlsort = np.take(igvl,np.argsort(maxEmiss))
-        topLines = igvlsort[-top:]
-        maxWvl = '%5.3f' % wvl[topLines[-1]]
-        maxline = topLines[-1]
-        # need to make sure there are no negative values before plotting
-        good = np.where(emiss > 0.)
-        emissMin = emiss[good].min()
-        bad = np.where(emiss <= 0.)
-        emiss[bad] = emissMin
-        topLines = topLines[wvl[topLines].argsort()]
-        ntemp = self.Temperature.size
-        ndens = self.EDensity.size
-        ylabel = 'Emissivity relative to '+maxWvl
-        title = self.Spectroscopic
-        #  normally, ionWeb is only using in the non-interactive mode
-        plt.ioff()
-        if ndens == 1 and ntemp == 1:
-            print(' only a single temperature and eDensity')
-            return
-        elif ndens == 1:
-            xlabel = 'Temperature (K)'
-            ngofnt = temperature.size
-            xvalues = temperature
-            outTemperature = temperature
-            outDensity = np.zeros(ntemp,'Float64')
-            outDensity.fill(eDensity)
-            desc_str=' at Density = %10.2e' % eDensity
-        elif ntemp == 1:
-            xvalues = eDensity
-            ngofnt = eDensity.size
-            outTemperature = np.zeros(ndens,'Float64')
-            outTemperature.fill(temperature)
-            outDensity = eDensity
-            xlabel = r'$\rm{Electron Density (cm}^{-3}\rm{)}$'
-            desc_str = ' at Temperature = %10.2e' % temperature
-        else:
-            outTemperature = temperature
-            outDensity = eDensity
-            xlabel = 'Temperature (K)'
-            xvalues = temperature
-            desc_str = ' for variable Density'
-
-        plt.figure()
-        nxvalues = len(xvalues)
-        for iline in range(top):
-            tline = topLines[iline]
-            plt.loglog(xvalues,emiss[tline]/maxAll)
-            skip = 2
-            start = divmod(iline,nxvalues)[1]
-            for ixvalue in range(start,nxvalues,nxvalues//skip):
-                plt.text(xvalues[ixvalue],emiss[tline,ixvalue]/maxAll[ixvalue],str(wvl[tline]))
-        plt.xlim(xvalues.min(),xvalues.max())
-        plt.xlabel(xlabel,fontsize=fontsize)
-        plt.ylabel(ylabel,fontsize=fontsize)
-        plt.title(title+desc_str,fontsize=fontsize)
-        if saveFile:
-            plt.savefig(saveFile)
-        else:
-            plt.draw()
-        wvlChoices = []
-        for one in wvl[topLines]:
-            wvlChoices.append('%12.3f'%(one))
-        self.wvlChoices = wvlChoices
-        self.topLines = topLines
-
-    def gofntPlot(self, wvlRange=0, top=10, index=0, saveFile=0):
-        """
-        Return a plot of the 'so-called' G(T) function fron the selected lines in index
-
-        Given as a function of both temperature and eDensity.
-
-        Only the top( set by 'top') brightest lines are plotted.
-        """
-
-        if hasattr(self, 'Emiss'):
-            doEmiss = False
-            em = self.Emiss
-        else:
-            doEmiss = True
-        if doEmiss:
-            self.emiss()
-            em = self.Emiss
-
-        if not hasattr(self, 'Abundance'):
-            self.Abundance = io.abundanceRead()
-
-        fontsize = 12
-        emiss = em["emiss"]
-        wvl = em["wvl"]
-        temperature = self.Temperature
-        eDensity = self.EDensity
-        plotLabels = em["plotLabels"]
-        xLabel = plotLabels["xLabel"]
-        yLabel = plotLabels["yLabel"]
-
-        if type(wvlRange) != type(1):
-            igvl = util.between(wvl,wvlRange)
-        else:
-            igvl = range(len(wvl))
-        nlines = len(igvl)
-        if nlines == 0:
-            print(' no lines in selected interval')
-            self.Message = ' no lines in selected interval '
-            return
-
-        # find the top most intense lines
-        if top > nlines:
-            top = nlines
-        maxEmiss = np.zeros(nlines,'Float64')
-        for iline in range(nlines):
-            maxEmiss[iline] = emiss[igvl[iline]].max()
-        for iline in range(nlines):
-            if maxEmiss[iline] >= maxEmiss.max():
-                maxAll = emiss[igvl[iline]]
-                maxIndex = igvl[iline]
-                print(' maxIndex, maxAll = %5i %5i'%(maxIndex,  maxAll))
-
-        igvlsort = np.take(igvl,np.argsort(maxEmiss))
-        topLines = igvlsort[-top:]
-
-        # need to make sure there are no negative values before plotting
-        good = np.where(emiss > 0.)
-        emissMin = emiss[good].min()
-        bad = np.where(emiss <= 0.)
-        emiss[bad] = emissMin
-        topLines = topLines[wvl[topLines].argsort()]
-        ntemp = self.Temperature.size
-        ndens = self.EDensity.size
-        title = self.Spectroscopic
-        if ndens == 1 and ntemp ==1 :
-            print(' only a single temperature and eDensity')
-            return
-        elif ndens == 1:
-            xlabel = 'Temperature (K)'
-            ngofnt = temperature.size
-            xvalues = temperature
-            outTemperature = temperature
-            outDensity = np.zeros(ntemp,'Float64')
-            outDensity.fill(eDensity)
-            desc_str = ' at Density = %10.2e' % eDensity
-        elif ntemp == 1:
-            xvalues = eDensity
-            ngofnt = eDensity.size
-            outTemperature = np.zeros(ndens,'Float64')
-            outTemperature.fill(temperature)
-            outDensity = eDensity
-            xlabel = r'$\rm{Electron Density (cm}^{-3}\rm{)}$'
-            desc_str = ' at Temperature = %10.2e' % temperature
-        else:
-            outTemperature = temperature
-            outDensity = eDensity
-            xlabel = 'Temperature (K)'
-            xvalues = temperature
-            ngofnt = temperature.size
-            desc_str=' for variable Density'
-
-        gline_idx = index
-        nWvl = len(index)
-        gAbund = self.Abundance
-        if not hasattr(self, 'IoneqOne'):
-            self.ioneqOne()
-        gIoneq = self.IoneqOne/eDensity
-        #  ionWeb is normally only used in the non-interative mode
-        plt.ioff()
-        plt.figure()
-        if nWvl > 1:
-            gofnt = np.zeros((ngofnt) ,'float64')
-            for aline in gline_idx:
-                gofnt += gAbund*gIoneq*emiss[aline].squeeze()
-        else:
-            gofnt = gAbund*gIoneq*emiss[index].squeeze()
-
-        self.Gofnt = {'temperature':outTemperature,'eDensity':outDensity,'gofnt':gofnt, 'index':gline_idx}
-
-        plt.loglog(xvalues,gofnt)
-        plt.xlim(xvalues.min(),xvalues.max())
-        plt.xlabel(xlabel,fontsize=fontsize)
-        plt.ylabel('Gofnt',fontsize=fontsize)
-        plt.title(title+' '+str(wvl[index])+' '+desc_str, fontsize=fontsize)
-        if saveFile:
-            plt.savefig(saveFile)
-        else:
-            plt.show()
-
-    def intensityRatioSelectLines(self, wvlRange=0, top=10,  saveFile=0):
-        """
-        Provide a selection of lines for calculating the 'so-called' G(T) function.
-
-        Given as a function of both temperature and eDensity.
-
-        Only the top( set by 'top') brightest lines are plotted.
-        """
-
-        if hasattr(self, 'Emiss'):
-            doEmiss = False
-            em = self.Emiss
-        else:
-            doEmiss = True
-        #
-        #
-        if doEmiss:
-            # new values of temperature or eDensity
-            self.emiss()
-            em = self.Emiss
-        #
-        fontsize = 12
-        #
-        emiss = em["emiss"]
-        wvl = em["wvl"]
-        temperature = self.Temperature
-        eDensity = self.EDensity
-        plotLabels = em["plotLabels"]
-        xLabel = plotLabels["xLabel"]
-        yLabel = plotLabels["yLabel"]
-        #
-        # find which lines are in the wavelength range if it is set
-        #
-        #
-        if not isinstance(wvlRange, int):
-            igvl = util.between(wvl,wvlRange)
-        else:
-            igvl = range(len(wvl))
-        nlines = len(igvl)
-        if nlines < 2:
-            print(' less than 2 lines in selected interval')
-            self.message = ' less than 2 lines in selected interval'
-            self.Error = 1
-            return
-        self.Error = 0
-        # find the top most intense lines
-        #
-        if (top > nlines) or (top == 0):
-            top = nlines
-        maxEmiss = np.zeros(nlines,'Float64')
-        for iline in range(nlines):
-            maxEmiss[iline] = emiss[igvl[iline]].max()
-        for iline in range(nlines):
-            if maxEmiss[iline] >= maxEmiss.max():
-                maxAll = emiss[igvl[iline]]
-                maxIndex = igvl[iline]
-                print(' maxIndex, maxAll = %5i %5i '%(maxIndex,  maxAll))
-#        line=range(nlines)
-        igvlsort = np.take(igvl,np.argsort(maxEmiss))
-        topLines = igvlsort[-top:]
-        maxWvl = '%5.3f' % wvl[topLines[-1]]
-#        maxline=topLines[-1]
-        #
-        # need to make sure there are no negative values before plotting
-        good = np.where(emiss > 0.)
-        emissMin = emiss[good].min()
-        bad = np.where(emiss <= 0.)
-        emiss[bad] = emissMin
-        #
-        topLines = topLines[wvl[topLines].argsort()]
-        #
-        #
-        ntemp = self.Temperature.size
-        #
-        ndens = self.EDensity.size
-        #
-        ylabel = 'Emissivity relative to '+maxWvl
-        title = self.Spectroscopic
-        #
-        #
-        if ndens == 1 and ntemp == 1:
-            print(' only a single temperature and eDensity')
-            return
-        elif ndens == 1:
-            xlabel = 'Temperature (K)'
-            ngofnt = temperature.size
-            xvalues = temperature
-            outTemperature = temperature
-            outDensity = np.zeros(ntemp,'Float64')
-            outDensity.fill(eDensity)
-            desc_str = ' at Density = %10.2e' % eDensity
-        elif ntemp == 1:
-            xvalues = eDensity
-            ngofnt = eDensity.size
-            outTemperature = np.zeros(ndens,'Float64')
-            outTemperature.fill(temperature)
-            outDensity = eDensity
-            xlabel = r'$\rm{Electron Density (cm}^{-3}\rm{)}$'
-            desc_str = ' at Temperature = %10.2e' % temperature
-        else:
-            outTemperature = temperature
-            outDensity = eDensity
-            xlabel = 'Temperature (K)'
-            xvalues = temperature
-#            ngofnt  =  temperature.size
-            desc_str = ' for variable Density'
-            #
-        #
-        # put all actual plotting here
-        #
-#        plt.ion()
-        #  topLines are sorted by wavelength
-        ymax = np.max(1.2*emiss[topLines[0]]/maxAll)
-        ymin = ymax
-        plt.figure()
-        ax = plt.subplot(111)
-        nxvalues = len(xvalues)
-        for iline in range(top):
-            tline = topLines[iline]
-            plt.loglog(xvalues,emiss[tline]/maxAll)
-            if np.min(emiss[tline]/maxAll) < ymin:
-                ymin = np.min(emiss[tline]/maxAll)
-            if np.max(emiss[tline]/maxAll) > ymax:
-                ymax = np.max(emiss[tline]/maxAll)
-            skip = 2
-            start = divmod(iline,nxvalues)[1]
-            for ixvalue in range(start,nxvalues,nxvalues//skip):
-                plt.text(xvalues[ixvalue],emiss[tline,ixvalue]/maxAll[ixvalue],str(wvl[tline]))
-        plt.xlim(xvalues.min(),xvalues.max())
-        plt.xlabel(xlabel,fontsize=fontsize)
-        plt.ylabel(ylabel,fontsize=fontsize)
-        if ndens == ntemp and ntemp > 1:
-            plt.text(0.07, 0.5,title, horizontalalignment='left', verticalalignment='center', fontsize=fontsize,  transform = ax.transAxes)
-            #
-            ax2 = plt.twiny()
-            xlabelDen = r'Electron Density (cm$^{-3}$)'
-            plt.xlabel(xlabelDen, fontsize=fontsize)
-            plt.loglog(eDensity,emiss[topLines[top-1]]/maxAll, visible=False)
-            ax2.xaxis.tick_top()
-            plt.ylim(ymin/1.2, 1.2*ymax)
-        else:
-            plt.ylim(ymin/1.2, 1.2*ymax)
-            plt.title(title+desc_str,fontsize=fontsize)
-        if saveFile:
-            plt.savefig(saveFile)
-        else:
-            plt.draw()
-
-        wvlChoices = []
-        for one in wvl[topLines]:
-            wvlChoices.append('%12.3f'%(one))
-        self.wvlChoices = wvlChoices
-        self.topLines = topLines
-
-    def intensityRatioShow(self,numIdx, denIdx, plotDir=0, saveDir=0):
-        """Plot the ratio of 2 lines or sums of lines.
-
-        Shown as a function of eDensity and/or temperature.
-
-        to save a plot or txt, only the directory name is needed"""
-
-        em = self.Emiss
-        emiss = em['emiss']
-        wvl = em["wvl"]
-        plotLabels = em["plotLabels"]
-        xLabel = plotLabels["xLabel"]
-        yLabel = plotLabels["yLabel"]
-        topLines = self.topLines
-        maxWvl = '%5.3f' % wvl[topLines[-1]]
-        # need to make sure there are no negative values before plotting
-        good = np.where(emiss > 0.)
-        emissMin = emiss[good].min()
-        bad = np.where(emiss <= 0.)
-        emiss[bad] = emissMin
-        ntemp = self.Temperature.size
-        ndens = self.EDensity.size
-        ylabel = 'Emissivity relative to '+maxWvl
-        title = self.Spectroscopic
-        if ndens == 1 and ntemp == 1:
-            print(' only a single temperature and eDensity')
-            return
-        elif ndens == 1:
-            xlabel = 'Temperature (K)'
-            xvalues = self.Temperature
-            outTemperature = self.Temperature
-            outDensity = np.zeros(ntemp,'Float64')
-            outDensity.fill(self.EDensity)
-            desc_str = ' at  Density = %10.2e (cm)$^{-3}$' % self.EDensity
-        elif ntemp == 1:
-            xvalues = self.EDensity
-            outTemperature = np.zeros(ndens,'Float64')
-            outTemperature.fill(self.Temperature)
-            outDensity = self.EDensity
-            xlabel = r'$\rm{Electron Density (cm)^{-3}}$'
-            desc_str = ' at Temp = %10.2e (K)' % self.Temperature
-        else:
-            outTemperature = self.Temperature
-            outDensity = self.EDensity
-            xlabel = 'Temperature (K)'
-            xvalues = self.Temperature
-            desc_str = ' for variable Density'
-
-        if np.iterable(numIdx):
-            num_idx = numIdx
-        else:
-            num_idx = [numIdx]
-        if len(num_idx) == 0:
-            print(' no numerator lines were selected')
-            self.Message = ' no numerator lines were selected'
-            return
-
-        if np.iterable(denIdx):
-            den_idx = denIdx
-        else:
-            den_idx = [denIdx]
-
-        if len(den_idx) == 0:
-            print(' no denominator lines were selected')
-            self.Message = ' no denominator lines were selected'
-            return
-
-        numEmiss = np.zeros(len(xvalues),'Float64')
-        for aline in num_idx:
-            numEmiss += emiss[topLines[aline]]
-
-        denEmiss = np.zeros(len(xvalues),'Float64')
-        for aline in den_idx:
-            denEmiss += emiss[topLines[aline]]
-
-        intRatio = numEmiss/denEmiss
-        fontsize = 12
-        plt.figure()
-        ax = plt.subplot(111)
-        plt.loglog(xvalues,numEmiss/denEmiss)
-        plt.xlim(xvalues.min(),xvalues.max())
-        plt.xlabel(xlabel,fontsize=fontsize)
-        plt.ylabel('Ratio ('+self.Defaults['flux']+')',fontsize=fontsize)
-        desc = title + ':'
-        for aline in num_idx:
-            desc += ' ' + str(wvl[topLines[aline]])
-        desc += ' / '
-        for aline in den_idx:
-            desc += ' ' + str(wvl[topLines[aline]])
-        if ndens == ntemp and ntemp > 1:
-            plt.text(0.07, 0.5,desc, horizontalalignment='left', verticalalignment='center', fontsize=fontsize,  transform = ax.transAxes)
-            #
-            ax2 = plt.twiny()
-            xlabelDen = r'Electron Density (cm$^{-3}$)'
-            plt.xlabel(xlabelDen, fontsize=fontsize)
-            plt.loglog(outDensity,intRatio, visible=False)
-            ax2.xaxis.tick_top()
-        else:
-            plt.title(desc,fontsize=fontsize)
-
-        intensityRatioFileName = self.IonStr
-        for aline in num_idx:
-            addstr = '%10.3f'%(wvl[topLines[aline]])
-            intensityRatioFileName += '_' + addstr.strip()
-        intensityRatioFileName += '_2'
-        for aline in den_idx:
-            addstr = '%10.3f'%(wvl[topLines[aline]])
-            intensityRatioFileName += '_' + addstr.strip()
-
-        #  need to so the before the next save statements
-        self.IntensityRatio = {'ratio':intRatio,'desc':desc,
-                'temperature':outTemperature,'eDensity':outDensity,'filename':intensityRatioFileName}
-        if plotDir:
-            plotFile = os.path.join(plotDir, intensityRatioFileName+'.png')
-            plt.savefig(plotFile)
-        if saveDir:
-            txtFile = os.path.join(saveDir, intensityRatioFileName+'.txt')
-            self.intensityRatioSave(outFile = txtFile)
-
-
-class ioneq():
-    '''
-    Reads, calculates, and/or plots the ionization equilibrium for an element as a function of temperature.
-    The variable z is the atomic number of the element.  Acceptable values are from 1 to 30.
-    '''
-
-
-    def __init__(self, z, verbose=False):
-        self.Z = z
-
-    def load(self, ioneqName):
-        '''
-        read in an existing file ionization equilibrium file
-        ioneqName should be something like 'chianti', or 'chianti_version6'
-        '''
-        ioneqAll = io.ioneqRead(ioneqName)
-        self.Temperature = ioneqAll['ioneqTemperature']
-        self.Ioneq = ioneqAll['ioneqAll'][self.Z - 1]
-
-    def calculate(self, temperature):
-        '''
-        returns with the ionization balance as self.Ioneq and
-        temperature as self.Temperature
-        '''
-        self.Temperature = np.array(temperature, 'float64')
-        ionList = []
-        chIons = []
-        z = self.Z
-        for stage in range(1, z+2):
-            ionStr = util.zion2name(z, stage)
-            ionList.append(ionStr)
-            print(' Z %5i Stage %5i  ionStr %s'%(z, stage, ionStr))
-            atom = ion(ionStr, temperature = self.Temperature)
-            atom.ionizRate()
-            atom.recombRate()
-            chIons.append(atom)
-
-        ntemp = chIons[0].IonizRate['temperature'].size
-        if ntemp == 1:
-            ioneq = np.zeros((z+1), 'Float64')
-            factor = []
-            for anIon in chIons:
-                if hasattr(anIon, 'RecombRate') and hasattr(anIon, 'IonizRate'):
-                    rat = anIon.IonizRate['rate']/anIon.RecombRate['rate']
-                    factor.append(rat**2 + rat**(-2))
-                else:
-                    factor.append(0.)
-            factor[0] = max(factor)
-            factor[-1] = max(factor)
-            ionmax = factor.index(min(factor))
-            ioneq[ionmax] = 1.
-
-            for iz in range(ionmax+1, z+1):
-                ionrate = chIons[iz-1].IonizRate['rate']
-                recrate = chIons[iz].RecombRate['rate']
-                ioneq[iz] = ionrate*ioneq[iz-1]/recrate
-
-            for iz in range(ionmax-1, -1, -1):
-                ionrate = chIons[iz].IonizRate['rate']
-                recrate = chIons[iz+1].RecombRate['rate']
-                ioneq[iz] = recrate*ioneq[iz+1]/ionrate
-            ionsum = ioneq.sum()
-            ioneq = ioneq/ionsum
-            self.Ioneq = ioneq
-        else:
-            ioneq = np.zeros((z+1,ntemp ), 'Float64')
-            for it in range(ntemp):
-                factor = []
-                for anIon in chIons:
-                    if type(anIon.IonizRate) != type(None) and type(anIon.RecombRate) != type(None):
-                        rat = anIon.IonizRate['rate'][it]/anIon.RecombRate['rate'][it]
-                        factor.append(rat**2 + rat**(-2))
-                    else:
-                        factor.append(0.)
-                factor[0] = max(factor)
-                factor[-1] = max(factor)
-                ionmax = factor.index(min(factor))
-                ioneq[ionmax, it] = 1.
-
-                for iz in range(ionmax+1, z+1):
-                    ionrate = chIons[iz-1].IonizRate['rate'][it]
-                    recrate = chIons[iz].RecombRate['rate'][it]
-                    ioneq[iz, it] = ionrate*ioneq[iz-1, it]/recrate
-
-                for iz in range(ionmax-1, -1, -1):
-                    ionrate = chIons[iz].IonizRate['rate'][it]
-                    recrate = chIons[iz+1].RecombRate['rate'][it]
-                    ioneq[iz, it] = recrate*ioneq[iz+1, it]/ionrate
-                ionsum = ioneq[:, it].sum()
-                ioneq[:, it] = ioneq[:, it]/ionsum
-            self.Ioneq = ioneq
-
-    def plot(self, stages=0, xr=0, yr=0, oplot=0, label=1, title=1,  bw=0, semilogx = 0):
-        '''
-        Plots the ionization equilibria.
-
-        self.plot(xr=None, yr=None, oplot=False)
-        stages = sequence of ions to be plotted, neutral == 1, fully stripped == Z+1
-        xr = temperature range, yr = ion fraction range
-
-        for overplotting:
-        oplot="ioneqfilename" such as 'mazzotta'
-        or if oplot=True or oplot=1 and a widget will come up so that a file can be selected.
-        '''
-        if hasattr(self, 'Ioneq'):
-            ioneq = getattr(self, 'Ioneq')
-        else:
-            print(' must first load or calculate and ionization equilibrium')
-            return
-
-        if bw:
-            linestyle = ['k-','k--', 'k-.', 'k:']
-            plt.rcParams['font.size'] = 16.
-            lw = 2
-        else:
-            linestyle = ['b-','r--', 'g-.', 'm:']
-            lw = 1
-        #
-        if not stages:
-            stages = range(1, self.Z+2)
-        elif min(stages) < 1 or max(stages) > self.Z+1:
-            stages = range(1, self.Z+2)  #  spectroscopic notation
-        if not xr:
-            xr = [self.Temperature.min(), self.Temperature.max()]
-        if not yr:
-            yr = [0.01, 1.1]
-        xyr = list(xr)
-        xyr.extend(list(yr))
-        #
-        iz = stages[0]
-        if semilogx:
-            plt.semilogx(self.Temperature, ioneq[iz-1], linestyle[0], lw=lw)
-        else:
-            plt.loglog(self.Temperature, ioneq[iz-1], linestyle[0], lw=lw)
-        if label:
-            idx = self.Ioneq[iz-1] == self.Ioneq[iz-1].max()
-            if idx.sum() > 1:
-                jdx = np.arange(len(idx))
-                idx = int(jdx[idx].max())
-            ann = const.Ionstage[iz-1]
-            plt.annotate(ann, [self.Temperature[idx], 0.7*ioneq[iz-1, idx]], ha='center')
-        for iz in stages[1:]:
-            if semilogx:
-                plt.semilogx(self.Temperature, ioneq[iz-1], linestyle[0], lw=lw)
-            else:
-                plt.loglog(self.Temperature, ioneq[iz-1], linestyle[0], lw=lw)
-            if label:
-                idx = ioneq[iz-1] == ioneq[iz-1].max()
-                if idx.sum() > 1:
-                    jdx = np.arange(len(idx))
-                    idx = int(jdx[idx].mean())
-                ann = const.Ionstage[iz-1]
-                plt.annotate(ann, [self.Temperature[idx], 0.7*ioneq[iz-1, idx]], ha='center')
-        plt.xlabel('Temperature (K)')
-        plt.ylabel('Ion Fraction')
-        atitle = 'Chianti Ionization Equilibrium for '+const.El[self.Z-1].capitalize()
-        #
-        if oplot:
-            if oplot == 0:
-                result = io.ioneqRead(ioneqname='')
-#                print 'keys = ', result.keys()
-                if result != False:
-                    atitle += '  & '+result['ioneqname'].replace('.ioneq', '')
-                    atitle += ' '+linestyle[0]
-                    for iz in stages:
-                        plt.plot(result['ioneqTemperature'], result['ioneqAll'][self.Z-1, iz-1],linestyle[1], lw=lw)
-            elif type(oplot) == type('string'):
-                atitle += '  & ' + oplot
-                result = io.ioneqRead(ioneqname=oplot)
-                if result != False:
-                    for iz in stages:
-                        plt.plot(result['ioneqTemperature'], result['ioneqAll'][self.Z-1, iz-1],linestyle[1], lw=lw)
-            elif type(oplot) == type([]):
-                for iplot in range(len(oplot)):
-                    result = io.ioneqRead(ioneqname=oplot[iplot])
-#                    print 'keys = ', result.keys()
-                    if result != False:
-                        atitle += '  & '+oplot[iplot]+' '+linestyle[iplot%3]
-                        for iz in stages:
-                            plt.plot(result['ioneqTemperature'], result['ioneqAll'][self.Z-1, iz-1],linestyle[1], lw=lw)
-            else:
-                print(' oplot file not understood %s'%(oplot))
-        if title:
-            plt.title(atitle)
-        plt.axis(xyr)

@@ -11,4 +11,4 @@ from .IpyMspectrum import ipymspectrum
 from .Continuum import Continuum
 from .RadLoss import radLoss
 from .Ion import ion
-from .Ion import ioneq
+from .Ioneq import ioneq

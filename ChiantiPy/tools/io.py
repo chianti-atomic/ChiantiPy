@@ -643,8 +643,8 @@ def elvlcRead(ions, filename=None, getExtended=False, verbose=False, useTh=True)
             if cnt > 0:
                 idx = s1[i].index(',')
                 extended[i] = s1[i][idx+1:]
-    eryd = [ecm[i]*const.invCm2ryd if ecm[i] > 0. else -1. for i in range(nlvls)]
-    erydth = [ecmth[i]*const.invCm2ryd if ecmth[i] > 0. else -1. for i in range(nlvls)]
+    eryd = [ecm[i]*const.invCm2ryd if ecm[i] >= 0. else -1. for i in range(nlvls)]
+    erydth = [ecmth[i]*const.invCm2ryd if ecmth[i] >= 0. else -1. for i in range(nlvls)]
     ref = []
     # this should skip the last '-1' in the file
     for i in range(nlvls+1,len(s1)):

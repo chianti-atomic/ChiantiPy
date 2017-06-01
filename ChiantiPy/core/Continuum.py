@@ -7,7 +7,7 @@ import numpy as np
 from scipy.interpolate import splev, splrep
 from scipy.ndimage import map_coordinates
 
-from .Ion import ioneq
+from .Ioneq import ioneq
 import ChiantiPy.tools.data as ch_data
 import ChiantiPy.tools.util as ch_util
 import ChiantiPy.tools.io as ch_io
@@ -134,7 +134,7 @@ class Continuum(object):
         `itoh_gaunt_factor` and `sutherland_gaunt_factor` for more details.
 
         The free-free emission is in units of erg
-        :math:`\mathrm{cm}^3\mathrm{s}^{-1}\mathrm{\AA}^{-1}\mathrm{str}^{-1}`. If the emission
+        :math:`\mathrm{cm}^3\mathrm{s}^{-1}\mathrm{\mathring{A}}^{-1}\mathrm{str}^{-1}`. If the emission
         measure has been set, the units will be multiplied by :math:`\mathrm{cm}^{-5}` or
         :math:`\mathrm{cm}^{-3}`, depending on whether it is the line-of-sight or volumetric
         emission measure, respectively.
@@ -361,7 +361,8 @@ class Continuum(object):
         are the statistical weights of the :math:`i^{\mathrm{th}}` level of the recombined ion
         and the ground level of the recombing ion, respectively, :math:`\sigma_i^{bf}` is the
         photoionization cross-section, and :math:`I_i` is the ionization potential of level :math:`i`.
-        This expression comes from Eq. 7 of `Peter Young's notes on free-bound continuum`_.
+        This expression comes from Eq. 12 of [3]_. For more information about the free-bound continuum
+        calculation, see `Peter Young's notes on free-bound continuum`_.
 
         The photoionization cross-sections are calculated using the methods of [2]_ for the
         transitions to the ground state and [1]_ for all other transitions. See
@@ -370,7 +371,7 @@ class Continuum(object):
         .. _Peter Young's notes on free-bound continuum: http://www.pyoung.org/chianti/freebound.pdf
 
         The free-bound emission is in units of erg
-        :math:`\mathrm{cm}^3\mathrm{s}^{-1}\mathrm{\AA}^{-1}\mathrm{str}^{-1}`. If the emission
+        :math:`\mathrm{cm}^3\mathrm{s}^{-1}\mathrm{\mathring{A}}^{-1}\mathrm{str}^{-1}`. If the emission
         measure has been set, the units will be multiplied by :math:`\mathrm{cm}^{-5}` or
         :math:`\mathrm{cm}^{-3}`, depending on whether it is the line-of-sight or volumetric
         emission measure, respectively.
@@ -397,6 +398,8 @@ class Continuum(object):
             <http://adsabs.harvard.edu/abs/1961ApJS....6..167K>`_
         .. [2] Verner & Yakovlev, 1995, A&AS, `109, 125
             <http://adsabs.harvard.edu/abs/1995A%26AS..109..125V>`_
+        .. [3] Young et al., 2003, ApJSS, `144, 135
+            <http://adsabs.harvard.edu/abs/2003ApJS..144..135Y>`_
         """
         # calculate the photon energy in erg
         photon_energy = ch_const.planck*(1.e8*ch_const.light)/wavelength
@@ -504,7 +507,8 @@ class Continuum(object):
         :math:`E` is the photon energy, :math:`g_{bf}` is the Gaunt factor calculated
         according to [1]_, and :math:`n_i` is the principal quantum number of the
         :math:`i^{\mathrm{th}}` level. :math:`\sigma_i^{bf}` is units of :math:`\mathrm{cm}^{2}`.
-        This expression is given in `Peter Young's notes on free-bound continuum`_.
+        This expression is given by Eq. 13 of [2]_. For more information on the photoionization
+        cross-sections, see `Peter Young's notes on free-bound continuum`_.
 
         .. _Peter Young's notes on free-bound continuum: http://www.pyoung.org/chianti/freebound.pdf
 
@@ -519,6 +523,8 @@ class Continuum(object):
         ----------
         .. [1] Karzas and Latter, 1961, ApJSS, `6, 167
             <http://adsabs.harvard.edu/abs/1961ApJS....6..167K>`_
+        .. [2] Young et al., 2003, ApJSS, `144, 135
+            <http://adsabs.harvard.edu/abs/2003ApJS..144..135Y>`_
         """
         # numerical constant, in Mbarn
         kl_constant = 1.077294e-1*8065.54e3
@@ -549,7 +555,7 @@ class Continuum(object):
         ionization equilibrium.
         """
         tmp = ioneq(self.Z)
-        tmp.load(kwargs.get('ioneqfile', ch_data.Defaults['ioneqfile']))
+        tmp.load(ioneqName=kwargs.get('ioneqfile', None))
         ionization_equilibrium = splev(self.temperature,
                                        splrep(tmp.Temperature, tmp.Ioneq[self.stage,:], k=1), ext=1)
         return np.where(ionization_equilibrium < 0., 0., ionization_equilibrium)

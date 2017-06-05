@@ -1,11 +1,11 @@
 """
-Tests for the ion and ioneq classes.
+Tests for the ion class.
 """
 
 import numpy as np
 import pytest
 
-from ChiantiPy.core import ion,ioneq
+from ChiantiPy.core import ion
 import ChiantiPy.tools as ch_tools
 
 # use an ion with relatively small chianti files
@@ -22,7 +22,7 @@ density_3 = np.logspace(5,8,21)
 tmp_ion = ion(test_ion,temperature=temperature_2,eDensity=density_2)
 
 
-#Check various ways to specify the temperature and density
+# Check various ways to specify the temperature and density
 def test_temperature_density():
     # TODO: test case where neither are set/ one or the other is not set
     # Two single values
@@ -47,7 +47,8 @@ def test_temperature_density():
                                 equal size.'''):
         _tmp_ion = ion(test_ion,temperature=temperature_2,eDensity=density_3,setup=False)
 
-#Check how abundance is set
+
+# Check how abundance is set
 def test_abundance():
     # Float value
     _tmp_ion = ion(test_ion,abundance=0.01,setup=False)
@@ -60,7 +61,8 @@ def test_abundance():
     abundance = ch_tools.io.abundanceRead(abundancename='sun_coronal_2012_schmelz')
     assert _tmp_ion.Abundance==abundance['abundance'][_tmp_ion.Z-1]
 
-#Check CHIANTI file imports
+
+# Check CHIANTI file imports
 def test_chianti_files():
     assert hasattr(tmp_ion,'Elvlc')
     assert hasattr(tmp_ion,'Wgfa')

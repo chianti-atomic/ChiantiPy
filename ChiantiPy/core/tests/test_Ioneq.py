@@ -17,7 +17,7 @@ z = 26
 
 def test_el_input():
     el_ioneq_input = ioneq(el)
-    assert el_ioneq_input.Z = util.el2z(el)
+    assert el_ioneq_input.Z == util.el2z(el)
 
 
 def test_z_input():
@@ -46,4 +46,10 @@ def test_load_ioneq():
     load_ioneq.load()
     assert hasattr(load_ioneq, 'Temperature')
     assert hasattr(load_ioneq, 'Ioneq')
+
+
+def test_load_ioneq_alternate_file():
+    load_ioneq = ioneq(el)
     load_ioneq.load(ioneqName='chianti')
+    assert hasattr(load_ioneq, 'Temperature')
+    assert hasattr(load_ioneq, 'Ioneq')

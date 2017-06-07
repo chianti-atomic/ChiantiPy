@@ -52,7 +52,7 @@ def boxcar(wvl, wvl0, factor=None):
         Wavelength array
     wvl0 : `~numpy.float64`
         Wavelength filter should be centered on.
-    width : `~numpy.float64`
+    factor : `~numpy.float64`
         Full width of the box-car filter
     """
     wvl = np.asarray(wvl, 'float64')

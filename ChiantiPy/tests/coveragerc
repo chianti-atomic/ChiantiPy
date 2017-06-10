@@ -1,16 +1,11 @@
 [run]
-source = {packagename}
+source = ChiantiPy
 omit =
-   {packagename}/_astropy_init*
-   {packagename}/conftest*
-   {packagename}/cython_version*
-   {packagename}/setup_package*
-   {packagename}/*/setup_package*
-   {packagename}/*/*/setup_package*
-   {packagename}/tests/*
-   {packagename}/*/tests/*
-   {packagename}/*/*/tests/*
-   {packagename}/version*
+   ChiantiPy/_astropy_init*
+   ChiantiPy/conftest*
+   ChiantiPy/*setup_package*
+   ChiantiPy/*tests/*
+   ChiantiPy/version*
 
 [report]
 exclude_lines =

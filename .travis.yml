@@ -10,16 +10,16 @@ env:
     #- NUMPY_VERSION='stable'
     - ASTROPY_VERSION='stable'
     - MAIN_CMD='python setup.py'
-    - CONDA_DEPENDENCIES='scipy matplotlib ipython ipyparallel pyqt sphinx sphinx_rtd_theme pytest'
+    - CONDA_DEPENDENCIES='scipy matplotlib ipython ipyparallel pyqt sphinx sphinx_rtd_theme pytest pytest-cov coverage'
     - NUMPY_VERSION='1.11'
     - PYQT_VERSION='4.11.4'
   matrix:
     - PYTHON_VERSION=2.7 SETUP_CMD='install'
     - PYTHON_VERSION=3.4 SETUP_CMD='install'
     - PYTHON_VERSION=3.5 SETUP_CMD='install'
-    - PYTHON_VERSION=2.7 SETUP_CMD='test'
-    - PYTHON_VERSION=3.4 SETUP_CMD='test'
-    - PYTHON_VERSION=3.5 SETUP_CMD='test'
+    - PYTHON_VERSION=2.7 SETUP_CMD='test --coverage'
+    - PYTHON_VERSION=3.4 SETUP_CMD='test --coverage'
+    - PYTHON_VERSION=3.5 SETUP_CMD='test --coverage'
     - PYTHON_VERSION=2.7 SETUP_CMD='build_docs --no-intersphinx'
     - PYTHON_VERSION=3.4 SETUP_CMD='build_docs --no-intersphinx'
     - PYTHON_VERSION=3.5 SETUP_CMD='build_docs --no-intersphinx'
@@ -32,7 +32,9 @@ before_script:
   - mkdir -p $HOME/.chianti
   - cp chiantirc $HOME/.chianti
   - mkdir -p $XUVTOP
-  - if [[ "$SETUP_CMD" == "test" ]]; then curl -L http://www.chiantidatabase.org/download/CHIANTI_8.0.6_data.tar.gz | tar xz -C $XUVTOP; fi
+  - if [[ $SETUP_CMD == *test* ]]; then curl -L http://www.chiantidatabase.org/download/CHIANTI_8.0.6_data.tar.gz | tar xz -C $XUVTOP; fi
 #run the setup commands
 script:
   - $MAIN_CMD $SETUP_CMD
+after_success:
+  - if [[ $SETUP_CMD == *coverage* ]]; then coveralls --rcfile='./ChiantiPy/tests/coveragerc'; fi

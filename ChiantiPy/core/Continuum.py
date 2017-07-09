@@ -440,13 +440,15 @@ class Continuum(object):
 
         # combine factors
         fb_emiss = prefactor*energy_over_temp_factor*sum_factor
+        #
         # include abundance, ionization equilibrium, photon conversion, emission measure
         if include_abundance:
             fb_emiss *= self.abundance
         if include_ioneq:
             fb_emiss *= self.ioneq_one(**kwargs)[:,np.newaxis]
         if self.emission_measure is not None:
-            fb_emiss *= self.emission_measure
+            for i, em in enumerate(self.emission_measure):
+                fb_emiss[i] *= em
         if ch_data.Defaults['flux'] == 'photon':
             fb_emiss /= photon_energy
         # the final units should be per angstrom

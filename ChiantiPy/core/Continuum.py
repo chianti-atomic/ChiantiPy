@@ -440,7 +440,6 @@ class Continuum(object):
 
         # combine factors
         fb_emiss = prefactor*energy_over_temp_factor*sum_factor
-        #
         # include abundance, ionization equilibrium, photon conversion, emission measure
         if include_abundance:
             fb_emiss *= self.abundance

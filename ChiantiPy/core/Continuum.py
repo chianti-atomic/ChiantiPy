@@ -447,8 +447,7 @@ class Continuum(object):
         if include_ioneq:
             fb_emiss *= self.ioneq_one(**kwargs)[:,np.newaxis]
         if self.emission_measure is not None:
-            for i, em in enumerate(self.emission_measure):
-                fb_emiss[i] *= em
+            fb_emiss *= self.emission_measure[:,np.newaxis]
         if ch_data.Defaults['flux'] == 'photon':
             fb_emiss /= photon_energy
         # the final units should be per angstrom

@@ -1392,9 +1392,9 @@ def scupsRead(ions, filename=None, verbose=False):
         counter += 3
     counter += 1
     ref = []
-    for aline in lines[counter:]:
+    for aline in lines[counter:-1]:
         ref.append(aline.strip('\n'))
-    return {'lvl1':lvl1, 'lvl2':lvl2, 'de':de, 'gf':gf, 'lim':lim, 'ttype':ttype,'cups':cups,'ntemp':ntemp, 'btemp':btemp, 'bscups':bscups, 'ntrans':ntrans, 'ref':ref}
+    return {'ions':ions, 'lvl1':lvl1, 'lvl2':lvl2, 'de':de, 'gf':gf, 'lim':lim, 'ttype':ttype,'cups':cups,'ntemp':ntemp, 'btemp':btemp, 'bscups':bscups, 'ntrans':ntrans, 'ref':ref}
 
 
 def splomRead(ions, ea=False, filename=None):

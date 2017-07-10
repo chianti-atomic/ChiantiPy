@@ -1968,7 +1968,6 @@ class ion(ionTrails, specTrails):
 
         Does not include elemental abundance or ionization fraction
 
-        Wavelengths are sorted
         set allLines = 1 to include unidentified lines
         """
 

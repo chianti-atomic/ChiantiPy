@@ -713,13 +713,13 @@ def elvlcWrite(info, outfile=None, addLvl=0, includeRyd=False,  includeEv=False)
         nlvl = len(info['ecm'])
         info['label'] = [' ']*nlvl
     if 'eryd' not in info:
-        info['eryd'] = [x*const.invCm2ryd for x in info['ecm']]
+        info['eryd'] = [x*const.invCm2ryd  if x > 0. else  -1. for x in info['ecm']]
     if 'erydth 'not in info:
-        info['erydth'] = [x*const.invCm2ryd for x in info['ecmth']]
+        info['erydth'] = [x*const.invCm2ryd  if x > 0. else  -1. for x in info['ecmth']]
     if 'eV' not in info:
-        info['eV'] = [x*const.invCm2Ev for x in info['ecm']]
+        info['eV'] = [x*const.invCm2Ev if x > 0. else  -1. for x in info['ecm']]
     if 'eVth 'not in info:
-        info['eVth'] = [x*const.invCm2Ev for x in info['ecmth']]
+        info['eVth'] = [x*const.invCm2Ev if x > 0. else  -1. for x in info['ecmth']]
    #
     out = open(elvlcName, 'w')
     for i,  aterm in enumerate(info['term']):
@@ -1832,7 +1832,7 @@ def wgfaRead(ions, filename=None, elvlcname=0, total=False, verbose=False):
     return Wgfa
 
 
-def wgfaWrite(info, outfile = None, minBranch = 0.):
+def wgfaWrite(info, outfile = None, minBranch = 0., rightDigits = 4):
     """
     Write data to a CHIANTI .wgfa file
 
@@ -1869,9 +1869,9 @@ def wgfaWrite(info, outfile = None, minBranch = 0.):
     nlvl = max(info['lvl2'])
     totalAvalue = np.zeros(nlvl, 'float64')
     if 'pretty1' in info:
-        pformat = '%5i%5i%15.4f%15.3e%15.3e%30s - %30s'
+        pformat = '%5i%5i%15.' + str(rightDigits) + 'f%15.3e%15.3e%30s - %30s'
     else:
-        pformat = '%5i%5i%15.4f%15.3e%15.3e'
+        pformat = '%5i%5i%15.' + str(rightDigits) + 'f%15.3e%15.3e'
     for itrans, avalue in enumerate(info['avalue']):
         # for autoionization transitions, lvl1 can be less than zero
         if abs(info['lvl1'][itrans]) > 0 and info['lvl2'][itrans] > 0:

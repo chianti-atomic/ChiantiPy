@@ -1551,7 +1551,7 @@ class ion(ionTrails, specTrails):
             for i, lvl in enumerate(self.Elvlc['lvl'][1:]):
                 if verbose:
                     print('%5i %5i %5i'%(i, lvl, lvl-1))
-                branch[lvl-1] = self.Wgfa['avalueLvl'][lvl-1]/(self.Wgfa['avalueLvl'][lvl-1] +self.Auto['avalueLvl'][lvl-1])
+                branch[lvl-1] = self.Wgfa['avalueLvl'][lvl-1]/(self.Wgfa['avalueLvl'][lvl-1] + self.Auto['avalueLvl'][lvl-1])
         temp = temperature
         ntemp = temp.size
         dens = self.EDensity
@@ -1967,8 +1967,9 @@ class ion(ionTrails, specTrails):
         units:  ergs s^-1 str^-1
 
         Does not include elemental abundance or ionization fraction
+        
+        Wavelengths are sorted        
 
-        Wavelengths are sorted
         set allLines = 1 to include unidentified lines
         """
 

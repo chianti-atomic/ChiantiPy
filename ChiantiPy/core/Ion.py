@@ -2854,8 +2854,7 @@ class ion(ionTrails, specTrails):
         elif ntemp == 1:
             xvalues = eDensity
             ngofnt = eDensity.size
-            outTemperature = np.zeros(ndens,'Float64')
-            outTemperature.fill(temperature)
+            outTemperature = temperature
             outDensity = eDensity
             xlabel = r'$\rm{Electron Density (cm}^{-3}\rm{)}$'
             desc_str = ' at Temperature = %10.2e' % temperature[0]

@@ -1,8 +1,12 @@
 from datetime import datetime
 import copy
+import warnings
 
 import numpy as np
-from ipyparallel import Client
+try:
+    from ipyparallel import Client
+except ImportError:
+    warnings.warn("ipyparallel not found. You won't be able to use the ipymspectrum module")
 
 import ChiantiPy
 import ChiantiPy.tools.data as chdata

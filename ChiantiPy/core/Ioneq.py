@@ -57,7 +57,7 @@ class ioneq(object):
         for stage in range(1, z+2):
             ionStr = util.zion2name(z, stage)
             ionList.append(ionStr)
-            print(' Z %5i Stage %5i  ionStr %s'%(z, stage, ionStr))
+#            print(' Z %5i Stage %5i  ionStr %s'%(z, stage, ionStr))
             atom = ion(ionStr, temperature = self.Temperature)
             atom.ionizRate()
             atom.recombRate()
@@ -96,25 +96,48 @@ class ioneq(object):
                 factor = []
                 for anIon in chIons:
                     if type(anIon.IonizRate) != type(None) and type(anIon.RecombRate) != type(None):
-                        rat = anIon.IonizRate['rate'][it]/anIon.RecombRate['rate'][it]
-                        factor.append(rat**2 + rat**(-2))
+                        ioniz = anIon.IonizRate['rate'][it]
+                        recomb = anIon.RecombRate['rate'][it]
+                        if ioniz == 0. or recomb == 0.:
+                            rat = 1.e-100
+                        else:
+                            rat = anIon.IonizRate['rate'][it]/anIon.RecombRate['rate'][it]
+#                        print(' it: %5i ion: %5s rat: %10.2e %10.2e %10.2e'%(it, anIon.IonStr, ioniz, recomb, rat))
+                        try:
+                            factor.append(rat**2 + rat**(-2))
+                        except:
+#                            print(' rat = %10.2e'%(rat))
+                            factor.append(0.)
                     else:
                         factor.append(0.)
                 factor[0] = max(factor)
                 factor[-1] = max(factor)
                 ionmax = factor.index(min(factor))
+#                print(' it:  %5i  ionmax:  %5i'%(it, ionmax))
                 ioneq[ionmax, it] = 1.
 
                 for iz in range(ionmax+1, z+1):
                     ionrate = chIons[iz-1].IonizRate['rate'][it]
                     recrate = chIons[iz].RecombRate['rate'][it]
-                    ioneq[iz, it] = ionrate*ioneq[iz-1, it]/recrate
+                    if recrate != 0.:
+                        ioneq[iz, it] = ionrate*ioneq[iz-1, it]/recrate
+                    else:
+                        ioneq[iz, it] = 0.
 
                 for iz in range(ionmax-1, -1, -1):
                     ionrate = chIons[iz].IonizRate['rate'][it]
                     recrate = chIons[iz+1].RecombRate['rate'][it]
-                    ioneq[iz, it] = recrate*ioneq[iz+1, it]/ionrate
+                    if ionrate != 0.:
+                        ioneq[iz, it] = recrate*ioneq[iz+1, it]/ionrate
+                    else:
+                        ioneq[iz, it] = 0.
                 ionsum = ioneq[:, it].sum()
+#                print(' ioneq sum %10.2e'%(ionsum))
+#                if np.isinf(ionsum):
+#                    pstring = ' %5i '%(it)
+#                    for one in ioneq[:, it]:
+#                        pstring += ' %10.2e'%(one)
+#                    print(pstring)
                 ioneq[:, it] = ioneq[:, it]/ionsum
             self.Ioneq = ioneq
 

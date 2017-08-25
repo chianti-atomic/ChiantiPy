@@ -557,5 +557,5 @@ class Continuum(object):
         tmp = ioneq(self.Z)
         tmp.load(ioneqName=kwargs.get('ioneqfile', None))
         ionization_equilibrium = splev(self.temperature,
-                                       splrep(tmp.Temperature, tmp.Ioneq[self.stage,:], k=1), ext=1)
+                                       splrep(tmp.Temperature, tmp.Ioneq[self.stage-1,:], k=1), ext=1)
         return np.where(ionization_equilibrium < 0., 0., ionization_equilibrium)

@@ -157,6 +157,7 @@ class Continuum(object):
         .. [3] Sutherland, R. S., 1998, MNRAS, `300, 321
             <http://adsabs.harvard.edu/abs/1998MNRAS.300..321S>`_
         """
+        wavelength = np.atleast_1d(wavelength)
         # define the numerical prefactor
         prefactor = ((ch_const.light*1e8)/3./ch_const.emass
                      * (ch_const.fine*ch_const.planck/np.pi)**3
@@ -401,6 +402,7 @@ class Continuum(object):
         .. [3] Young et al., 2003, ApJSS, `144, 135
             <http://adsabs.harvard.edu/abs/2003ApJS..144..135Y>`_
         """
+        wavelength = np.atleast_1d(wavelength)
         # calculate the photon energy in erg
         photon_energy = ch_const.planck*(1.e8*ch_const.light)/wavelength
         prefactor = (2./np.sqrt(2.*np.pi)/(4.*np.pi)/(ch_const.planck*(ch_const.light**3)

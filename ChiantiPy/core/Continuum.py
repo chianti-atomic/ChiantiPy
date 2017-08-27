@@ -56,7 +56,7 @@ class Continuum(object):
         nameDict = ch_util.convertName(ion_string)
         self.Z = nameDict['Z']
         self.stage = nameDict['Ion']
-        self.temperature = np.array(temperature)
+        self.temperature = np.atleast_1d(temperature)
         if emission_measure is None:
             self.emission_measure = emission_measure
         else:
@@ -112,7 +112,7 @@ class Continuum(object):
         prefactor = (4.*(ch_const.fine**3)*(ch_const.planck**2)/3./(np.pi**2)/ch_const.emass
                      * np.sqrt(2.*np.pi*ch_const.boltzmann/3./ch_const.emass))
         # include abundance and ionization equilibrium
-        prefactor *= self.abundance*self.ioneq_one(**kwargs)
+        prefactor *= self.abundance*self.ioneq_one(self.stage, **kwargs)
 
         self.free_free_loss = prefactor*(self.Z**2)*np.sqrt(self.temperature)*gaunt_factor
 
@@ -166,7 +166,7 @@ class Continuum(object):
         if include_abundance:
             prefactor *= self.abundance
         if include_ioneq:
-            prefactor *= self.ioneq_one(**kwargs)
+            prefactor *= self.ioneq_one(self.stage, **kwargs)
         if self.emission_measure is not None:
             prefactor *= self.emission_measure
         # define exponential factor
@@ -345,7 +345,7 @@ class Continuum(object):
         f_2 = (0.9*zeta_0*(z_0**4)/(n_0**5)*np.exp(scaled_energy*(z_0**2)/(n_0**2) - ip/ch_const.boltzmann/self.temperature)
                + 0.42/(n_0**1.5)*(self.stage**4))
 
-        return scaled_energy*f_2*self.abundance*self.ioneq_one(**kwargs)
+        return scaled_energy*f_2*self.abundance*self.ioneq_one(self.stage+1, **kwargs)
 
     def calculate_free_bound_emission(self, wavelength, include_abundance=True, include_ioneq=True, use_verner=True, **kwargs):
         """
@@ -444,7 +444,7 @@ class Continuum(object):
         if include_abundance:
             fb_emiss *= self.abundance
         if include_ioneq:
-            fb_emiss *= self.ioneq_one(**kwargs)[:,np.newaxis]
+            fb_emiss *= self.ioneq_one(self.stage+1, **kwargs)[:,np.newaxis]
         if self.emission_measure is not None:
             fb_emiss *= self.emission_measure[:,np.newaxis]
         if ch_data.Defaults['flux'] == 'photon':
@@ -545,7 +545,7 @@ class Continuum(object):
 
         return np.where(photon_energy >= ionization_potential, cross_section, 0.)
 
-    def ioneq_one(self, **kwargs):
+    def ioneq_one(self, stage, **kwargs):
         """
         Calculate the equilibrium fractional ionization of the ion as a function of temperature.
 
@@ -553,9 +553,14 @@ class Continuum(object):
         ionization equilibrium file can be passed as a keyword argument, `ioneqfile`. This can
         be passed through as a keyword argument to any of the functions that uses the
         ionization equilibrium.
+
+        Parameters
+        ----------
+        stage : int
+            Ionization stage, e.g. 25 for Fe XXV
         """
         tmp = ioneq(self.Z)
         tmp.load(ioneqName=kwargs.get('ioneqfile', None))
         ionization_equilibrium = splev(self.temperature,
-                                       splrep(tmp.Temperature, tmp.Ioneq[self.stage-1,:], k=1), ext=1)
+                                       splrep(tmp.Temperature, tmp.Ioneq[stage-1,:], k=1), ext=1)
         return np.where(ionization_equilibrium < 0., 0., ionization_equilibrium)

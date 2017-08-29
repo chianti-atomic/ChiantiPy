@@ -38,6 +38,11 @@ except ImportError:
 # Note this if statement is only here to allow chiantipy to be imported before
 # it's compiled.
 if not _ASTROPY_SETUP_:
-    ## For ChiantiPy
-    from . import version
-    Version = version._last_generated_version
+    try:
+        from . import version
+        Version = version._last_generated_version
+    except:
+        from . import static_version
+        Version = static_version.__version__
+        Version_info = static_version.__version_info__
+        

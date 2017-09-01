@@ -161,7 +161,7 @@ class spectrum(ionTrails, specTrails):
                     print(' calculating ff continuum for :  %s'%(akey))
                 FF = ChiantiPy.core.Continuum(akey, temperature, abundance=abundance, emission_measure=em)
                 FF.calculate_free_free_emission(wavelength)
-                freeFree += FF.free_free_emission
+                freeFree += FF.free_free_emission.squeeze()
 
             if 'fb' in self.Todo[akey]:
                 if verbose:
@@ -169,7 +169,7 @@ class spectrum(ionTrails, specTrails):
                 FB = ChiantiPy.core.Continuum(akey, temperature, abundance=abundance, emission_measure=em)
                 try:
                     FB.calculate_free_bound_emission(wavelength)
-                    freeBound += FB.free_bound_emission
+                    freeBound += FB.free_bound_emission.squeeze()
                 except ValueError:
                     # free-bound information not available for all ions
                     pass

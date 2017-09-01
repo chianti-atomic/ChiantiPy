@@ -23,9 +23,9 @@ tmp_cont_no_fb = Continuum('fe_3', temperature_array)
 
 def test_temperature():
     _tmp_cont = Continuum(test_ion, temperature_scalar)
-    assert np.all(np.atleast_1d(temperature_scalar) == _tmp_cont.temperature)
+    assert np.all(np.atleast_1d(temperature_scalar) == _tmp_cont.Temperature)
     _tmp_cont = Continuum(test_ion, temperature_array)
-    assert np.all(temperature_array == _tmp_cont.temperature)
+    assert np.all(temperature_array == _tmp_cont.Temperature)
 
 
 def test_free_free_scalar():

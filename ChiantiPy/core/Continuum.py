@@ -1,7 +1,6 @@
 """
 Continuum module
 """
-import os
 
 import numpy as np
 from scipy.interpolate import splev, splrep
@@ -56,11 +55,12 @@ class Continuum(object):
         nameDict = ch_util.convertName(ion_string)
         self.Z = nameDict['Z']
         self.stage = nameDict['Ion']
-        self.temperature = np.atleast_1d(temperature)
+        self.Temperature = np.atleast_1d(temperature)
         if emission_measure is None:
             self.emission_measure = emission_measure
         else:
             self.emission_measure = np.array(emission_measure)
+        self.Ip = ch_data.Ip[self.Z-1, self.stage-1]
         self.ionization_potential = ch_data.Ip[self.Z-1, self.stage-1]*ch_const.ev2Erg
         # Set abundance
         if abundance is not None:
@@ -105,7 +105,7 @@ class Continuum(object):
         """
         # interpolate wavelength-averaged K&L gaunt factors
         gf_kl_info = ch_io.gffintRead()
-        gamma_squared = self.ionization_potential/ch_const.boltzmann/self.temperature
+        gamma_squared = self.ionization_potential/ch_const.boltzmann/self.Temperature
         gaunt_factor = splev(np.log(gamma_squared),
                              splrep(gf_kl_info['g2'],gf_kl_info['gffint']), ext=3)
         # calculate numerical constant
@@ -114,7 +114,7 @@ class Continuum(object):
         # include abundance and ionization equilibrium
         prefactor *= self.abundance*self.ioneq_one(self.stage, **kwargs)
 
-        self.free_free_loss = prefactor*(self.Z**2)*np.sqrt(self.temperature)*gaunt_factor
+        self.free_free_loss = prefactor*(self.Z**2)*np.sqrt(self.Temperature)*gaunt_factor
 
     def calculate_free_free_emission(self, wavelength, include_abundance=True, include_ioneq=True, **kwargs):
         """
@@ -163,7 +163,7 @@ class Continuum(object):
                      * (ch_const.fine*ch_const.planck/np.pi)**3
                      * np.sqrt(2.*np.pi/3./ch_const.emass/ch_const.boltzmann))
         # include temperature dependence
-        prefactor *= self.Z**2/np.sqrt(self.temperature)
+        prefactor *= self.Z**2/np.sqrt(self.Temperature)
         if include_abundance:
             prefactor *= self.abundance
         if include_ioneq:
@@ -172,7 +172,7 @@ class Continuum(object):
             prefactor *= self.emission_measure
         # define exponential factor
         exp_factor = np.exp(-ch_const.planck*(1.e8*ch_const.light)/ch_const.boltzmann
-                            / np.outer(self.temperature, wavelength))/(wavelength**2)
+                            / np.outer(self.Temperature, wavelength))/(wavelength**2)
         # calculate gaunt factor
         gf_itoh = self.itoh_gaunt_factor(wavelength)
         gf_sutherland = self.sutherland_gaunt_factor(wavelength)
@@ -213,9 +213,9 @@ class Continuum(object):
             <http://adsabs.harvard.edu/abs/2000ApJS..128..125I>`_
         """
         # calculate scaled energy and temperature
-        lower_u = ch_const.planck*(1.e8*ch_const.light)/ch_const.boltzmann/np.outer(self.temperature, wavelength)
+        lower_u = ch_const.planck*(1.e8*ch_const.light)/ch_const.boltzmann/np.outer(self.Temperature, wavelength)
         upper_u = 1./2.5*(np.log10(lower_u) + 1.5)
-        t = 1./1.25*(np.log10(self.temperature) - 7.25)
+        t = 1./1.25*(np.log10(self.Temperature) - 7.25)
         # read in Itoh coefficients
         itoh_coefficients = ch_io.itohRead()['itohCoef'][self.Z - 1].reshape(11,11)
         # calculate Gaunt factor
@@ -225,8 +225,8 @@ class Continuum(object):
                 gf += (itoh_coefficients[i,j]*(t**i))[:,np.newaxis]*(upper_u**j)
         # apply NaNs where Itoh approximation is not valid
         gf = np.where(np.logical_and(np.log10(lower_u) >= -4., np.log10(lower_u) <= 1.0),gf,np.nan)
-        gf[np.where(np.logical_or(np.log10(self.temperature) <= 6.0,
-                                  np.log10(self.temperature) >= 8.5)),:] = np.nan
+        gf[np.where(np.logical_or(np.log10(self.Temperature) <= 6.0,
+                                  np.log10(self.Temperature) >= 8.5)),:] = np.nan
 
         return gf
 
@@ -244,8 +244,8 @@ class Continuum(object):
         .. [1] Sutherland, R. S., 1998, MNRAS, `300, 321 <http://adsabs.harvard.edu/abs/1998MNRAS.300..321S>`_
         """
         # calculate scaled quantities
-        lower_u = ch_const.planck*(1.e8*ch_const.light)/ch_const.boltzmann/np.outer(self.temperature,wavelength)
-        gamma_squared = (self.Z**2)*ch_const.ryd2erg/ch_const.boltzmann/self.temperature[:,np.newaxis]*np.ones(lower_u.shape)
+        lower_u = ch_const.planck*(1.e8*ch_const.light)/ch_const.boltzmann/np.outer(self.Temperature,wavelength)
+        gamma_squared = (self.Z**2)*ch_const.ryd2erg/ch_const.boltzmann/self.Temperature[:,np.newaxis]*np.ones(lower_u.shape)
         # convert to index coordinates
         i_lower_u = (np.log10(lower_u) + 4.)*10.
         i_gamma_squared = (np.log10(gamma_squared) + 4.)*5.
@@ -287,7 +287,7 @@ class Continuum(object):
         prefactor = (8./3.*np.sqrt(np.pi/6.)*(ch_const.planck**2)*(ch_const.fine**3)/(np.pi**2)
                      * (ch_const.boltzmann**(1./2.))/(ch_const.emass**(3./2.)))
 
-        self.free_bound_loss = gaunt_factor*np.sqrt(self.temperature)*prefactor
+        self.free_bound_loss = gaunt_factor*np.sqrt(self.Temperature)*prefactor
 
     def mewe_gaunt_factor(self, **kwargs):
         """
@@ -325,7 +325,7 @@ class Continuum(object):
         if 'errorMessage' in recombined_fblvl:
             raise ValueError('No free-bound information available for {}'.format(ch_util.zion2name(self.Z, self.stage)))
         # thermal energy scaled by H ionization potential
-        scaled_energy = ch_const.ryd2erg/ch_const.boltzmann/self.temperature
+        scaled_energy = ch_const.ryd2erg/ch_const.boltzmann/self.Temperature
         # set variables used in Eq. 16 of Mewe et al.(1986)
         n_0 = recombined_fblvl['pqn'][0]
         z_0 = np.sqrt(self.ionization_potential/ch_const.ryd2erg)*n_0
@@ -343,7 +343,7 @@ class Continuum(object):
             zeta_0 = self.Z - self.stage + 1
 
         ip = self.ionization_potential - recombined_fblvl['ecm'][0]*ch_const.planck*ch_const.light
-        f_2 = (0.9*zeta_0*(z_0**4)/(n_0**5)*np.exp(scaled_energy*(z_0**2)/(n_0**2) - ip/ch_const.boltzmann/self.temperature)
+        f_2 = (0.9*zeta_0*(z_0**4)/(n_0**5)*np.exp(scaled_energy*(z_0**2)/(n_0**2) - ip/ch_const.boltzmann/self.Temperature)
                + 0.42/(n_0**1.5)*(self.stage**4))
 
         return scaled_energy*f_2*self.abundance*self.ioneq_one(self.stage+1, **kwargs)
@@ -418,9 +418,9 @@ class Continuum(object):
         else:
             omega_0 = recombining_fblvl['mult'][0]
 
-        energy_over_temp_factor = np.outer(1./(self.temperature**1.5), photon_energy**5.)
+        energy_over_temp_factor = np.outer(1./(self.Temperature**1.5), photon_energy**5.)
         # sum over levels of the recombined ion
-        sum_factor = np.zeros((len(self.temperature), len(wavelength)))
+        sum_factor = np.zeros((len(self.Temperature), len(wavelength)))
         for i,omega_i in enumerate(recombined_fblvl['mult']):
             # ionization potential for level i
             ip = self.ionization_potential - recombined_fblvl['ecm'][i]*ch_const.planck*ch_const.light
@@ -434,7 +434,7 @@ class Continuum(object):
                 cross_section = self.karzas_cross_section(photon_energy, ip,
                                                           recombined_fblvl['pqn'][i],
                                                           recombined_fblvl['l'][i])
-            scaled_energy = np.outer(1./(ch_const.boltzmann*self.temperature), photon_energy - ip)
+            scaled_energy = np.outer(1./(ch_const.boltzmann*self.Temperature), photon_energy - ip)
             # the exponential term can go to infinity for low temperatures
             # but if the cross-section is zero this does not matter
             scaled_energy[:,np.where(cross_section == 0.0)] = 0.0
@@ -547,6 +547,25 @@ class Continuum(object):
 
         return np.where(photon_energy >= ionization_potential, cross_section, 0.)
 
+
+    def klgfbInterp(self, wvl, n, l):
+        '''A Python version of the CHIANTI IDL procedure karzas_xs.
+
+        Interpolates free-bound gaunt factor of Karzas and Latter, (1961, Astrophysical Journal
+        Supplement Series, 6, 167) as a function of wavelength (wvl).
+        '''
+        try:
+            klgfb = self.Klgfb
+        except:
+            self.Klgfb = ch_io.klgfbRead()
+            klgfb = self.Klgfb
+        # get log of photon energy relative to the ionization potential
+        sclE = np.log(self.Ip/(wvl*ch_const.ev2ang))
+        thisGf = klgfb['klgfb'][n-1, l]
+        spl = splrep(klgfb['pe'], thisGf)
+        gf = splev(sclE, spl)
+        return gf
+
     def ioneq_one(self, stage, **kwargs):
         """
         Calculate the equilibrium fractional ionization of the ion as a function of temperature.
@@ -563,6 +582,6 @@ class Continuum(object):
         """
         tmp = ioneq(self.Z)
         tmp.load(ioneqName=kwargs.get('ioneqfile', None))
-        ionization_equilibrium = splev(self.temperature,
+        ionization_equilibrium = splev(self.Temperature,
                                        splrep(tmp.Temperature, tmp.Ioneq[stage-1,:], k=1), ext=1)
         return np.where(ionization_equilibrium < 0., 0., ionization_equilibrium)

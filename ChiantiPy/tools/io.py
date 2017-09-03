@@ -742,17 +742,23 @@ def elvlcWrite(info, outfile=None, addLvl=0, includeRyd=False,  includeEv=False)
     return
 
 
-def fblvlRead(filename, verbose=False):
+def fblvlRead(ions, filename=None, verbose=False):
     """
-    Read a Chianti energy level file
+    Read a Chianti energy level file for calculating the
+    free-bound continuum
     """
-#        #  ,format='(i5,a20,2i5,a3,i5,2f20.3)'
     fstring = 'i5,a20,2i5,a3,i5,2f20.3'
-#    elvlcFormat=FortranFormat(fstring)
     header_line = FortranRecordReader(fstring)
     #
-    if os.path.exists(filename):
-        input = open(filename,'r')
+    if filename:
+        fblvlName = filename
+        bname = os.path.basename(filename)
+        ions = bname.split('.')[0]
+    else:
+        fname = util.ion2filename(ions)
+        fblvlName = fname+'.fblvl'
+    if os.path.exists(fblvlName):
+        input = open(fblvlName,'r')
         s1 = input.readlines()
         input.close()
         nlvls = 0
@@ -794,9 +800,9 @@ def fblvlRead(filename, verbose=False):
             s1a = s1[i][:-1]
             ref.append(s1a.strip())
         return {"lvl":lvl,"conf":conf,'pqn':pqn,"l":l,"spd":spd,"mult":mult,
-            "ecm":ecm,'ecmth':ecmth, 'ref':ref}
+            "ecm":ecm,'ecmth':ecmth, 'filename':fblvlName,  'ref':ref}
     else:
-        return {'errorMessage':' fblvl file does not exist'}
+        return {'errorMessage':' fblvl file does not exist %s'%(fblvlName)}
 
 
 def gffRead():

@@ -52,9 +52,10 @@ class Continuum(object):
     """
 
     def __init__(self, ion_string,  temperature, abundance=None, emission_measure=None):
-        nameDict = ch_util.convertName(ion_string)
-        self.Z = nameDict['Z']
-        self.stage = nameDict['Ion']
+        self.ion_string = ion_string
+        self.nameDict = ch_util.convertName(ion_string)
+        self.Z = self.nameDict['Z']
+        self.stage = self.nameDict['Ion']
         self.Temperature = np.atleast_1d(temperature)
         if emission_measure is None:
             self.emission_measure = emission_measure
@@ -321,9 +322,9 @@ class Continuum(object):
         .. [1] Mewe, R. et al., 1986, A&AS, `65, 511 <http://adsabs.harvard.edu/abs/1986A%26AS...65..511M>`_
         """
         # read in free-bound level information for the recombined ion
-        recombined_fblvl = ch_io.fblvlRead('.'.join([ch_util.zion2filename(self.Z, self.stage), 'fblvl']))
+        recombined_fblvl = ch_io.fblvlRead(self.ion_string)
         if 'errorMessage' in recombined_fblvl:
-            raise ValueError('No free-bound information available for {}'.format(ch_util.zion2name(self.Z, self.stage)))
+            raise ValueError('No free-bound information available for {}'.format(self.ion_string))
         # thermal energy scaled by H ionization potential
         scaled_energy = ch_const.ryd2erg/ch_const.boltzmann/self.Temperature
         # set variables used in Eq. 16 of Mewe et al.(1986)
@@ -408,10 +409,10 @@ class Continuum(object):
         prefactor = (2./np.sqrt(2.*np.pi)/(4.*np.pi)/(ch_const.planck*(ch_const.light**3)
                      * (ch_const.emass*ch_const.boltzmann)**(3./2.)))
         # read the free-bound level information for the recombined and recombining ion
-        recombined_fblvl = ch_io.fblvlRead('.'.join([ch_util.zion2filename(self.Z, self.stage), 'fblvl']))
+        recombined_fblvl = ch_io.fblvlRead(self.ion_string)
         if 'errorMessage' in recombined_fblvl:
             raise ValueError('No free-bound information available for {}'.format(ch_util.zion2name(self.Z, self.stage)))
-        recombining_fblvl = ch_io.fblvlRead('.'.join([ch_util.zion2filename(self.Z, self.stage+1), 'fblvl']))
+        recombining_fblvl = ch_io.fblvlRead(self.nameDict['higher'])
         # get the multiplicity of the ground state of the recombining ion
         if 'errorMessage' in recombining_fblvl:
             omega_0 = 1.

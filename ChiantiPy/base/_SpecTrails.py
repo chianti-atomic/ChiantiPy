@@ -246,8 +246,6 @@ class specTrails(object):
                             ioneqTestD = (temperature.max() >= ionInfo[ionSd]['tmin']) and (temperature.min() <=ionInfo[ionSd]['tmax'])
                             #
                         if masterListTest and wvlTestMin and wvlTestMax and ioneqTest and doIons:
-                            #if verbose:
-                                #print(' setting up spectrum calculation for  %s'%(ionS))
                             if ionS in sorted(self.Todo.keys()):
                                 self.Todo[ionS] += '_line'
                             else:
@@ -256,8 +254,6 @@ class specTrails(object):
                             if verbose:
                                 print(' for ion %s do : %s'%(ionS, self.Todo[ionS]))
                         if masterListTestD and wvlTestMinD and wvlTestMaxD and ioneqTestD and doIons:
-                            #if verbose:
-                                #print(' setting up  spectrum calculation for  %s '%(ionSd))
                             if ionSd in sorted(self.Todo.keys()):
                                 self.Todo[ionSd] += '_line'
                             else:

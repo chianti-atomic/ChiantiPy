@@ -229,10 +229,12 @@ def convertName(name):
 def ion2filename(ions):
     """
     Convert ion name string to generic directory-file name.
+    convertName has probably made this redundant
     """
     dir = os.environ["XUVTOP"]
-    zion = convertName(ions)
-    el = z2element(zion['Z'])
+    nameDict = convertName(ions)
+    zion = nameDict['Z']
+    el = z2element(zion)
     fname = os.path.join(dir,el,ions,ions)
     return fname
 

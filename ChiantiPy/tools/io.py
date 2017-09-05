@@ -755,8 +755,8 @@ def fblvlRead(ions, filename=None, verbose=False):
         bname = os.path.basename(filename)
         ions = bname.split('.')[0]
     else:
-        fname = util.ion2filename(ions)
-        fblvlName = fname+'.fblvl'
+        fname = util.convertName(ions)['filename']
+        fblvlName = fname + '.fblvl'
     if os.path.exists(fblvlName):
         input = open(fblvlName,'r')
         s1 = input.readlines()

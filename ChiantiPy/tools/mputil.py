@@ -1,7 +1,7 @@
 """
 Functions needed for standard Python multiprocessing module mspectrum
 """
-
+import numpy as np
 import ChiantiPy
 
 def doFfQ(inQ, outQ):

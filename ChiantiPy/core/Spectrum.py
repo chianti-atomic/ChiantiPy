@@ -74,7 +74,7 @@ class spectrum(ionTrails, specTrails):
     If set to a blank (''), a gui selection menu will popup and allow the selection of an
     set of abundances
     '''
-    def __init__(self, temperature, eDensity, wavelength, filter=(chfilters.gaussianR, 1000.), label=0, elementList = 0, ionList = 0, minAbund=1.e-6, doContinuum=1, em=0, keepIons=0,  abundance=None, verbose=0, allLines=1):
+    def __init__(self, temperature, eDensity, wavelength, filter=(chfilters.gaussianR, 1000.), label=0, elementList = 0, ionList = 0, minAbund=1.e-6, doLines=1, doContinuum=1, em=0, keepIons=0,  abundance=None, verbose=0, allLines=1):
         #
         t1 = datetime.now()
         # creates Intensity dict from first ion calculated
@@ -142,9 +142,11 @@ class spectrum(ionTrails, specTrails):
         self.IonsCalculated = []
         if keepIons:
             self.IonInstances = {}
+            self.FfInstances = {}
+            self.FbInstances = {}
         self.Finished = []
         #
-        self.ionGate(elementList = elementList, ionList = ionList, minAbund=minAbund, doContinuum=doContinuum, verbose = verbose)
+        self.ionGate(elementList = elementList, ionList = ionList, minAbund=minAbund, doLines=doLines, doContinuum=doContinuum, verbose = verbose)
         #
         for akey in sorted(self.Todo.keys()):
             zStuff = util.convertName(akey)
@@ -162,6 +164,8 @@ class spectrum(ionTrails, specTrails):
                 FF = ChiantiPy.core.Continuum(akey, temperature, abundance=abundance, emission_measure=em)
                 FF.calculate_free_free_emission(wavelength)
                 freeFree += FF.free_free_emission.squeeze()
+                if keepIons:
+                    self.FfInstances[akey] = copy.deepcopy(FF)
 
             if 'fb' in self.Todo[akey]:
                 if verbose:
@@ -170,6 +174,8 @@ class spectrum(ionTrails, specTrails):
                 try:
                     FB.calculate_free_bound_emission(wavelength)
                     freeBound += FB.free_bound_emission.squeeze()
+                    if keepIons:
+                        self.FbInstances[akey] = copy.deepcopy(FB)
                 except ValueError:
                     # free-bound information not available for all ions
                     pass

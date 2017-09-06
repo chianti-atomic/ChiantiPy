@@ -69,7 +69,7 @@ def test_free_bound_scalar():
     # emiss--wavelength array
     tmp_cont_scalar.freeBound(wavelength_array)
     assert hasattr(tmp_cont_scalar,'FreeBound')
-    assert tmp_cont_scalar.FreeBound['intensity']shape == (1,)+wavelength_array.shape
+    assert tmp_cont_scalar.FreeBound['intensity'].shape == (1,)+wavelength_array.shape
     # loss
     tmp_cont_scalar.calculate_free_bound_loss()
     assert hasattr(tmp_cont_scalar, 'free_bound_loss')

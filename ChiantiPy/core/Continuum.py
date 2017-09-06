@@ -57,12 +57,15 @@ class Continuum(object):
         self.Z = self.nameDict['Z']
         self.stage = self.nameDict['Ion']
         self.Temperature = np.atleast_1d(temperature)
+        self.NTemperature = self.Temperature.size
         if emission_measure is None:
             self.emission_measure = emission_measure
         else:
             self.emission_measure = np.array(emission_measure)
         self.Ip = ch_data.Ip[self.Z-1, self.stage-1]
+        self.Ipr = ch_data.Ip[self.Z-1, self.stage-2]
         self.ionization_potential = ch_data.Ip[self.Z-1, self.stage-1]*ch_const.ev2Erg
+        self.IprErg = self.Ipr*ch_const.ev2Erg
         # Set abundance
         if abundance is not None:
             try:
@@ -183,7 +186,7 @@ class Continuum(object):
         if ch_data.Defaults['flux'] == 'photon':
             energy_factor = ch_const.planck*(1.e8*ch_const.light)/wavelength
 
-        self.free_free_emission = prefactor[:,np.newaxis]*exp_factor*gf/energy_factor
+        self.free_free_emission = (prefactor[:,np.newaxis]*exp_factor*gf/energy_factor).squeeze()
 
     def itoh_gaunt_factor(self, wavelength):
         """
@@ -404,15 +407,20 @@ class Continuum(object):
             <http://adsabs.harvard.edu/abs/2003ApJS..144..135Y>`_
         """
         wavelength = np.atleast_1d(wavelength)
+        self.Nwavelength = wavelength.size
         # calculate the photon energy in erg
         photon_energy = ch_const.planck*(1.e8*ch_const.light)/wavelength
         prefactor = (2./np.sqrt(2.*np.pi)/(4.*np.pi)/(ch_const.planck*(ch_const.light**3)
                      * (ch_const.emass*ch_const.boltzmann)**(3./2.)))
         # read the free-bound level information for the recombined and recombining ion
-        recombined_fblvl = ch_io.fblvlRead(self.ion_string)
+        recombined_fblvl = ch_io.fblvlRead(self.nameDict['lower'])
         if 'errorMessage' in recombined_fblvl:
-            raise ValueError('No free-bound information available for {}'.format(ch_util.zion2name(self.Z, self.stage)))
-        recombining_fblvl = ch_io.fblvlRead(self.nameDict['higher'])
+#            raise ValueError('No free-bound information available for {}'.format(ch_util.zion2name(self.Z, self.stage)))
+#            errorMessage = 'No free-bound information available for {}'.format(ch_util.zion2name(self.Z, self.stage))
+            fb_emiss = np.zeros((self.NTemperature, self.Nwavelength), 'float64')
+            self.free_bound_emission = fb_emiss.squeeze()
+            return
+        recombining_fblvl = ch_io.fblvlRead(self.ion_string)
         # get the multiplicity of the ground state of the recombining ion
         if 'errorMessage' in recombining_fblvl:
             omega_0 = 1.
@@ -424,7 +432,8 @@ class Continuum(object):
         sum_factor = np.zeros((len(self.Temperature), len(wavelength)))
         for i,omega_i in enumerate(recombined_fblvl['mult']):
             # ionization potential for level i
-            ip = self.ionization_potential - recombined_fblvl['ecm'][i]*ch_const.planck*ch_const.light
+#            ip = self.ionization_potential - recombined_fblvl['ecm'][i]*ch_const.planck*ch_const.light
+            ip = self.IprErg - recombined_fblvl['ecm'][i]*ch_const.planck*ch_const.light
             # skip level if photon energy is not sufficiently high
             if ip < 0. or np.all(np.max(photon_energy) < (self.ionization_potential - ip)):
                 continue
@@ -442,20 +451,28 @@ class Continuum(object):
             sum_factor += omega_i/omega_0*np.exp(-scaled_energy)*cross_section
 
         # combine factors
-        fb_emiss = prefactor*energy_over_temp_factor*sum_factor
+        fb_emiss = prefactor*energy_over_temp_factor*sum_factor.squeeze()
         # include abundance, ionization equilibrium, photon conversion, emission measure
         if include_abundance:
             fb_emiss *= self.abundance
         if include_ioneq:
-            fb_emiss *= self.ioneq_one(self.stage+1, **kwargs)[:,np.newaxis]
+            if self.NTemperature > 1:
+                fb_emiss *= self.ioneq_one(self.stage, **kwargs)[:,np.newaxis]
+            else:
+                fb_emiss *= self.ioneq_one(self.stage, **kwargs)
         if self.emission_measure is not None:
-            fb_emiss *= self.emission_measure[:,np.newaxis]
+            if self.emission_measure.size > 1:
+                fb_emiss *= self.emission_measure[:,np.newaxis]
+            else:
+                fb_emiss *= self.emission_measure
+                
         if ch_data.Defaults['flux'] == 'photon':
             fb_emiss /= photon_energy
         # the final units should be per angstrom
         fb_emiss /= 1e8
 
-        self.free_bound_emission = fb_emiss
+        self.free_bound_emission = fb_emiss.squeeze()
+        
 
     def verner_cross_section(self, photon_energy):
         """
@@ -480,14 +497,14 @@ class Continuum(object):
         """
         # read verner data
         verner_info = ch_io.vernerRead()
-        eth = verner_info['eth'][self.Z,self.stage]*ch_const.ev2Erg
-        yw = verner_info['yw'][self.Z,self.stage]
-        ya = verner_info['ya'][self.Z,self.stage]
-        p = verner_info['p'][self.Z,self.stage]
+        eth = verner_info['eth'][self.Z,self.stage-1]*ch_const.ev2Erg
+        yw = verner_info['yw'][self.Z,self.stage-1]
+        ya = verner_info['ya'][self.Z,self.stage-1]
+        p = verner_info['p'][self.Z,self.stage-1]
         # convert from megabarn to cm^2
-        sigma0 = verner_info['sig0'][self.Z,self.stage]*1e-18
-        e0 = verner_info['e0'][self.Z,self.stage]*ch_const.ev2Erg
-        q = 5.5 + verner_info['l'][self.Z,self.stage] - 0.5*p
+        sigma0 = verner_info['sig0'][self.Z,self.stage-1]*1e-18
+        e0 = verner_info['e0'][self.Z,self.stage-1]*ch_const.ev2Erg
+        q = 5.5 + verner_info['l'][self.Z,self.stage-1] - 0.5*p
 
         # scaled photon energy
         y = photon_energy/e0

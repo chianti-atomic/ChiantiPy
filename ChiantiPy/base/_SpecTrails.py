@@ -116,7 +116,7 @@ class specTrails(object):
         #
         # ---------------------------------------------------------------------------
         #
-    def ionGate(self, elementList = 0, ionList = 0, minAbund=0, doIons=1, doContinuum=1, doWvlTest=1, verbose=0):
+    def ionGate(self, elementList = 0, ionList = 0, minAbund=0, doLines=1, doContinuum=1, doWvlTest=1, verbose=0):
         '''
         creates a list of ions for free-free, free-bound, and line intensity calculations
         if doing the radiative losses, accept all wavelength -> doWvlTest=0
@@ -188,7 +188,7 @@ class specTrails(object):
                 if nameDict['Element'].lower() in  elementList:
                     if verbose:
                         print(' ion = %s'%(one))
-                    if doIons:
+                    if doLines:
                         self.Todo[one] = 'line'
                     if doContinuum and not nameDict['Dielectronic']:
                         if one not in self.Todo:
@@ -199,7 +199,7 @@ class specTrails(object):
                 stuff = util.convertName(one)
                 bare = stuff['Z'] == stuff['Ion']
                 if masterlist.count(one):
-                    if doIons:
+                    if doLines:
                         self.Todo[one] = 'line'
                     if doContinuum and not stuff['Dielectronic']:
                         self.Todo[one]+= '_ff'
@@ -245,7 +245,7 @@ class specTrails(object):
                                 wvlTestMaxD = 1
                             ioneqTestD = (temperature.max() >= ionInfo[ionSd]['tmin']) and (temperature.min() <=ionInfo[ionSd]['tmax'])
                             #
-                        if masterListTest and wvlTestMin and wvlTestMax and ioneqTest and doIons:
+                        if masterListTest and wvlTestMin and wvlTestMax and ioneqTest and doLines:
                             if ionS in sorted(self.Todo.keys()):
                                 self.Todo[ionS] += '_line'
                             else:
@@ -253,7 +253,7 @@ class specTrails(object):
                         # get dielectronic lines
                             if verbose:
                                 print(' for ion %s do : %s'%(ionS, self.Todo[ionS]))
-                        if masterListTestD and wvlTestMinD and wvlTestMaxD and ioneqTestD and doIons:
+                        if masterListTestD and wvlTestMinD and wvlTestMaxD and ioneqTestD and doLines:
                             if ionSd in sorted(self.Todo.keys()):
                                 self.Todo[ionSd] += '_line'
                             else:

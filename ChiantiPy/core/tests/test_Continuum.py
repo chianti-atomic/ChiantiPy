@@ -63,13 +63,13 @@ def test_free_free_array():
 def test_free_bound_scalar():
     # free-bound emission and loss rate methods for scalar temperature
     # emiss--wavelength scalar
-    tmp_cont_scalar.calculate_free_bound_emission(wavelength_scalar)
-    assert hasattr(tmp_cont_scalar, 'free_bound_emission')
-    assert tmp_cont_scalar.free_bound_emission.shape == (1,1)
+    tmp_cont_scalar.freeBound(wavelength_scalar)
+    assert hasattr(tmp_cont_scalar, 'FreeBound')
+    assert tmp_cont_scalar.FreeBound['intensity'].shape == (1,1)
     # emiss--wavelength array
-    tmp_cont_scalar.calculate_free_bound_emission(wavelength_array)
-    assert hasattr(tmp_cont_scalar,'free_bound_emission')
-    assert tmp_cont_scalar.free_bound_emission.shape == (1,)+wavelength_array.shape
+    tmp_cont_scalar.freeBound(wavelength_array)
+    assert hasattr(tmp_cont_scalar,'FreeBound')
+    assert tmp_cont_scalar.FreeBound['intensity']shape == (1,)+wavelength_array.shape
     # loss
     tmp_cont_scalar.calculate_free_bound_loss()
     assert hasattr(tmp_cont_scalar, 'free_bound_loss')
@@ -79,13 +79,13 @@ def test_free_bound_scalar():
 def test_free_bound_array():
     # free-bound emission and loss rate methods for temperature array
     # emiss--wavelength scalar
-    tmp_cont_array.calculate_free_bound_emission(wavelength_scalar)
-    assert hasattr(tmp_cont_array, 'free_bound_emission')
-    assert tmp_cont_array.free_bound_emission.shape == temperature_array.shape+(1,)
+    tmp_cont_array.freeBound(wavelength_scalar)
+    assert hasattr(tmp_cont_array, 'FreeBound')
+    assert tmp_cont_array.FreeBound['intensity'].shape == temperature_array.shape+(1,)
     # emiss--wavelength array
-    tmp_cont_array.calculate_free_bound_emission(wavelength_array)
+    tmp_cont_array.freeBound(wavelength_array)
     assert hasattr(tmp_cont_array,'free_bound_emission')
-    assert tmp_cont_array.free_bound_emission.shape == temperature_array.shape+wavelength_array.shape
+    assert tmp_cont_array.FreeBound['intensity'].shape == temperature_array.shape+wavelength_array.shape
     # loss
     tmp_cont_array.calculate_free_bound_loss()
     assert hasattr(tmp_cont_array, 'free_bound_loss')
@@ -95,4 +95,4 @@ def test_free_bound_array():
 def test_free_bound_no_info():
     # raise error if no free-bound information is available
     with pytest.raises(ValueError, message='Expecting ValueError when no free-bound information is available'):
-        tmp_cont_no_fb.calculate_free_bound_emission(wavelength_array)
+        tmp_cont_no_fb.freeBound(wavelength_array)

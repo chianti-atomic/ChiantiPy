@@ -33,7 +33,7 @@ def test_free_free_scalar():
     # emission--wavelength scalar
     tmp_cont_scalar.calculate_free_free_emission(wavelength_scalar)
     assert hasattr(tmp_cont_scalar, 'free_free_emission')
-    assert tmp_cont_scalar.free_free_emission.shape == (1,)
+    assert tmp_cont_scalar.free_free_emission.shape == ()
     # emission--wavelength array
     tmp_cont_scalar.calculate_free_free_emission(wavelength_array)
     assert hasattr(tmp_cont_scalar, 'free_free_emission')

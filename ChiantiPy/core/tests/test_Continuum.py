@@ -15,16 +15,16 @@ temperature_array = np.logspace(5,8,10)
 wavelength_scalar = 50.0
 wavelength_array = np.linspace(10,100,100)
 # create continuum object for testing
-tmp_cont_scalar = continuum(test_ion, temperature_scalar)
-tmp_cont_array = continuum(test_ion, temperature_array)
+tmp_cont_scalar = Continuum.continuum(test_ion, temperature_scalar)
+tmp_cont_array = Continuum.continuum(test_ion, temperature_array)
 # create continuum object for which there is no free-bound information available
-tmp_cont_no_fb = continuum('fe_3', temperature_array)
+tmp_cont_no_fb = Continuum.continuum('fe_3', temperature_array)
 
 
 def test_temperature():
-    _tmp_cont = Continuum(test_ion, temperature_scalar)
+    _tmp_cont = Continuum.continuum(test_ion, temperature_scalar)
     assert np.all(np.atleast_1d(temperature_scalar) == _tmp_cont.Temperature)
-    _tmp_cont = Continuum(test_ion, temperature_array)
+    _tmp_cont = Continuum.continuum(test_ion, temperature_array)
     assert np.all(temperature_array == _tmp_cont.Temperature)
 
 

@@ -170,7 +170,7 @@ class spectrum(ionTrails, specTrails):
             if 'fb' in self.Todo[akey]:
                 if verbose:
                     print(' calculating fb continuum for :  %s'%(akey))
-                FB = ChiantiPy.core.Continuum(akey, temperature, abundance=abundance, emission_measure=em)
+                FB = ChiantiPy.core.continuum(akey, temperature, abundance=abundance, emission_measure=em)
                 try:
                     FB.freeBound(wavelength)
                     freeBound += FB.FreeBound['intensity']

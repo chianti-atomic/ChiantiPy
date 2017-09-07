@@ -5,7 +5,7 @@ Tests for the continuum class
 import numpy as np
 import pytest
 
-from ChiantiPy.core import Continuum
+from ChiantiPy.core import continuum
 
 # test ion
 test_ion = 'fe_15'
@@ -15,10 +15,10 @@ temperature_array = np.logspace(5,8,10)
 wavelength_scalar = 50.0
 wavelength_array = np.linspace(10,100,100)
 # create continuum object for testing
-tmp_cont_scalar = Continuum(test_ion, temperature_scalar)
-tmp_cont_array = Continuum(test_ion, temperature_array)
+tmp_cont_scalar = continuum(test_ion, temperature_scalar)
+tmp_cont_array = continuum(test_ion, temperature_array)
 # create continuum object for which there is no free-bound information available
-tmp_cont_no_fb = Continuum('fe_3', temperature_array)
+tmp_cont_no_fb = continuum('fe_3', temperature_array)
 
 
 def test_temperature():

@@ -172,8 +172,8 @@ class spectrum(ionTrails, specTrails):
                     print(' calculating fb continuum for :  %s'%(akey))
                 FB = ChiantiPy.core.Continuum(akey, temperature, abundance=abundance, emission_measure=em)
                 try:
-                    FB.calculate_free_bound_emission(wavelength)
-                    freeBound += FB.free_bound_emission.squeeze()
+                    FB.freeBound(wavelength)
+                    freeBound += FB.FreeBound['intensity']
                     if keepIons:
                         self.FbInstances[akey] = copy.deepcopy(FB)
                 except ValueError:

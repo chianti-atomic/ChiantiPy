@@ -14,7 +14,7 @@ import ChiantiPy.tools.constants as ch_const
 import ChiantiPy.Gui as chGui
 
 
-class Continuum(object):
+class continuum(object):
     """
     The top level class for continuum calculations. Includes methods for the calculation of the
     free-free and free-bound continua.
@@ -352,7 +352,7 @@ class Continuum(object):
 
         return scaled_energy*f_2*self.abundance*self.ioneq_one(self.stage+1, **kwargs)
 
-    def calculate_free_bound_emission(self, wavelength, include_abundance=True, include_ioneq=True, use_verner=True, **kwargs):
+    def freeBound(self, wavelength, include_abundance=True, include_ioneq=True, use_verner=True, **kwargs):
         """
         Calculate the free-bound emission of an ion. The result is returned as a 2D array to the
         `free_bound_emission` attribute.
@@ -418,7 +418,8 @@ class Continuum(object):
 #            raise ValueError('No free-bound information available for {}'.format(ch_util.zion2name(self.Z, self.stage)))
 #            errorMessage = 'No free-bound information available for {}'.format(ch_util.zion2name(self.Z, self.stage))
             fb_emiss = np.zeros((self.NTemperature, self.Nwavelength), 'float64')
-            self.free_bound_emission = fb_emiss.squeeze()
+#            self.free_bound_emission = fb_emiss.squeeze()
+            self.FreeBound = {'intensity':fb_emiss, 'temperature':self.Temperature,'wvl':wavelength,'em':self.emission_measure}
             return
         recombining_fblvl = ch_io.fblvlRead(self.ion_string)
         # get the multiplicity of the ground state of the recombining ion
@@ -471,7 +472,8 @@ class Continuum(object):
         # the final units should be per angstrom
         fb_emiss /= 1e8
 
-        self.free_bound_emission = fb_emiss.squeeze()
+#        self.free_bound_emission = fb_emiss.squeeze()
+        self.FreeBound = {'intensity':fb_emiss.squeeze(), 'temperature':self.Temperature,'wvl':wavelength,'em':self.emission_measure}
         
 
     def verner_cross_section(self, photon_energy):

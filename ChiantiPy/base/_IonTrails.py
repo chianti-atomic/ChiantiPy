@@ -454,7 +454,8 @@ class ionTrails(object):
         plt.figure()
         ax = plt.subplot(111)
         nxvalues=len(xvalues)
-        for iline in range(top):
+        # reversing is necessary - otherwise, get a ymin=ymax and a matplotlib error
+        for iline in range(top-1, -1, -1):
             tline=topLines[iline]
             plt.loglog(xvalues,intensity[:, tline]/maxAll)
             if np.min(intensity[:, tline]/maxAll) < ymin:

@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 np.seterr(over='ignore')
 
-from .Continuum import Continuum
+from .Continuum import continuum
 from .Ion import ion
 import ChiantiPy.tools.data as chdata
 import ChiantiPy.tools.constants as const
@@ -134,13 +134,13 @@ class radLoss(specTrails):
                     print(' calculating ff continuum for :  %s'%(akey))
                 if 'ff' in self.Todo[akey]:
                     # need to skip the neutral
-                    cont = Continuum(akey, temperature, abundance=abundance)
+                    cont = continuum(akey, temperature, abundance=abundance)
                     cont.calculate_free_free_loss()
                     freeFreeLoss += cont.free_free_loss
                 if 'fb' in self.Todo[akey]:
                     if verbose:
                         print(' calculating fb continuum for :  %s'%(akey))
-                    cont = Continuum(akey, temperature, abundance=abundance)
+                    cont = continuum(akey, temperature, abundance=abundance)
                     try:
                         cont.calculate_free_bound_loss()
                         freeBoundLoss += cont.free_bound_loss

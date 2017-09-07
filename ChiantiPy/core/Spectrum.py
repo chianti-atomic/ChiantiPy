@@ -161,7 +161,7 @@ class spectrum(ionTrails, specTrails):
             if 'ff' in self.Todo[akey]:
                 if verbose:
                     print(' calculating ff continuum for :  %s'%(akey))
-                FF = ChiantiPy.core.Continuum(akey, temperature, abundance=abundance, emission_measure=em)
+                FF = ChiantiPy.core.continuum(akey, temperature, abundance=abundance, emission_measure=em)
                 FF.calculate_free_free_emission(wavelength)
                 freeFree += FF.free_free_emission.squeeze()
                 if keepIons:

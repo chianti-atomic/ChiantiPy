@@ -407,7 +407,7 @@ class continuum(object):
             <http://adsabs.harvard.edu/abs/2003ApJS..144..135Y>`_
         """
         wavelength = np.atleast_1d(wavelength)
-        self.Nwavelength = wavelength.size
+        self.NWavelength = wavelength.size
         # calculate the photon energy in erg
         photon_energy = ch_const.planck*(1.e8*ch_const.light)/wavelength
         prefactor = (2./np.sqrt(2.*np.pi)/(4.*np.pi)/(ch_const.planck*(ch_const.light**3)
@@ -428,7 +428,11 @@ class continuum(object):
         else:
             omega_0 = recombining_fblvl['mult'][0]
 
-        energy_over_temp_factor = np.outer(1./(self.Temperature**1.5), photon_energy**5.)
+        energy_over_temp_factor = np.outer(1./(self.Temperature**1.5), photon_energy**5.).squeeze()
+#        if self.NWavelength > 1:
+#            print(' energy shape %5i %5i'%(energy_over_temp_factor.shape[0],energy_over_temp_factor.shape[1]))
+#        else:
+#            print(' energy size %5i'%(energy_over_temp_factor.size))
         # sum over levels of the recombined ion
         sum_factor = np.zeros((len(self.Temperature), len(wavelength)))
         for i,omega_i in enumerate(recombined_fblvl['mult']):
@@ -453,12 +457,19 @@ class continuum(object):
 
         # combine factors
         fb_emiss = prefactor*energy_over_temp_factor*sum_factor.squeeze()
+#        if self.NWavelength > 1:
+#            print(' fb emiss.shape %5i %5i'%(fb_emiss.shape[0], fb_emiss.shape[1]))
+#        else:
+#            print(' fb emiss.size %5i'%(fb_emiss.size))
         # include abundance, ionization equilibrium, photon conversion, emission measure
         if include_abundance:
             fb_emiss *= self.abundance
         if include_ioneq:
             if self.NTemperature > 1:
-                fb_emiss *= self.ioneq_one(self.stage, **kwargs)[:,np.newaxis]
+                if self.NWavelength > 1:
+                    fb_emiss *= self.ioneq_one(self.stage, **kwargs)[:,np.newaxis]
+                else:
+                    fb_emiss *= self.ioneq_one(self.stage, **kwargs)
             else:
                 fb_emiss *= self.ioneq_one(self.stage, **kwargs)
         if self.emission_measure is not None:

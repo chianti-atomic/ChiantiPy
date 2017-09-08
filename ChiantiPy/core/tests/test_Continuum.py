@@ -81,7 +81,7 @@ def test_free_bound_array():
     # emiss--wavelength scalar
     tmp_cont_array.freeBound(wavelength_scalar)
     assert hasattr(tmp_cont_array, 'FreeBound')
-    assert tmp_cont_array.FreeBound['intensity'].shape == temperature_array.shape+(1,)
+    assert tmp_cont_array.FreeBound['intensity'].shape == temperature_array.shape
     # emiss--wavelength array
     tmp_cont_array.freeBound(wavelength_array)
     assert hasattr(tmp_cont_array,'free_bound_emission')

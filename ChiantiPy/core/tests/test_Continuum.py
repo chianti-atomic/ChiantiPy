@@ -94,5 +94,5 @@ def test_free_bound_array():
 
 def test_free_bound_no_info():
     # raise error if no free-bound information is available
-    with pytest.raises(ValueError, message='Expecting ValueError when no free-bound information is available'):
-        tmp_cont_no_fb.freeBound(wavelength_array)
+    tmp_cont_no_fb.freeBound(wavelength_array)
+    assert 'errorMessage' in tmp_cont_no_fb.FreeBound.keys()

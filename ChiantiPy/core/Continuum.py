@@ -417,7 +417,7 @@ class continuum(object):
         if 'errorMessage' in recombined_fblvl:
 #            raise ValueError('No free-bound information available for {}'.format(ch_util.zion2name(self.Z, self.stage)))
 #            errorMessage = 'No free-bound information available for {}'.format(ch_util.zion2name(self.Z, self.stage))
-            fb_emiss = np.zeros((self.NTemperature, self.Nwavelength), 'float64')
+            fb_emiss = np.zeros((self.NTemperature, self.NWavelength), 'float64')
 #            self.free_bound_emission = fb_emiss.squeeze()
             self.FreeBound = {'intensity':fb_emiss, 'temperature':self.Temperature,'wvl':wavelength,'em':self.emission_measure}
             return

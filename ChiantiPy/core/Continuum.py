@@ -416,10 +416,10 @@ class continuum(object):
         recombined_fblvl = ch_io.fblvlRead(self.nameDict['lower'])
         if 'errorMessage' in recombined_fblvl:
 #            raise ValueError('No free-bound information available for {}'.format(ch_util.zion2name(self.Z, self.stage)))
-#            errorMessage = 'No free-bound information available for {}'.format(ch_util.zion2name(self.Z, self.stage))
+            errorMessage = 'No free-bound information available for {}'.format(ch_util.zion2name(self.Z, self.stage))
             fb_emiss = np.zeros((self.NTemperature, self.NWavelength), 'float64')
 #            self.free_bound_emission = fb_emiss.squeeze()
-            self.FreeBound = {'intensity':fb_emiss, 'temperature':self.Temperature,'wvl':wavelength,'em':self.emission_measure}
+            self.FreeBound = {'intensity':fb_emiss, 'temperature':self.Temperature,'wvl':wavelength,'em':self.emission_measure, 'errorMessage':errorMessage}
             return
         recombining_fblvl = ch_io.fblvlRead(self.ion_string)
         # get the multiplicity of the ground state of the recombining ion

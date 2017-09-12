@@ -38,10 +38,10 @@ class continuum(object):
     >>> import ChiantiPy.core as ch
     >>> import numpy as np
     >>> temperature = np.logspace(4,9,20)
-    >>> cont = ch.Continuum('fe_15',temperature)
+    >>> cont = ch.continuum('fe_15',temperature)
     >>> wavelength = np.arange(1,1000,10)
-    >>> cont.calculate_free_free_emission(wavelength)
-    >>> cont.calculate_free_bound_emission(wavelength, include_abundance=True, include_ioneq=False)
+    >>> cont.freeFree(wavelength)
+    >>> cont.freeBound(wavelength, include_abundance=True, include_ioneq=False)
     >>> cont.calculate_free_free_loss()
     >>> cont.calculate_free_bound_loss()
 

@@ -162,8 +162,8 @@ class spectrum(ionTrails, specTrails):
                 if verbose:
                     print(' calculating ff continuum for :  %s'%(akey))
                 FF = ChiantiPy.core.continuum(akey, temperature, abundance=abundance, emission_measure=em)
-                FF.calculate_free_free_emission(wavelength)
-                freeFree += FF.free_free_emission.squeeze()
+                FF.freeFree(wavelength)
+                freeFree += FF['intensity'].squeeze()
                 if keepIons:
                     self.FfInstances[akey] = copy.deepcopy(FF)
 

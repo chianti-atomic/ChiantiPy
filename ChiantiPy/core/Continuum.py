@@ -120,10 +120,10 @@ class continuum(object):
 
         self.free_free_loss = prefactor*(self.Z**2)*np.sqrt(self.Temperature)*gaunt_factor
 
-    def calculate_free_free_emission(self, wavelength, include_abundance=True, include_ioneq=True, **kwargs):
+    def freeFree(self, wavelength, include_abundance=True, include_ioneq=True, **kwargs):
         """
-        Calculates the free-free emission for a single ion. The result is returned as a 2D array to
-        the `free_free_emission` attribute.
+        Calculates the free-free emission for a single ion. The result is returned as a dict to
+        the `FreeFree` attribute.  The dict has the keywords `intensity`, `wvl`, `temperature`, `em`.
 
         The free-free emission for the given ion is calculated according Eq. 5.14a of [1]_,
         substituting :math:`\\nu=c/\lambda`, dividing by the solid angle, and writing the numerical
@@ -132,7 +132,7 @@ class continuum(object):
         .. math::
            \\frac{dW}{dtdVd\lambda} = \\frac{c}{3m_e}\left(\\frac{\\alpha h}{\pi}\\right)^3\left(\\frac{2\pi}{3m_ek_B}\\right)^{1/2}\\frac{Z^2}{\lambda^2T^{1/2}}\exp{\left(-\\frac{hc}{\lambda k_BT}\\right)}\\bar{g}_{ff},
 
-        where :math:`Z` is the nuclear charge, :math:`T` is the electron temperature, and
+        where :math:`Z` is the nuclear charge, :math:`T` is the electron temperature in K, and
         :math:`\\bar{g}_{ff}` is the velocity-averaged Gaunt factor. The Gaunt factor is estimated
         using the methods of [2]_ and [3]_, depending on the temperature and energy regime. See
         `itoh_gaunt_factor` and `sutherland_gaunt_factor` for more details.
@@ -186,7 +186,8 @@ class continuum(object):
         if ch_data.Defaults['flux'] == 'photon':
             energy_factor = ch_const.planck*(1.e8*ch_const.light)/wavelength
 
-        self.free_free_emission = (prefactor[:,np.newaxis]*exp_factor*gf/energy_factor).squeeze()
+        free_free_emission = (prefactor[:,np.newaxis]*exp_factor*gf/energy_factor).squeeze()
+        self.FreeFree = {'intensity':free_free_emission, 'temperature':self.Temperature, 'wvl':wavelength, 'em':self.emission_measure}
 
     def itoh_gaunt_factor(self, wavelength):
         """

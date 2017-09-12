@@ -31,7 +31,7 @@ def test_temperature():
 def test_free_free_scalar():
     # call free-free emission and loss rate methods for scalar temperature
     # emission--wavelength scalar
-    tmp_cont_scalar.calculate_free_free_emission(wavelength_scalar)
+    tmp_cont_scalar.freeFree(wavelength_scalar)
     assert hasattr(tmp_cont_scalar, 'FreeFree')
     assert tmp_cont_scalar.FreeFree['intensity'].shape == ()
     # emission--wavelength array

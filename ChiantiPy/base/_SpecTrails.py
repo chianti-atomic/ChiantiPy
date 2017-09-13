@@ -185,14 +185,13 @@ class specTrails(object):
                     print('el = %s'%(one))
             for one in masterlist:
                 nameDict = util.convertName(one)
-                if nameDict['Element'].lower() in  elementList:
+                if nameDict['Element'].lower() in elementList:
                     if verbose:
                         print(' ion = %s'%(one))
                     if doLines:
                         self.Todo[one] = 'line'
                     if doContinuum and not nameDict['Dielectronic']:
-                        if one not in self.Todo:
-                            self.Todo[one] = '_ff'
+                        self.Todo[one] += '_ff'
                         self.Todo[one] += '_fb'
         if ionList:
             for one in ionList:

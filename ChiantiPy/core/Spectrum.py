@@ -161,16 +161,16 @@ class spectrum(ionTrails, specTrails):
             if 'ff' in self.Todo[akey]:
                 if verbose:
                     print(' calculating ff continuum for :  %s'%(akey))
-                FF = ChiantiPy.core.continuum(akey, temperature, abundance=abundance, emission_measure=em)
+                FF = ChiantiPy.core.continuum(akey, temperature, abundance=abundance, em=em)
                 FF.freeFree(wavelength)
-                freeFree += FF['intensity'].squeeze()
+                freeFree += FF.FreeFree['intensity'].squeeze()
                 if keepIons:
                     self.FfInstances[akey] = copy.deepcopy(FF)
 
             if 'fb' in self.Todo[akey]:
                 if verbose:
                     print(' calculating fb continuum for :  %s'%(akey))
-                FB = ChiantiPy.core.continuum(akey, temperature, abundance=abundance, emission_measure=em)
+                FB = ChiantiPy.core.continuum(akey, temperature, abundance=abundance, em=em)
                 try:
                     FB.freeBound(wavelength)
                     freeBound += FB.FreeBound['intensity']

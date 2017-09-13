@@ -28,7 +28,7 @@ class continuum(object):
     abundance : `float` or `str`, optional
         Elemental abundance relative to Hydrogen or name of CHIANTI abundance file,
         without the '.abund' suffix, e.g. 'sun_photospheric_1998_grevesse'.
-    emission_measure : array-like, optional
+    em : array-like, optional
         Line-of-sight emission measure (:math:`\int\mathrm{d}l\,n_en_H`), in units of
         :math:`\mathrm{cm}^{-5}`, or the volumetric emission measure (:math:`\int\mathrm{d}V\,n_en_H`)
         in units of :math:`\mathrm{cm}^{-3}`.
@@ -51,17 +51,17 @@ class continuum(object):
     their result to an attribute. See the respective docstrings for more information.
     """
 
-    def __init__(self, ion_string,  temperature, abundance=None, emission_measure=None):
+    def __init__(self, ion_string,  temperature, abundance=None, em=None):
         self.ion_string = ion_string
         self.nameDict = ch_util.convertName(ion_string)
         self.Z = self.nameDict['Z']
         self.stage = self.nameDict['Ion']
         self.Temperature = np.atleast_1d(temperature)
         self.NTemperature = self.Temperature.size
-        if emission_measure is None:
-            self.emission_measure = emission_measure
+        if em is None:
+            self.Em = em
         else:
-            self.emission_measure = np.array(emission_measure)
+            self.Em = np.array(em)
         self.Ip = ch_data.Ip[self.Z-1, self.stage-1]
         self.Ipr = ch_data.Ip[self.Z-1, self.stage-2]
         self.ionization_potential = ch_data.Ip[self.Z-1, self.stage-1]*ch_const.ev2Erg
@@ -172,8 +172,8 @@ class continuum(object):
             prefactor *= self.abundance
         if include_ioneq:
             prefactor *= self.ioneq_one(self.stage, **kwargs)
-        if self.emission_measure is not None:
-            prefactor *= self.emission_measure
+        if self.Em is not None:
+            prefactor *= self.Em
         # define exponential factor
         exp_factor = np.exp(-ch_const.planck*(1.e8*ch_const.light)/ch_const.boltzmann
                             / np.outer(self.Temperature, wavelength))/(wavelength**2)
@@ -187,7 +187,7 @@ class continuum(object):
             energy_factor = ch_const.planck*(1.e8*ch_const.light)/wavelength
 
         free_free_emission = (prefactor[:,np.newaxis]*exp_factor*gf/energy_factor).squeeze()
-        self.FreeFree = {'intensity':free_free_emission, 'temperature':self.Temperature, 'wvl':wavelength, 'em':self.emission_measure}
+        self.FreeFree = {'intensity':free_free_emission, 'temperature':self.Temperature, 'wvl':wavelength, 'em':self.Em}
 
     def itoh_gaunt_factor(self, wavelength):
         """
@@ -420,7 +420,7 @@ class continuum(object):
             errorMessage = 'No free-bound information available for {}'.format(ch_util.zion2name(self.Z, self.stage))
             fb_emiss = np.zeros((self.NTemperature, self.NWavelength), 'float64')
 #            self.free_bound_emission = fb_emiss.squeeze()
-            self.FreeBound = {'intensity':fb_emiss, 'temperature':self.Temperature,'wvl':wavelength,'em':self.emission_measure, 'errorMessage':errorMessage}
+            self.FreeBound = {'intensity':fb_emiss, 'temperature':self.Temperature,'wvl':wavelength,'em':self.Em, 'errorMessage':errorMessage}
             return
         recombining_fblvl = ch_io.fblvlRead(self.ion_string)
         # get the multiplicity of the ground state of the recombining ion
@@ -473,11 +473,11 @@ class continuum(object):
                     fb_emiss *= self.ioneq_one(self.stage, **kwargs)
             else:
                 fb_emiss *= self.ioneq_one(self.stage, **kwargs)
-        if self.emission_measure is not None:
-            if self.emission_measure.size > 1:
-                fb_emiss *= self.emission_measure[:,np.newaxis]
+        if self.Em is not None:
+            if self.Em.size > 1:
+                fb_emiss *= self.Em[:,np.newaxis]
             else:
-                fb_emiss *= self.emission_measure
+                fb_emiss *= self.Em
                 
         if ch_data.Defaults['flux'] == 'photon':
             fb_emiss /= photon_energy
@@ -485,7 +485,7 @@ class continuum(object):
         fb_emiss /= 1e8
 
 #        self.free_bound_emission = fb_emiss.squeeze()
-        self.FreeBound = {'intensity':fb_emiss.squeeze(), 'temperature':self.Temperature,'wvl':wavelength,'em':self.emission_measure}
+        self.FreeBound = {'intensity':fb_emiss.squeeze(), 'temperature':self.Temperature,'wvl':wavelength,'em':self.Em}
         
 
     def verner_cross_section(self, photon_energy):

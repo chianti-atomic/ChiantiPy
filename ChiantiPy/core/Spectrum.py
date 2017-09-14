@@ -74,7 +74,7 @@ class spectrum(ionTrails, specTrails):
     If set to a blank (''), a gui selection menu will popup and allow the selection of an
     set of abundances
     '''
-    def __init__(self, temperature, eDensity, wavelength, filter=(chfilters.gaussianR, 1000.), label=0, elementList = 0, ionList = 0, minAbund=1.e-6, doLines=1, doContinuum=1, em=0, keepIons=0,  abundance=None, verbose=0, allLines=1):
+    def __init__(self, temperature, eDensity, wavelength, filter=(chfilters.gaussianR, 1000.), label=0, elementList = 0, ionList = 0, minAbund=None, doLines=1, doContinuum=1, em=0, keepIons=0,  abundance=None, verbose=0, allLines=1):
         #
         t1 = datetime.now()
         # creates Intensity dict from first ion calculated
@@ -161,16 +161,16 @@ class spectrum(ionTrails, specTrails):
             if 'ff' in self.Todo[akey]:
                 if verbose:
                     print(' calculating ff continuum for :  %s'%(akey))
-                FF = ChiantiPy.core.continuum(akey, temperature, abundance=abundance, emission_measure=em)
-                FF.calculate_free_free_emission(wavelength)
-                freeFree += FF.free_free_emission.squeeze()
+                FF = ChiantiPy.core.continuum(akey, temperature, abundance=abundance, em=em)
+                FF.freeFree(wavelength)
+                freeFree += FF.FreeFree['intensity'].squeeze()
                 if keepIons:
                     self.FfInstances[akey] = copy.deepcopy(FF)
 
             if 'fb' in self.Todo[akey]:
                 if verbose:
                     print(' calculating fb continuum for :  %s'%(akey))
-                FB = ChiantiPy.core.continuum(akey, temperature, abundance=abundance, emission_measure=em)
+                FB = ChiantiPy.core.continuum(akey, temperature, abundance=abundance, em=em)
                 try:
                     FB.freeBound(wavelength)
                     freeBound += FB.FreeBound['intensity']

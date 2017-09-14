@@ -31,13 +31,13 @@ def test_temperature():
 def test_free_free_scalar():
     # call free-free emission and loss rate methods for scalar temperature
     # emission--wavelength scalar
-    tmp_cont_scalar.calculate_free_free_emission(wavelength_scalar)
-    assert hasattr(tmp_cont_scalar, 'free_free_emission')
-    assert tmp_cont_scalar.free_free_emission.shape == ()
+    tmp_cont_scalar.freeFree(wavelength_scalar)
+    assert hasattr(tmp_cont_scalar, 'FreeFree')
+    assert tmp_cont_scalar.FreeFree['intensity'].shape == ()
     # emission--wavelength array
-    tmp_cont_scalar.calculate_free_free_emission(wavelength_array)
-    assert hasattr(tmp_cont_scalar, 'free_free_emission')
-    assert tmp_cont_scalar.free_free_emission.shape == wavelength_array.shape
+    tmp_cont_scalar.freeFree(wavelength_array)
+    assert hasattr(tmp_cont_scalar, 'FreeFree')
+    assert tmp_cont_scalar.FreeFree['intensity'].shape == wavelength_array.shape
     # loss
     tmp_cont_scalar.calculate_free_free_loss()
     assert hasattr(tmp_cont_scalar, 'free_free_loss')
@@ -47,13 +47,13 @@ def test_free_free_scalar():
 def test_free_free_array():
     # call free-free emission and loss rate methods for scalar temperature
     # emission--wavelength scalar
-    tmp_cont_array.calculate_free_free_emission(wavelength_scalar)
-    assert hasattr(tmp_cont_array, 'free_free_emission')
-    assert tmp_cont_array.free_free_emission.shape == temperature_array.shape
+    tmp_cont_array.freeFree(wavelength_scalar)
+    assert hasattr(tmp_cont_array, 'FreeFree')
+    assert tmp_cont_array.FreeFree['intensity'].shape == temperature_array.shape
     # emission--wavelength array
-    tmp_cont_array.calculate_free_free_emission(wavelength_array)
-    assert hasattr(tmp_cont_array, 'free_free_emission')
-    assert tmp_cont_array.free_free_emission.shape == temperature_array.shape+wavelength_array.shape
+    tmp_cont_array.freeFree(wavelength_array)
+    assert hasattr(tmp_cont_array, 'FreeFree')
+    assert tmp_cont_array.FreeFree['intensity'].shape == temperature_array.shape+wavelength_array.shape
     # loss
     tmp_cont_array.calculate_free_free_loss()
     assert hasattr(tmp_cont_array, 'free_free_loss')

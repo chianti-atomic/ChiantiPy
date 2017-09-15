@@ -56,7 +56,7 @@ class mspectrum(ionTrails, specTrails):
     proc = the number of processors to use
     timeout - a small but non-zero value seems to be necessary
     '''
-    def __init__(self, temperature, eDensity, wavelength, filter=(chfilters.gaussianR, 1000.), label=0, elementList = 0, ionList = 0, minAbund=1.e-6, keepIons=0, abundance=None,  doLines=1, doContinuum=1, allLines = 1, em =0,  proc=3, verbose = 0,  timeout=0.1):
+    def __init__(self, temperature, eDensity, wavelength, filter=(chfilters.gaussianR, 1000.), label=0, elementList = None, ionList = None, minAbund=None, keepIons=0, abundance=None,  doLines=1, doContinuum=1, allLines = 1, em=0,  proc=3, verbose = 0,  timeout=0.1):
         #
         t1 = datetime.now()
         # creates Intensity dict from first ion calculated
@@ -143,15 +143,16 @@ class mspectrum(ionTrails, specTrails):
         self.Finished = []
         #
 
-#        self.Todo = []
         self.ionGate(elementList = elementList, ionList = ionList, minAbund=minAbund, doLines=doLines, doContinuum=doContinuum, verbose = verbose)
+        for one in self.Todo.keys():
+            print(' %s  %s'%(one, self.Todo[one]))
         #
         for akey in sorted(self.Todo.keys()):
-            zStuff = util.convertName(akey)
-            Z = zStuff['Z']
-            abundance = self.Abundance[Z - 1]
-            if verbose:
-                print(' %5i %5s abundance = %10.2e '%(Z, const.El[Z-1],  abundance))
+#            zStuff = util.convertName(akey)
+#            Z = zStuff['Z']
+#            abundance = self.Abundance[Z - 1]
+#            if verbose:
+#                print(' %5i %5s abundance = %10.2e '%(Z, const.El[Z-1],  abundance))
             if verbose:
                 print(' doing ion %s for the following processes %s'%(akey, self.Todo[akey]))
             if 'ff' in self.Todo[akey]:
@@ -177,7 +178,7 @@ class mspectrum(ionTrails, specTrails):
             #
             for iff in range(ffWorkerQSize):
                 thisFreeFree = ffDoneQ.get()
-                freeFree += thisFreeFree
+                freeFree += thisFreeFree['intensity']
             for p in ffProcesses:
                 if not isinstance(p, str):
                     p.terminate()
@@ -194,7 +195,7 @@ class mspectrum(ionTrails, specTrails):
             #
             for ifb in range(fbWorkerQSize):
                 thisFreeBound = fbDoneQ.get()
-                freeBound += thisFreeBound
+                freeBound += thisFreeBound['intensity'].squeeze()
             for p in fbProcesses:
                 if not isinstance(p, str):
                     p.terminate()

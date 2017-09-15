@@ -50,6 +50,9 @@ class spectrum(ionTrails, specTrails):
 
     a minimum abundance can be specified so that the calculation can be speeded up
     by excluding elements with a low abundance. The default of minAbund is 1.e-6
+    
+    It is necessary to specify at least an elementList, an ionList, or a minAbund to select any ions 
+    for a spectrum calculation
 
     With solar photospheric abundances -
 
@@ -57,6 +60,7 @@ class spectrum(ionTrails, specTrails):
     setting minAbund = 2.e-5 adds  N, Mg, Si, S, Fe
     setting minAbund = 1.e-6 adds  Na, Al, Ar, Ca, Ni
 
+    Setting doLines = 0 will skip the calculation of spectral lines.
     Setting doContinuum =0 will skip the continuum calculation.
 
     Setting em [for emission measure] will multiply the spectrum at each temperature
@@ -74,7 +78,7 @@ class spectrum(ionTrails, specTrails):
     If set to a blank (''), a gui selection menu will popup and allow the selection of an
     set of abundances
     '''
-    def __init__(self, temperature, eDensity, wavelength, filter=(chfilters.gaussianR, 1000.), label=0, elementList = 0, ionList = 0, minAbund=None, doLines=1, doContinuum=1, em=0, keepIons=0,  abundance=None, verbose=0, allLines=1):
+    def __init__(self, temperature, eDensity, wavelength, filter=(chfilters.gaussianR, 1000.), label=0, elementList = None, ionList = None, minAbund=None, doLines=1, doContinuum=1, em=None, keepIons=0,  abundance=None, verbose=0, allLines=1):
         #
         t1 = datetime.now()
         # creates Intensity dict from first ion calculated

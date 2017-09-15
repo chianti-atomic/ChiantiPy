@@ -2015,7 +2015,7 @@ class ion(ionTrails, specTrails):
         obs = obs[nonzed]
         nwvl = len(wvl)
         if nwvl == 0:
-            self.Emiss = {'errorMessage':self.Spectroscopic+' no lines in this wavelength range'}
+            self.Emiss = {'errorMessage':self.IonStr + ' no lines in this wavelength range'}
             return
 
         try:
@@ -2550,7 +2550,7 @@ class ion(ionTrails, specTrails):
         else:
             emiss = copy.copy(self.Emiss)
         if 'errorMessage'  in emiss.keys():
-            self.Intensity = {'errorMessage': self.Spectroscopic+' no lines in this wavelength region'}
+            self.Intensity = {'errorMessage': emiss['errorMessage']}
             return
 
         # everything in emiss should be a numpy array

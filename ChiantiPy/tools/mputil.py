@@ -21,9 +21,9 @@ def doFfQ(inQ, outQ):
         wavelength = inputs[2]
         abund = inputs[3]
         em = inputs[4]
-        ff = ChiantiPy.core.Continuum(ionS, temperature, abundance=abund, emission_measure=em)
-        ff.calculate_free_free_emission(wavelength)
-        outQ.put(ff.free_free_emission)
+        ff = ChiantiPy.core.continuum(ionS, temperature, abundance=abund, em=em)
+        ff.freeFree(wavelength)
+        outQ.put(ff.FreeFree)
     return
 
 
@@ -46,11 +46,11 @@ def doFbQ(inQ, outQ):
         em = inputs[4]
         fb = ChiantiPy.core.continuum(ionS, temperature, abundance=abund, em=em)
         try:
-            fb.calculate_free_bound_emission(wavelength)
-            fb_emiss = fb.free_bound_emission
+            fb.freeBound(wavelength)
+#            fb_emiss = fb.FreeBound['intensity']
         except ValueError:
-            fb_emiss = np.zeros((len(temperature),len(wavelength)))
-        outQ.put(fb_emiss)
+            fb.FreeBound = {'intensity':np.zeros((len(temperature),len(wavelength)))}
+        outQ.put(fb.FreeBound)
     return
 
 

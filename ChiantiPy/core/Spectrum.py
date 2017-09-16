@@ -288,7 +288,7 @@ class bunch(ionTrails, specTrails):
     #
     # ------------------------------------------------------------------------------------
     #
-    def __init__(self, temperature, eDensity, wvlRange, elementList=0, ionList=0, minAbund=0, keepIons=0, em=0, abundanceName=0, verbose=0, allLines=1):
+    def __init__(self, temperature, eDensity, wvlRange, elementList=None, ionList=None, minAbund=None, keepIons=0, em=None, abundanceName=None, verbose=0, allLines=1):
         #
         t1 = datetime.now()
         # creates Intensity dict from first ion calculated
@@ -321,11 +321,11 @@ class bunch(ionTrails, specTrails):
         elif tst1 and tst4:
             self.NTempDen = ntemp
         #
-        if type(em) == int and em == 0:
+        if em == None:
             em = np.ones(self.NTempDen, 'float64')
         elif type(em) == float and em > 0.:
             em = np.ones(self.NTempDen, 'float64')*em
-        elif type(em) == list or type(em) == tuple:
+        elif type(em) == list or type(em) == tuple or type(em) == np.ndarray:
             em = np.asarray(em, 'float64')
         self.Em = em
         #
@@ -366,7 +366,7 @@ class bunch(ionTrails, specTrails):
         # also needed by ionGate
         self.WvlRange = np.asarray(wvlRange, 'float64')
         #
-        self.ionGate(elementList = elementList, ionList = ionList, minAbund=minAbund, doContinuum=0, verbose = verbose)
+        self.ionGate(elementList = elementList, ionList = ionList, minAbund=minAbund, doLines=1, doContinuum=0, verbose = verbose)
         #
         for ionS in sorted(self.Todo.keys()):
             nameStuff = util.convertName(ionS)
@@ -374,8 +374,8 @@ class bunch(ionTrails, specTrails):
 
             if verbose:
                 print(' calculating %s'%(ionS))
-            thisIon = ChiantiPy.core.ion(ionS, temperature, eDensity, abundance=abundAll[Z-1])
-            thisIon.intensity(wvlRange=wvlRange, allLines = allLines,  em=em)
+            thisIon = ChiantiPy.core.ion(ionS, temperature, eDensity, abundance=abundAll[Z-1],  em=em)
+            thisIon.intensity(wvlRange=wvlRange, allLines = allLines)
             self.IonsCalculated.append(ionS)
             #
             if 'errorMessage' not in  list(thisIon.Intensity.keys()):

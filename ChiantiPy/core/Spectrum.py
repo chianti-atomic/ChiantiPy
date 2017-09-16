@@ -78,7 +78,7 @@ class spectrum(ionTrails, specTrails):
     If set to a blank (''), a gui selection menu will popup and allow the selection of an
     set of abundances
     '''
-    def __init__(self, temperature, eDensity, wavelength, filter=(chfilters.gaussianR, 1000.), label=0, elementList = None, ionList = None, minAbund=None, doLines=1, doContinuum=1, em=None, keepIons=0,  abundance=None, verbose=0, allLines=1):
+    def __init__(self, temperature, eDensity, wavelength, filter=(chfilters.gaussianR, 1000.), label=None, elementList = None, ionList = None, minAbund=None, doLines=1, doContinuum=1, em=None, keepIons=0,  abundance=None, verbose=0, allLines=1):
         #
         t1 = datetime.now()
         # creates Intensity dict from first ion calculated
@@ -93,13 +93,13 @@ class spectrum(ionTrails, specTrails):
         nTempDen = self.NTempDen
         self.Wavelength = wavelength
         #
-        if type(em) == int and em == 0:
+        if em == None:
             em = np.ones(self.NTempDen, 'float64')
             ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
         elif type(em) == float and em > 0.:
             em = np.ones(self.NTempDen, 'float64')*em
             ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ $'
-        elif type(em) == list or type(em) == tuple:
+        elif type(em) == list or type(em) == tuple or type(em) == np.ndarray:
             em = np.asarray(em, 'float64')
             ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ $'
         self.Em = em

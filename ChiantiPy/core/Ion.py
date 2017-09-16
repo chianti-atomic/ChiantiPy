@@ -178,6 +178,8 @@ class ion(ionTrails, specTrails):
                 self.Em = np.tile(em,self.NTempDen)
             else:
                 self.Em = em
+        else:
+            self.Em = np.tile(1., self.NTempDen)
 
     def setup(self, alternate_dir=None, verbose=False):
         """

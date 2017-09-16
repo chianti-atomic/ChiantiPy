@@ -51,6 +51,9 @@ class ioneq(object):
         ionization and recombination rates.
         """
         self.Temperature = np.array(temperature, 'float64')
+        if self.Temperature.size == 1:
+            print(' temperature must be an array')
+            return
         ionList = []
         chIons = []
         z = self.Z

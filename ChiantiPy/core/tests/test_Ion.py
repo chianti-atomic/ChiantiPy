@@ -51,7 +51,7 @@ def test_temperature_density():
 # Check how abundance is set
 def test_abundance():
     # Float value
-    _tmp_ion = ion(test_ion, abundance=0.01, setup=False)
+    _tmp_ion = ion(test_ion, temperature = temperature_1, eDensity = density_1, abundance=0.01, setup=False)
     assert _tmp_ion.Abundance == 0.01
     # FIXME: if setting custom abundance, AbundanceName should not be set, but right
     # now it is by the proton/electron density ratio calculation.

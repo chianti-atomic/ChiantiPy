@@ -179,7 +179,8 @@ class ion(ionTrails, specTrails):
             else:
                 self.Em = em
         else:
-            self.Em = np.tile(1., self.NTempDen)
+            if hasattr(self, 'NTempDen'):
+                self.Em = np.tile(1., self.NTempDen)
 
     def setup(self, alternate_dir=None, verbose=False):
         """

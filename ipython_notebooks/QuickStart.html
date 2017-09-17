@@ -127,14 +127,14 @@ div#notebook {
   div.cell {
     display: block;
     page-break-inside: avoid;
-  } 
-  div.output_wrapper { 
-    display: block;
-    page-break-inside: avoid; 
   }
-  div.output { 
+  div.output_wrapper {
     display: block;
-    page-break-inside: avoid; 
+    page-break-inside: avoid;
+  }
+  div.output {
+    display: block;
+    page-break-inside: avoid;
   }
 }
 </style>
@@ -186,8 +186,8 @@ div#notebook {
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>This short tutorial will demonstrate some of the capabilities of ChiantiPy and the CHIANTI database. 
-It assumes that you know what the CHIANTI database provides and why you want to use it. 
+<p>This short tutorial will demonstrate some of the capabilities of ChiantiPy and the CHIANTI database.
+It assumes that you know what the CHIANTI database provides and why you want to use it.
 The current implementation uses Version 0.6.4 of ChiantiPy and version 8.0 of the CHIANTI database and mainly provides access to methods concerned with single ions. An ion such as Fe XIV is specified by the string ‘fe_14’, in the usual CHIANTI notation.</p>
 <p>Bring up a JuPyter notebook</p>
 
@@ -1057,12 +1057,12 @@ the intensityRatio as a function of temperature and density can be save to a tex
 <span class="n">wvl</span> <span class="o">=</span> <span class="mf">1.</span> <span class="o">+</span> <span class="mf">0.002</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">4501</span><span class="p">)</span>
 <span class="n">c</span><span class="o">.</span><span class="n">freeFree</span><span class="p">(</span><span class="n">wvl</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">wvl</span><span class="p">,</span> <span class="n">c</span><span class="o">.</span><span class="n">FreeFree</span><span class="p">[</span><span class="s">&#39;rate&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;ff&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">wvl</span><span class="p">,</span> <span class="n">c</span><span class="o">.</span><span class="n">FreeFree</span><span class="p">[</span><span class="s">&#39;intensity&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;ff&#39;</span><span class="p">)</span>
 <span class="n">c</span><span class="o">.</span><span class="n">freeBound</span><span class="p">(</span><span class="n">wvl</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">wvl</span><span class="p">,</span> <span class="n">c</span><span class="o">.</span><span class="n">FreeBound</span><span class="p">[</span><span class="s">&#39;rate&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;fb&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">wvl</span><span class="p">,</span> <span class="n">c</span><span class="o">.</span><span class="n">FreeBound</span><span class="p">[</span><span class="s">&#39;intensity&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;fb&#39;</span><span class="p">)</span>
 <span class="n">fe25</span><span class="o">=</span><span class="n">ch</span><span class="o">.</span><span class="n">ion</span><span class="p">(</span><span class="s">&#39;fe_25&#39;</span><span class="p">,</span><span class="n">temperature</span><span class="p">,</span><span class="mf">1.e+9</span><span class="p">,</span><span class="n">em</span><span class="o">=</span><span class="n">em</span><span class="p">)</span>
 <span class="n">fe25</span><span class="o">.</span><span class="n">twoPhoton</span><span class="p">(</span><span class="n">wvl</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">wvl</span><span class="p">,</span><span class="n">fe25</span><span class="o">.</span><span class="n">TwoPhoton</span><span class="p">[</span><span class="s">&#39;rate&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;2 photon&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">wvl</span><span class="p">,</span><span class="n">fe25</span><span class="o">.</span><span class="n">TwoPhoton</span><span class="p">[</span><span class="s">&#39;intensity&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="n">label</span><span class="o">=</span><span class="s">&#39;2 photon&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s">&#39;upper right&#39;</span><span class="p">)</span>
 </pre></div>
 
@@ -1589,7 +1589,7 @@ the intensityRatio as a function of temperature and density can be save to a tex
 <div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre> 
+<div class=" highlight hl-ipython3"><pre>
 </pre></div>
 
 </div>

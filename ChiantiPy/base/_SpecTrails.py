@@ -116,7 +116,7 @@ class specTrails(object):
         #
         # ---------------------------------------------------------------------------
         #
-    def ionGate(self, elementList = 0, ionList = 0, minAbund=0, doLines=1, doContinuum=1, doWvlTest=1, verbose=0):
+    def ionGate(self, elementList = None, ionList = None, minAbund=None, doLines=1, doContinuum=1, doWvlTest=1, verbose=0):
         '''
         creates a list of ions for free-free, free-bound, and line intensity calculations
         if doing the radiative losses, accept all wavelength -> doWvlTest=0
@@ -145,65 +145,40 @@ class specTrails(object):
         # use the ionList but make sure the ions are in the database
         self.Todo = {}
         #
-        if minAbund:
-            if doContinuum:
-                for iz in range(1, 31):
-                    abundance = chdata.Abundance[self.AbundanceName]['abundance'][iz-1]
-                    if abundance >= minAbund:
-                        if verbose:
-                            print(' %5i %5s abundance = %10.2e '%(iz, const.El[iz-1],  abundance))
-                        #
-                        for ionstage in range(1, iz+2):
-                            ionS = util.zion2name(iz, ionstage)
-                            masterListTest = ionS in masterlist
-                            masterListInfoTest = ionS in sorted(ionInfo.keys())
-                            if masterListTest or masterListInfoTest:
-                                if doWvlTest:
-                                    wvlTestMin = wvlRange[0] <= ionInfo[ionS]['wmax']
-                                    wvlTestMax = wvlRange[1] >= ionInfo[ionS]['wmin']
-                                else:
-                                    wvlTestMin = 1
-                                    wvlTestMax = 1
-                                ioneqTest = (temperature.max() >= ionInfo[ionS]['tmin']) and (temperature.min() <= ionInfo[ionS]['tmax'])
-                            # construct similar test for the dielectronic files
-                            ionstageTest = ionstage > 1
-                            if ionstageTest and ioneqTest and doContinuum:
-                                # ionS is the target ion, cannot be the neutral for the continuum
-                                if verbose:
-                                    print(' setting up continuum calculation for %s  '%(ionS))
-                                if ionS in sorted(self.Todo.keys()):
-                                    self.Todo[ionS] += '_ff_fb'
-                                else:
-                                    self.Todo[ionS] = 'ff_fb'
-                                if verbose:
-                                    print(' for ion %s do : %s'%(ionS, self.Todo[ionS]))
         #
         if elementList:
-            for i,  one in enumerate(elementList):
-                elementList[i] = one.lower()
+            for i,  element in enumerate(elementList):
+                elementList[i] = element.lower()
                 if verbose:
-                    print('el = %s'%(one))
-            for one in masterlist:
-                nameDict = util.convertName(one)
-                if nameDict['Element'].lower() in elementList:
-                    if verbose:
-                        print(' ion = %s'%(one))
-                    if doLines:
-                        self.Todo[one] = 'line'
+                    print('el = %s'%(element))
+                z = const.El.index(element.lower()) + 1 
+                for one in masterlist:
+                    nameDict = util.convertName(one)
+                    if nameDict['Element'].lower() in elementList:
+                        if verbose:
+                            print(' ion = %s'%(one))
+                        if doLines:
+                            self.Todo[one] = 'line'
+                for stage in range(2, z+2):
+                    name = util.zion2name(z, stage)            
                     if doContinuum and not nameDict['Dielectronic']:
-                        self.Todo[one] += '_ff'
-                        self.Todo[one] += '_fb'
+                        if name not in self.Todo.keys():
+                            self.Todo[name] = 'ff'
+                        else:
+                            self.Todo[name] += '_ff'
+                        self.Todo[name] += '_fb'
         if ionList:
             for one in ionList:
-                stuff = util.convertName(one)
-                bare = stuff['Z'] == stuff['Ion']
+                nameDict = util.convertName(one)
                 if masterlist.count(one):
                     if doLines:
                         self.Todo[one] = 'line'
-                    if doContinuum and not stuff['Dielectronic']:
-                        self.Todo[one]+= '_ff'
-                        if not bare:
-                            self.Todo[one] += '_fb'
+                if doContinuum and not nameDict['Dielectronic']:
+                    if one not in self.Todo.keys():
+                        self.Todo[one] = 'ff'
+                    else:
+                        self.Todo[one] += '_ff'
+                    self.Todo[one] += '_fb'
                 else:
                     if verbose:
                         pstring = ' %s not in CHIANTI database'%(one)
@@ -218,7 +193,7 @@ class specTrails(object):
                     if verbose:
                         print(' %5i %5s abundance = %10.2e '%(iz, const.El[iz-1],  abundance))
                     #
-                    for ionstage in range(1, iz+2):
+                    for ionstage in range(1, iz+1):
                         ionS = util.zion2name(iz, ionstage)
                         masterListTest = ionS in masterlist
                         masterListInfoTest = ionS in sorted(ionInfo.keys())
@@ -259,6 +234,25 @@ class specTrails(object):
                                 self.Todo[ionSd] = 'line'
                             if verbose:
                                 print(' for ion %s do : %s'%(ionSd, self.Todo[ionSd]))
+        #
+                    #
+                    for ionstage in range(2, iz+2):
+                        ionS = util.zion2name(iz, ionstage)
+                        if ionS in ionInfo.keys():
+                            ioneqTest = (temperature.max() >= ionInfo[ionS]['tmin']) and (temperature.min() <= ionInfo[ionS]['tmax'])
+                        else:
+                            ioneqTest = 1
+                        # construct similar test for the dielectronic files
+                        if ioneqTest and doContinuum:
+                            # ionS is the target ion, cannot be the neutral for the continuum
+#                            if verbose:
+#                                print(' setting up continuum calculation for %s  '%(ionS))
+                            if ionS in sorted(self.Todo.keys()):
+                                self.Todo[ionS] += '_ff_fb'
+                            else:
+                                self.Todo[ionS] = 'ff_fb'
+                            if verbose:
+                                print(' for ion %s do : %s'%(ionS, self.Todo[ionS]))
         if len(self.Todo.keys()) == 0:
             print(' no elements have been selected')
             print(' it is necessary to provide an elementList, an ionList, or set minAbund > 0.')

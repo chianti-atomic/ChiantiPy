@@ -178,6 +178,9 @@ class ion(ionTrails, specTrails):
                 self.Em = np.tile(em,self.NTempDen)
             else:
                 self.Em = em
+        else:
+            if hasattr(self, 'NTempDen'):
+                self.Em = np.tile(1., self.NTempDen)
 
     def setup(self, alternate_dir=None, verbose=False):
         """
@@ -2015,7 +2018,7 @@ class ion(ionTrails, specTrails):
         obs = obs[nonzed]
         nwvl = len(wvl)
         if nwvl == 0:
-            self.Emiss = {'errorMessage':self.Spectroscopic+' no lines in this wavelength range'}
+            self.Emiss = {'errorMessage':self.IonStr + ' no lines in this wavelength range'}
             return
 
         try:
@@ -2518,7 +2521,7 @@ class ion(ionTrails, specTrails):
         self.IntensityRatio = {'ratio':numEmiss/denEmiss,'desc':desc,
                 'temperature':outTemperature,'eDensity':outDensity,'filename':intensityRatioFileName, 'numIdx':num_idx, 'denIdx':den_idx}
 
-    def intensity(self,  wvlRange = None,  allLines=1, em=0):
+    def intensity(self,  wvlRange = None,  allLines=1):
         """
         Calculate  the intensities for lines of the specified ion.
 
@@ -2531,18 +2534,6 @@ class ion(ionTrails, specTrails):
         the emission measure 'em' is included if specified
         """
 
-        if type(em) == int and em == 0:
-            if hasattr(self, 'Em'):
-                em = self.Em
-            else:
-                em = np.ones(self.NTempDen, 'float64')
-                self.Em = em
-        elif type(em) == float and em > 0.:
-            em = np.ones(self.NTempDen, 'float64')*em
-            self.Em = em
-        elif type(em) == list or type(em) == tuple or type(em) == np.ndarray:
-            em = np.asarray(em, 'float64')
-            self.Em = em
         # so we know that it has been applied
         if not hasattr(self, 'Emiss'):
             self.emiss(wvlRange = wvlRange, allLines=allLines)
@@ -2550,7 +2541,7 @@ class ion(ionTrails, specTrails):
         else:
             emiss = copy.copy(self.Emiss)
         if 'errorMessage'  in emiss.keys():
-            self.Intensity = {'errorMessage': self.Spectroscopic+' no lines in this wavelength region'}
+            self.Intensity = {'errorMessage': emiss['errorMessage']}
             return
 
         # everything in emiss should be a numpy array
@@ -2581,16 +2572,16 @@ class ion(ionTrails, specTrails):
             if thisIoneq.size == 1:
                 thisIoneq = np.ones(ntempden, 'float64')*thisIoneq
             for it in range(ntempden):
-                intensity[it] = ab*thisIoneq[it]*emissivity[:, it]*em[it]/self.EDensity[it]
+                intensity[it] = ab*thisIoneq[it]*emissivity[:, it]*self.Em[it]/self.EDensity[it]
         else:
             nwvl = len(emissivity)
             ntempden = 1
-            intensity = ab*thisIoneq*emissivity*em/self.EDensity
+            intensity = ab*thisIoneq*emissivity*self.Em/self.EDensity
         if ntempden == 1:
             integrated = intensity
         else:
             integrated = intensity.sum(axis=0)
-        Intensity = {'intensity':intensity, 'integrated':integrated,'ionS':ionS, 'wvl':wvl, 'lvl1':lvl1, 'lvl2':lvl2, 'pretty1':pretty1, 'pretty2':pretty2,  'obs':obs, 'avalue':avalue, 'em':em}
+        Intensity = {'intensity':intensity, 'integrated':integrated,'ionS':ionS, 'wvl':wvl, 'lvl1':lvl1, 'lvl2':lvl2, 'pretty1':pretty1, 'pretty2':pretty2,  'obs':obs, 'avalue':avalue, 'em':self.Em}
         self.Intensity = Intensity
 
     def boundBoundLoss(self,  wvlRange = None,  allLines=1):

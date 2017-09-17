@@ -50,6 +50,9 @@ class spectrum(ionTrails, specTrails):
 
     a minimum abundance can be specified so that the calculation can be speeded up
     by excluding elements with a low abundance. The default of minAbund is 1.e-6
+    
+    It is necessary to specify at least an elementList, an ionList, or a minAbund to select any ions 
+    for a spectrum calculation
 
     With solar photospheric abundances -
 
@@ -57,6 +60,7 @@ class spectrum(ionTrails, specTrails):
     setting minAbund = 2.e-5 adds  N, Mg, Si, S, Fe
     setting minAbund = 1.e-6 adds  Na, Al, Ar, Ca, Ni
 
+    Setting doLines = 0 will skip the calculation of spectral lines.
     Setting doContinuum =0 will skip the continuum calculation.
 
     Setting em [for emission measure] will multiply the spectrum at each temperature
@@ -74,7 +78,7 @@ class spectrum(ionTrails, specTrails):
     If set to a blank (''), a gui selection menu will popup and allow the selection of an
     set of abundances
     '''
-    def __init__(self, temperature, eDensity, wavelength, filter=(chfilters.gaussianR, 1000.), label=0, elementList = 0, ionList = 0, minAbund=None, doLines=1, doContinuum=1, em=0, keepIons=0,  abundance=None, verbose=0, allLines=1):
+    def __init__(self, temperature, eDensity, wavelength, filter=(chfilters.gaussianR, 1000.), label=None, elementList = None, ionList = None, minAbund=None, doLines=1, doContinuum=1, em=None, keepIons=0,  abundance=None, verbose=0, allLines=1):
         #
         t1 = datetime.now()
         # creates Intensity dict from first ion calculated
@@ -89,13 +93,13 @@ class spectrum(ionTrails, specTrails):
         nTempDen = self.NTempDen
         self.Wavelength = wavelength
         #
-        if type(em) == int and em == 0:
+        if em == None:
             em = np.ones(self.NTempDen, 'float64')
             ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
         elif type(em) == float and em > 0.:
             em = np.ones(self.NTempDen, 'float64')*em
             ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ $'
-        elif type(em) == list or type(em) == tuple:
+        elif type(em) == list or type(em) == tuple or type(em) == np.ndarray:
             em = np.asarray(em, 'float64')
             ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ $'
         self.Em = em
@@ -182,8 +186,8 @@ class spectrum(ionTrails, specTrails):
             if 'line' in self.Todo[akey]:
                 if verbose:
                     print(' calculating spectrum for  :  %s'%(akey))
-                thisIon = ChiantiPy.core.ion(akey, temperature, eDensity, abundance=abundance)
-                thisIon.intensity(wvlRange=wvlRange, allLines=allLines, em=em)
+                thisIon = ChiantiPy.core.ion(akey, temperature, eDensity, abundance=abundance, em=em)
+                thisIon.intensity(wvlRange=wvlRange, allLines=allLines)
                 self.IonsCalculated.append(akey)
                 if 'errorMessage' not in  list(thisIon.Intensity.keys()):
                     self.Finished.append(akey)
@@ -284,7 +288,7 @@ class bunch(ionTrails, specTrails):
     #
     # ------------------------------------------------------------------------------------
     #
-    def __init__(self, temperature, eDensity, wvlRange, elementList=0, ionList=0, minAbund=0, keepIons=0, em=0, abundanceName=0, verbose=0, allLines=1):
+    def __init__(self, temperature, eDensity, wvlRange, elementList=None, ionList=None, minAbund=None, keepIons=0, em=None, abundanceName=None, verbose=0, allLines=1):
         #
         t1 = datetime.now()
         # creates Intensity dict from first ion calculated
@@ -317,11 +321,11 @@ class bunch(ionTrails, specTrails):
         elif tst1 and tst4:
             self.NTempDen = ntemp
         #
-        if type(em) == int and em == 0:
+        if em == None:
             em = np.ones(self.NTempDen, 'float64')
         elif type(em) == float and em > 0.:
             em = np.ones(self.NTempDen, 'float64')*em
-        elif type(em) == list or type(em) == tuple:
+        elif type(em) == list or type(em) == tuple or type(em) == np.ndarray:
             em = np.asarray(em, 'float64')
         self.Em = em
         #
@@ -362,7 +366,7 @@ class bunch(ionTrails, specTrails):
         # also needed by ionGate
         self.WvlRange = np.asarray(wvlRange, 'float64')
         #
-        self.ionGate(elementList = elementList, ionList = ionList, minAbund=minAbund, doContinuum=0, verbose = verbose)
+        self.ionGate(elementList = elementList, ionList = ionList, minAbund=minAbund, doLines=1, doContinuum=0, verbose = verbose)
         #
         for ionS in sorted(self.Todo.keys()):
             nameStuff = util.convertName(ionS)
@@ -370,8 +374,8 @@ class bunch(ionTrails, specTrails):
 
             if verbose:
                 print(' calculating %s'%(ionS))
-            thisIon = ChiantiPy.core.ion(ionS, temperature, eDensity, abundance=abundAll[Z-1])
-            thisIon.intensity(wvlRange=wvlRange, allLines = allLines,  em=em)
+            thisIon = ChiantiPy.core.ion(ionS, temperature, eDensity, abundance=abundAll[Z-1],  em=em)
+            thisIon.intensity(wvlRange=wvlRange, allLines = allLines)
             self.IonsCalculated.append(ionS)
             #
             if 'errorMessage' not in  list(thisIon.Intensity.keys()):

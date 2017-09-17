@@ -212,7 +212,7 @@ def convertName(name):
     Z = int(const.El.index(els)+1)
     ions = s2[1].strip()
     d = ions.find('d')
-    if d >0 :
+    if d > 0 :
         dielectronic = True
         ions = ions.replace('d','')
     else:

@@ -2563,7 +2563,7 @@ class ion(ionTrails, specTrails):
         if hasattr(self, 'IoneqOne'):
             thisIoneq = self.IoneqOne
         else:
-            self.ioneqOne()
+            self.IoneqOne = self.ioneqOne()
             thisIoneq = self.IoneqOne
 
         if len(emissivity.shape) > 1:
@@ -3021,7 +3021,7 @@ class ion(ionTrails, specTrails):
                         emiss[it, goodWvl] = f*pop[it, l2]*distr/self.EDensity[it]
                 self.TwoPhotonEmiss = {'wvl':wvl, 'emiss':emiss}
 
-    def twoPhoton(self, wvl, em=0, verbose=False):
+    def twoPhoton(self, wvl, verbose=False):
         '''
         to calculate the two-photon continuum - only for hydrogen- and helium-like ions
         includes the elemental abundance and the ionization equilibrium
@@ -3029,19 +3029,6 @@ class ion(ionTrails, specTrails):
         '''
         wvl = np.array(wvl, 'float64')
         #
-        if type(em) == int and em == 0:
-            if hasattr(self, 'Em'):
-                em = self.Em
-            else:
-                em = np.ones(self.NTempDen, 'float64')
-                self.Em = em
-        elif type(em) == float and em > 0.:
-            em = np.ones(self.NTempDen, 'float64')*em
-            self.Em = em
-        elif type(em) == list or type(em) == tuple or type(em) == np.ndarray:
-            em = np.asarray(em, 'float64')
-            self.Em = em
-        # so we know that it has been applied
         #
         nWvl = wvl.size
         if self.Z - self.Ion > 1 or self.Dielectronic:
@@ -3070,8 +3057,6 @@ class ion(ionTrails, specTrails):
                 nTempDens = max(self.Temperature.size, self.EDensity.size)
             if nTempDens > 1:
                 rate = np.zeros((nTempDens, nWvl), 'float64')
-                if em.size == 1.:
-                    em = np.ones(nTempDens, 'float64')*em
                 if self.EDensity.size == 1:
                     eDensity = np.repeat(self.EDensity, nTempDens)
                 else:
@@ -3103,11 +3088,11 @@ class ion(ionTrails, specTrails):
                     else:
                         f = 1./(4.*const.pi)
                     if nTempDens == 1:
-                        rate[goodWvl] = f*pop[l2]*distr*ab*thisIoneq*em/eDensity
+                        rate[goodWvl] = f*pop[l2]*distr*ab*thisIoneq*self.Em/eDensity
                     else:
                        for it in range(nTempDens):
-                            rate[it, goodWvl] = f*pop[it, l2]*distr*ab*thisIoneq[it]*em[it]/eDensity[it]
-                self.TwoPhoton = {'wvl':wvl, 'rate':rate}
+                            rate[it, goodWvl] = f*pop[it, l2]*distr*ab*thisIoneq[it]*self.Em[it]/eDensity[it]
+                self.TwoPhoton = {'wvl':wvl, 'intensity':rate}
 
             else:
                 # He seq
@@ -3126,11 +3111,11 @@ class ion(ionTrails, specTrails):
                     else:
                         f = 1./(4.*const.pi)
                     if nTempDens == 1:
-                        rate[goodWvl] = f*pop[l2]*distr*ab*thisIoneq*em/eDensity
+                        rate[goodWvl] = f*pop[l2]*distr*ab*thisIoneq*self.Em/eDensity
                     else:
                        for it in range(nTempDens):
-                            rate[it, goodWvl] = f*pop[it, l2]*distr*ab*thisIoneq[it]*em[it]/eDensity[it]
-                self.TwoPhoton = {'wvl':wvl, 'rate':rate, 'em':em}
+                            rate[it, goodWvl] = f*pop[it, l2]*distr*ab*thisIoneq[it]*self.Em[it]/eDensity[it]
+                self.TwoPhoton = {'wvl':wvl, 'intensity':rate, 'em':self.Em}
 
     def twoPhotonLoss(self):
         '''

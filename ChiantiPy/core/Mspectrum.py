@@ -56,7 +56,7 @@ class mspectrum(ionTrails, specTrails):
     proc = the number of processors to use
     timeout - a small but non-zero value seems to be necessary
     '''
-    def __init__(self, temperature, eDensity, wavelength, filter=(chfilters.gaussianR, 1000.), label=0, elementList = None, ionList = None, minAbund=None, keepIons=0, abundance=None,  doLines=1, doContinuum=1, allLines = 1, em=0,  proc=3, verbose = 0,  timeout=0.1):
+    def __init__(self, temperature, eDensity, wavelength, filter=(chfilters.gaussianR, 1000.), label=0, elementList = None, ionList = None, minAbund=None, keepIons=0, abundance=None,  doLines=1, doContinuum=1, allLines = 1, em=None,  proc=3, verbose = 0,  timeout=0.1):
         #
         t1 = datetime.now()
         # creates Intensity dict from first ion calculated
@@ -70,15 +70,15 @@ class mspectrum(ionTrails, specTrails):
         nTempDen = max([nTemp, nDen])
         self.NTempDen = nTempDen
         #
-        if type(em) == int and em == 0:
+        if em == None:
             em = np.ones(self.NTempDen, 'float64')
-            ylabel = r"erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$"
+            ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
         elif type(em) == float and em > 0.:
             em = np.ones(self.NTempDen, 'float64')*em
-            ylabel = r"erg  cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$"
-        elif type(em) == list or type(em) == tuple:
+            ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ $'
+        elif type(em) == list or type(em) == tuple or type(em) == np.ndarray:
             em = np.asarray(em, 'float64')
-            ylabel = r"erg  cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$"
+            ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ $'
         self.Em = em
         #
         #
@@ -236,7 +236,7 @@ class mspectrum(ionTrails, specTrails):
                # check for two-photon emission
                 if len(out) == 3:
                     tp = out[2]
-                    twoPhoton += tp['rate']
+                    twoPhoton += tp['intensity']
             else:
                 if 'errorMessage' in sorted(thisIntensity.keys()):
                     print(thisIntensity['errorMessage'])

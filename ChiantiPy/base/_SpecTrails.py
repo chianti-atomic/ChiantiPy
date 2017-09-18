@@ -173,16 +173,16 @@ class specTrails(object):
                 if masterlist.count(one):
                     if doLines:
                         self.Todo[one] = 'line'
+                else:
+                    if verbose:
+                        pstring = ' %s not in CHIANTI database'%(one)
+                        print(pstring)
                 if doContinuum and not nameDict['Dielectronic']:
                     if one not in self.Todo.keys():
                         self.Todo[one] = 'ff'
                     else:
                         self.Todo[one] += '_ff'
                     self.Todo[one] += '_fb'
-                else:
-                    if verbose:
-                        pstring = ' %s not in CHIANTI database'%(one)
-                        print(pstring)
         #
         #
         #

@@ -64,7 +64,7 @@ class ipymspectrum(ionTrails, specTrails):
     proc = the number of processors to use
     timeout - a small but non-zero value seems to be necessary
     '''
-    def __init__(self, temperature, eDensity, wavelength, filter=(chfilters.gaussianR, 1000.), label=0, elementList = 0, ionList = 0, minAbund=1.e-6, keepIons=0, doLines=1, doContinuum=0, allLines = 1, em=0, abundanceName=0, verbose=0,  timeout=0.1):
+    def __init__(self, temperature, eDensity, wavelength, filter=(chfilters.gaussianR, 1000.), label=None, elementList = None, ionList = None, minAbund=None, keepIons=0, doLines=1, doContinuum=1, allLines = 1, em=None, abundanceName=0, verbose=0,  timeout=0.1):
         #
         t1 = datetime.now()
         #
@@ -101,12 +101,15 @@ class ipymspectrum(ionTrails, specTrails):
             self.NTempDen = ntemp
             #
         #
-        if type(em) == int and em == 0:
+        if em == None:
             em = np.ones(self.NTempDen, 'float64')
+            ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
         elif type(em) == float and em > 0.:
             em = np.ones(self.NTempDen, 'float64')*em
-        elif type(em) == list or type(em) == tuple:
+            ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ $'
+        elif type(em) == list or type(em) == tuple or type(em) == np.ndarray:
             em = np.asarray(em, 'float64')
+            ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ $'
         self.Em = em
         #
         #
@@ -229,7 +232,7 @@ class ipymspectrum(ionTrails, specTrails):
                     if len(out) == 4:
                         tp = out[3]
                         if self.NTempDen == 1:
-                            twoPhoton += tp['rate']
+                            twoPhoton += tp['intensity']
                         else:
                             for iTempDen in range(self.NTempDen):
                                 twoPhoton[iTempDen] += tp['rate'][iTempDen]
@@ -283,20 +286,20 @@ def doAll(inpt):
         wavelength = inpt[3]
         abund = inpt[4]
         em = inpt[5]
-        FF = ChiantiPy.core.Continuum(ionS, temperature, abundance=abund, emission_measure=em)
-        FF.calculate_free_free_emission(wavelength)
+        FF = ChiantiPy.core.Continuum(ionS, temperature, abundance=abund, em=em)
+        FF.freeFree(wavelength)
         # can not do a deep copy of
 #        return [ionS, calcType, copy.deepcopy(cont)]
-        return [ionS, calcType, copy.copy(FF.free_free_emission)]
+        return [ionS, calcType, copy.copy(FF.FreeFree)]
     elif calcType == 'fb':
         temperature = inpt[2]
         wavelength = inpt[3]
         abund = inpt[4]
         em = inpt[5]
-        cont = ChiantiPy.core.Continuum(ionS, temperature, abundance=abund, emission_measure=em)
+        cont = ChiantiPy.core.Continuum(ionS, temperature, abundance=abund, em=em)
         try:
-            cont.calculate_free_bound_emission(wavelength)
-            return [ionS, calcType, {'rate': cont.calculate_free_bound_emission}]
+            cont.freeBound(wavelength)
+            return [ionS, calcType, {'rate': cont.FreeBound}]
         except ValueError:
             return [ionS, calcType, {'errorMessage': 'No free-bound information available.'}]
     elif calcType == 'line':
@@ -309,13 +312,13 @@ def doAll(inpt):
         abund = inpt[7]
         em = inpt[8]
         doContinuum = inpt[9]
-        thisIon = ChiantiPy.core.ion(ionS, temperature, density, abundance=abund)
-        thisIon.intensity(wvlRange = wvlRange, allLines = allLines, em=em)
+        thisIon = ChiantiPy.core.ion(ionS, temperature, density, abundance=abund, em=em)
+        thisIon.intensity(wvlRange = wvlRange, allLines = allLines)
         if 'errorMessage' not in thisIon.Intensity.keys():
             thisIon.spectrum(wavelength,  filter=filter, allLines=allLines)
         outList = [ionS, calcType, copy.deepcopy(thisIon)]
         if not thisIon.Dielectronic and doContinuum:
             if (thisIon.Z - thisIon.Ion) in [0, 1]:
-                thisIon.twoPhoton(wavelength, em=em)
+                thisIon.twoPhoton(wavelength)
                 outList.append(thisIon.TwoPhoton)
         return outList

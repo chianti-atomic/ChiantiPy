@@ -8,11 +8,11 @@ Perhaps the easiest way is to use a jupyter-notebook or a jupyter3-notebook to l
 
 N.B.:  in the time some of the plots and data were produced, there have been some changes to ChiantiPy and CHIANTI.  It is possible that you might find difference (hopefully small).
 
-Bring up a Python session (using > Python -i ), or better yet, an IPython session 
+Bring up a Python session (using > Python -i ), or better yet, an IPython session
 
 ::
 
-  import ChiantiPy.core as ch 
+  import ChiantiPy.core as ch
   import numpy as np
   import matplotlib.pyplot as plt
 
@@ -50,21 +50,21 @@ A ChiantiPy Convention
 Classes and function of ChiantiPy start with lower case letters.  Data/attributes that are attached to the instantiation of a class will start with a capital letter.  For example,
 
 ::
-    
+
   fe14.populate() creates fe14.Population containing the level population information
-  
+
   fe14.intensity() created fe14.Intensity contain the line intensities information
-  
+
   fe14.spectrum() creates fe14.Spectrum contain the line and continuum spectrum information
-  
- 
+
+
 
 Spectral Line Intensities
 -------------------------
 
 
 ::
-	
+
   fe14.intensityPlot(wvlRange=[210.,220.],linLog='log')
 
 will plot the intensities for the top (default = 10) lines in the specified wavelength range.  If the **Intensity** attribute has not yet been calculated, it will calculate it.  Since there are 21 temperature involved, a single temperature is selected (21/2 = 10).  Otherwise,
@@ -91,9 +91,9 @@ gives the following terminal output:
 ::
 
   using index =    10 specifying temperature =   2.00e+06, eDensity =    1.00e+09 em =   1.00e+27
-   
+
   ------------------------------------------
-   
+
   Ion  lvl1  lvl2                     lower - upper                           Wvl(A)    Intensity      A value Obs
   fe_14     1    11              3s2.3p 2P0.5 - 3s2.3d 2D1.5                  211.3172    2.336e+02     3.81e+10 Y
   fe_14     4    27              3s.3p2 4P1.5 - 3s.3p(3P).3d 4P1.5            212.1255    5.355e-01     2.21e+10 Y
@@ -105,7 +105,7 @@ gives the following terminal output:
   fe_14     7    32              3s.3p2 2D2.5 - 3s.3p(3P).3d 2F3.5            218.1767    3.734e+00     1.70e+10 Y
   fe_14     4    22              3s.3p2 4P1.5 - 3s.3p(3P).3d 4P2.5            218.5725    2.391e+00     2.65e+10 Y
   fe_14     2    12              3s2.3p 2P1.5 - 3s2.3d 2D2.5                  219.1305    5.077e+01     4.27e+10 Y
-   
+
  ------------------------------------------
 
 optionally, an output file could also be created by setting the keyword outFile to the name of the desired name
@@ -113,15 +113,15 @@ optionally, an output file could also be created by setting the keyword outFile 
 ::
 
   fe14.intensityList(wvlRange=[210.,220.], relative=1, index=11)
-  
+
 give the following terminal/notebook output
 
 ::
 
   using index =    11 specifying temperature =   2.24e+06, eDensity =    1.00e+09 em =   1.00e+27
-   
+
   ------------------------------------------
-   
+
   Ion  lvl1  lvl2                     lower - upper                           Wvl(A)    Intensity      A value Obs
   fe_14     1    11              3s2.3p 2P0.5 - 3s2.3d 2D1.5                  211.3172    1.000e+00     3.81e+10 Y
   fe_14     4    27              3s.3p2 4P1.5 - 3s.3p(3P).3d 4P1.5            212.1255    2.267e-03     2.21e+10 Y
@@ -133,15 +133,15 @@ give the following terminal/notebook output
   fe_14     7    32              3s.3p2 2D2.5 - 3s.3p(3P).3d 2F3.5            218.1767    1.557e-02     1.70e+10 Y
   fe_14     4    22              3s.3p2 4P1.5 - 3s.3p(3P).3d 4P2.5            218.5725    1.009e-02     2.65e+10 Y
   fe_14     2    12              3s2.3p 2P1.5 - 3s2.3d 2D2.5                  219.1305    2.096e-01     4.27e+10 Y
-   
+
  ------------------------------------------
 
- 
+
 G(n,T) function
 ---------------
 
 ::
-	
+
   fe14.gofnt(wvlRange=[210., 220.],top=3)
 
 brings up a matplotlib plot window which shows the emissivities of the top (strongest) 3 lines in the wavelength region from 210 to 220 Angstroms.
@@ -170,15 +170,15 @@ while the is a fairly straightforward way to get a G(T) function, it is not very
   dist = np.abs(np.asarray(fe14.Intensity['wvl']) - 211.3172)
   idx = np.argmin(dist)
   print(' wvl = %10.3f '%(fe14.Intensity['wvl'][idx]))
-  
-prints 
 
-wvl =    211.317 
+prints
+
+wvl =    211.317
 
 ::
 
   plt.loglog(temp,fe14.Intensity['intensity'][:,idx])
-  
+
 once the axes are properly scaled, this produces the same values as fe14.Gofnt['gofnt']
 
 .. image:: _static/fe14.gofnt_alternate.png
@@ -228,7 +228,7 @@ the same numerator/denominator selector dialog would come up and when 2 or more 
 to obtain ratios of lines widely separated in wavelength, the wvlRanges keyword can be used:
 
 ::
-  
+
  fe12 = ch.ion('fe_12', temperature=t, eDensity=1.e+9
  fe12.intensityRatio(wvlRanges=[[190.,200.],[1240.,1250.]])
 
@@ -240,7 +240,7 @@ Spectra of a single ion
 -----------------------
 
 ::
-	
+
   fe14 = ch.ion('fe_14', temperature = 2.e+6, density = 1.e+9)
   wvl = wvl=200. + 0.125*arange(801)
   fe14.spectrum(wvl, em=1.e+27)
@@ -259,11 +259,11 @@ other filters available in chianti.filters include a boxcar filter and a gaussia
       print(' Emission Measure = %12.2e'%(fe14.Em))
   else:
       print(' the value for the emission measure is unspecified')
-      
+
 Emission Measure =     1.00e+27
 
 ::
-	
+
   import chianti.filters as chfilters
   fe14.spectrum(wvl,filter=(chfilters.gaussian,.04))
 
@@ -274,7 +274,7 @@ The current value of the spectrum is kept in fe14.Spectrum with the following ke
 
   for akey in sorted(fe14.Spectrum.keys()):
       print(' %10s'%(akey))
-      
+
 allLines
 em
 filter
@@ -292,8 +292,8 @@ ylabel
 
 .. image:: _static/fe14.spectrum2.png
     :align:  center
-    
-    
+
+
 New in **ChiantiPy 0.6**, the *label* keyword has been added to the ion.spectrum method, and also to the other various spectral classes. This allows several spectral calculations for different filters to be saved and compared
 
 ::
@@ -304,36 +304,36 @@ New in **ChiantiPy 0.6**, the *label* keyword has been added to the ion.spectrum
   emeas = np.ones(11,'float64')*1.e+27
   wvl = 200. + 0.125*np.arange(801)
   fe14.spectrum(wvl,filter=(chfilters.gaussian,.4),label='.4',em=emeas, label='0.4')
-  fe14.spectrum(wvl,filter=(chfilters.gaussian,1.),label='1.', label-'1.0')  
+  fe14.spectrum(wvl,filter=(chfilters.gaussian,1.),label='1.', label-'1.0')
   plt.plot(wvl,fe14.Spectrum['.4']['intensity'][5])
   plt.plot(wvl,fe14.Spectrum['1.']['intensity'][5],'-r')
   plt.xlabel(fe14.Spectrum['.4']['xlabel'])
-  plt.ylabel(fe14.Spectrum['.4']['ylabel'])  
+  plt.ylabel(fe14.Spectrum['.4']['ylabel'])
   plt.legen(loc='upper right')
-  
-  
+
+
 .. image:: _static/fe14.spectrum_label.png
     :align:  center
 
 
-  
+
 Free-free and free-bound continuum
 ----------------------------------
 
 The module continuum provides the ability to calculate the free-free and free-bound spectrum for a large number of  individual ions.  The two-photon continuum is produced only by the hydrogen-like and helium-like ions
 
 ::
-	
+
   temperature = 2.e+7
   c = ch.continuum('fe_25', temperature = temperature)
   wvl = 1. + 0.002*arange(4501)
   c.freeFree(wvl)
-  plot(wvl, c.FreeFree['rate'])
+  plot(wvl, c.FreeFree['intensity'])
   c.freeBound(wvl)
-  plot(wvl, c.FreeBound['rate'])
+  plot(wvl, c.FreeBound['intensity'])
   fe25=ch.ion('fe_25',2.e+7,1.e+9,em=1.e+27)
   fe25.twoPhoton(wvl)
-  plt.plot(wvl,fe25.TwoPhoton['rate'],label='2 photon')
+  plt.plot(wvl,fe25.TwoPhoton['intensity'],label='2 photon')
   plt.legend(loc='upper right')
 
 
@@ -355,14 +355,14 @@ The multi-ion class **bunch** [new in v0.6] inherits a number of the same method
   bnch=ch.bunch(t,1.e+9,wvlRange=[300.,500.],ionList=['ne_6','mg_6'],abundanceName='unity')
   bnch.intensityRatio(wvlRange=[395.,405.],top=7)
 
-produces and initial plot of the selected lines, a selection widget and finally a plot of the ratio 
+produces and initial plot of the selected lines, a selection widget and finally a plot of the ratio
 
 .. image:: _static/ne6_mg6_t_ratio_top7.png
     :align:  center
-    
+
 .. image:: _static/bunch_selector.png
     :align:  center
-    
+
 .. image:: _static/ne6_mg6_t_ratio.png
     :align:  center
 
@@ -411,13 +411,13 @@ these IonInstances have all the properties of the Ion class for each of these io
 
   plt.plot(wvl,bnch2.IonInstances['mg_6'].Spectrum['intensity'][6],'r',label='mg_6')
   plt.legend(loc='upper left')
-  
+
 produces
 
 .. image:: _static/ne6_mg6_spectrum.png
     :align:  center
-    
-    
+
+
 Spectra of multiple ions and continuum
 --------------------------------------
 
@@ -434,7 +434,7 @@ The single processor spectrum class
 
 
 ::
-	
+
   temperature = [1.e+6, 2.e+6]
   density = 1.e+9
   wvl = 200. + 0.05*arange(2001)
@@ -454,13 +454,13 @@ produces
     :align:  center
 
 
-The integrated spectrum is formed by summing the spectra for all temperatures.  
+The integrated spectrum is formed by summing the spectra for all temperatures.
 
-  * For minAbund=1.e-6, the calculatation takes 209 s on a 3.5 GHz processor.  
-  
+  * For minAbund=1.e-6, the calculatation takes 209 s on a 3.5 GHz processor.
+
   * For minAbund=1.e-5, the calculatation takes 122 s on a 3.5 GHz processor.
-  
-  
+
+
 The filter is not applied to the continuum.
 
 
@@ -472,7 +472,7 @@ Calculations with the Spectrum module can be time consuming.  One way to control
 
 
   * minAbund = 1.e-4, will include H, He, C, O, Ne
-  
+
   * minAbund = 2.e-5 adds  N, Mg, Si, S, Fe
 
   * minAbund = 1.e-6 adds  Na, Al, Ar, Ca, Ni
@@ -515,24 +515,24 @@ then in an IPython notebook or qtconsole
   s = ch.ipymspectrum(temp, dens, wvl, filter = (chfilters.gaussian,.2), em = emeasure, doContinuum=1, minAbund=1.e-5, verbose=0)
   plt.figure
   plt.plot(wvl, s.Spectrum['integrated'])
-  
+
 produces
 
 .. image:: _static/spectrum_200_300_integrated.png
     :align:  center
 
-  
+
 
 spectrum, mspectrum and ipymspectrum can all be instantiated with the same arguments and keyword arguments.  Most of the examples below use the ipymspectrum class for speed.
 
 ::
-    
+
   temperature = 1.e+7
   wvl = 10. + 0.005*arange(2001)
   s = ch.ipymspectrum(temperature, density, wvl, filter = (chfilters.gaussian,.015))
   plot(wvl, s.Spectrum['intensity'])
 
-produces 
+produces
 
 .. image:: _static/spectrum_10_20.png
     :align:  center
@@ -564,26 +564,26 @@ Because **keepIons** has been set, the ion instances of all of the ions are main
   wvl = 1. + 0.002*np.arange(4501)
   s3 = ch.ipymspectrum(temp, dens, wvl, filter = (chfilters.gaussian,.015),doContinuum=1, em=1.e+27,minAbund=1.e-5,verbose=0)
   plt.plot(wvl, s3.Spectrum['intensity'])
-  
+
 
 .. image:: _static/spectrum_1_10.png
     :align:  center
-    
+
 with doContinuum=1, the continuum can be plotted separately
-    
+
 ::
 
   plot(wvl, s3.Spectrum['intensity'])  plot(wvl,s.FreeFree['intensity'])
   plot(wvl,s.FreeBound['intensity'])
   plot(wvl,s.FreeBound['intensity']+s.FreeFree['intensity'])
-  
-  
+
+
 
 produces
 
 .. image:: _static/continuum_2e7_1_10.png
     :align:  center
-    
+
 ::
 
   temperature = 2.e+7
@@ -596,8 +596,8 @@ produces
 
 .. image:: _static/spectrum_2e7_1.84_1.90.png
     :align:  center
-    
-    
+
+
 Radiative loss rate
 -------------------
 
@@ -614,7 +614,7 @@ produces, in 446 s:
 .. image:: _static/radloss.png
     :align:  center
 
-    
+
 the radiative losses are kept in the rl.RadLoss dictionary
 
 the **abundance** keyword argument can be set to the name of an available abundance file in XUVTOP/abund

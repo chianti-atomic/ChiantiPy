@@ -207,7 +207,8 @@ class spectrum(ionTrails, specTrails):
                 # get 2 photon emission for H and He sequences
                 if (Z - ionstage) in [0, 1] and not dielectronic:
                     thisIon.twoPhoton(wavelength)
-                    twoPhoton += thisIon.TwoPhoton['rate']
+                    twoPhoton += thisIon.TwoPhoton['intensity']
+                    twoPhoton += thisIon.TwoPhoton['intensity']
 
         self.FreeFree = {'wavelength':wavelength, 'intensity':freeFree.squeeze()}
         self.FreeBound = {'wavelength':wavelength, 'intensity':freeBound.squeeze()}

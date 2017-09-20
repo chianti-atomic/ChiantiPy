@@ -411,6 +411,9 @@ class continuum(object):
             <http://adsabs.harvard.edu/abs/2003ApJS..144..135Y>`_
         """
         wavelength = np.atleast_1d(wavelength)
+        if wavelength.size < 2:
+            print(' wavelength must have at least two values, current length %3i'%(wavelength.size))
+            return
         self.NWavelength = wavelength.size
         # calculate the photon energy in erg
         photon_energy = ch_const.planck*(1.e8*ch_const.light)/wavelength

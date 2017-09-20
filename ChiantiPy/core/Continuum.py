@@ -58,10 +58,13 @@ class continuum(object):
         self.stage = self.nameDict['Ion']
         self.Temperature = np.atleast_1d(temperature)
         self.NTemperature = self.Temperature.size
+        
         if em is None:
+            self.Em = 1.*np.ones_like(self.Temperature)
+        elif type(em) == np.ndarray:
             self.Em = em
-        else:
-            self.Em = np.array(em)
+        elif type(em) == type(1.):
+            self.Em = em*np.ones_like(self.Temperature)
         self.Ip = ch_data.Ip[self.Z-1, self.stage-1]
         self.Ipr = ch_data.Ip[self.Z-1, self.stage-2]
         self.ionization_potential = ch_data.Ip[self.Z-1, self.stage-1]*ch_const.ev2Erg
@@ -187,7 +190,7 @@ class continuum(object):
             energy_factor = ch_const.planck*(1.e8*ch_const.light)/wavelength
 
         free_free_emission = (prefactor[:,np.newaxis]*exp_factor*gf/energy_factor).squeeze()
-        self.FreeFree = {'intensity':free_free_emission, 'temperature':self.Temperature, 'wvl':wavelength, 'em':self.Em}
+        self.FreeFree = {'intensity':free_free_emission, 'temperature':self.Temperature, 'wvl':wavelength, 'em':self.Em, 'ions':self.ion_string}
 
     def itoh_gaunt_factor(self, wavelength):
         """
@@ -408,6 +411,9 @@ class continuum(object):
             <http://adsabs.harvard.edu/abs/2003ApJS..144..135Y>`_
         """
         wavelength = np.atleast_1d(wavelength)
+        if wavelength.size < 2:
+            print(' wavelength must have at least two values, current length %3i'%(wavelength.size))
+            return
         self.NWavelength = wavelength.size
         # calculate the photon energy in erg
         photon_energy = ch_const.planck*(1.e8*ch_const.light)/wavelength
@@ -485,7 +491,7 @@ class continuum(object):
         fb_emiss /= 1e8
 
 #        self.free_bound_emission = fb_emiss.squeeze()
-        self.FreeBound = {'intensity':fb_emiss.squeeze(), 'temperature':self.Temperature,'wvl':wavelength,'em':self.Em}
+        self.FreeBound = {'intensity':fb_emiss.squeeze(), 'temperature':self.Temperature,'wvl':wavelength,'em':self.Em, 'ions':self.ion_string}
         
 
     def verner_cross_section(self, photon_energy):

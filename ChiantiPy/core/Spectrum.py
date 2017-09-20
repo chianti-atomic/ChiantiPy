@@ -175,14 +175,11 @@ class spectrum(ionTrails, specTrails):
                 if verbose:
                     print(' calculating fb continuum for :  %s'%(akey))
                 FB = ChiantiPy.core.continuum(akey, temperature, abundance=abundance, em=em)
-                try:
-                    FB.freeBound(wavelength)
+                FB.freeBound(wavelength)
+                if 'errorMessage' not in FB.FreeBound.keys():
                     freeBound += FB.FreeBound['intensity']
                     if keepIons:
                         self.FbInstances[akey] = copy.deepcopy(FB)
-                except ValueError:
-                    # free-bound information not available for all ions
-                    pass
             if 'line' in self.Todo[akey]:
                 if verbose:
                     print(' calculating spectrum for  :  %s'%(akey))

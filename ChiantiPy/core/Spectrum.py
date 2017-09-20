@@ -180,9 +180,6 @@ class spectrum(ionTrails, specTrails):
                     freeBound += FB.FreeBound['intensity']
                     if keepIons:
                         self.FbInstances[akey] = copy.deepcopy(FB)
-                else:
-                    # free-bound information not available for all ions
-                    pass
             if 'line' in self.Todo[akey]:
                 if verbose:
                     print(' calculating spectrum for  :  %s'%(akey))

@@ -80,6 +80,10 @@ class spectrum(ionTrails, specTrails):
     '''
     def __init__(self, temperature, eDensity, wavelength, filter=(chfilters.gaussianR, 1000.), label=None, elementList = None, ionList = None, minAbund=None, doLines=1, doContinuum=1, em=None, keepIons=0,  abundance=None, verbose=0, allLines=1):
         #
+        wavelength = np.atleast_1d(wavelength)
+        if wavelength.size < 2:
+            print(' wavelength must have at least two values, current length %3i'%(wavelength.size))
+            return
         t1 = datetime.now()
         # creates Intensity dict from first ion calculated
         setupIntensity = 0

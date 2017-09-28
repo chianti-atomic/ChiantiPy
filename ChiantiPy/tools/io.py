@@ -943,10 +943,10 @@ def klgfbRead():
     return {'pe':pe, 'klgfb':gfb}
 
 
-def ioneqRead(ioneqname='', verbose=False):
+def ioneqRead(ioneqname='', minIoneq=1.e-20, verbose=False):
     """
     Reads an ioneq file
-
+    ionization equilibrium values less then minIoneq are returns as zeros
     Returns
     -------
     {'ioneqname','ioneqAll','ioneqTemperature','ioneqRef'} : `dict`
@@ -996,9 +996,7 @@ def ioneqRead(ioneqname='', verbose=False):
     nTemperature = int(ntemp)
     nElement = int(nele)
     #
-#    tformat=FortranFormat(str(nTemperature)+'f6.2')
     header_linet = FortranRecordReader(str(nTemperature)+'f6.2')
-#    ioneqTemperature=FortranLine(s1[1],tformat)
     ioneqTemperature = header_linet.read(s1[1])
     ioneqTemperature = np.asarray(ioneqTemperature[:],'Float64')
     ioneqTemperature = 10.**ioneqTemperature
@@ -1021,6 +1019,7 @@ def ioneqRead(ioneqname='', verbose=False):
         iz = out[0]
         ion = out[1]
         ioneqAll[iz-1,ion-1].put(list(range(nTemperature)),np.asarray(out[2:],'Float64'))
+    ioneqAll = np.where(ioneqAll > minIoneq, ioneqAll, 0.)
     ioneqRef = []
     for one in s1[nlines+1:]:
         ioneqRef.append(one[:-1])  # gets rid of the \n

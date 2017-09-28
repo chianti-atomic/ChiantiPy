@@ -144,16 +144,6 @@ class ion(ionTrails, specTrails):
             self.Temperature = np.array(temperature)
         self.IoneqAll = chdata.IoneqAll
         self.ioneqOne()
-#        if self.IoneqOne == None:
-#            
-#        try:
-#            isize = self.IoneqOne.size
-#            if verbose:
-#                print('%s  size of self.IoneqOne %i'%(self.IonStr, isize))
-#        except:
-#            if verbose:
-#                print(' %s error in ioneqOne.size len: %i'%(self.IonStr, len(self.IoneqOne)))
-#            return
         #  this needs to go after setting temperature and reading ionization
         #  equilibria
         if pDensity == 'default':
@@ -2578,7 +2568,7 @@ class ion(ionTrails, specTrails):
         if len(emissivity.shape) > 1:
             nwvl, ntempden =  emissivity.shape
             intensity = np.zeros((ntempden, nwvl),'Float64')
-            if self.IoneqOne == None:
+            if self.IoneqOne.all() == 0.:
                 intensity = np.zeros((ntempden, nwvl),'Float64')
                 errorMessage = 'ioneq = zero in temperature range'
                 self.Intensity = {'intensity':intensity, 'errorMessage':errorMessage}

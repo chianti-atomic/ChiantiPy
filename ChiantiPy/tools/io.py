@@ -1309,6 +1309,42 @@ def rrRead(ions, filename=None):
         return RrParams
     else:
         return {'rrtype':-1}
+        
+def rrLossRead():
+    ''' to read the Mao 2017 rr loss parameters
+    
+    References
+    ----------
+    .. [1] Mao J., Kaastra J., Badnell N.R., `2017 Astron. Astrophys. 599, A10
+        <http://adsabs.harvard.edu/abs/2017A%26A...599A..10M>`_
+    '''
+    filename = os.path.join(os.environ['XUVTOP'], 'continuum', 'rrloss_mao_2017_pars.dat')
+    inpt = open(filename, 'r')
+    lines = inpt.readlines()
+    inpt.close()
+    iso = []
+    z = []
+    a0 = []
+    b0 = []
+    c0 = []
+    a1 = []
+    b1 = []    
+    a2 = []
+    b2 = []
+    mdp = []
+    for aline in lines:
+        iso.append(int(aline.split()[0]))
+        z.append(int(aline.split()[1]))
+        a0.append(float(aline.split()[2]))
+        b0.append(float(aline.split()[3]))
+        c0.append(float(aline.split()[4]))
+        a1.append(float(aline.split()[5]))
+        b1.append(float(aline.split()[6]))
+        a2.append(float(aline.split()[7]))
+        b2.append(float(aline.split()[8]))
+        mdp.append(float(aline.split()[9]))
+        
+    return {'iso':iso, 'z':z, 'a0':a0, 'b0':b0, 'c0':c0, 'a1':a1, 'b1':b1, 'a2':a2, 'b2':b2, 'mdp':mdp}
 
 
 def scupsRead(ions, filename=None, verbose=False):

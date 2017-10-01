@@ -2736,8 +2736,6 @@ class ion(ionTrails, specTrails):
         ioneqOne = np.zeros_like(temperature)
         #
         thisIoneq = ioneqAll['ioneqAll'][Z-1,Ion-1 + Dielectronic].squeeze()
-        del ioneqAll
-#        thisIoneq = self.Ioneq
         gioneq = thisIoneq > 0.
         goodt1 = self.Temperature >= ioneqTemperature[gioneq].min()
         goodt2 = self.Temperature <= ioneqTemperature[gioneq].max()

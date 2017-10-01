@@ -58,6 +58,7 @@ class continuum(object):
         self.stage = self.nameDict['Ion']
         self.Temperature = np.atleast_1d(temperature)
         self.NTemperature = self.Temperature.size
+        self.Defaults = ch_data.Defaults
         
         if em is None:
             self.Em = 1.*np.ones_like(self.Temperature)
@@ -85,7 +86,7 @@ class continuum(object):
             self.abundance_name = ch_data.Defaults['abundfile']
         if not hasattr(self, 'abundance'):
             self.abundance = ch_data.Abundance[self.abundance_name]['abundance'][self.Z-1]
-        self.IoneqOne = self.ioneqOne()
+        self.ioneqOne()
 
     def calculate_free_free_loss(self, **kwargs):
         """
@@ -177,7 +178,7 @@ class continuum(object):
         if include_abundance:
             prefactor *= self.abundance
         if include_ioneq:
-            prefactor *= self.ioneq_one(self.stage, **kwargs)
+            prefactor *= self.IoneqOne
         if self.Em is not None:
             prefactor *= self.Em
         # define exponential factor
@@ -230,7 +231,7 @@ class continuum(object):
         prefactor = (4.*(ch_const.fine**3)*(ch_const.planck**2)/3./(np.pi**2)/ch_const.emass
                      * np.sqrt(2.*np.pi*ch_const.boltzmann/3./ch_const.emass))
         # include abundance and ionization equilibrium
-        prefactor *= self.abundance*self.ioneq_one(self.stage, **kwargs)
+        prefactor *= self.abundance*self.IoneqOne
 
         self.FreeFreeLoss = {'rate':prefactor*(self.Z**2)*np.sqrt(self.Temperature)*gaunt_factor}
 
@@ -549,11 +550,12 @@ class continuum(object):
         if include_ioneq:
             if self.NTemperature > 1:
                 if self.NWavelength > 1:
-                    fb_emiss *= self.ioneq_one(self.stage, **kwargs)[:,np.newaxis]
+#                    fb_emiss *= self.ioneq_one(self.stage, **kwargs)[:,np.newaxis]
+                    fb_emiss *= self.IoneqOne
                 else:
-                    fb_emiss *= self.ioneq_one(self.stage, **kwargs)
+                    fb_emiss *= self.IoneqOne
             else:
-                fb_emiss *= self.ioneq_one(self.stage, **kwargs)
+                fb_emiss *= self.IoneqOne
         if self.Em is not None:
             if self.Em.size > 1:
                 fb_emiss *= self.Em[:,np.newaxis]
@@ -682,6 +684,7 @@ class continuum(object):
     def ioneqOne(self):
         '''
         Provide the ionization equilibrium for the selected ion as a function of temperature.
+        Similar to but not identical to ion.ioneqOne()
         returned in self.IoneqOne
         '''
         #
@@ -693,16 +696,15 @@ class continuum(object):
         if hasattr(self, 'IoneqAll'):
             ioneqAll = self.IoneqAll
         else:
-            ioneqAll = ch_io.ioneqRead(ioneqname = self.Defaults['ioneqfile'])
-            self.ioneqAll = self.IoneqAll
+            self.IoneqAll = ch_io.ioneqRead(ioneqname = self.Defaults['ioneqfile'])
+            ioneqAll = self.IoneqAll
         #
         ioneqTemperature = ioneqAll['ioneqTemperature']
         Z = self.Z
-        Ion = self.Ion
-        Dielectronic = self.Dielectronic
+        stage = self.stage
         ioneqOne = np.zeros_like(temperature)
         #
-        thisIoneq = ioneqAll['ioneqAll'][Z-1,Ion-1 + Dielectronic].squeeze()
+        thisIoneq = ioneqAll['ioneqAll'][Z-1,stage-1].squeeze()
         gioneq = thisIoneq > 0.
         goodt1 = self.Temperature >= ioneqTemperature[gioneq].min()
         goodt2 = self.Temperature <= ioneqTemperature[gioneq].max()
@@ -716,7 +718,10 @@ class continuum(object):
             else:
                 gIoneq = splev(np.log(self.Temperature),y2)
                 ioneqOne = np.exp(gIoneq)
+                ioneqOne = np.atleast_1d(ioneqOne)
             self.IoneqOne = ioneqOne
+        else:
+            self.IoneqOne = np.zeros_like(self.Temperature)
 
 
     def ioneq_one(self, stage, **kwargs):

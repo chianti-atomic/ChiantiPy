@@ -143,7 +143,6 @@ class ion(ionTrails, specTrails):
         if temperature is not None:
             self.Temperature = np.array(temperature)
         self.IoneqAll = chdata.IoneqAll
-        self.ioneqOne()
         #  this needs to go after setting temperature and reading ionization
         #  equilibria
         if pDensity == 'default':
@@ -155,6 +154,8 @@ class ion(ionTrails, specTrails):
                 self.Temperature = np.ones_like(self.EDensity)*self.Temperature
             elif self.EDensity.size == 1 and self.Temperature.size > 1:
                 self.EDensity = np.ones_like(self.Temperature)*self.EDensity
+        #  needs to know self.NTempDen first
+        self.ioneqOne()
 
         if hasattr(self,'EDensity') and hasattr(self,'Temperature') \
         and self.EDensity.size != self.Temperature.size:
@@ -2754,8 +2755,8 @@ class ion(ionTrails, specTrails):
                 gIoneq = interpolate.splev(np.log(self.Temperature[goodt]),y2)   #,der=0)
                 ioneqOne[goodt] = np.exp(gIoneq)
             else:
-                gIoneq = np.atleast_1d(interpolate.splev(np.log(self.Temperature),y2))
-                ioneqOne = np.exp(gIoneq)
+                gIoneq = interpolate.splev(np.log(self.Temperature),y2)
+                ioneqOne = np.exp(gIoneq)*np.ones(self.NTempDen, 'float64')
             self.IoneqOne = ioneqOne
         else:
             self.IoneqOne = np.zeros_like(self.Temperature)

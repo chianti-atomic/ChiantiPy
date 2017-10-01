@@ -85,6 +85,7 @@ class continuum(object):
             self.abundance_name = ch_data.Defaults['abundfile']
         if not hasattr(self, 'abundance'):
             self.abundance = ch_data.Abundance[self.abundance_name]['abundance'][self.Z-1]
+        self.IoneqOne = self.IoneqOne()
 
     def calculate_free_free_loss(self, **kwargs):
         """
@@ -603,6 +604,46 @@ class continuum(object):
         spl = splrep(klgfb['pe'], thisGf)
         gf = splev(sclE, spl)
         return gf
+        
+    def ioneqOne(self):
+        '''
+        Provide the ionization equilibrium for the selected ion as a function of temperature.
+        returned in self.IoneqOne
+        '''
+        #
+        if hasattr(self, 'Temperature'):
+            temperature = self.Temperature
+        else:
+            return
+        #
+        if hasattr(self, 'IoneqAll'):
+            ioneqAll = self.IoneqAll
+        else:
+            ioneqAll = ch_io.ioneqRead(ioneqname = self.Defaults['ioneqfile'])
+            self.ioneqAll = self.IoneqAll
+        #
+        ioneqTemperature = ioneqAll['ioneqTemperature']
+        Z = self.Z
+        Ion = self.Ion
+        Dielectronic = self.Dielectronic
+        ioneqOne = np.zeros_like(temperature)
+        #
+        thisIoneq = ioneqAll['ioneqAll'][Z-1,Ion-1 + Dielectronic].squeeze()
+        gioneq = thisIoneq > 0.
+        goodt1 = self.Temperature >= ioneqTemperature[gioneq].min()
+        goodt2 = self.Temperature <= ioneqTemperature[gioneq].max()
+        goodt = np.logical_and(goodt1,goodt2)
+        y2 = splrep(np.log(ioneqTemperature[gioneq]),np.log(thisIoneq[gioneq]),s=0)
+        #
+        if goodt.sum() > 0:
+            if self.Temperature.size > 1:
+                gIoneq = splev(np.log(self.Temperature[goodt]),y2)   #,der=0)
+                ioneqOne[goodt] = np.exp(gIoneq)
+            else:
+                gIoneq = splev(np.log(self.Temperature),y2)
+                ioneqOne = np.exp(gIoneq)
+            self.IoneqOne = ioneqOne
+
 
     def ioneq_one(self, stage, **kwargs):
         """

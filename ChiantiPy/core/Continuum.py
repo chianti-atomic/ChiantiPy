@@ -85,7 +85,7 @@ class continuum(object):
             self.abundance_name = ch_data.Defaults['abundfile']
         if not hasattr(self, 'abundance'):
             self.abundance = ch_data.Abundance[self.abundance_name]['abundance'][self.Z-1]
-        self.IoneqOne = self.IoneqOne()
+        self.IoneqOne = self.ioneqOne()
 
     def calculate_free_free_loss(self, **kwargs):
         """

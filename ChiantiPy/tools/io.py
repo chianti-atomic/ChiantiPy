@@ -943,10 +943,10 @@ def klgfbRead():
     return {'pe':pe, 'klgfb':gfb}
 
 
-def ioneqRead(ioneqname='', verbose=False):
+def ioneqRead(ioneqname='', minIoneq=1.e-20, verbose=False):
     """
     Reads an ioneq file
-
+    ionization equilibrium values less then minIoneq are returns as zeros
     Returns
     -------
     {'ioneqname','ioneqAll','ioneqTemperature','ioneqRef'} : `dict`
@@ -996,9 +996,7 @@ def ioneqRead(ioneqname='', verbose=False):
     nTemperature = int(ntemp)
     nElement = int(nele)
     #
-#    tformat=FortranFormat(str(nTemperature)+'f6.2')
     header_linet = FortranRecordReader(str(nTemperature)+'f6.2')
-#    ioneqTemperature=FortranLine(s1[1],tformat)
     ioneqTemperature = header_linet.read(s1[1])
     ioneqTemperature = np.asarray(ioneqTemperature[:],'Float64')
     ioneqTemperature = 10.**ioneqTemperature
@@ -1021,6 +1019,7 @@ def ioneqRead(ioneqname='', verbose=False):
         iz = out[0]
         ion = out[1]
         ioneqAll[iz-1,ion-1].put(list(range(nTemperature)),np.asarray(out[2:],'Float64'))
+    ioneqAll = np.where(ioneqAll > minIoneq, ioneqAll, 0.)
     ioneqRef = []
     for one in s1[nlines+1:]:
         ioneqRef.append(one[:-1])  # gets rid of the \n
@@ -1310,6 +1309,42 @@ def rrRead(ions, filename=None):
         return RrParams
     else:
         return {'rrtype':-1}
+        
+def rrLossRead():
+    ''' to read the Mao 2017 rr loss parameters
+    
+    References
+    ----------
+    .. [1] Mao J., Kaastra J., Badnell N.R., `2017 Astron. Astrophys. 599, A10
+        <http://adsabs.harvard.edu/abs/2017A%26A...599A..10M>`_
+    '''
+    filename = os.path.join(os.environ['XUVTOP'], 'continuum', 'rrloss_mao_2017_pars.dat')
+    inpt = open(filename, 'r')
+    lines = inpt.readlines()
+    inpt.close()
+    iso = []
+    z = []
+    a0 = []
+    b0 = []
+    c0 = []
+    a1 = []
+    b1 = []    
+    a2 = []
+    b2 = []
+    mdp = []
+    for aline in lines:
+        iso.append(int(aline.split()[0]))
+        z.append(int(aline.split()[1]))
+        a0.append(float(aline.split()[2]))
+        b0.append(float(aline.split()[3]))
+        c0.append(float(aline.split()[4]))
+        a1.append(float(aline.split()[5]))
+        b1.append(float(aline.split()[6]))
+        a2.append(float(aline.split()[7]))
+        b2.append(float(aline.split()[8]))
+        mdp.append(float(aline.split()[9]))
+        
+    return {'iso':iso, 'z':z, 'a0':a0, 'b0':b0, 'c0':c0, 'a1':a1, 'b1':b1, 'a2':a2, 'b2':b2, 'mdp':mdp}
 
 
 def scupsRead(ions, filename=None, verbose=False):

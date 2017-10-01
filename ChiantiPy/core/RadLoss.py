@@ -141,12 +141,9 @@ class radLoss(specTrails):
                     if verbose:
                         print(' calculating fb continuum for :  %s'%(akey))
                     cont = continuum(akey, temperature, abundance=abundance)
-                    try:
-                        cont.calculate_free_bound_loss()
+                    cont.freeBoundLoss()
+                    if 'errorMessage' not in cont.FreeBoundLoss.keys():
                         freeBoundLoss += cont.free_bound_loss
-                    except ValueError:
-                        # account for case where there is no free-bound information available
-                        pass
             if 'line' in self.Todo[akey]:
                 if verbose:
                     print(' calculating spectrum for  :  %s'%(akey))

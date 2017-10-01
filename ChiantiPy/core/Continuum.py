@@ -114,6 +114,8 @@ class continuum(object):
         # interpolate wavelength-averaged K&L gaunt factors
         gf_kl_info = ch_io.gffintRead()
         gamma_squared = self.ionization_potential/ch_const.boltzmann/self.Temperature
+        for i, atemp in enumerate(self.Temperature):
+            print('%s T:  %10.2e gamma_squared  %10.2e'%(self.ion_string, atemp, gamma_squared[i]))
         gaunt_factor = splev(np.log(gamma_squared),
                              splrep(gf_kl_info['g2'],gf_kl_info['gffint']), ext=3)
         # calculate numerical constant
@@ -192,6 +194,46 @@ class continuum(object):
 
         free_free_emission = (prefactor[:,np.newaxis]*exp_factor*gf/energy_factor).squeeze()
         self.FreeFree = {'intensity':free_free_emission, 'temperature':self.Temperature, 'wvl':wavelength, 'em':self.Em, 'ions':self.ion_string}
+        
+    def freeFreeLoss(self, **kwargs):
+        """
+        Calculate the free-free energy loss rate of an ion. The result is returned to the
+        `free_free_loss` attribute.
+
+        The free-free radiative loss rate is given by Eq. 5.15a of [1]_. Writing the numerical
+        constant in terms of the fine structure constant :math:`\\alpha`,
+
+        .. math::
+           \\frac{dW}{dtdV} = \\frac{4\\alpha^3h^2}{3\pi^2m_e}\left(\\frac{2\pi k_B}{3m_e}\\right)^{1/2}Z^2T^{1/2}\\bar{g}_B
+
+        where where :math:`Z` is the nuclear charge, :math:`T` is the electron temperature, and
+        :math:`\\bar{g}_{B}` is the wavelength-averaged and velocity-averaged Gaunt factor. The
+        Gaunt factor is calculated using the methods of [2]_. Note that this expression for the
+        loss rate is just the integral over wavelength of Eq. 5.14a of [1]_, the free-free emission, and
+        is expressed in units of erg :math:`\mathrm{cm}^3\,\mathrm{s}^{-1}`.
+
+        References
+        ----------
+        .. [1] Rybicki and Lightman, 1979, Radiative Processes in Astrophysics,
+            `(Wiley-VCH) <http://adsabs.harvard.edu/abs/1986rpa..book.....R>`_
+        .. [2] Karzas and Latter, 1961, ApJSS, `6, 167
+            <http://adsabs.harvard.edu/abs/1961ApJS....6..167K>`_
+        """
+        # interpolate wavelength-averaged K&L gaunt factors
+        gf_kl_info = ch_io.gffintRead()
+        gamma_squared = self.IprErg/ch_const.boltzmann/self.Temperature
+        for i, atemp in enumerate(self.Temperature):
+            print('%s T:  %10.2e gamma_squared  %10.2e'%(self.ion_string, atemp, gamma_squared[i]))
+        gaunt_factor = splev(np.log(gamma_squared),
+                             splrep(gf_kl_info['g2'],gf_kl_info['gffint']), ext=3)
+        # calculate numerical constant
+        prefactor = (4.*(ch_const.fine**3)*(ch_const.planck**2)/3./(np.pi**2)/ch_const.emass
+                     * np.sqrt(2.*np.pi*ch_const.boltzmann/3./ch_const.emass))
+        # include abundance and ionization equilibrium
+        prefactor *= self.abundance*self.ioneq_one(self.stage, **kwargs)
+
+        self.FreeFreeLoss = {'rate':prefactor*(self.Z**2)*np.sqrt(self.Temperature)*gaunt_factor}
+
 
     def itoh_gaunt_factor(self, wavelength):
         """
@@ -297,6 +339,38 @@ class continuum(object):
                      * (ch_const.boltzmann**(1./2.))/(ch_const.emass**(3./2.)))
 
         self.free_bound_loss = gaunt_factor*np.sqrt(self.Temperature)*prefactor
+
+    def freeBoundLoss(self, **kwargs):
+        """
+        Calculate the free-bound energy loss rate of an ion. The result is returned to the
+        `free_bound_loss` attribute.
+
+        The free-bound loss rate can be calculated by integrating the free-bound emission over the wavelength.
+        This is difficult using the expression in `calculate_free_bound_emission` so we instead use the
+        approach of [1]_ and [2]_. Eq. 1a of [2]_ can be integrated over wavelength to get the free-bound loss rate,
+
+        .. math::
+           \\frac{dW}{dtdV} = C_{ff}\\frac{k}{hc}T^{1/2}G_{fb},
+
+        in units of erg :math:`\mathrm{cm}^3\,\mathrm{s}^{-1}` where :math:`G_{fb}` is the free-bound Gaunt factor as
+        given by Eq. 15 of [2]_ (see `mewe_gaunt_factor` for more details) and :math:`C_{ff}` is the numerical constant
+        as given in Eq. 4 of [1]_ and can be written in terms of the fine structure constant :math:`\\alpha`,
+
+        .. math::
+           C_{ff}\\frac{k}{hc} = \\frac{8}{3}\left(\\frac{\pi}{6}\\right)^{1/2}\\frac{h^2\\alpha^3}{\pi^2}\\frac{k_B}{m_e^{3/2}} \\approx 1.43\\times10^{-27}
+
+        References
+        ----------
+        .. [1] Gronenschild, E.H.B.M. and Mewe, R., 1978, A&AS, `32, 283 <http://adsabs.harvard.edu/abs/1978A%26AS...32..283G>`_
+        .. [2] Mewe, R. et al., 1986, A&AS, `65, 511 <http://adsabs.harvard.edu/abs/1986A%26AS...65..511M>`_
+        """
+        # Calculate Gaunt factor according to Mewe
+        gaunt_factor = self.mewe_gaunt_factor()
+        # Numerical prefactor
+        prefactor = (8./3.*np.sqrt(np.pi/6.)*(ch_const.planck**2)*(ch_const.fine**3)/(np.pi**2)
+                     * (ch_const.boltzmann**(1./2.))/(ch_const.emass**(3./2.)))
+
+        self.FreeBoundLoss = {'rate':gaunt_factor*np.sqrt(self.Temperature)*prefactor, 'temperature':self.Temperature}
 
     def mewe_gaunt_factor(self, **kwargs):
         """

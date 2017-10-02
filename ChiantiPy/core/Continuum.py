@@ -551,7 +551,7 @@ class continuum(object):
             if self.NTemperature > 1:
                 if self.NWavelength > 1:
 #                    fb_emiss *= self.ioneq_one(self.stage, **kwargs)[:,np.newaxis]
-                    fb_emiss *= self.IoneqOne
+                    fb_emiss *= self.IoneqOne[:,np.newaxis]
                 else:
                     fb_emiss *= self.IoneqOne
             else:

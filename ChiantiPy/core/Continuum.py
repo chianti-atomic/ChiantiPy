@@ -511,8 +511,8 @@ class continuum(object):
         else:
             omega_0 = recombining_fblvl['mult'][0]
         
-        recombined_fblvl = ch_io.fblvlRead(self.nameDict['lower'])
-        if 'errorMessage' in recombined_fblvl:
+        self.Recombined_fblvl = ch_io.fblvlRead(self.nameDict['lower'])
+        if 'errorMessage' in self.Recombined_fblvl:
 #            raise ValueError('No free-bound information available for {}'.format(ch_util.zion2name(self.Z, self.stage)))
             errorMessage = 'No free-bound information available for {}'.format(ch_util.zion2name(self.Z, self.stage))
             fb_emiss = np.zeros((self.NTemperature, self.NWavelength), 'float64')
@@ -527,10 +527,10 @@ class continuum(object):
 #            print(' energy size %5i'%(energy_over_temp_factor.size))
         # sum over levels of the recombined ion
         sum_factor = np.zeros((len(self.Temperature), len(wavelength)))
-        for i,omega_i in enumerate(recombined_fblvl['mult']):
+        for i,omega_i in enumerate(self.Recombined_fblvl['mult']):
             # ionization potential for level i
 #            ip = self.ionization_potential - recombined_fblvl['ecm'][i]*ch_const.planck*ch_const.light
-            ip = self.IprErg - recombined_fblvl['ecm'][i]*ch_const.planck*ch_const.light
+            ip = self.IprErg - self.Recombined_fblvl['ecm'][i]*ch_const.planck*ch_const.light
             # skip level if photon energy is not sufficiently high
             if ip < 0. or np.all(np.max(photon_energy) < (self.ionization_potential - ip)):
                 continue
@@ -539,8 +539,8 @@ class continuum(object):
                 cross_section = self.verner_cross_section(photon_energy)
             else:
                 cross_section = self.karzas_cross_section(photon_energy, ip,
-                                                          recombined_fblvl['pqn'][i],
-                                                          recombined_fblvl['l'][i])
+                                                          self.Recombined_fblvl['pqn'][i],
+                                                          self.Recombined_fblvl['l'][i])
             scaled_energy = np.outer(1./(ch_const.boltzmann*self.Temperature), photon_energy - ip)
             # the exponential term can go to infinity for low temperatures
             # but if the cross-section is zero this does not matter

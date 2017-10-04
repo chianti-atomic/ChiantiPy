@@ -365,7 +365,15 @@ class continuum(object):
         .. [1] Gronenschild, E.H.B.M. and Mewe, R., 1978, A&AS, `32, 283 <http://adsabs.harvard.edu/abs/1978A%26AS...32..283G>`_
         .. [2] Mewe, R. et al., 1986, A&AS, `65, 511 <http://adsabs.harvard.edu/abs/1986A%26AS...65..511M>`_
         """
-        # Calculate Gaunt factor according to Mewe
+        nameDict = ch_util.convertName(self.ion_string)
+        lower = nameDict['lower']
+        self.Recombined_fblvl = ch_io.fblvlRead(lower)
+        if 'errorMessage' in self.Recombined_fblvl:
+            errorMessage = 'No free-bound information available for {}'.format(self.ion_string)
+            rate = np.zeros_like(self.Temperature)
+            self.FreeBoundLoss = {'rate':rate, 'errorMessage':errorMessage}
+            return
+# Calculate Gaunt factor according to Mewe
         gaunt_factor = self.mewe_gaunt_factor()
         # Numerical prefactor
         prefactor = (8./3.*np.sqrt(np.pi/6.)*(ch_const.planck**2)*(ch_const.fine**3)/(np.pi**2)
@@ -405,15 +413,10 @@ class continuum(object):
         .. [1] Mewe, R. et al., 1986, A&AS, `65, 511 <http://adsabs.harvard.edu/abs/1986A%26AS...65..511M>`_
         """
         # read in free-bound level information for the recombined ion
-        nameDict = ch_util.convertName(self.ion_string)
-        lower = nameDict['lower']
-        recombined_fblvl = ch_io.fblvlRead(lower)
-        if 'errorMessage' in recombined_fblvl:
-            raise ValueError('No free-bound information available for {}'.format(self.ion_string))
         # thermal energy scaled by H ionization potential
         scaled_energy = ch_const.ryd2erg/ch_const.boltzmann/self.Temperature
         # set variables used in Eq. 16 of Mewe et al.(1986)
-        n_0 = recombined_fblvl['pqn'][0]
+        n_0 = self.Recombined_fblvl['pqn'][0]
 #        z_0 = np.sqrt(self.ionization_potential/ch_const.ryd2erg)*n_0
         z_0 = np.sqrt(self.Ipr/ch_const.ryd2erg)*n_0
 
@@ -429,7 +432,7 @@ class continuum(object):
         else:
             zeta_0 = self.Z - self.stage + 1
 
-        ip = self.Ipr - recombined_fblvl['ecm'][0]*ch_const.planck*ch_const.light
+        ip = self.Ipr - self.Recombined_fblvl['ecm'][0]*ch_const.planck*ch_const.light
 #        ip = self.ionization_potential - recombined_fblvl['ecm'][0]*ch_const.planck*ch_const.light
         f_2 = (0.9*zeta_0*(z_0**4)/(n_0**5)*np.exp(scaled_energy*(z_0**2)/(n_0**2) - ip/ch_const.boltzmann/self.Temperature)
                + 0.42/(n_0**1.5)*(self.stage**4))
@@ -501,6 +504,13 @@ class continuum(object):
         prefactor = (2./np.sqrt(2.*np.pi)/(4.*np.pi)/(ch_const.planck*(ch_const.light**3)
                      * (ch_const.emass*ch_const.boltzmann)**(3./2.)))
         # read the free-bound level information for the recombined and recombining ion
+        recombining_fblvl = ch_io.fblvlRead(self.ion_string)
+        # get the multiplicity of the ground state of the recombining ion
+        if 'errorMessage' in recombining_fblvl:
+            omega_0 = 1.
+        else:
+            omega_0 = recombining_fblvl['mult'][0]
+        
         recombined_fblvl = ch_io.fblvlRead(self.nameDict['lower'])
         if 'errorMessage' in recombined_fblvl:
 #            raise ValueError('No free-bound information available for {}'.format(ch_util.zion2name(self.Z, self.stage)))
@@ -509,12 +519,6 @@ class continuum(object):
 #            self.free_bound_emission = fb_emiss.squeeze()
             self.FreeBound = {'intensity':fb_emiss, 'temperature':self.Temperature,'wvl':wavelength,'em':self.Em, 'errorMessage':errorMessage}
             return
-        recombining_fblvl = ch_io.fblvlRead(self.ion_string)
-        # get the multiplicity of the ground state of the recombining ion
-        if 'errorMessage' in recombining_fblvl:
-            omega_0 = 1.
-        else:
-            omega_0 = recombining_fblvl['mult'][0]
 
         energy_over_temp_factor = np.outer(1./(self.Temperature**1.5), photon_energy**5.).squeeze()
 #        if self.NWavelength > 1:

@@ -223,8 +223,8 @@ class continuum(object):
         # interpolate wavelength-averaged K&L gaunt factors
         gf_kl_info = ch_io.gffintRead()
         gamma_squared = self.IprErg/ch_const.boltzmann/self.Temperature
-        for i, atemp in enumerate(self.Temperature):
-            print('%s T:  %10.2e gamma_squared  %10.2e'%(self.ion_string, atemp, gamma_squared[i]))
+#        for i, atemp in enumerate(self.Temperature):
+#            print('%s T:  %10.2e gamma_squared  %10.2e'%(self.ion_string, atemp, gamma_squared[i]))
         gaunt_factor = splev(np.log(gamma_squared),
                              splrep(gf_kl_info['g2'],gf_kl_info['gffint']), ext=3)
         # calculate numerical constant
@@ -405,14 +405,17 @@ class continuum(object):
         .. [1] Mewe, R. et al., 1986, A&AS, `65, 511 <http://adsabs.harvard.edu/abs/1986A%26AS...65..511M>`_
         """
         # read in free-bound level information for the recombined ion
-        recombined_fblvl = ch_io.fblvlRead(self.ion_string)
+        nameDict = ch_util.convertName(self.ion_string)
+        lower = nameDict['lower']
+        recombined_fblvl = ch_io.fblvlRead(lower)
         if 'errorMessage' in recombined_fblvl:
             raise ValueError('No free-bound information available for {}'.format(self.ion_string))
         # thermal energy scaled by H ionization potential
         scaled_energy = ch_const.ryd2erg/ch_const.boltzmann/self.Temperature
         # set variables used in Eq. 16 of Mewe et al.(1986)
         n_0 = recombined_fblvl['pqn'][0]
-        z_0 = np.sqrt(self.ionization_potential/ch_const.ryd2erg)*n_0
+#        z_0 = np.sqrt(self.ionization_potential/ch_const.ryd2erg)*n_0
+        z_0 = np.sqrt(self.Ipr/ch_const.ryd2erg)*n_0
 
         # calculate zeta_0, the number of vacancies in the recombining ion
         # see zeta_0 function in chianti/idl/continuum/fb_rad_loss.pro and
@@ -426,11 +429,13 @@ class continuum(object):
         else:
             zeta_0 = self.Z - self.stage + 1
 
-        ip = self.ionization_potential - recombined_fblvl['ecm'][0]*ch_const.planck*ch_const.light
+        ip = self.Ipr - recombined_fblvl['ecm'][0]*ch_const.planck*ch_const.light
+#        ip = self.ionization_potential - recombined_fblvl['ecm'][0]*ch_const.planck*ch_const.light
         f_2 = (0.9*zeta_0*(z_0**4)/(n_0**5)*np.exp(scaled_energy*(z_0**2)/(n_0**2) - ip/ch_const.boltzmann/self.Temperature)
                + 0.42/(n_0**1.5)*(self.stage**4))
 
-        return scaled_energy*f_2*self.abundance*self.ioneq_one(self.stage+1, **kwargs)
+#        return scaled_energy*f_2*self.abundance*self.ioneq_one(self.stage+1, **kwargs)
+        return scaled_energy*f_2*self.abundance*self.IoneqOne
 
     def freeBound(self, wavelength, include_abundance=True, include_ioneq=True, use_verner=True, **kwargs):
         """

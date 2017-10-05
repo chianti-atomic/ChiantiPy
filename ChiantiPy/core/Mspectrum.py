@@ -58,6 +58,10 @@ class mspectrum(ionTrails, specTrails):
     '''
     def __init__(self, temperature, eDensity, wavelength, filter=(chfilters.gaussianR, 1000.), label=0, elementList = None, ionList = None, minAbund=None, keepIons=0, abundance=None,  doLines=1, doContinuum=1, allLines = 1, em=None,  proc=3, verbose = 0,  timeout=0.1):
         #
+        wavelength = np.atleast_1d(wavelength)
+        if wavelength.size < 2:
+            print(' wavelength must have at least two values, current length %3i'%(wavelength.size))
+            return
         t1 = datetime.now()
         # creates Intensity dict from first ion calculated
         setupIntensity = 0
@@ -139,7 +143,8 @@ class mspectrum(ionTrails, specTrails):
         #
         self.IonsCalculated = []
         if keepIons:
-            self.IonInstances = {}
+            if doLines:
+                self.IonInstances = {}
         self.Finished = []
         #
 
@@ -196,54 +201,56 @@ class mspectrum(ionTrails, specTrails):
             for ifb in range(fbWorkerQSize):
                 thisFreeBound = fbDoneQ.get()
                 freeBound += thisFreeBound['intensity'].squeeze()
+
             for p in fbProcesses:
                 if not isinstance(p, str):
                     p.terminate()
         #
-        ionProcesses = []
-        if ionWorkerQSize < proc:
-            proc = ionWorkerQSize
-        for i in range(proc):
-            p = mp.Process(target=mputil.doIonQ, args=(ionWorkerQ, ionDoneQ))
-            p.start()
-            ionProcesses.append(p)
-#       timeout is not necessary
-        for p in ionProcesses:
-#            if p.is_alive():
-#                p.join()
-                p.join(timeout=timeout)
-        #
-        for ijk in range(ionWorkerQSize):
-            out = ionDoneQ.get()
-            ions = out[0]
-            if verbose:
-                print(' collecting calculation for %s'%(ions))
-            thisIon = out[1]
-            thisIntensity = thisIon.Intensity
-            if not 'errorMessage' in sorted(thisIntensity.keys()):
-                self.Finished.append(ions)
-                if keepIons:
-                    self.IonInstances[ions] = copy.deepcopy(thisIon)
-                if setupIntensity:
-                    for akey in sorted(self.Intensity.keys()):
-                        self.Intensity[akey] = np.hstack((copy.copy(self.Intensity[akey]), thisIntensity[akey]))
+        if doLines:
+            ionProcesses = []
+            if ionWorkerQSize < proc:
+                proc = ionWorkerQSize
+            for i in range(proc):
+                p = mp.Process(target=mputil.doIonQ, args=(ionWorkerQ, ionDoneQ))
+                p.start()
+                ionProcesses.append(p)
+        #       timeout is not necessary
+            for p in ionProcesses:
+        #            if p.is_alive():
+        #                p.join()
+                    p.join(timeout=timeout)
+            #
+            for ijk in range(ionWorkerQSize):
+                out = ionDoneQ.get()
+                ionS = out[0]
+                if verbose:
+                    print(' collecting ion calculation for %s'%(ionS))
+                thisIon = out[1]
+                thisIntensity = thisIon.Intensity
+                if not 'errorMessage' in sorted(thisIntensity.keys()):
+                    self.Finished.append(ionS)
+                    if keepIons:
+                        self.IonInstances[ionS] = copy.deepcopy(thisIon)
+                    if setupIntensity:
+                        for akey in sorted(self.Intensity.keys()):
+                            self.Intensity[akey] = np.hstack((copy.copy(self.Intensity[akey]), thisIntensity[akey]))
+                    else:
+                        setupIntensity = 1
+                        self.Intensity  = thisIntensity
+                    #
+                    if not 'errorMessage' in sorted(thisIon.Spectrum.keys()):
+                        lineSpectrum += thisIon.Spectrum['intensity']
+                   # check for two-photon emission
+                    if len(out) == 3:
+                        tp = out[2]
+                        twoPhoton += tp['intensity']
                 else:
-                    setupIntensity = 1
-                    self.Intensity  = thisIntensity
+                    if 'errorMessage' in sorted(thisIntensity.keys()):
+                        print(thisIntensity['errorMessage'])
                 #
-                if not 'errorMessage' in sorted(thisIon.Spectrum.keys()):
-                    lineSpectrum += thisIon.Spectrum['intensity']
-               # check for two-photon emission
-                if len(out) == 3:
-                    tp = out[2]
-                    twoPhoton += tp['intensity']
-            else:
-                if 'errorMessage' in sorted(thisIntensity.keys()):
-                    print(thisIntensity['errorMessage'])
-        #
-        for p in ionProcesses:
-            if not isinstance(p, str):
-                p.terminate()
+            for p in ionProcesses:
+                if not isinstance(p, str):
+                    p.terminate()
         #
         #
         #

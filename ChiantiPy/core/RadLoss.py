@@ -135,18 +135,15 @@ class radLoss(specTrails):
                 if 'ff' in self.Todo[akey]:
                     # need to skip the neutral
                     cont = continuum(akey, temperature, abundance=abundance)
-                    cont.calculate_free_free_loss()
-                    freeFreeLoss += cont.free_free_loss
+                    cont.freeFreeLoss()
+                    freeFreeLoss += cont.FreeFreeLoss['rate']
                 if 'fb' in self.Todo[akey]:
                     if verbose:
                         print(' calculating fb continuum for :  %s'%(akey))
                     cont = continuum(akey, temperature, abundance=abundance)
-                    try:
-                        cont.calculate_free_bound_loss()
-                        freeBoundLoss += cont.free_bound_loss
-                    except ValueError:
-                        # account for case where there is no free-bound information available
-                        pass
+                    cont.freeBoundLoss()
+                    if 'errorMessage' not in cont.FreeBoundLoss.keys():
+                        freeBoundLoss += cont.FreeBoundLoss['rate']
             if 'line' in self.Todo[akey]:
                 if verbose:
                     print(' calculating spectrum for  :  %s'%(akey))

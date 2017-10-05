@@ -58,6 +58,7 @@ class continuum(object):
         self.stage = self.nameDict['Ion']
         self.Temperature = np.atleast_1d(temperature)
         self.NTemperature = self.Temperature.size
+        self.Defaults = ch_data.Defaults
         
         if em is None:
             self.Em = 1.*np.ones_like(self.Temperature)
@@ -85,6 +86,7 @@ class continuum(object):
             self.abundance_name = ch_data.Defaults['abundfile']
         if not hasattr(self, 'abundance'):
             self.abundance = ch_data.Abundance[self.abundance_name]['abundance'][self.Z-1]
+        self.ioneqOne()
 
     def calculate_free_free_loss(self, **kwargs):
         """
@@ -113,6 +115,8 @@ class continuum(object):
         # interpolate wavelength-averaged K&L gaunt factors
         gf_kl_info = ch_io.gffintRead()
         gamma_squared = self.ionization_potential/ch_const.boltzmann/self.Temperature
+        for i, atemp in enumerate(self.Temperature):
+            print('%s T:  %10.2e gamma_squared  %10.2e'%(self.ion_string, atemp, gamma_squared[i]))
         gaunt_factor = splev(np.log(gamma_squared),
                              splrep(gf_kl_info['g2'],gf_kl_info['gffint']), ext=3)
         # calculate numerical constant
@@ -174,7 +178,7 @@ class continuum(object):
         if include_abundance:
             prefactor *= self.abundance
         if include_ioneq:
-            prefactor *= self.ioneq_one(self.stage, **kwargs)
+            prefactor *= self.IoneqOne
         if self.Em is not None:
             prefactor *= self.Em
         # define exponential factor
@@ -191,6 +195,46 @@ class continuum(object):
 
         free_free_emission = (prefactor[:,np.newaxis]*exp_factor*gf/energy_factor).squeeze()
         self.FreeFree = {'intensity':free_free_emission, 'temperature':self.Temperature, 'wvl':wavelength, 'em':self.Em, 'ions':self.ion_string}
+        
+    def freeFreeLoss(self, **kwargs):
+        """
+        Calculate the free-free energy loss rate of an ion. The result is returned to the
+        `free_free_loss` attribute.
+
+        The free-free radiative loss rate is given by Eq. 5.15a of [1]_. Writing the numerical
+        constant in terms of the fine structure constant :math:`\\alpha`,
+
+        .. math::
+           \\frac{dW}{dtdV} = \\frac{4\\alpha^3h^2}{3\pi^2m_e}\left(\\frac{2\pi k_B}{3m_e}\\right)^{1/2}Z^2T^{1/2}\\bar{g}_B
+
+        where where :math:`Z` is the nuclear charge, :math:`T` is the electron temperature, and
+        :math:`\\bar{g}_{B}` is the wavelength-averaged and velocity-averaged Gaunt factor. The
+        Gaunt factor is calculated using the methods of [2]_. Note that this expression for the
+        loss rate is just the integral over wavelength of Eq. 5.14a of [1]_, the free-free emission, and
+        is expressed in units of erg :math:`\mathrm{cm}^3\,\mathrm{s}^{-1}`.
+
+        References
+        ----------
+        .. [1] Rybicki and Lightman, 1979, Radiative Processes in Astrophysics,
+            `(Wiley-VCH) <http://adsabs.harvard.edu/abs/1986rpa..book.....R>`_
+        .. [2] Karzas and Latter, 1961, ApJSS, `6, 167
+            <http://adsabs.harvard.edu/abs/1961ApJS....6..167K>`_
+        """
+        # interpolate wavelength-averaged K&L gaunt factors
+        gf_kl_info = ch_io.gffintRead()
+        gamma_squared = self.IprErg/ch_const.boltzmann/self.Temperature
+#        for i, atemp in enumerate(self.Temperature):
+#            print('%s T:  %10.2e gamma_squared  %10.2e'%(self.ion_string, atemp, gamma_squared[i]))
+        gaunt_factor = splev(np.log(gamma_squared),
+                             splrep(gf_kl_info['g2'],gf_kl_info['gffint']), ext=3)
+        # calculate numerical constant
+        prefactor = (4.*(ch_const.fine**3)*(ch_const.planck**2)/3./(np.pi**2)/ch_const.emass
+                     * np.sqrt(2.*np.pi*ch_const.boltzmann/3./ch_const.emass))
+        # include abundance and ionization equilibrium
+        prefactor *= self.abundance*self.IoneqOne
+
+        self.FreeFreeLoss = {'rate':prefactor*(self.Z**2)*np.sqrt(self.Temperature)*gaunt_factor}
+
 
     def itoh_gaunt_factor(self, wavelength):
         """
@@ -297,6 +341,46 @@ class continuum(object):
 
         self.free_bound_loss = gaunt_factor*np.sqrt(self.Temperature)*prefactor
 
+    def freeBoundLoss(self, **kwargs):
+        """
+        Calculate the free-bound energy loss rate of an ion. The result is returned to the
+        `free_bound_loss` attribute.
+
+        The free-bound loss rate can be calculated by integrating the free-bound emission over the wavelength.
+        This is difficult using the expression in `calculate_free_bound_emission` so we instead use the
+        approach of [1]_ and [2]_. Eq. 1a of [2]_ can be integrated over wavelength to get the free-bound loss rate,
+
+        .. math::
+           \\frac{dW}{dtdV} = C_{ff}\\frac{k}{hc}T^{1/2}G_{fb},
+
+        in units of erg :math:`\mathrm{cm}^3\,\mathrm{s}^{-1}` where :math:`G_{fb}` is the free-bound Gaunt factor as
+        given by Eq. 15 of [2]_ (see `mewe_gaunt_factor` for more details) and :math:`C_{ff}` is the numerical constant
+        as given in Eq. 4 of [1]_ and can be written in terms of the fine structure constant :math:`\\alpha`,
+
+        .. math::
+           C_{ff}\\frac{k}{hc} = \\frac{8}{3}\left(\\frac{\pi}{6}\\right)^{1/2}\\frac{h^2\\alpha^3}{\pi^2}\\frac{k_B}{m_e^{3/2}} \\approx 1.43\\times10^{-27}
+
+        References
+        ----------
+        .. [1] Gronenschild, E.H.B.M. and Mewe, R., 1978, A&AS, `32, 283 <http://adsabs.harvard.edu/abs/1978A%26AS...32..283G>`_
+        .. [2] Mewe, R. et al., 1986, A&AS, `65, 511 <http://adsabs.harvard.edu/abs/1986A%26AS...65..511M>`_
+        """
+        nameDict = ch_util.convertName(self.ion_string)
+        lower = nameDict['lower']
+        self.Recombined_fblvl = ch_io.fblvlRead(lower)
+        if 'errorMessage' in self.Recombined_fblvl:
+            errorMessage = 'No free-bound information available for {}'.format(self.ion_string)
+            rate = np.zeros_like(self.Temperature)
+            self.FreeBoundLoss = {'rate':rate, 'errorMessage':errorMessage}
+            return
+# Calculate Gaunt factor according to Mewe
+        gaunt_factor = self.mewe_gaunt_factor()
+        # Numerical prefactor
+        prefactor = (8./3.*np.sqrt(np.pi/6.)*(ch_const.planck**2)*(ch_const.fine**3)/(np.pi**2)
+                     * (ch_const.boltzmann**(1./2.))/(ch_const.emass**(3./2.)))
+
+        self.FreeBoundLoss = {'rate':gaunt_factor*np.sqrt(self.Temperature)*prefactor, 'temperature':self.Temperature}
+
     def mewe_gaunt_factor(self, **kwargs):
         """
         Calculate the Gaunt factor according to [1]_ for a single ion :math:`Z_z`.
@@ -329,14 +413,12 @@ class continuum(object):
         .. [1] Mewe, R. et al., 1986, A&AS, `65, 511 <http://adsabs.harvard.edu/abs/1986A%26AS...65..511M>`_
         """
         # read in free-bound level information for the recombined ion
-        recombined_fblvl = ch_io.fblvlRead(self.ion_string)
-        if 'errorMessage' in recombined_fblvl:
-            raise ValueError('No free-bound information available for {}'.format(self.ion_string))
         # thermal energy scaled by H ionization potential
         scaled_energy = ch_const.ryd2erg/ch_const.boltzmann/self.Temperature
         # set variables used in Eq. 16 of Mewe et al.(1986)
-        n_0 = recombined_fblvl['pqn'][0]
-        z_0 = np.sqrt(self.ionization_potential/ch_const.ryd2erg)*n_0
+        n_0 = self.Recombined_fblvl['pqn'][0]
+#        z_0 = np.sqrt(self.ionization_potential/ch_const.ryd2erg)*n_0
+        z_0 = np.sqrt(self.Ipr/ch_const.ryd2erg)*n_0
 
         # calculate zeta_0, the number of vacancies in the recombining ion
         # see zeta_0 function in chianti/idl/continuum/fb_rad_loss.pro and
@@ -350,11 +432,13 @@ class continuum(object):
         else:
             zeta_0 = self.Z - self.stage + 1
 
-        ip = self.ionization_potential - recombined_fblvl['ecm'][0]*ch_const.planck*ch_const.light
+        ip = self.Ipr - self.Recombined_fblvl['ecm'][0]*ch_const.planck*ch_const.light
+#        ip = self.ionization_potential - recombined_fblvl['ecm'][0]*ch_const.planck*ch_const.light
         f_2 = (0.9*zeta_0*(z_0**4)/(n_0**5)*np.exp(scaled_energy*(z_0**2)/(n_0**2) - ip/ch_const.boltzmann/self.Temperature)
                + 0.42/(n_0**1.5)*(self.stage**4))
 
-        return scaled_energy*f_2*self.abundance*self.ioneq_one(self.stage+1, **kwargs)
+#        return scaled_energy*f_2*self.abundance*self.ioneq_one(self.stage+1, **kwargs)
+        return scaled_energy*f_2*self.abundance*self.IoneqOne
 
     def freeBound(self, wavelength, include_abundance=True, include_ioneq=True, use_verner=True, **kwargs):
         """
@@ -420,20 +504,21 @@ class continuum(object):
         prefactor = (2./np.sqrt(2.*np.pi)/(4.*np.pi)/(ch_const.planck*(ch_const.light**3)
                      * (ch_const.emass*ch_const.boltzmann)**(3./2.)))
         # read the free-bound level information for the recombined and recombining ion
-        recombined_fblvl = ch_io.fblvlRead(self.nameDict['lower'])
-        if 'errorMessage' in recombined_fblvl:
-#            raise ValueError('No free-bound information available for {}'.format(ch_util.zion2name(self.Z, self.stage)))
-            errorMessage = 'No free-bound information available for {}'.format(ch_util.zion2name(self.Z, self.stage))
-            fb_emiss = np.zeros((self.NTemperature, self.NWavelength), 'float64')
-#            self.free_bound_emission = fb_emiss.squeeze()
-            self.FreeBound = {'intensity':fb_emiss, 'temperature':self.Temperature,'wvl':wavelength,'em':self.Em, 'errorMessage':errorMessage}
-            return
         recombining_fblvl = ch_io.fblvlRead(self.ion_string)
         # get the multiplicity of the ground state of the recombining ion
         if 'errorMessage' in recombining_fblvl:
             omega_0 = 1.
         else:
             omega_0 = recombining_fblvl['mult'][0]
+        
+        self.Recombined_fblvl = ch_io.fblvlRead(self.nameDict['lower'])
+        if 'errorMessage' in self.Recombined_fblvl:
+#            raise ValueError('No free-bound information available for {}'.format(ch_util.zion2name(self.Z, self.stage)))
+            errorMessage = 'No free-bound information available for {}'.format(ch_util.zion2name(self.Z, self.stage))
+            fb_emiss = np.zeros((self.NTemperature, self.NWavelength), 'float64')
+#            self.free_bound_emission = fb_emiss.squeeze()
+            self.FreeBound = {'intensity':fb_emiss, 'temperature':self.Temperature,'wvl':wavelength,'em':self.Em, 'errorMessage':errorMessage}
+            return
 
         energy_over_temp_factor = np.outer(1./(self.Temperature**1.5), photon_energy**5.).squeeze()
 #        if self.NWavelength > 1:
@@ -442,10 +527,10 @@ class continuum(object):
 #            print(' energy size %5i'%(energy_over_temp_factor.size))
         # sum over levels of the recombined ion
         sum_factor = np.zeros((len(self.Temperature), len(wavelength)))
-        for i,omega_i in enumerate(recombined_fblvl['mult']):
+        for i,omega_i in enumerate(self.Recombined_fblvl['mult']):
             # ionization potential for level i
 #            ip = self.ionization_potential - recombined_fblvl['ecm'][i]*ch_const.planck*ch_const.light
-            ip = self.IprErg - recombined_fblvl['ecm'][i]*ch_const.planck*ch_const.light
+            ip = self.IprErg - self.Recombined_fblvl['ecm'][i]*ch_const.planck*ch_const.light
             # skip level if photon energy is not sufficiently high
             if ip < 0. or np.all(np.max(photon_energy) < (self.ionization_potential - ip)):
                 continue
@@ -454,8 +539,8 @@ class continuum(object):
                 cross_section = self.verner_cross_section(photon_energy)
             else:
                 cross_section = self.karzas_cross_section(photon_energy, ip,
-                                                          recombined_fblvl['pqn'][i],
-                                                          recombined_fblvl['l'][i])
+                                                          self.Recombined_fblvl['pqn'][i],
+                                                          self.Recombined_fblvl['l'][i])
             scaled_energy = np.outer(1./(ch_const.boltzmann*self.Temperature), photon_energy - ip)
             # the exponential term can go to infinity for low temperatures
             # but if the cross-section is zero this does not matter
@@ -474,11 +559,12 @@ class continuum(object):
         if include_ioneq:
             if self.NTemperature > 1:
                 if self.NWavelength > 1:
-                    fb_emiss *= self.ioneq_one(self.stage, **kwargs)[:,np.newaxis]
+#                    fb_emiss *= self.ioneq_one(self.stage, **kwargs)[:,np.newaxis]
+                    fb_emiss *= self.IoneqOne[:,np.newaxis]
                 else:
-                    fb_emiss *= self.ioneq_one(self.stage, **kwargs)
+                    fb_emiss *= self.IoneqOne
             else:
-                fb_emiss *= self.ioneq_one(self.stage, **kwargs)
+                fb_emiss *= self.IoneqOne
         if self.Em is not None:
             if self.Em.size > 1:
                 fb_emiss *= self.Em[:,np.newaxis]
@@ -603,6 +689,49 @@ class continuum(object):
         spl = splrep(klgfb['pe'], thisGf)
         gf = splev(sclE, spl)
         return gf
+        
+    def ioneqOne(self):
+        '''
+        Provide the ionization equilibrium for the selected ion as a function of temperature.
+        Similar to but not identical to ion.ioneqOne()
+        returned in self.IoneqOne
+        '''
+        #
+        if hasattr(self, 'Temperature'):
+            temperature = self.Temperature
+        else:
+            return
+        #
+        if hasattr(self, 'IoneqAll'):
+            ioneqAll = self.IoneqAll
+        else:
+            self.IoneqAll = ch_io.ioneqRead(ioneqname = self.Defaults['ioneqfile'])
+            ioneqAll = self.IoneqAll
+        #
+        ioneqTemperature = ioneqAll['ioneqTemperature']
+        Z = self.Z
+        stage = self.stage
+        ioneqOne = np.zeros_like(temperature)
+        #
+        thisIoneq = ioneqAll['ioneqAll'][Z-1,stage-1].squeeze()
+        gioneq = thisIoneq > 0.
+        goodt1 = self.Temperature >= ioneqTemperature[gioneq].min()
+        goodt2 = self.Temperature <= ioneqTemperature[gioneq].max()
+        goodt = np.logical_and(goodt1,goodt2)
+        y2 = splrep(np.log(ioneqTemperature[gioneq]),np.log(thisIoneq[gioneq]),s=0)
+        #
+        if goodt.sum() > 0:
+            if self.Temperature.size > 1:
+                gIoneq = splev(np.log(self.Temperature[goodt]),y2)   #,der=0)
+                ioneqOne[goodt] = np.exp(gIoneq)
+            else:
+                gIoneq = splev(np.log(self.Temperature),y2)
+                ioneqOne = np.exp(gIoneq)
+                ioneqOne = np.atleast_1d(ioneqOne)
+            self.IoneqOne = ioneqOne
+        else:
+            self.IoneqOne = np.zeros_like(self.Temperature)
+
 
     def ioneq_one(self, stage, **kwargs):
         """

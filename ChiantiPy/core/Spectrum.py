@@ -192,7 +192,7 @@ class spectrum(ionTrails, specTrails):
                 self.IonsCalculated.append(akey)
                 if 'errorMessage' not in  list(thisIon.Intensity.keys()):
                     self.Finished.append(akey)
-                    thisIon.spectrum(wavelength, filter=filter, allLines=allLines, em=em)
+                    thisIon.spectrum(wavelength, filter=filter, allLines=allLines)
                     if keepIons:
                         self.IonInstances[akey] = copy.deepcopy(thisIon)
                     if setupIntensity:

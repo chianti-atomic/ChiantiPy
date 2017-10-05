@@ -101,7 +101,7 @@ class ion(ionTrails, specTrails):
 
     def __init__(self, ionStr, temperature=None, eDensity=None,
                 pDensity='default', radTemperature=None, rStar=None,
-                abundance=None, setup=True, em=None):
+                abundance=None, setup=True, em=None, verbose=0):
 
         self.IonStr = ionStr
         _tmp_convert_name = util.convertName(ionStr)
@@ -143,8 +143,6 @@ class ion(ionTrails, specTrails):
         if temperature is not None:
             self.Temperature = np.array(temperature)
         self.IoneqAll = chdata.IoneqAll
-        self.ioneqOne()
-
         #  this needs to go after setting temperature and reading ionization
         #  equilibria
         if pDensity == 'default':
@@ -156,6 +154,8 @@ class ion(ionTrails, specTrails):
                 self.Temperature = np.ones_like(self.EDensity)*self.Temperature
             elif self.EDensity.size == 1 and self.Temperature.size > 1:
                 self.EDensity = np.ones_like(self.Temperature)*self.EDensity
+        #  needs to know self.NTempDen first
+        self.ioneqOne()
 
         if hasattr(self,'EDensity') and hasattr(self,'Temperature') \
         and self.EDensity.size != self.Temperature.size:
@@ -1299,7 +1299,7 @@ class ion(ionTrails, specTrails):
         else:
             self.Upsilon = {'upsilon':ups, 'temperature':temperature, 'exRate':exRate, 'dexRate':dexRate, 'de':deAll}
 
-    def spectrum(self, wavelength, filter=(chfilters.gaussianR,1000.), label=0, allLines=1, em=0):
+    def spectrum(self, wavelength, filter=(chfilters.gaussianR,1000.), label=0, allLines=1):
         """
         Calculates the line emission spectrum for the specified ion.
 
@@ -1333,25 +1333,25 @@ class ion(ionTrails, specTrails):
         if hasattr(self, 'Intensity'):
             intensity = self.Intensity
         else:
-            self.intensity(wvlRange = wvlRange, allLines=allLines, em=em)
+            self.intensity(wvlRange = wvlRange, allLines=allLines)
             intensity = self.Intensity
         #  if intensity had been called with em, then the intensities are
         # already multiply by em
         if hasattr(self, 'Em'):
             em = self.Em
             useEm = 0
-        elif type(em) == int and em == 0:
-            em = np.ones(self.NTempDen, 'float64')
-            self.Em = em
-            useEm = 1
-        elif type(em) == float and em > 0.:
-            em = np.ones(self.NTempDen, 'float64')*em
-            self.Em = em
-            useEm = 1
-        elif type(em) == list or type(em) == tuple or type(em) == np.ndarray:
-            em = np.asarray(em, 'float64')
-            self.Em = em
-            useEm = 1
+#        elif em == None:
+#            em = np.ones(self.NTempDen, 'float64')
+#            self.Em = em
+#            useEm = 1
+#        elif type(em) == float and em > 0.:
+#            em = np.ones(self.NTempDen, 'float64')*em
+#            self.Em = em
+#            useEm = 1
+#        elif type(em) == list or type(em) == tuple or type(em) == np.ndarray:
+#            em = np.asarray(em, 'float64')
+#            self.Em = em
+#            useEm = 1
         if self.Em.any() > 0.:
             ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ '
         else:
@@ -2533,7 +2533,11 @@ class ion(ionTrails, specTrails):
 
         the emission measure 'em' is included if specified
         """
+        if self.IoneqOne.all() == 0.:
+            self.Intensity = {'errorMessage':' Ioneq = 0 for this temperature range', 'ionS':self.IonStr}
+            return
 
+            
         # so we know that it has been applied
         if not hasattr(self, 'Emiss'):
             self.emiss(wvlRange = wvlRange, allLines=allLines)
@@ -2554,26 +2558,28 @@ class ion(ionTrails, specTrails):
         pretty1 = emiss['pretty1']
         pretty2 = emiss['pretty2']
         avalue = emiss['avalue']
+        errorMessage = None
 
         if hasattr(self, 'Abundance'):
             ab = self.Abundance
         else:
             self.Abundance = io.abundanceRead()
             ab = self.Abundance
-        if hasattr(self, 'IoneqOne'):
-            thisIoneq = self.IoneqOne
-        else:
-            self.IoneqOne = self.ioneqOne()
-            thisIoneq = self.IoneqOne
-
+            
         if len(emissivity.shape) > 1:
             nwvl, ntempden =  emissivity.shape
             intensity = np.zeros((ntempden, nwvl),'Float64')
-            if thisIoneq.size == 1:
-                thisIoneq = np.ones(ntempden, 'float64')*thisIoneq
-            for it in range(ntempden):
-                intensity[it] = ab*thisIoneq[it]*emissivity[:, it]*self.Em[it]/self.EDensity[it]
+            if self.IoneqOne.all() == 0.:
+                intensity = np.zeros((ntempden, nwvl),'Float64')
+                errorMessage = 'ioneq = zero in temperature range'
+                self.Intensity = {'intensity':intensity, 'errorMessage':errorMessage}
+                return
+            else:
+                thisIoneq = self.IoneqOne
+                for it in range(ntempden):
+                    intensity[it] = ab*thisIoneq[it]*emissivity[:, it]*self.Em[it]/self.EDensity[it]
         else:
+            thisIoneq = self.IoneqOne
             nwvl = len(emissivity)
             ntempden = 1
             intensity = ab*thisIoneq*emissivity*self.Em/self.EDensity
@@ -2582,6 +2588,8 @@ class ion(ionTrails, specTrails):
         else:
             integrated = intensity.sum(axis=0)
         Intensity = {'intensity':intensity, 'integrated':integrated,'ionS':ionS, 'wvl':wvl, 'lvl1':lvl1, 'lvl2':lvl2, 'pretty1':pretty1, 'pretty2':pretty2,  'obs':obs, 'avalue':avalue, 'em':self.Em}
+#        if errorMessage != None:
+#            Intensity['errorMessage'] = errorMessage
         self.Intensity = Intensity
 
     def boundBoundLoss(self,  wvlRange = None,  allLines=1):
@@ -2736,8 +2744,6 @@ class ion(ionTrails, specTrails):
         ioneqOne = np.zeros_like(temperature)
         #
         thisIoneq = ioneqAll['ioneqAll'][Z-1,Ion-1 + Dielectronic].squeeze()
-        del ioneqAll
-#        thisIoneq = self.Ioneq
         gioneq = thisIoneq > 0.
         goodt1 = self.Temperature >= ioneqTemperature[gioneq].min()
         goodt2 = self.Temperature <= ioneqTemperature[gioneq].max()
@@ -2750,8 +2756,10 @@ class ion(ionTrails, specTrails):
                 ioneqOne[goodt] = np.exp(gIoneq)
             else:
                 gIoneq = interpolate.splev(np.log(self.Temperature),y2)
-                ioneqOne = np.exp(gIoneq)
+                ioneqOne = np.exp(gIoneq)*np.ones(self.NTempDen, 'float64')
             self.IoneqOne = ioneqOne
+        else:
+            self.IoneqOne = np.zeros_like(self.Temperature)
 
     def gofnt(self,wvlRange=0,top=10, verbose=0, plot = True):
         """

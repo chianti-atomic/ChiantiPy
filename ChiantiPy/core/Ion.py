@@ -1554,7 +1554,10 @@ class ion(ionTrails, specTrails):
             for i, lvl in enumerate(self.Elvlc['lvl'][1:]):
                 if verbose:
                     print('%5i %5i %5i'%(i, lvl, lvl-1))
-                branch[lvl-1] = self.Wgfa['avalueLvl'][lvl-1]/(self.Wgfa['avalueLvl'][lvl-1] + self.Auto['avalueLvl'][lvl-1])
+                if self.Wgfa['avalueLvl'][lvl-1] > 0.:
+                    branch[lvl-1] = self.Wgfa['avalueLvl'][lvl-1]/(self.Wgfa['avalueLvl'][lvl-1] + self.Auto['avalueLvl'][lvl-1])
+                else:
+                   branch[lvl-1] = 0. 
         temp = temperature
         ntemp = temp.size
         dens = self.EDensity

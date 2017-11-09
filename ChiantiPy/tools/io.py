@@ -451,13 +451,14 @@ def drRead(ions, filename=None):
         #
         if drtype == 1:
             # a Badnell type
-#            fmt=FortranFormat('2i5,8e12.4')
-            header_line =  FortranRecordReader('2i5,9e12.4')
+            nparams = len(lines[1].split())
+            if nparams == 10:
+                header_line =  FortranRecordReader('2i5,8e12.4')
+            elif nparams == 11:
+                header_line =  FortranRecordReader('2i5,9e12.4')
             inpt1 = header_line.read(lines[1])
-#            eparams=np.asarray(FortranLine(lines[1],fmt)[2:], 'float64')
-            eparams = np.asarray(inpt1[2:], 'float64')
             inpt2 = header_line.read(lines[2])
-#            cparams=np.asarray(FortranLine(lines[2],fmt)[2:], 'float64')
+            eparams = np.asarray(inpt1[2:], 'float64')
             cparams = np.asarray(inpt2[2:], 'float64')
             DrParams = {'drtype':drtype, 'eparams':eparams,'cparams':cparams,  'ref':ref}
         elif drtype == 2:

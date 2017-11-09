@@ -452,7 +452,7 @@ def drRead(ions, filename=None):
         if drtype == 1:
             # a Badnell type
 #            fmt=FortranFormat('2i5,8e12.4')
-            header_line =  FortranRecordReader('2i5,8e12.4')
+            header_line =  FortranRecordReader('2i5,9e12.4')
             inpt1 = header_line.read(lines[1])
 #            eparams=np.asarray(FortranLine(lines[1],fmt)[2:], 'float64')
             eparams = np.asarray(inpt1[2:], 'float64')

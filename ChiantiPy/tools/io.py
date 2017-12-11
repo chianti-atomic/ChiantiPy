@@ -2,6 +2,7 @@
 Reading and writing functions
 """
 import os
+from datetime import date
 import fnmatch
 import pickle
 try:
@@ -18,7 +19,7 @@ import ChiantiPy.tools.constants as const
 import ChiantiPy.Gui as chgui
 from  ChiantiPy.fortranformat import FortranRecordReader
 
-
+today = date.today()
 def abundanceRead(abundancename=''):
     """
     Read abundance file `abundancename` and return the abundance values relative to hydrogen
@@ -169,8 +170,6 @@ def autoRead(ions, filename=None, total=True, verbose=False):
     wgfaFormat = '(2i7,e12.2,a30,3x,a30)'
     header_line = FortranRecordReader(wgfaFormat)
     for ivl in range(nwvl):
-        if verbose:
-            print('%5i  %s'%(ivl, s1[ivl].strip()))
 #        inpt=FortranLine(s1[ivl],wgfaFormat)
         inpt = header_line.read(s1[ivl])
         lvl1[ivl] = inpt[0]
@@ -190,7 +189,16 @@ def autoRead(ions, filename=None, total=True, verbose=False):
         for iwvl in range(nwvl):
             avalueLvl[lvl2[iwvl] -1] += avalue[iwvl]
         Auto['avalueLvl'] = np.asarray(avalueLvl)
-
+    
+    if verbose:
+        pstring1 = '%5s %5s %12s %12s %20s - %20s'
+        print(pstring1%('lvl1', 'lvl2', 'auto value', 'branch ratio', 'pretty1', 'pretty2'))
+        pstring = '%5i %5i %12.2e %12.2e %20s - %20s'
+        for ivl, avalue in enumerate(avalue):
+            l1 = lvl1[ivl]
+            l2 = lvl2[ivl]
+            br = avalue/avalueLvl[l2-1]
+            print(pstring%(l1, l2, avalue, br, pretty1[ivl], pretty2[ivl]))
     #
     return Auto
 
@@ -738,7 +746,6 @@ def elvlcWrite(info, outfile=None, addLvl=0, includeRyd=False,  includeEv=False)
     out.write('%filename:  ' + os.path.split(elvlcName)[1] + '\n')
     for aref in info['ref']:
         out.write(aref + '\n')
-    out.write(' -1 \n')
     out.close()
     return
 
@@ -1874,7 +1881,7 @@ def wgfaRead(ions, filename=None, elvlcname=0, total=False, verbose=False):
     return Wgfa
 
 
-def wgfaWrite(info, outfile = None, minBranch = 0., rightDigits = 4):
+def wgfaWrite(info, outfile = None, minBranch = 1.e-5, rightDigits = 4):
     """
     Write data to a CHIANTI .wgfa file
 
@@ -1941,5 +1948,6 @@ def wgfaWrite(info, outfile = None, minBranch = 0., rightDigits = 4):
     out.write('%filename:  ' + wgfaname + '\n')
     for one in info['ref']:
         out.write(one+'\n')
+    out.write(today.strftime('%Y %B %d') +'\n')
     out.write(' -1 \n')
     out.close()

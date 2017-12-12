@@ -158,7 +158,8 @@ class ioneq(object):
             lw = 2
         else:
             linestyle = ['b-','r--', 'g-.', 'm:']
-            lw = 1
+            plt.rcParams['font.size'] = 14.
+            lw = 2
         #
         if not stages:
             stages = range(1, self.Z+2)
@@ -226,4 +227,5 @@ class ioneq(object):
                 print(' oplot file not understood %s'%(oplot))
         if title:
             plt.title(atitle)
+        plt.tight_layout()
         plt.axis(xyr)

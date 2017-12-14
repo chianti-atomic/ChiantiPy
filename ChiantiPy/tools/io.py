@@ -179,7 +179,6 @@ def autoRead(ions, filename=None, total=True, verbose=False):
         pretty2[ivl] = inpt[4].strip()
 
     ref = []
-    # should skip the last '-1' in the file
     for i in range(nwvl+1,len(s1)):
         s1a = s1[i]
         ref.append(s1a.strip())

@@ -266,7 +266,6 @@ def autoWrite(info, outfile = None, minBranch = None):
     out.write('%filename:  ' + wgfaname + '\n')
     for one in info['ref']:
         out.write(one+'\n')
-    out.write(' -1 \n')
     out.close()
 
 def cireclvlRead(ions, filename=None, filetype='cilvl'):

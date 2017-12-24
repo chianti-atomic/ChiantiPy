@@ -224,17 +224,16 @@ def autoWrite(info, outfile = None, minBranch = None):
     #
 #    gname = info['ionS']
     if outfile:
-        wgfaname = outfile
+        autoname = outfile
     else:
         print(' output filename not specified, no file will be created')
         return
-#        wgfaname = gname + '.wgfa'
-    print((' wgfa file name = ', wgfaname))
+    print((' auto file name = ', autoname))
     if minBranch == None:
         minBranch = 0.
     else:
         info['ref'].append(' minimum branching ratio = %10.2e'%(minBranch))
-    out = open(wgfaname, 'w')
+    out = open(autoname, 'w')
     #ntrans = len(info['lvl1'])
     nlvl = max(info['lvl2'])
     totalAvalue = np.zeros(nlvl, 'float64')
@@ -243,7 +242,7 @@ def autoWrite(info, outfile = None, minBranch = None):
     else:
         pformat = '%%7i%7i%12.2e'
     for itrans, avalue in enumerate(info['avalue']):
-        # for autoionization transitions, lvl1 can be less than zero
+        # for autoionization transitions, lvl1 can be less than zero???
         if abs(info['lvl1'][itrans]) > 0 and info['lvl2'][itrans] > 0:
             totalAvalue[info['lvl2'][itrans] -1] += avalue
 
@@ -254,15 +253,13 @@ def autoWrite(info, outfile = None, minBranch = None):
             branch = 0.
         if branch > minBranch and abs(info['lvl1'][itrans]) > 0 and info['lvl2'][itrans] > 0:
             if 'pretty1' in info:
-                # generally only useful with NIST data
                 lbl2 =  info['pretty2'][itrans]
                 pstring = pformat%(info['lvl1'][itrans], info['lvl2'][itrans], avalue, info['pretty1'][itrans].rjust(30), lbl2.ljust(30))
                 out.write(pstring+'\n')
             else:
                 pstring = pformat%(info['lvl1'][itrans], info['lvl2'][itrans], avalue)
                 out.write(pstring+'\n')
-    out.write(' -1\n')
-    out.write('%filename:  ' + wgfaname + '\n')
+    out.write('%filename:  ' + autoname + '\n')
     for one in info['ref']:
         out.write(one+'\n')
     out.close()
@@ -1925,7 +1922,9 @@ def wgfaWrite(info, outfile = None, minBranch = 1.e-5, rightDigits = 4):
             totalAvalue[info['lvl2'][itrans] -1] += avalue
 
     for itrans, avalue in enumerate(info['avalue']):
-        if avalue > 0.:
+        if info['wvl'][itrans] == 0.:
+            branch = 1.
+        elif avalue > 0.:
             branch = avalue/totalAvalue[info['lvl2'][itrans] -1]
         else:
             branch = 0.

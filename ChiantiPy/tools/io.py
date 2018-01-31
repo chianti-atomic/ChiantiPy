@@ -662,7 +662,7 @@ def elvlcRead(ions, filename=None, getExtended=False, verbose=False, useTh=True)
     return info
 
 
-def elvlcWrite(info, outfile=None, addLvl=0, includeRyd=False,  includeEv=False):
+def elvlcWrite(info, outfile=None, round=0, addLvl=0, includeRyd=False, includeEv=False):
     '''
     Write Chianti data to .elvlc file.
 
@@ -683,6 +683,8 @@ def elvlcWrite(info, outfile=None, addLvl=0, includeRyd=False,  includeEv=False)
         ref, the references in the literature to the data in the input info
     outfile : `str`
         Output filename. ionS+'.elvlc' (in current directory) if None
+    round : `int`
+        input to `np.round' to round input values to maintain the correct number of significant figures
     addLvl : `int`
         Add a constant value to the index of all levels
     includeRyd : `bool`
@@ -730,7 +732,7 @@ def elvlcWrite(info, outfile=None, addLvl=0, includeRyd=False,  includeEv=False)
         thisTerm = aterm.ljust(29)
         thisLabel = info['label'][i].ljust(4)
 #        print, ' len of thisTerm = ', len(thisTerm)
-        pstring = '%7i%30s%5s%5i%5s%5.1f%15.3f%15.3f'%(i+1+addLvl, thisTerm, thisLabel, info['spin'][i], info['spd'][i],info['j'][i],  info['ecm'][i], info['ecmth'][i])        
+        pstring = '%7i%30s%5s%5i%5s%5.1f%15.3f%15.3f'%(i+1+addLvl, thisTerm, thisLabel, info['spin'][i], info['spd'][i],info['j'][i],  np.round(info['ecm'][i], round), np.round(info['ecmth'][i], round))        
         if includeRyd:
              pstring += ' , %15.8f , %15.8f'%(info['eryd'][i], info['erydth'][i])
         if includeEv:

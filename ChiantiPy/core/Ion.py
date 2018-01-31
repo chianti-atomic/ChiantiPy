@@ -226,7 +226,7 @@ class ion(ionTrails, specTrails):
         # read the scups/splups file
         if os.path.isfile(scupsfile):
             # happens the case of fe_3 and prob. a few others
-            self.Scups = io.scupsRead(self.IonStr, filename=scupsfile)
+            self.Scups = io.scupsRead(self.IonStr)
             self.Nscups = len(self.Scups['lvl1'])
             nlvlScups = max(self.Scups['lvl2'])
             nlvlList.append(nlvlScups)
@@ -235,7 +235,7 @@ class ion(ionTrails, specTrails):
             nlvlScups = 0
         # read cilvl file
         if os.path.isfile(cilvlfile):
-            self.Cilvl = io.cireclvlRead(self.IonStr,filename = fileName, filetype='cilvl')
+            self.Cilvl = io.cireclvlRead(self.IonStr, filetype='cilvl')
             self.Ncilvl = len(self.Cilvl['lvl1'])
             nlvlCilvl = max(self.Cilvl['lvl2'])
             nlvlList.append(nlvlCilvl)
@@ -243,7 +243,7 @@ class ion(ionTrails, specTrails):
             self.Ncilvl = 0
         #  .reclvl file may not exist
         if os.path.isfile(reclvlfile):
-            self.Reclvl = io.cireclvlRead(self.IonStr, filename=fileName, filetype='reclvl')
+            self.Reclvl = io.cireclvlRead(self.IonStr, filetype='reclvl')
             self.Nreclvl = len(self.Reclvl['lvl1'])
             nlvlReclvl = max(self.Reclvl['lvl2'])
             nlvlList.append(nlvlReclvl)
@@ -252,19 +252,19 @@ class ion(ionTrails, specTrails):
         #  psplups file may not exist
         psplupsfile = fileName +'.psplups'
         if os.path.isfile(psplupsfile):
-            self.Psplups = io.splupsRead(self.IonStr, filename=psplupsfile, filetype='psplups')
+            self.Psplups = io.splupsRead(self.IonStr, filetype='psplups')
             self.Npsplups = len(self.Psplups["lvl1"])
         else:
             self.Npsplups = 0
         # drparams file may not exist
         if os.path.isfile(drParamsFile):
-            self.DrParams = io.drRead(self.IonStr, filename=drParamsFile)
+            self.DrParams = io.drRead(self.IonStr)
         if os.path.isfile(rrParamsFile):
-            self.RrParams = io.rrRead(self.IonStr,filename=rrParamsFile)
+            self.RrParams = io.rrRead(self.IonStr)
 
         #  .auto file may not exist
         if os.path.isfile(autofile):
-            self.Auto = io.autoRead(self.IonStr,filename=autofile, total=True)
+            self.Auto = io.autoRead(self.IonStr, total=True)
             self.Nauto = len(self.Auto['lvl1'])
         else:
             self.Nauto = 0

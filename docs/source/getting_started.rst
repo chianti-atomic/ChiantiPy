@@ -28,16 +28,17 @@ Prerequisites
 * Matplotlib requires a GUI library
 
   PyQt4_ or wxPython_ (not compatible with Python3)
-  
+
   Once one of these is installed, it must be set as the backend in your matplotlibrc file, e.g., backend:  Qt4Agg
 
 .. _PyQt4: http://www.riverbankcomputing.co.uk/
 
 .. _wxPython:  http://www.wxpython.org/
 
+* ipyparallel (required for multiprocessing with ipymspectrum
 
 * (not really a prerequisite but **extremely** useful) IPython_ version 4 or 5 and Jupyter_
-  
+
 .. _IPython:  http://ipython.org
 
 .. _Jupyter: http://jupyter.readthedocs.io/en/latest/
@@ -55,9 +56,9 @@ The gzipped *data* tar ball can be downloaded from the CHIANTI website_
 * ChiantiPy uses the environment variable *XUVTOP* to find the database.  Set XUVTOP to the name of the directory where the CHIANTI data tarball was placed.  For example
 
 ::
-	
+
   setenv XUVTOP /data1/xuv/directory.where.the.tarball.was.placed
-  
+
 
 or on Windows:   To set the environment variable, go to Control Panel -> System -> Advanced System Properties -> Environment Variables.
 
@@ -69,7 +70,7 @@ Install the Prerequisites
 
 On **Linux** systems this can usually be done with your package manager.
 
-On **Windows**, **Linux** and **Mac** systems, it is possible to use 
+On **Windows**, **Linux** and **Mac** systems, it is possible to use
 
 * the Anaconda_ distribution from from Continuum, or,
 
@@ -96,7 +97,7 @@ In order to be compatible with the latest version (8.0) of the CHIANTI atomic da
 ::
 
   pip install ChiantiPy
-  
+
 or
 
 ::

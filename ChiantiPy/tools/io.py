@@ -259,6 +259,7 @@ def autoWrite(info, outfile = None, minBranch = None):
             else:
                 pstring = pformat%(info['lvl1'][itrans], info['lvl2'][itrans], avalue)
                 out.write(pstring+'\n')
+    out.write(' -1 \n')
     out.write('%filename:  ' + autoname + '\n')
     for one in info['ref']:
         out.write(one+'\n')

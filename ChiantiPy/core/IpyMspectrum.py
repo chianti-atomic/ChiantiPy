@@ -23,8 +23,12 @@ class ipymspectrum(ionTrails, specTrails):
     this is the multiprocessing version of spectrum for using inside an IPython Qtconsole or notebook.
 
     be for creating an instance, it is necessary to type something like the following into a console
-    > ipcluster start --profile=notebook  --n=3
-    this is the way to invoke things under the IPython 2.1 notation, a bit different in 2.0
+    
+    > ipcluster3 start   --n=3
+    or
+    > ipcluster start   --n=3
+
+    this is the way to invoke things under the IPython 6 notation
 
     Calculate the emission spectrum as a function of temperature and density.
 
@@ -66,6 +70,11 @@ class ipymspectrum(ionTrails, specTrails):
     '''
     def __init__(self, temperature, eDensity, wavelength, filter=(chfilters.gaussianR, 1000.), label=None, elementList = None, ionList = None, minAbund=None, keepIons=0, doLines=1, doContinuum=1, allLines = 1, em=None, abundanceName=0, verbose=0,  timeout=0.1):
         #
+        wavelength = np.atleast_1d(wavelength)
+        if wavelength.size < 2:
+            print(' wavelength must have at least two values, current length %3i'%(wavelength.size))
+            return
+            
         t1 = datetime.now()
         #
         rcAll = Client()
@@ -99,18 +108,22 @@ class ipymspectrum(ionTrails, specTrails):
                 self.Temperature = np.ones_like(self.EDensity)*self.Temperature
         elif tst1 and tst4:
             self.NTempDen = ntemp
+        if verbose:
+            print('NTempDen:  %5i'%(self.NTempDen))
             #
         #
         if em == None:
             em = np.ones(self.NTempDen, 'float64')
             ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
-        elif type(em) == float and em > 0.:
+        elif type(em) == float:
             em = np.ones(self.NTempDen, 'float64')*em
             ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ $'
         elif type(em) == list or type(em) == tuple or type(em) == np.ndarray:
             em = np.asarray(em, 'float64')
             ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ $'
         self.Em = em
+        if verbose:
+            print('len of self.Em %5i'%(len(self.Em)))
         #
         #
         if self.Em.any() > 0.:
@@ -286,7 +299,7 @@ def doAll(inpt):
         wavelength = inpt[3]
         abund = inpt[4]
         em = inpt[5]
-        FF = ChiantiPy.core.Continuum(ionS, temperature, abundance=abund, em=em)
+        FF = ChiantiPy.core.continuum(ionS, temperature, abundance=abund, em=em)
         FF.freeFree(wavelength)
         # can not do a deep copy of
 #        return [ionS, calcType, copy.deepcopy(cont)]
@@ -296,7 +309,7 @@ def doAll(inpt):
         wavelength = inpt[3]
         abund = inpt[4]
         em = inpt[5]
-        cont = ChiantiPy.core.Continuum(ionS, temperature, abundance=abund, em=em)
+        cont = ChiantiPy.core.continuum(ionS, temperature, abundance=abund, em=em)
         try:
             cont.freeBound(wavelength)
             return [ionS, calcType, {'rate': cont.FreeBound}]

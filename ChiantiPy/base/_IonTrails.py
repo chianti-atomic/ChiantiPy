@@ -16,7 +16,7 @@ class ionTrails(object):
     Base class for `ChiantiPy.core.ion` and `ChiantiPy.core.spectrum`
     """
 
-    def intensityList(self, index=-1, wvlRange=None, wvlRanges=None, top=10, relative=0, outFile=0 ):
+    def intensityList(self, index=-1, wvlRange=None, wvlRanges=None, top=10, relative=0, outFile=0, rightDigits=4 ):
         """
         List the line intensities. Checks to see if there is an existing Intensity attribute. If it exists, then those values are used.
         Otherwise, the `intensity` method is called.
@@ -89,6 +89,9 @@ class ionTrails(object):
         outFile : `str`
             specifies the file that the intensities should be output to
             default(outFile = 0) intensities are output to the terminal
+        rightDigits:  `int`
+            specifies the format for the wavelengths for the number of digits
+            to right of the decimal place
         """
 
         if not hasattr(self, 'Intensity'):
@@ -191,7 +194,8 @@ class ionTrails(object):
 
         idx = np.argsort(wvl)
         fmt1 = '%5s %5s %5s %25s - %-25s %12s %12s %12s %3s'
-        fmt = '%5s %5i %5i %25s - %-25s %12.4f %12.3e %12.2e %1s'
+        fmt = '%5s %5i %5i %25s - %-25s %12.' + str(rightDigits) + \
+            'f %12.2e %12.2e %1s'
         print('   ')
         print(' ------------------------------------------')
         print('   ')
@@ -206,7 +210,8 @@ class ionTrails(object):
         self.Intensity['intensityTop'] = intensity[idx]
         if outFile:
             fmt1a = '%5s %5s %5s %25s - %-25s %12s %12s %12s %3s \n'
-            fmt = '%5s %5i %5i %25s - %-25s %12.4f %12.3e %12.2e %1s \n'
+            fmt = '%5s %5i %5i %25s - %-25s %12.4' + str(rightDigits) + \
+            'f %12.2e %12.2e %1s \n'
             outpt = open(outFile, 'w')
             outpt.write(fmt1a%('Ion','lvl1','lvl2','lower','upper','Wvl(A)','Intensity','A value','Obs'))
             for kdx in idx:

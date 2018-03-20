@@ -71,6 +71,14 @@ def zion2name(z,ion, dielectronic=False):
     """
     Convert `Z` and `ion` to generic name, e.g. 26, 13 -> fe_13
 
+    Parameters
+    ----------
+    z : `int`
+        the nuclear charge, for example 26 for Fe XIV
+    ion : `int`
+        the ion stage, for example, 14 for Fe XIV
+        
+        
     Notes
     -----
     A duplicate of the routine in `ChiantiPy.tools.util` but needed by masterList Info
@@ -92,7 +100,14 @@ def zion2name(z,ion, dielectronic=False):
 
 def convertName(name):
     """
-    Convert ion name string to Z and Ion
+    Convert ion name string to Z and Ion and other interesting info
+    
+    Parameters
+    ----------
+    name :  `str`
+        a generic name of an ion in the CHIANTI database,
+        such as fe_14 for Fe XIV
+    
 
     Notes
     -----

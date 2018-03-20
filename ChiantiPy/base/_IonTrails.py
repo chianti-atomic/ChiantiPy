@@ -565,12 +565,8 @@ class ionTrails(object):
 
         The intensity ratio as a function to temperature and eDensity is saved to an asciii file. Descriptive information is included at the top of the file.
 
-        Arguments.
+        Parameters
         ----------
-            None
-
-        Keyword Arguments.
-        ------------------
             outFile
                 default(0):  the plot of the intensity ratio is not saved
                 str/unicode:  the plot is saved to the file names 'outFile'

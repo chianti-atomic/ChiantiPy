@@ -1333,7 +1333,7 @@ class ion(ionTrails, specTrails):
         if hasattr(self, 'Intensity'):
             intensity = self.Intensity
         else:
-            self.intensity(wvlRange = wvlRange, allLines=allLines)
+            self.intensity(allLines=allLines)
             intensity = self.Intensity
         #  if intensity had been called with em, then the intensities are
         # already multiply by em
@@ -1966,8 +1966,6 @@ class ion(ionTrails, specTrails):
         """
         Calculate the emissivities for lines of the specified ion.
 
-        wvlRange can be set to limit the calculation to a particular wavelength range
-
         units:  ergs s^-1 str^-1
 
         Does not include elemental abundance or ionization fraction
@@ -2512,8 +2510,6 @@ class ion(ionTrails, specTrails):
         """
         Calculate  the intensities for lines of the specified ion.
 
-        wvlRange, a 2 element tuple, list or array determines the wavelength range
-
         units:  ergs cm^-3 s^-1 str^-1
 
         includes elemental abundance and ionization fraction.
@@ -2576,14 +2572,12 @@ class ion(ionTrails, specTrails):
             Intensity['errorMessage'] = errorMessage
         self.Intensity = Intensity
 
-    def boundBoundLoss(self,  wvlRange = None,  allLines=1):
+    def boundBoundLoss(self, allLines=1):
         """
         Calculate  the summed radiative loss rate for all spectral lines of the specified ion.
 
         Parameters
         ----------
-
-        wvlRange : a 2 element tuple, list or array determines a limited wavelength range
 
         allLines : `bool`
             If True, include losses from both observed and unobserved lines.
@@ -2599,8 +2593,6 @@ class ion(ionTrails, specTrails):
 
         BoundBoundLoss : `dict` with the keys below.
 
-            *wvlRange* : identical to the input value.
-
             *rate* : the radiative loss rate (:math:`\mathrm{erg \, cm^{-3}} \, \mathrm{s}^{-1}`) per unit emission measure.
 
             *temperature* : (K).
@@ -2610,7 +2602,7 @@ class ion(ionTrails, specTrails):
 
         """
 
-        self.emiss(wvlRange = wvlRange, allLines=allLines)
+        self.emiss(allLines=allLines)
         emiss = self.Emiss
         if 'errorMessage'  in emiss.keys():
             self.Intensity = {'errorMessage': self.Spectroscopic+' no lines in this wavelength region'}
@@ -2648,7 +2640,7 @@ class ion(ionTrails, specTrails):
             else:
                 intensity = 4.*const.pi*ab*thisIoneq*em
             loss = intensity.sum()
-        self.BoundBoundLoss = {'rate':loss, 'wvlRange':wvlRange, 'temperature':self.Temperature, 'eDensity':self.EDensity}
+        self.BoundBoundLoss = {'rate':loss, 'temperature':self.Temperature, 'eDensity':self.EDensity}
 
     def intensityRatioInterpolate(self,data, scale = 'lin', plot=0, verbose=0):
         '''

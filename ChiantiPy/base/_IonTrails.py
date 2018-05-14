@@ -111,6 +111,9 @@ class ionTrails(object):
         ntemp = temperature.size
 
         intens = copy.deepcopy(self.Intensity)
+        if 'errorMessage' in intens.keys():
+            print(' errorMessage:  %s'%(intens['errorMessage']))
+            return
         intensity = intens['intensity']
         ionS = intens['ionS']
         wvl = intens['wvl']

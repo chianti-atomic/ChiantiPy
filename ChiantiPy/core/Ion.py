@@ -1962,7 +1962,7 @@ class ion(ionTrails, specTrails):
             plt.savefig(outFile)
         self.Population['toplvl'] = toplvl
 
-    def emiss(self, wvlRange=0,  allLines=1):
+    def emiss(self, allLines=True):
         """
         Calculate the emissivities for lines of the specified ion.
 
@@ -1974,7 +1974,7 @@ class ion(ionTrails, specTrails):
         
         Wavelengths are sorted        
 
-        set allLines = 1 to include unidentified lines
+        set allLines = True to include unidentified lines
         """
 
         if hasattr(self, 'Population'):
@@ -1996,17 +1996,6 @@ class ion(ionTrails, specTrails):
             pretty2 = np.asarray(self.Wgfa['pretty2'])
 
         # make sure there are lines in the wavelength range, if specified
-        if wvlRange:
-            realgood = util.between(wvl, wvlRange)
-            l1 = l1[realgood]
-            l2 = l2[realgood]
-            wvl = wvl[realgood]
-            avalue = avalue[realgood]
-            obs = obs[realgood]
-            if 'pretty1' in self.Wgfa.keys():
-                pretty1 = pretty1[realgood]
-            if 'pretty2' in self.Wgfa.keys():
-                pretty2 = pretty2[realgood]
 
         # two-photon decays have wvl=0 and nonzero avalues
         nonzed = wvl != 0.
@@ -2018,9 +2007,6 @@ class ion(ionTrails, specTrails):
         pretty2 = pretty2[nonzed]
         obs = obs[nonzed]
         nwvl = len(wvl)
-        if nwvl == 0:
-            self.Emiss = {'errorMessage':self.IonStr + ' no lines in this wavelength range'}
-            return
 
         try:
             ntempden,nlvls = pop.shape
@@ -2057,7 +2043,7 @@ class ion(ionTrails, specTrails):
                 p = pop[l2[iwvl]-1]
                 em[iwvl] = factor[iwvl]*p*avalue[iwvl]
             if self.Defaults['wavelength'] == 'kev':
-                wvlE = const.ev2Ang/np.asarray(wvl)
+                wvl = const.ev2Ang/np.asarray(wvl)
             elif self.Defaults['wavelength'] == 'nm':
                 wvl = wvl/10.
         nlvl = len(l1)
@@ -2522,7 +2508,7 @@ class ion(ionTrails, specTrails):
         self.IntensityRatio = {'ratio':numEmiss/denEmiss,'desc':desc,
                 'temperature':outTemperature,'eDensity':outDensity,'filename':intensityRatioFileName, 'numIdx':num_idx, 'denIdx':den_idx}
 
-    def intensity(self,  wvlRange = None,  allLines=1):
+    def intensity(self, allLines=1):
         """
         Calculate  the intensities for lines of the specified ion.
 
@@ -2534,14 +2520,10 @@ class ion(ionTrails, specTrails):
 
         the emission measure 'em' is included if specified
         """
-        if self.IoneqOne.all() == 0.:
-            self.Intensity = {'errorMessage':' Ioneq = 0 for this temperature range', 'ionS':self.IonStr}
-            return
-
             
         # so we know that it has been applied
         if not hasattr(self, 'Emiss'):
-            self.emiss(wvlRange = wvlRange, allLines=allLines)
+            self.emiss(allLines=allLines)
             emiss = copy.copy(self.Emiss)
         else:
             emiss = copy.copy(self.Emiss)
@@ -2570,7 +2552,8 @@ class ion(ionTrails, specTrails):
         if len(emissivity.shape) > 1:
             nwvl, ntempden =  emissivity.shape
             intensity = np.zeros((ntempden, nwvl),'Float64')
-            if self.IoneqOne.all() == 0.:
+            good = self.IoneqOne > 0.
+            if good.sum() == 0.:
                 intensity = np.zeros((ntempden, nwvl),'Float64')
                 errorMessage = 'ioneq = zero in temperature range'
                 self.Intensity = {'intensity':intensity, 'errorMessage':errorMessage}
@@ -2589,8 +2572,8 @@ class ion(ionTrails, specTrails):
         else:
             integrated = intensity.sum(axis=0)
         Intensity = {'intensity':intensity, 'integrated':integrated,'ionS':ionS, 'wvl':wvl, 'lvl1':lvl1, 'lvl2':lvl2, 'pretty1':pretty1, 'pretty2':pretty2,  'obs':obs, 'avalue':avalue, 'em':self.Em}
-#        if errorMessage != None:
-#            Intensity['errorMessage'] = errorMessage
+        if errorMessage != None:
+            Intensity['errorMessage'] = errorMessage
         self.Intensity = Intensity
 
     def boundBoundLoss(self,  wvlRange = None,  allLines=1):

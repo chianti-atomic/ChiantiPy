@@ -1340,7 +1340,7 @@ class ion(ionTrails, specTrails):
         if 'errorMessage' in intensity.keys():
             errorMessage = intensity['errorMessage']
         else:
-            errorMess
+            errorMessage = None
         if hasattr(self, 'Em'):
             em = self.Em
             useEm = 0

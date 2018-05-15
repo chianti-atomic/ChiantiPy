@@ -1337,6 +1337,10 @@ class ion(ionTrails, specTrails):
             intensity = self.Intensity
         #  if intensity had been called with em, then the intensities are
         # already multiply by em
+        if 'errorMessage' in intensity.keys():
+            errorMessage = intensity['errorMessage']
+        else:
+            errorMessage = None
         if hasattr(self, 'Em'):
             em = self.Em
             useEm = 0
@@ -1362,37 +1366,45 @@ class ion(ionTrails, specTrails):
             if not 'errorMessage' in self.Intensity.keys():
                 idx = util.between(self.Intensity['wvl'], wvlRange)
                 if len(idx) == 0:
-                    print(' no lines in wavelength range %12.2f - %12.2f'%(wavelength.min(), wavelength.max()))
-                    self.Spectrum = {'errorMessage':' no lines in wavelength range %12.2f - %12.2f'%(wavelength.min(), wavelength.max())}
-                    return
-                for iwvl in idx:
-                    wvlCalc = self.Intensity['wvl'][iwvl]
-                    aspectrum += useFilter(wavelength, wvlCalc,
-                                factor=useFactor)*intensity['intensity'][iwvl]
-                if useEm:
-                    aspectrum *= em
+#                    print(' no lines in wavelength range %12.2f - %12.2f'%(wavelength.min(), wavelength.max()))
+#                    self.Spectrum = {'errorMessage':' no lines in wavelength range %12.2f - %12.2f'%(wavelength.min(), wavelength.max())}
+                    errorMessage =  'no lines in wavelength range %12.2f - %12.2f'%(wavelength.min(), wavelength.max())
+                else:
+                    for iwvl in idx:
+                        wvlCalc = self.Intensity['wvl'][iwvl]
+                        aspectrum += useFilter(wavelength, wvlCalc,
+                                    factor=useFactor)*intensity['intensity'][iwvl]
+                    if useEm:
+                        aspectrum *= em
         elif self.NTempDen > 1:
             aspectrum = np.zeros((self.NTempDen, wavelength.size), 'float64')
             if not 'errorMessage' in self.Intensity.keys():
                 idx = util.between(self.Intensity['wvl'], wvlRange)
                 if len(idx) == 0:
-                    print(' no lines in wavelength range %12.2f - %12.2f'%(wavelength.min(), wavelength.max()))
-                    self.Spectrum = {'errorMessage':' no lines in wavelength range %12.2f - %12.2f'%(wavelength.min(), wavelength.max())}
-                    return
-                for itemp in range(self.NTempDen):
-                    for iwvl in idx:
-                        wvlCalc = self.Intensity['wvl'][iwvl]
-                        aspectrum[itemp] += useFilter(wavelength, wvlCalc, factor=useFactor)*self.Intensity['intensity'][itemp, iwvl]
-                    if useEm:
-                        aspectrum[itemp] *= em[itemp]
+#                    print(' no lines in wavelength range %12.2f - %12.2f'%(wavelength.min(), wavelength.max()))
+#                    self.Spectrum = {'errorMessage':' no lines in wavelength range %12.2f - %12.2f'%(wavelength.min(), wavelength.max())}
+                    errorMessage =  'no lines in wavelength range %12.2f - %12.2f'%(wavelength.min(), wavelength.max())
+                else:
+                    for itemp in range(self.NTempDen):
+                        for iwvl in idx:
+                            wvlCalc = self.Intensity['wvl'][iwvl]
+                            aspectrum[itemp] += useFilter(wavelength, wvlCalc, factor=useFactor)*self.Intensity['intensity'][itemp, iwvl]
+                        if useEm:
+                            aspectrum[itemp] *= em[itemp]
 
         if type(label) == type(''):
             if hasattr(self, 'Spectrum'):
                 self.Spectrum[label] = {'intensity':aspectrum,  'wvl':wavelength, 'filter':useFilter.__name__, 'filterWidth':useFactor, 'allLines':allLines, 'em':em, 'xlabel':xlabel, 'ylabel':ylabel}
+                if errorMessage != None:
+                    self.Spectrum[label]['errorMessage'] = errorMessage
             else:
                 self.Spectrum = {label:{'intensity':aspectrum,  'wvl':wavelength, 'filter':useFilter.__name__, 'filterWidth':useFactor, 'allLines':allLines, 'em':em, 'xlabel':xlabel, 'ylabel':ylabel}}
+                if errorMessage != None:
+                    self.Spectrum[label]['errorMessage'] = errorMessage
         else:
             self.Spectrum = {'intensity':aspectrum,  'wvl':wavelength, 'filter':useFilter.__name__, 'filterWidth':useFactor, 'allLines':allLines, 'em':em, 'xlabel':xlabel, 'ylabel':ylabel}
+            if errorMessage != None:
+                self.Spectrum['errorMessage'] = errorMessage
 
 
     def populate(self, popCorrect=1, verbose=0, **kwargs):

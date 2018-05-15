@@ -8,12 +8,12 @@ import pytest
 from ChiantiPy.core import spectrum, bunch
 
 # set temperature, density, wavelength
-temperature_scalar = 4e6
+temperature_scalar = 2e6
 temperature_array_1d = np.array([temperature_scalar])
 temperature_array = np.array([1e+6,4e+6,1e+7])
 temperature_array_long = np.logspace(5,8,10)
 density = 1e+9
-wavelength = np.linspace(10,100,1000)
+wavelength = np.linspace(200,400,1000)
 wavelength_range = [wavelength[0], wavelength[-1]]
 min_abund = 1.e-4
 ion_list = ['fe_15', 'fe_16']

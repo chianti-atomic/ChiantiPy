@@ -1340,7 +1340,7 @@ class ion(ionTrails, specTrails):
         if 'errorMessage' in intensity.keys():
             errorMessage = intensity['errorMessage']
         else:
-            errorMessage = None
+            errorMess
         if hasattr(self, 'Em'):
             em = self.Em
             useEm = 0
@@ -2650,7 +2650,7 @@ class ion(ionTrails, specTrails):
             if self.Defaults['flux'] != 'energy':
                 intensity = 4.*const.pi*(const.planck*const.light*1.e+8/wvl)*ab*thisIoneq*em
             else:
-                intensity = 4.*const.pi*ab*thisIoneq*em
+                intensity = 4.*const.pi*ab*thisIoneq*em/eDensity[it]
             loss = intensity.sum()
         self.BoundBoundLoss = {'rate':loss, 'temperature':self.Temperature, 'eDensity':self.EDensity}
 

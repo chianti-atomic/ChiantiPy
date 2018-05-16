@@ -188,7 +188,7 @@ class spectrum(ionTrails, specTrails):
                 if verbose:
                     print(' calculating spectrum for  :  %s'%(akey))
                 thisIon = ChiantiPy.core.ion(akey, temperature, eDensity, abundance=abundance, em=em)
-                thisIon.intensity(wvlRange=wvlRange, allLines=allLines)
+                thisIon.intensity(allLines=allLines)
                 self.IonsCalculated.append(akey)
                 if 'errorMessage' not in  list(thisIon.Intensity.keys()):
                     self.Finished.append(akey)
@@ -377,7 +377,7 @@ class bunch(ionTrails, specTrails):
             if verbose:
                 print(' calculating %s'%(ionS))
             thisIon = ChiantiPy.core.ion(ionS, temperature, eDensity, abundance=abundAll[Z-1],  em=em)
-            thisIon.intensity(wvlRange=wvlRange, allLines = allLines)
+            thisIon.intensity(allLines = allLines)
             self.IonsCalculated.append(ionS)
             #
             if 'errorMessage' not in  list(thisIon.Intensity.keys()):

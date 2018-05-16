@@ -1333,10 +1333,14 @@ class ion(ionTrails, specTrails):
         if hasattr(self, 'Intensity'):
             intensity = self.Intensity
         else:
-            self.intensity(wvlRange = wvlRange, allLines=allLines)
+            self.intensity(allLines=allLines)
             intensity = self.Intensity
         #  if intensity had been called with em, then the intensities are
         # already multiply by em
+        if 'errorMessage' in intensity.keys():
+            errorMessage = intensity['errorMessage']
+        else:
+            errorMessage = None
         if hasattr(self, 'Em'):
             em = self.Em
             useEm = 0
@@ -1362,37 +1366,45 @@ class ion(ionTrails, specTrails):
             if not 'errorMessage' in self.Intensity.keys():
                 idx = util.between(self.Intensity['wvl'], wvlRange)
                 if len(idx) == 0:
-                    print(' no lines in wavelength range %12.2f - %12.2f'%(wavelength.min(), wavelength.max()))
-                    self.Spectrum = {'errorMessage':' no lines in wavelength range %12.2f - %12.2f'%(wavelength.min(), wavelength.max())}
-                    return
-                for iwvl in idx:
-                    wvlCalc = self.Intensity['wvl'][iwvl]
-                    aspectrum += useFilter(wavelength, wvlCalc,
-                                factor=useFactor)*intensity['intensity'][iwvl]
-                if useEm:
-                    aspectrum *= em
+#                    print(' no lines in wavelength range %12.2f - %12.2f'%(wavelength.min(), wavelength.max()))
+#                    self.Spectrum = {'errorMessage':' no lines in wavelength range %12.2f - %12.2f'%(wavelength.min(), wavelength.max())}
+                    errorMessage =  'no lines in wavelength range %12.2f - %12.2f'%(wavelength.min(), wavelength.max())
+                else:
+                    for iwvl in idx:
+                        wvlCalc = self.Intensity['wvl'][iwvl]
+                        aspectrum += useFilter(wavelength, wvlCalc,
+                                    factor=useFactor)*intensity['intensity'][iwvl]
+                    if useEm:
+                        aspectrum *= em
         elif self.NTempDen > 1:
             aspectrum = np.zeros((self.NTempDen, wavelength.size), 'float64')
             if not 'errorMessage' in self.Intensity.keys():
                 idx = util.between(self.Intensity['wvl'], wvlRange)
                 if len(idx) == 0:
-                    print(' no lines in wavelength range %12.2f - %12.2f'%(wavelength.min(), wavelength.max()))
-                    self.Spectrum = {'errorMessage':' no lines in wavelength range %12.2f - %12.2f'%(wavelength.min(), wavelength.max())}
-                    return
-                for itemp in range(self.NTempDen):
-                    for iwvl in idx:
-                        wvlCalc = self.Intensity['wvl'][iwvl]
-                        aspectrum[itemp] += useFilter(wavelength, wvlCalc, factor=useFactor)*self.Intensity['intensity'][itemp, iwvl]
-                    if useEm:
-                        aspectrum[itemp] *= em[itemp]
+#                    print(' no lines in wavelength range %12.2f - %12.2f'%(wavelength.min(), wavelength.max()))
+#                    self.Spectrum = {'errorMessage':' no lines in wavelength range %12.2f - %12.2f'%(wavelength.min(), wavelength.max())}
+                    errorMessage =  'no lines in wavelength range %12.2f - %12.2f'%(wavelength.min(), wavelength.max())
+                else:
+                    for itemp in range(self.NTempDen):
+                        for iwvl in idx:
+                            wvlCalc = self.Intensity['wvl'][iwvl]
+                            aspectrum[itemp] += useFilter(wavelength, wvlCalc, factor=useFactor)*self.Intensity['intensity'][itemp, iwvl]
+                        if useEm:
+                            aspectrum[itemp] *= em[itemp]
 
         if type(label) == type(''):
             if hasattr(self, 'Spectrum'):
                 self.Spectrum[label] = {'intensity':aspectrum,  'wvl':wavelength, 'filter':useFilter.__name__, 'filterWidth':useFactor, 'allLines':allLines, 'em':em, 'xlabel':xlabel, 'ylabel':ylabel}
+                if errorMessage != None:
+                    self.Spectrum[label]['errorMessage'] = errorMessage
             else:
                 self.Spectrum = {label:{'intensity':aspectrum,  'wvl':wavelength, 'filter':useFilter.__name__, 'filterWidth':useFactor, 'allLines':allLines, 'em':em, 'xlabel':xlabel, 'ylabel':ylabel}}
+                if errorMessage != None:
+                    self.Spectrum[label]['errorMessage'] = errorMessage
         else:
             self.Spectrum = {'intensity':aspectrum,  'wvl':wavelength, 'filter':useFilter.__name__, 'filterWidth':useFactor, 'allLines':allLines, 'em':em, 'xlabel':xlabel, 'ylabel':ylabel}
+            if errorMessage != None:
+                self.Spectrum['errorMessage'] = errorMessage
 
 
     def populate(self, popCorrect=1, verbose=0, **kwargs):
@@ -1962,11 +1974,9 @@ class ion(ionTrails, specTrails):
             plt.savefig(outFile)
         self.Population['toplvl'] = toplvl
 
-    def emiss(self, wvlRange=0,  allLines=1):
+    def emiss(self, allLines=True):
         """
         Calculate the emissivities for lines of the specified ion.
-
-        wvlRange can be set to limit the calculation to a particular wavelength range
 
         units:  ergs s^-1 str^-1
 
@@ -1974,7 +1984,7 @@ class ion(ionTrails, specTrails):
         
         Wavelengths are sorted        
 
-        set allLines = 1 to include unidentified lines
+        set allLines = True to include unidentified lines
         """
 
         if hasattr(self, 'Population'):
@@ -1996,17 +2006,6 @@ class ion(ionTrails, specTrails):
             pretty2 = np.asarray(self.Wgfa['pretty2'])
 
         # make sure there are lines in the wavelength range, if specified
-        if wvlRange:
-            realgood = util.between(wvl, wvlRange)
-            l1 = l1[realgood]
-            l2 = l2[realgood]
-            wvl = wvl[realgood]
-            avalue = avalue[realgood]
-            obs = obs[realgood]
-            if 'pretty1' in self.Wgfa.keys():
-                pretty1 = pretty1[realgood]
-            if 'pretty2' in self.Wgfa.keys():
-                pretty2 = pretty2[realgood]
 
         # two-photon decays have wvl=0 and nonzero avalues
         nonzed = wvl != 0.
@@ -2018,9 +2017,6 @@ class ion(ionTrails, specTrails):
         pretty2 = pretty2[nonzed]
         obs = obs[nonzed]
         nwvl = len(wvl)
-        if nwvl == 0:
-            self.Emiss = {'errorMessage':self.IonStr + ' no lines in this wavelength range'}
-            return
 
         try:
             ntempden,nlvls = pop.shape
@@ -2057,7 +2053,7 @@ class ion(ionTrails, specTrails):
                 p = pop[l2[iwvl]-1]
                 em[iwvl] = factor[iwvl]*p*avalue[iwvl]
             if self.Defaults['wavelength'] == 'kev':
-                wvlE = const.ev2Ang/np.asarray(wvl)
+                wvl = const.ev2Ang/np.asarray(wvl)
             elif self.Defaults['wavelength'] == 'nm':
                 wvl = wvl/10.
         nlvl = len(l1)
@@ -2522,11 +2518,9 @@ class ion(ionTrails, specTrails):
         self.IntensityRatio = {'ratio':numEmiss/denEmiss,'desc':desc,
                 'temperature':outTemperature,'eDensity':outDensity,'filename':intensityRatioFileName, 'numIdx':num_idx, 'denIdx':den_idx}
 
-    def intensity(self,  wvlRange = None,  allLines=1):
+    def intensity(self, allLines=1):
         """
         Calculate  the intensities for lines of the specified ion.
-
-        wvlRange, a 2 element tuple, list or array determines the wavelength range
 
         units:  ergs cm^-3 s^-1 str^-1
 
@@ -2534,14 +2528,10 @@ class ion(ionTrails, specTrails):
 
         the emission measure 'em' is included if specified
         """
-        if self.IoneqOne.all() == 0.:
-            self.Intensity = {'errorMessage':' Ioneq = 0 for this temperature range', 'ionS':self.IonStr}
-            return
-
             
         # so we know that it has been applied
         if not hasattr(self, 'Emiss'):
-            self.emiss(wvlRange = wvlRange, allLines=allLines)
+            self.emiss(allLines=allLines)
             emiss = copy.copy(self.Emiss)
         else:
             emiss = copy.copy(self.Emiss)
@@ -2570,7 +2560,8 @@ class ion(ionTrails, specTrails):
         if len(emissivity.shape) > 1:
             nwvl, ntempden =  emissivity.shape
             intensity = np.zeros((ntempden, nwvl),'Float64')
-            if self.IoneqOne.all() == 0.:
+            good = self.IoneqOne > 0.
+            if good.sum() == 0.:
                 intensity = np.zeros((ntempden, nwvl),'Float64')
                 errorMessage = 'ioneq = zero in temperature range'
                 self.Intensity = {'intensity':intensity, 'errorMessage':errorMessage}
@@ -2589,18 +2580,16 @@ class ion(ionTrails, specTrails):
         else:
             integrated = intensity.sum(axis=0)
         Intensity = {'intensity':intensity, 'integrated':integrated,'ionS':ionS, 'wvl':wvl, 'lvl1':lvl1, 'lvl2':lvl2, 'pretty1':pretty1, 'pretty2':pretty2,  'obs':obs, 'avalue':avalue, 'em':self.Em}
-#        if errorMessage != None:
-#            Intensity['errorMessage'] = errorMessage
+        if errorMessage != None:
+            Intensity['errorMessage'] = errorMessage
         self.Intensity = Intensity
 
-    def boundBoundLoss(self,  wvlRange = None,  allLines=1):
+    def boundBoundLoss(self, allLines=1):
         """
         Calculate  the summed radiative loss rate for all spectral lines of the specified ion.
 
         Parameters
         ----------
-
-        wvlRange : a 2 element tuple, list or array determines a limited wavelength range
 
         allLines : `bool`
             If True, include losses from both observed and unobserved lines.
@@ -2616,8 +2605,6 @@ class ion(ionTrails, specTrails):
 
         BoundBoundLoss : `dict` with the keys below.
 
-            *wvlRange* : identical to the input value.
-
             *rate* : the radiative loss rate (:math:`\mathrm{erg \, cm^{-3}} \, \mathrm{s}^{-1}`) per unit emission measure.
 
             *temperature* : (K).
@@ -2627,7 +2614,7 @@ class ion(ionTrails, specTrails):
 
         """
 
-        self.emiss(wvlRange = wvlRange, allLines=allLines)
+        self.emiss(allLines=allLines)
         emiss = self.Emiss
         if 'errorMessage'  in emiss.keys():
             self.Intensity = {'errorMessage': self.Spectroscopic+' no lines in this wavelength region'}
@@ -2663,9 +2650,9 @@ class ion(ionTrails, specTrails):
             if self.Defaults['flux'] != 'energy':
                 intensity = 4.*const.pi*(const.planck*const.light*1.e+8/wvl)*ab*thisIoneq*em
             else:
-                intensity = 4.*const.pi*ab*thisIoneq*em
+                intensity = 4.*const.pi*ab*thisIoneq*em/eDensity[it]
             loss = intensity.sum()
-        self.BoundBoundLoss = {'rate':loss, 'wvlRange':wvlRange, 'temperature':self.Temperature, 'eDensity':self.EDensity}
+        self.BoundBoundLoss = {'rate':loss, 'temperature':self.Temperature, 'eDensity':self.EDensity}
 
     def intensityRatioInterpolate(self,data, scale = 'lin', plot=0, verbose=0):
         '''

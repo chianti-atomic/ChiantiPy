@@ -62,9 +62,11 @@ class continuum(object):
         
         if em is None:
             self.Em = 1.*np.ones_like(self.Temperature)
-        elif type(em) == np.ndarray:
+        elif type(em) is list:
+            self.Em = np.asarray(em)
+        elif type(em) is np.ndarray:
             self.Em = em
-        elif type(em) == type(1.):
+        elif type(em) is float:
             self.Em = em*np.ones_like(self.Temperature)
         self.Ip = ch_data.Ip[self.Z-1, self.stage-1]
         self.Ipr = ch_data.Ip[self.Z-1, self.stage-2]
@@ -73,22 +75,22 @@ class continuum(object):
         # Set abundance
         if abundance is not None:
             try:
-                self.abundance = float(abundance)
+                self.Abundance = float(abundance)
             except ValueError:
                 if abundance in ch_data.AbundanceList:
-                    self.abundance_name = abundance
+                    self.AbundanceName = abundance
                 else:
                     abundChoices = ch_data.AbundanceList
                     abundChoice = chGui.gui.selectorDialog(abundChoices, label='Select Abundance name')
                     abundChoice_idx = abundChoice.selectedIndex
-                    self.abundance_name = abundChoices[abundChoice_idx[0]]
+                    self.AbundanceName = abundChoices[abundChoice_idx[0]]
         else:
-            self.abundance_name = ch_data.Defaults['abundfile']
-        if not hasattr(self, 'abundance'):
-            self.abundance = ch_data.Abundance[self.abundance_name]['abundance'][self.Z-1]
+            self.AbundanceName = ch_data.Defaults['abundfile']
+        if not hasattr(self, 'Abundance'):
+            self.Abundance = ch_data.Abundance[self.AbundanceName]['abundance'][self.Z-1]
         self.ioneqOne()
 
-    def calculate_free_free_loss(self, **kwargs):
+    def free_free_loss(self, **kwargs):
         """
         Calculate the free-free energy loss rate of an ion. The result is returned to the
         `free_free_loss` attribute.
@@ -123,7 +125,7 @@ class continuum(object):
         prefactor = (4.*(ch_const.fine**3)*(ch_const.planck**2)/3./(np.pi**2)/ch_const.emass
                      * np.sqrt(2.*np.pi*ch_const.boltzmann/3./ch_const.emass))
         # include abundance and ionization equilibrium
-        prefactor *= self.abundance*self.ioneq_one(self.stage, **kwargs)
+        prefactor *= self.Abundance*self.ioneq_one(self.stage, **kwargs)
 
         self.free_free_loss = prefactor*(self.Z**2)*np.sqrt(self.Temperature)*gaunt_factor
 
@@ -176,7 +178,7 @@ class continuum(object):
         # include temperature dependence
         prefactor *= self.Z**2/np.sqrt(self.Temperature)
         if include_abundance:
-            prefactor *= self.abundance
+            prefactor *= self.Abundance
         if include_ioneq:
             prefactor *= self.IoneqOne
         if self.Em is not None:
@@ -231,7 +233,7 @@ class continuum(object):
         prefactor = (4.*(ch_const.fine**3)*(ch_const.planck**2)/3./(np.pi**2)/ch_const.emass
                      * np.sqrt(2.*np.pi*ch_const.boltzmann/3./ch_const.emass))
         # include abundance and ionization equilibrium
-        prefactor *= self.abundance*self.IoneqOne
+        prefactor *= self.Abundance*self.IoneqOne
 
         self.FreeFreeLoss = {'rate':prefactor*(self.Z**2)*np.sqrt(self.Temperature)*gaunt_factor}
 
@@ -437,10 +439,10 @@ class continuum(object):
         f_2 = (0.9*zeta_0*(z_0**4)/(n_0**5)*np.exp(scaled_energy*(z_0**2)/(n_0**2) - ip/ch_const.boltzmann/self.Temperature)
                + 0.42/(n_0**1.5)*(self.stage**4))
 
-#        return scaled_energy*f_2*self.abundance*self.ioneq_one(self.stage+1, **kwargs)
-        return scaled_energy*f_2*self.abundance*self.IoneqOne
+#        return scaled_energy*f_2*self.Abundance*self.ioneq_one(self.stage+1, **kwargs)
+        return scaled_energy*f_2*self.Abundance*self.IoneqOne
 
-    def freeBound(self, wavelength, include_abundance=True, include_ioneq=True, use_verner=True, **kwargs):
+    def freeBound(self, wavelength, includeAbundance=True, includeIoneq=True, useVerner=True, **kwargs):
         """
         Calculate the free-bound emission of an ion. The result is returned as a 2D array to the
         `free_bound_emission` attribute.
@@ -535,7 +537,7 @@ class continuum(object):
             if ip < 0. or np.all(np.max(photon_energy) < (self.ionization_potential - ip)):
                 continue
             # calculate cross-section
-            if i == 0 and use_verner:
+            if i == 0 and useVerner:
                 cross_section = self.verner_cross_section(photon_energy)
             else:
                 cross_section = self.karzas_cross_section(photon_energy, ip,
@@ -554,17 +556,21 @@ class continuum(object):
 #        else:
 #            print(' fb emiss.size %5i'%(fb_emiss.size))
         # include abundance, ionization equilibrium, photon conversion, emission measure
-        if include_abundance:
-            fb_emiss *= self.abundance
-        if include_ioneq:
+        if includeAbundance:
+            fb_emiss *= self.Abundance
+            includeAbundance = self.Abundance
+        if includeIoneq:
             if self.NTemperature > 1:
                 if self.NWavelength > 1:
 #                    fb_emiss *= self.ioneq_one(self.stage, **kwargs)[:,np.newaxis]
                     fb_emiss *= self.IoneqOne[:,np.newaxis]
+                    includeAbundance = self.IoneqOne[:,np.newaxis]
                 else:
                     fb_emiss *= self.IoneqOne
+                    includeAbundance = self.IoneqOne
             else:
                 fb_emiss *= self.IoneqOne
+                includeAbundance = self.IoneqOne
         if self.Em is not None:
             if self.Em.size > 1:
                 fb_emiss *= self.Em[:,np.newaxis]
@@ -577,7 +583,7 @@ class continuum(object):
         fb_emiss /= 1e8
 
 #        self.free_bound_emission = fb_emiss.squeeze()
-        self.FreeBound = {'intensity':fb_emiss.squeeze(), 'temperature':self.Temperature,'wvl':wavelength,'em':self.Em, 'ions':self.ion_string}
+        self.FreeBound = {'intensity':fb_emiss.squeeze(), 'temperature':self.Temperature,'wvl':wavelength,'em':self.Em, 'ions':self.ion_string,  'abundance':includeAbundance, 'ioneq':includeIoneq}
         
 
     def verner_cross_section(self, photon_energy):

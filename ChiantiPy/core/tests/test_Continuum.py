@@ -34,9 +34,9 @@ def test_free_free_scalar():
     assert hasattr(tmp_cont_scalar, 'FreeFree')
     assert tmp_cont_scalar.FreeFree['intensity'].shape == wavelength_array.shape
     # loss
-    tmp_cont_scalar.calculate_free_free_loss()
-    assert hasattr(tmp_cont_scalar, 'free_free_loss')
-    assert tmp_cont_scalar.free_free_loss.shape == (1,)
+    tmp_cont_scalar.freeFreeLoss()
+    assert hasattr(tmp_cont_scalar, 'FreeFreeLoss')
+    assert tmp_cont_scalar.FreeFreeLoss['rate'].shape == (1,)
 
 
 def test_free_free_array():
@@ -46,9 +46,9 @@ def test_free_free_array():
     assert hasattr(tmp_cont_array, 'FreeFree')
     assert tmp_cont_array.FreeFree['intensity'].shape == temperature_array.shape+wavelength_array.shape
     # loss
-    tmp_cont_array.calculate_free_free_loss()
-    assert hasattr(tmp_cont_array, 'free_free_loss')
-    assert tmp_cont_array.free_free_loss.shape == temperature_array.shape
+    tmp_cont_array.freeFreeLoss()
+    assert hasattr(tmp_cont_array, 'FreeFreeLoss')
+    assert tmp_cont_array.FreeFreeLoss['rate'].shape == temperature_array.shape
 
 
 def test_free_bound_scalar():
@@ -58,9 +58,9 @@ def test_free_bound_scalar():
     assert hasattr(tmp_cont_scalar,'FreeBound')
     assert tmp_cont_scalar.FreeBound['intensity'].shape == wavelength_array.shape
     # loss
-    tmp_cont_scalar.calculate_free_bound_loss()
-    assert hasattr(tmp_cont_scalar, 'free_bound_loss')
-    assert tmp_cont_scalar.free_bound_loss.shape == (1,)
+    tmp_cont_scalar.freeBoundLoss()
+    assert hasattr(tmp_cont_scalar, 'FreeBoundLoss')
+    assert tmp_cont_scalar.FreeBoundLoss['rate'].shape == (1,)
 
 
 def test_free_bound_array():
@@ -70,9 +70,9 @@ def test_free_bound_array():
     assert hasattr(tmp_cont_array,'FreeBound')
     assert tmp_cont_array.FreeBound['intensity'].shape == temperature_array.shape+wavelength_array.shape
     # loss
-    tmp_cont_array.calculate_free_bound_loss()
-    assert hasattr(tmp_cont_array, 'free_bound_loss')
-    assert tmp_cont_array.free_bound_loss.shape == temperature_array.shape
+    tmp_cont_array.freeBoundLoss()
+    assert hasattr(tmp_cont_array, 'FreeBoundLoss')
+    assert tmp_cont_array.FreeBoundLoss['rate'].shape == temperature_array.shape
 
 
 def test_free_bound_no_info():

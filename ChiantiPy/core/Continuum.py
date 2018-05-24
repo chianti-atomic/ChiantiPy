@@ -201,7 +201,7 @@ class continuum(object):
     def freeFreeLoss(self, **kwargs):
         """
         Calculate the free-free energy loss rate of an ion. The result is returned to the
-        `free_free_loss` attribute.
+        `FreeFreeLoss` attribute.
 
         The free-free radiative loss rate is given by Eq. 5.15a of [1]_. Writing the numerical
         constant in terms of the fine structure constant :math:`\\alpha`,

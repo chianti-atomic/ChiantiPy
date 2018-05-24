@@ -2,6 +2,16 @@
 Changelog
 ===========
 
+changes from 0.7.0 to 0.7.1
+===========================
+
+version 0.7.0 included some changes in the ChiantiPy naming conventions, largely in the continuum class.  These are being reverted to the original ChiantiPy nameing conventions.
+
+a pseudo-voigt filter has been added to filters
+
+the keyword argument wvlRange has been removed from the ion.emiss and ion.intensity methods
+
+
 changes from 0.6.5 to 0.7.0
 ===========================
 
@@ -9,16 +19,16 @@ The primary change is that code developement has been moved to Github_.
 
 .. _Github:  https://github.com/chianti-atomic/ChiantiPy
 
-Also, in order to be more compliant with other astrophysical packages on Github (Astropy_ and SunPy_) the directory layout has been changed and renamed.  
+Also, in order to be more compliant with other astrophysical packages on Github (Astropy_ and SunPy_) the directory layout has been changed and renamed.
 
 .. _SunPy:  https://github.com/sunpy/sunpy
 
-The core routines are now imported as 
+The core routines are now imported as
 
-:: 
+::
 
   import ChiantiPy.core as ch
-  
+
 this give access to ch.ion, ch.spectrum, etc.
 
 In terms of bug-fixes, the calculation of excitation-autoionization cross-sections and rates have been corrected in the eaCross() and eaRate() methods

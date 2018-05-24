@@ -26,7 +26,7 @@ The following two are extremely useful for running Python programs
 Optionally, if you'd like to use the GUI interfaces,
 
 * [PyQt4](https://riverbankcomputing.com/software/pyqt/intro) and/or
-* [wxPython](http://www.wxpython.org/)
+* [wxPython](http://www.wxpython.org/) although wxPython is only compatible with Python2
 
 If you are not familiar with installing Python and the needed dependencies, we recommend the [Anaconda platform](https://www.continuum.io/downloads). Next, download the [CHIANTI database](http://www.chiantidatabase.org/chianti_download.html). Assuming you've placed the CHIANTI tree in `$HOME`, set the environment variable in your `.bashrc` file,
 ```Shell

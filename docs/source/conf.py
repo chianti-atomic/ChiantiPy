@@ -25,6 +25,7 @@
 # Thus, any C-extensions that are needed to build the documentation will *not*
 # be accessible, and the documentation will not build correctly.
 
+
 import datetime
 import os
 import sys
@@ -57,6 +58,9 @@ import subprocess
 #except ImportError:
 #    print("Cannot import mock. Only needed for RTD build.")
 
+# autodoc is already loaded by astropy_helpers
+
+
 # -- Install CHIANTI database (if on RTD) -------------------------------------
 #check if on readthedocs
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
@@ -69,7 +73,8 @@ on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 #    subprocess.call('curl -L http://www.chiantidatabase.org/download/CHIANTI_8.0.2_data.tar.gz | tar xz -C '+os.environ['XUVTOP'], shell=True)
 
 # -- Module Mocking -------------------------------------------------------------
-#if on_rtd:
+if on_rtd:
+    autodoc_mock_imports = ['PyQt4', 'QtGui']
 #    class Mock(MagicMock):
 #        @classmethod
 #        def __getattr__(cls,name):

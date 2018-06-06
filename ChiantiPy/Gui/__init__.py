@@ -27,7 +27,7 @@ except (KeyError,configparser.NoSectionError) as e:
 #check for available gui
 hasWx=False
 hasPyQt4=False
-hasPyQt5=True
+hasPyQt5=False
 try:
     import PyQt5
     hasPyQt5 = True

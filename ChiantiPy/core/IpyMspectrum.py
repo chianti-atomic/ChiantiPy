@@ -319,14 +319,14 @@ def doAll(inpt):
         temperature = inpt[2]
         density = inpt[3]
         wavelength = inpt[4]
-        wvlRange = [wavelength.min(), wavelength.max()]
+        # wvlRange = [wavelength.min(), wavelength.max()]
         filter = inpt[5]
         allLines = inpt[6]
         abund = inpt[7]
         em = inpt[8]
         doContinuum = inpt[9]
         thisIon = ChiantiPy.core.ion(ionS, temperature, density, abundance=abund, em=em)
-        thisIon.intensity(wvlRange = wvlRange, allLines = allLines)
+        thisIon.intensity(allLines = allLines)
         if 'errorMessage' not in thisIon.Intensity.keys():
             thisIon.spectrum(wavelength,  filter=filter, allLines=allLines)
         outList = [ionS, calcType, copy.deepcopy(thisIon)]

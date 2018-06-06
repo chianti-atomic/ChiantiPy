@@ -27,22 +27,32 @@ except (KeyError,configparser.NoSectionError) as e:
 #check for available gui
 hasWx=False
 hasPyQt4=False
+hasPyQt5=True
 try:
-    import PyQt4
-    hasPyQt4 = True
-    print(' found PyQt4 widgets')
-    del PyQt4
-except ImportError:
+    import PyQt5
+    hasPyQt5 = True
+    print(' found PyQt5 widgets')
+    del PyQt5
+except:
     try:
-        import wx
-        hasWx = True
-        print(' found Wx widgets')
-        del wx
+        import PyQt4
+        hasPyQt4 = True
+        print(' found PyQt4 widgets')
+        del PyQt4
     except ImportError:
-        print(' using cli')
+        try:
+            import wx
+            hasWx = True
+            print(' found Wx widgets')
+            del wx
+        except ImportError:
+            print(' using cli')
 
 #set gui
-if hasPyQt4 and use_gui:
+if hasPyQt5 and use_gui:
+    from .gui_qt5 import gui
+    print(' using PyQt5 widgets')
+elif hasPyQt4 and use_gui:
     from .gui_qt import gui
     print(' using PyQt4 widgets')
 elif hasWx and use_gui:

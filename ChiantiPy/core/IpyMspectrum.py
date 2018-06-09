@@ -23,7 +23,7 @@ class ipymspectrum(ionTrails, specTrails):
     this is the multiprocessing version of spectrum for using inside an IPython Qtconsole or notebook.
 
     be for creating an instance, it is necessary to type something like the following into a console
-    
+
     > ipcluster3 start   --n=3
     or
     > ipcluster start   --n=3
@@ -74,7 +74,7 @@ class ipymspectrum(ionTrails, specTrails):
         if wavelength.size < 2:
             print(' wavelength must have at least two values, current length %3i'%(wavelength.size))
             return
-            
+
         t1 = datetime.now()
         #
         rcAll = Client()
@@ -214,16 +214,16 @@ class ipymspectrum(ionTrails, specTrails):
                 thisFf = out[2]
                 if keepIons:
                     self.FfInstances[ionS] = thisFf
-                freeFree += thisFf
+                freeFree += thisFf['intensity']
             elif calcType == 'fb':
                 thisFb = out[2]
                 if verbose:
                     print(' fb ion = %s'%(ionS))
-                if hasattr(thisFb, 'FreeBound'):
+                if 'intensity' in thisFb.keys():
                     if 'errorMessage' not in sorted(thisFb.keys()):
                         if keepIons:
                             self.FbInstances[ionS] = thisFb
-                        freeBound += thisFb['rate']
+                        freeBound += thisFb['intensity']
                     else:
                         print(thisFb['errorMessage'])
             elif calcType == 'line':
@@ -310,11 +310,12 @@ def doAll(inpt):
         abund = inpt[4]
         em = inpt[5]
         cont = ChiantiPy.core.continuum(ionS, temperature, abundance=abund, em=em)
-        try:
-            cont.freeBound(wavelength)
-            return [ionS, calcType, {'rate': cont.FreeBound}]
-        except ValueError:
-            return [ionS, calcType, {'errorMessage': 'No free-bound information available.'}]
+        #try:
+        cont.freeBound(wavelength)
+            #return [ionS, calcType, {'rate': cont.FreeBound}]
+        return [ionS, calcType, copy.copy(cont.FreeBound)]
+        #except ValueError:
+            #return [ionS, calcType, {'errorMessage': 'No free-bound information available.'}]
     elif calcType == 'line':
         temperature = inpt[2]
         density = inpt[3]
@@ -326,7 +327,7 @@ def doAll(inpt):
         em = inpt[8]
         doContinuum = inpt[9]
         thisIon = ChiantiPy.core.ion(ionS, temperature, density, abundance=abund, em=em)
-        thisIon.intensity(wvlRange = wvlRange, allLines = allLines)
+        thisIon.intensity(allLines = allLines)
         if 'errorMessage' not in thisIon.Intensity.keys():
             thisIon.spectrum(wavelength,  filter=filter, allLines=allLines)
         outList = [ionS, calcType, copy.deepcopy(thisIon)]

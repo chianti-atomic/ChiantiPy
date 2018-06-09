@@ -7,5 +7,4 @@ dependencies:
   - matplotlib
   - ipython
   - ipyparallel
-  - pyqt
   - sphinx_rtd_theme

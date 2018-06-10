@@ -30,7 +30,7 @@ import datetime
 import os
 import sys
 
-os.environ['XUVTOP'] = '/data1/dbase'
+#os.environ['XUVTOP'] = '/data1/dbase'
 
 try:
     import astropy_helpers
@@ -76,6 +76,7 @@ on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 
 # -- Module Mocking -------------------------------------------------------------
 if on_rtd:
+    print(' ------ on RTD -----\n')
     autodoc_mock_imports = ['PyQt4', 'PyQt4.QtGui']
 #    class Mock(MagicMock):
 #        @classmethod

@@ -30,6 +30,8 @@ import datetime
 import os
 import sys
 
+os.environ['XUVTOP'] = '/data1/dbase'
+
 try:
     import astropy_helpers
 except ImportError:

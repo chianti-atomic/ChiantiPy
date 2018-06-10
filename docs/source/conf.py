@@ -74,7 +74,7 @@ on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 
 # -- Module Mocking -------------------------------------------------------------
 if on_rtd:
-    autodoc_mock_imports = ['PyQt4', 'QtGui']
+    autodoc_mock_imports = ['PyQt4', 'PyQt4.QtGui']
 #    class Mock(MagicMock):
 #        @classmethod
 #        def __getattr__(cls,name):

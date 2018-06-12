@@ -25,14 +25,18 @@ def chpicker(dir, filter='*.*', label='ChiantiPy'):
 class selectorDialog(QtGui.QDialog):
     '''Make a single or multiple selection from a list of items.
 
-    expects the input of an array of items, will select one or more'''
-    def __init__(self, items, label=None ,  parent=None):
+    expects the input of an array of items, will select one or more
+    '''
+    def __init__(self, items, label=None ,  parent=None, multiChoice=True):
 #       if using the Qt4Agg backend for matplotlib, the following line needs to be comment out
 #        app=QtGui.QApplication(sys.argv)
         QtGui.QDialog.__init__(self)
         self.ui = Ui_selectorDialogForm()
         self.ui.setupUi(self)
-        self.ui.listWidget.setSelectionMode(QtGui.QListWidget.MultiSelection)
+        if multiChoice:
+            self.ui.listWidget.setSelectionMode(QtGui.QListWidget.MultiSelection)
+        else:
+            self.ui.listWidget.setSelectionMode(QtGui.QListWidget.SingleSelection)
         if label == None:
             self.setWindowTitle('ChiantiPy')
         else:

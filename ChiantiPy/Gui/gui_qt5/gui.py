@@ -9,8 +9,9 @@ from ChiantiPy.Gui.gui_qt5.ui import *
 
 def chpicker(dir, filter='*.*', label='ChiantiPy'):
     '''Select a filename using a Qt gui dialog.'''
-    app=QtWidgets.QApplication(sys.argv)
-    a=QtWidgets.QFileDialog()
+#    app=QtWidgets.QApplication(sys.argv)
+    a=QtWidgets.QFileDialog.getOpenFileName()
+    a.SetFileMode(1)
     a.setDirectory(dir)
     # a.setFilter(filter)
 #    mylabel=QtCore.QString('some label')
@@ -26,14 +27,16 @@ class selectorDialog(QtWidgets.QDialog):
     '''Make a single or multiple selection from a list of items.
 
     expects the input of an array of items, will select one or more'''
-    def __init__(self, items, label=None ,  parent=None, multi=True):
+    def __init__(self, items, label=None ,  parent=None, multiChoice=True):
 #       if using the Qt4Agg backend for matplotlib, the following line needs to be comment out
 #        app=QtGui.QApplication(sys.argv)
         QtWidgets.QDialog.__init__(self)
         self.ui = Ui_selectorDialogForm()
         self.ui.setupUi(self)
-        if multi:
+        if multiChoice:
             self.ui.listWidget.setSelectionMode(QtWidgets.QListWidget.MultiSelection)
+        else:
+            self.ui.listWidget.setSelectionMode(QtWidgets.QListWidget.SingleSelection)
         if label == None:
             self.setWindowTitle('ChiantiPy')
         else:

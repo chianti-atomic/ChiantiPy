@@ -27,9 +27,11 @@ Prerequisites
 
 * Matplotlib requires a GUI library
 
-  PyQt4_ or wxPython_ (wxPython is not compatible with Python3)
+  PyQt5_, PyQt4_ or wxPython_ (wxPython is not compatible with Python3)
 
   Once one of these is installed, it must be set as the backend in your matplotlibrc file, e.g., backend:  Qt4Agg
+
+.. _PyQt5: http://www.riverbankcomputing.co.uk/
 
 .. _PyQt4: http://www.riverbankcomputing.co.uk/
 
@@ -142,9 +144,17 @@ In order for the ChiantiPy dialog widget to be used, a backend for them must be 
 
 ::
 
-  %matplotlib
+  matplotlib inline
 
-If you choose to use a GUI backend other than that used for matplotlib, the in an IPython or a Jupyter command the following magic commands are available to start the backend:
+or
+
+::
+
+  matplotlib qt
+
+if you are using Qt4 or Qt5
+
+If you choose to use a GUI backend other than that used for matplotlib, then in an IPython or a Jupyter command the following magic commands are also available to start the backend:
 
 ::
 
@@ -152,5 +162,5 @@ If you choose to use a GUI backend other than that used for matplotlib, the in a
   %gui wx
 
 
-ChiantiPy has mostly been tested with the Qt4 backend for Matplotlib and using the ChiantiPy Qt4 widgets.
+ChiantiPy has mostly been tested with the Qt5 backend for Matplotlib and using the ChiantiPy Qt5 widgets.
 

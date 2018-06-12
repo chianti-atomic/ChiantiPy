@@ -352,7 +352,7 @@ The multi-ion class **bunch** [new in v0.6] inherits a number of the same method
 ::
 
   t = 10.**(5.0+0.1*np.arange(11))
-  bnch=ch.bunch(t,1.e+9,wvlRange=[300.,500.],ionList=['ne_6','mg_6'],abundanceName='unity')
+  bnch=ch.bunch(t,1.e+9,wvlRange=[300.,500.],ionList=['ne_6','mg_6'],abundance='unity')
   bnch.intensityRatio(wvlRange=[395.,405.],top=7)
 
 produces and initial plot of the selected lines, a selection widget and finally a plot of the ratio
@@ -619,4 +619,4 @@ the radiative losses are kept in the rl.RadLoss dictionary
 
 the **abundance** keyword argument can be set to the name of an available abundance file in XUVTOP/abund
 
-if abundanceName=1, a dialog will come up so that a abundance file can be selected
+if abundance='abc', or some name that does not match an abundance name, a dialog will come up so that a abundance file can be selected

@@ -13,7 +13,7 @@ import ChiantiPy.tools.data as chdata
 import ChiantiPy.tools.constants as const
 import ChiantiPy.tools.filters as chfilters
 import ChiantiPy.tools.util as util
-import ChiantiPy.Gui as chgui
+import ChiantiPy.Gui as chGui
 from ChiantiPy.base import ionTrails
 from ChiantiPy.base import specTrails
 
@@ -68,7 +68,7 @@ class ipymspectrum(ionTrails, specTrails):
     proc = the number of processors to use
     timeout - a small but non-zero value seems to be necessary
     '''
-    def __init__(self, temperature, eDensity, wavelength, filter=(chfilters.gaussianR, 1000.), label=None, elementList = None, ionList = None, minAbund=None, keepIons=0, doLines=1, doContinuum=1, allLines = 1, em=None, abundanceName=0, verbose=0,  timeout=0.1):
+    def __init__(self, temperature, eDensity, wavelength, filter=(chfilters.gaussianR, 1000.), label=None, elementList = None, ionList = None, minAbund=None, keepIons=0, doLines=1, doContinuum=1, allLines = 1, em=None, abundance=None, verbose=0,  timeout=0.1):
         #
         wavelength = np.atleast_1d(wavelength)
         if wavelength.size < 2:
@@ -135,18 +135,18 @@ class ipymspectrum(ionTrails, specTrails):
         #
         self.AllLines = allLines
         #
-        if not abundanceName:
-            self.AbundanceName = self.Defaults['abundfile']
-        else:
-            if abundanceName in chdata.Abundance:
-                self.AbundanceName = abundanceName
+        #
+        if abundance != None:
+            if abundance in list(chdata.Abundance.keys()):
+                self.AbundanceName = abundance
             else:
                 abundChoices = list(chdata.Abundance.keys())
-                abundChoice = chgui.gui.selectorDialog(abundChoices,label='Select Abundance name')
+                abundChoice = chGui.gui.selectorDialog(abundChoices,label='Select Abundance name', multiChoice=False)
                 abundChoice_idx = abundChoice.selectedIndex
                 self.AbundanceName = abundChoices[abundChoice_idx[0]]
-                abundanceName = self.AbundanceName
-                print(' Abundance chosen:  %s '%(self.AbundanceName))
+                print((' Abundance chosen:  %s '%(self.AbundanceName)))
+        else:
+            self.AbundanceName = self.Defaults['abundfile']
         #
         #
         abundAll = chdata.Abundance[self.AbundanceName]['abundance']

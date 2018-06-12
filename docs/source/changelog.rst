@@ -5,11 +5,15 @@ Changelog
 changes from 0.7.0 to 0.7.1
 ===========================
 
-version 0.7.0 included some changes in the ChiantiPy naming conventions, largely in the continuum class.  These are being reverted to the original ChiantiPy nameing conventions.
+version 0.7.0 included some changes in the ChiantiPy naming conventions, largely in the continuum class.  These are being reverted to the original ChiantiPy naming conventions.
 
-a pseudo-voigt filter has been added to filters
+a pseudo-voigt filter has been added to tools.filters
 
 the keyword argument wvlRange has been removed from the ion.emiss and ion.intensity methods
+
+a set of PyQt5 dialogs have been developed by **ktritz** and are now included
+
+this is the last release that will use the PyQt4 widgets as an option.
 
 
 changes from 0.6.5 to 0.7.0

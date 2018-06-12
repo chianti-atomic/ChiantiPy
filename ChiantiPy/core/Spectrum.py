@@ -50,8 +50,8 @@ class spectrum(ionTrails, specTrails):
 
     a minimum abundance can be specified so that the calculation can be speeded up
     by excluding elements with a low abundance. The default of minAbund is 1.e-6
-    
-    It is necessary to specify at least an elementList, an ionList, or a minAbund to select any ions 
+
+    It is necessary to specify at least an elementList, an ionList, or a minAbund to select any ions
     for a spectrum calculation
 
     With solar photospheric abundances -
@@ -121,9 +121,10 @@ class spectrum(ionTrails, specTrails):
                     self.AbundanceName = abundance
                 else:
                     abundChoices = chdata.AbundanceList
-                    abundChoice = chGui.gui.selectorDialog(abundChoices,label='Select Abundance name')
+                    abundChoice = chGui.gui.selectorDialog(abundChoices,label='Select Abundance name', multiChoice=False)
                     abundChoice_idx = abundChoice.selectedIndex
                     self.AbundanceName = abundChoices[abundChoice_idx[0]]
+                print((' Abundance chosen:  %s '%(self.AbundanceName)))
             else:
                 print(' keyword abundance must be a string, either a blank (\'\') or the name of an abundance file')
                 return
@@ -140,7 +141,6 @@ class spectrum(ionTrails, specTrails):
         wavelength = np.asarray(wavelength)
         nWvl = wavelength.size
         self.Wavelength = wavelength
-        wvlRange = [wavelength.min(), wavelength.max()]
         #
         freeFree = np.zeros((nTempDen, nWvl), 'float64').squeeze()
         freeBound = np.zeros((nTempDen, nWvl), 'float64').squeeze()
@@ -290,7 +290,7 @@ class bunch(ionTrails, specTrails):
     #
     # ------------------------------------------------------------------------------------
     #
-    def __init__(self, temperature, eDensity, wvlRange, elementList=None, ionList=None, minAbund=None, keepIons=0, em=None, abundanceName=None, verbose=0, allLines=1):
+    def __init__(self, temperature, eDensity, wvlRange, elementList=None, ionList=None, minAbund=None, keepIons=0, em=None, abundance=None, verbose=0, allLines=1):
         #
         t1 = datetime.now()
         # creates Intensity dict from first ion calculated
@@ -332,17 +332,16 @@ class bunch(ionTrails, specTrails):
         self.Em = em
         #
         #
-        if abundanceName:
-            if abundanceName in list(chdata.Abundance.keys()):
-                self.AbundanceName = abundanceName
+        if abundance != None:
+            if abundance in list(chdata.Abundance.keys()):
+                self.AbundanceName = abundance
             else:
                 abundChoices = list(chdata.Abundance.keys())
 #                for one in wvl[topLines]:
 #                    wvlChoices.append('%12.3f'%(one))
-                abundChoice = chGui.gui.selectorDialog(abundChoices,label='Select Abundance name')
+                abundChoice = chGui.gui.selectorDialog(abundChoices,label='Select Abundance name', multiChoice=False)
                 abundChoice_idx = abundChoice.selectedIndex
                 self.AbundanceName = abundChoices[abundChoice_idx[0]]
-                abundanceName = self.AbundanceName
                 print((' Abundance chosen:  %s '%(self.AbundanceName)))
         else:
             self.AbundanceName = self.Defaults['abundfile']

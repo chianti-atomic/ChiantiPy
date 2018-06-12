@@ -121,7 +121,7 @@ class ion(ionTrails, specTrails):
                     self.AbundanceName = abundance
                 else:
                     abundChoices = chdata.AbundanceList
-                    abundChoice = chGui.gui.selectorDialog(abundChoices,label='Select Abundance name')
+                    abundChoice = chGui.gui.selectorDialog(abundChoices,label='Select Abundance name', multiChoice=False)
                     abundChoice_idx = abundChoice.selectedIndex
                     self.AbundanceName = abundChoices[abundChoice_idx[0]]
         else:
@@ -1567,7 +1567,7 @@ class ion(ionTrails, specTrails):
                 if self.Wgfa['avalueLvl'][lvl-1] > 0.:
                     branch[lvl-1] = self.Wgfa['avalueLvl'][lvl-1]/(self.Wgfa['avalueLvl'][lvl-1] + self.Auto['avalueLvl'][lvl-1])
                 else:
-                   branch[lvl-1] = 0. 
+                   branch[lvl-1] = 0.
         temp = temperature
         ntemp = temp.size
         dens = self.EDensity
@@ -1981,8 +1981,8 @@ class ion(ionTrails, specTrails):
         units:  ergs s^-1 str^-1
 
         Does not include elemental abundance or ionization fraction
-        
-        Wavelengths are sorted        
+
+        Wavelengths are sorted
 
         set allLines = True to include unidentified lines
         """
@@ -2528,7 +2528,7 @@ class ion(ionTrails, specTrails):
 
         the emission measure 'em' is included if specified
         """
-            
+
         # so we know that it has been applied
         if not hasattr(self, 'Emiss'):
             self.emiss(allLines=allLines)
@@ -2556,7 +2556,7 @@ class ion(ionTrails, specTrails):
         else:
             self.Abundance = io.abundanceRead()
             ab = self.Abundance
-            
+
         if len(emissivity.shape) > 1:
             nwvl, ntempden =  emissivity.shape
             intensity = np.zeros((ntempden, nwvl),'Float64')

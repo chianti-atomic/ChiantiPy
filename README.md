@@ -7,7 +7,7 @@
 ChiantiPy is the Python interface to the [CHIANTI atomic database](http://www.chiantidatabase.org) for astrophysical spectroscopy.  It provides the capability to calculate the emission line and continuum spectrum of an optically thin plasma based on the data in the CHIANTI database.
 
 ## What is CHIANTI?
-CHIANTI provides a database of atomic data that can be used to interpret the emission of spectral lines and continuua emitted from high-temperature, optically-thin astrophysical sources.  The CHIANTI project provides a suite of routines written in Interactive Data Language (IDL) to access the database and calculate various quantities for use in interpreting observed spectra or producing synthetic spectra.
+CHIANTI provides a database of atomic data that can be used to interpret the emission of spectral lines and continua emitted from high-temperature, optically-thin astrophysical sources.  The CHIANTI project provides a suite of routines written in Interactive Data Language (IDL) to access the database and calculate various quantities for use in interpreting observed spectra or producing synthetic spectra.
 
 ## Installation
 The following dependencies are required to run ChiantiPy,
@@ -23,7 +23,7 @@ The following two are extremely useful for running Python programs
 * [Jupyter](http://jupyter.org/)
 
 
-Optionally, if you'd like to use the GUI interfaces,
+Optionally, if you'd like to use the GUI dialogs,
 
 * [PyQt5](https://riverbankcomputing.com/software/pyqt/intro) and/or
 * [PyQt4](https://riverbankcomputing.com/software/pyqt/intro) and/or

@@ -101,7 +101,7 @@ class mspectrum(ionTrails, specTrails):
                     self.AbundanceName = abundance
                 else:
                     abundChoices = chdata.AbundanceList
-                    abundChoice = chGui.gui.selectorDialog(abundChoices,label='Select Abundance name')
+                    abundChoice = chGui.gui.selectorDialog(abundChoices,label='Select Abundance name', multiChoice=False)
                     abundChoice_idx = abundChoice.selectedIndex
                     self.AbundanceName = abundChoices[abundChoice_idx[0]]
                     if verbose:

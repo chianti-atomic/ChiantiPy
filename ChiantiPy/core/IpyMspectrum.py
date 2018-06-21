@@ -320,7 +320,7 @@ def doAll(inpt):
         temperature = inpt[2]
         density = inpt[3]
         wavelength = inpt[4]
-        wvlRange = [wavelength.min(), wavelength.max()]
+        # wvlRange = [wavelength.min(), wavelength.max()]
         filter = inpt[5]
         allLines = inpt[6]
         abund = inpt[7]

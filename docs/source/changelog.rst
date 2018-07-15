@@ -15,6 +15,8 @@ a set of PyQt5 dialogs have been developed by **ktritz** and are now included
 
 this is the last release that will use the PyQt4 widgets as an option.
 
+the method **ioneqOne** is used by both the Ion and Continuum class.  It has been moved to a single _IoneqOne.py file in the **base** directory
+
 
 changes from 0.6.5 to 0.7.0
 ===========================

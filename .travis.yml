@@ -6,23 +6,23 @@ sudo: false
 env:
   global:
     - XUVTOP=$HOME"/chianti_dbase"
-    - PYTHON_VERSION=2.7
+    - PYTHON_VERSION=3.6
     #- NUMPY_VERSION='stable'
     - ASTROPY_VERSION='stable'
     - MAIN_CMD='python setup.py'
     - CONDA_DEPENDENCIES='scipy matplotlib ipython ipyparallel pyqt sphinx_rtd_theme pytest-cov coverage'
     - NUMPY_VERSION='1.11'
-    - PYQT_VERSION='4.11.4'
+    - PYQT_VERSION='5.5.0'
   matrix:
     - PYTHON_VERSION=2.7 SETUP_CMD='install'
     - PYTHON_VERSION=3.4 SETUP_CMD='install'
-    - PYTHON_VERSION=3.5 SETUP_CMD='install'
+    - PYTHON_VERSION=3.6 SETUP_CMD='install'
     - PYTHON_VERSION=2.7 SETUP_CMD='test --coverage'
     - PYTHON_VERSION=3.4 SETUP_CMD='test --coverage'
-    - PYTHON_VERSION=3.5 SETUP_CMD='test --coverage'
+    - PYTHON_VERSION=3.6 SETUP_CMD='test --coverage'
     - PYTHON_VERSION=2.7 SETUP_CMD='build_docs --no-intersphinx'
     - PYTHON_VERSION=3.4 SETUP_CMD='build_docs --no-intersphinx'
-    - PYTHON_VERSION=3.5 SETUP_CMD='build_docs --no-intersphinx'
+    - PYTHON_VERSION=3.6 SETUP_CMD='build_docs --no-intersphinx'
 #install the ci helpers
 install:
   - git clone https://github.com/astropy/ci-helpers.git

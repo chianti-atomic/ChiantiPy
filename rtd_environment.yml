@@ -2,7 +2,7 @@ name: chiantipy
 dependencies:
   - python=3.6
   - astropy
-  - numpy=1.11
+  - numpy=1.14
   - scipy
   - matplotlib
   - ipython

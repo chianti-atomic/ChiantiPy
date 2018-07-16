@@ -6,7 +6,7 @@ import copy
 import time
 
 import numpy as np
-from scipy import interpolate
+from scipy.interpolate import splev, splrep
 import matplotlib.pyplot as plt
 
 import ChiantiPy.tools.filters as chfilters
@@ -17,11 +17,12 @@ import ChiantiPy.tools.data as chdata
 import ChiantiPy.Gui as chGui
 from ChiantiPy.base import ionTrails
 from ChiantiPy.base import specTrails
+from ChiantiPy.base import ioneqOne
 
 heseqLvl2 = [-1,3,-1,-1,-1,5,6,6,-1,6,6,6,5,5,3,5,3,5,3,5,-1,-1,-1,-1,-1,4,-1,4,-1,4]
 
 
-class ion(ionTrails, specTrails):
+class ion(ioneqOne, ionTrails, specTrails):
     """
     The top level class for performing spectral calculations for an ion in the
     CHIANTI database.
@@ -383,9 +384,9 @@ class ion(ionTrails, specTrails):
                         self.DiParams['btf'][ifac], self.DiParams['ev1'][ifac])
                     # these interpolations were made with the scipy routine
                     # used here
-                    y2 = interpolate.splrep(self.DiParams['xsplom'][ifac],
+                    y2 = splrep(self.DiParams['xsplom'][ifac],
                         self.DiParams['ysplom'][ifac], s=0)
-                    btcross = interpolate.splev(btenergy, y2, der=0)
+                    btcross = splev(btenergy, y2, der=0)
                     energy1, cross1 = util.descale_bti(btenergy,
                                         btcross,self.DiParams['btf'][ifac],
                                         self.DiParams['ev1'][ifac] )
@@ -487,32 +488,32 @@ class ion(ionTrails, specTrails):
             if ttype == 1:
                 st = 1.-np.log(cups)/np.log(kte+cups)
                 xs = dx*np.arange(nspl)
-                y2 = interpolate.splrep(xs,splups,s=0)  #allow smoothing,s=0)
-                sups = interpolate.splev(st,y2,der=0)
+                y2 = splrep(xs,splups,s=0)  #allow smoothing,s=0)
+                sups = splev(st,y2,der=0)
                 ups[isplups] = sups*np.log(kte+np.exp(1.))
             if ttype == 2:
                 st = kte/(kte+cups)
                 xs = dx*np.arange(nspl)
-                y2 = interpolate.splrep(xs,splups,s=0)
-                sups = interpolate.splev(st,y2,der=0)
+                y2 = splrep(xs,splups,s=0)
+                sups = splev(st,y2,der=0)
                 ups[isplups] = sups
             if ttype == 3:
                 st = kte/(kte+cups)
                 xs = dx*np.arange(nspl)
-                y2 = interpolate.splrep(xs,splups,s = 0)
-                sups = interpolate.splev(st,y2,der=0)
+                y2 = splrep(xs,splups,s = 0)
+                sups = splev(st,y2,der=0)
                 ups[isplups] = sups/(kte+1.)
             if ttype == 4:
                 st = 1.-np.log(cups)/np.log(kte+cups)
                 xs = dx*np.arange(nspl)
-                y2 = interpolate.splrep(xs,splups,s=0)
-                sups = interpolate.splev(st,y2,der=0)
+                y2 = splrep(xs,splups,s=0)
+                sups = splev(st,y2,der=0)
                 ups[isplups] = sups*np.log(kte+cups)
             if ttype == 5:
                 st = kte/(kte+cups)
                 xs = dx*np.arange(nspl)
-                y2 = interpolate.splrep(xs,splups,s=0)  #allow smoothing,s=0)
-                sups = interpolate.splev(st,y2,der=0)
+                y2 = splrep(xs,splups,s=0)  #allow smoothing,s=0)
+                sups = splev(st,y2,der=0)
                 ups[isplups] = sups/(kte+0.)
             elif ttype > 5:  print(' t_type ne 1,2,3,4,5 = %5i %5i %5i'%(ttype,l1,l2))
 
@@ -812,15 +813,15 @@ class ion(ionTrails, specTrails):
                 for itrans in range(nlvl):
                     lvl2 = lvl['lvl2'][itrans]
                     nrecTemp = lvl['ntemp'][itrans]
-                    y2 = interpolate.splrep(np.log(lvl['temperature'][itrans][:nrecTemp]), np.log(lvl['rate'][itrans][:nrecTemp]))
-                    cirec = np.exp(interpolate.splev(np.log(temperature),y2))
+                    y2 = splrep(np.log(lvl['temperature'][itrans][:nrecTemp]), np.log(lvl['rate'][itrans][:nrecTemp]))
+                    cirec = np.exp(splev(np.log(temperature),y2))
                     rate[itrans] = cirec.squeeze()
         else:
             rate = np.zeros(( nlvl, temperature.size), 'float64')
             for itrans in range(nlvl):
                 lvl2 = lvl['lvl2'][itrans]
                 nTemp = lvl['ntemp'][itrans]
-                y2 = interpolate.splrep(np.log(lvl['temperature'][itrans, :nTemp]), np.log(lvl['rate'][itrans, :nTemp]))
+                y2 = splrep(np.log(lvl['temperature'][itrans, :nTemp]), np.log(lvl['rate'][itrans, :nTemp]))
                 goodLow = temperature < lvl['temperature'][itrans].min()
                 if goodLow.sum() >0:
                     lowT = temperature[goodLow]
@@ -844,11 +845,11 @@ class ion(ionTrails, specTrails):
                         newRate[index] = 0.
                         index += 1
                 if realgood.sum() == 1:
-                    midRec = np.exp(interpolate.splev(np.log(midT),y2))
+                    midRec = np.exp(splev(np.log(midT),y2))
                     newRate[index] = midRec
                     index += 1
                 elif realgood.sum() > 1:
-                    midRec = np.exp(interpolate.splev(np.log(midT),y2))
+                    midRec = np.exp(splev(np.log(midT),y2))
                     for idx in range(realgood.sum()):
                         newRate[index] = midRec[idx]
                         index += 1
@@ -974,8 +975,8 @@ class ion(ionTrails, specTrails):
                 denominator += z*self.IoneqAll['ioneqAll'][i,z,:]*abundance[i]
 
         p2eratio = abundance[0]*self.IoneqAll['ioneqAll'][0,1,:]/denominator
-        nots = interpolate.splrep(np.log10(self.IoneqAll['ioneqTemperature']),p2eratio,s=0)
-        self.ProtonDensityRatio = interpolate.splev(np.log10(temperature),nots,der=0,ext=1)
+        nots = splrep(np.log10(self.IoneqAll['ioneqTemperature']),p2eratio,s=0)
+        self.ProtonDensityRatio = splev(np.log10(temperature),nots,der=0,ext=1)
 
     def upsilonDescale(self, prot=0):
         """
@@ -1062,35 +1063,35 @@ class ion(ionTrails, specTrails):
             der=0
             if ttype == 1:
                 st = 1.-np.log(cups)/np.log(kte+cups)
-                y2 = interpolate.splrep(xs,scups,s=0)
-                sups = interpolate.splev(st,y2,der=der)
+                y2 = splrep(xs,scups,s=0)
+                sups = splev(st,y2,der=der)
                 ups[iscups] = sups*np.log(kte+np.exp(1.))
             if ttype == 2:
                 st = kte/(kte+cups)
-                y2 = interpolate.splrep(xs,scups,s = 0)
-                sups = interpolate.splev(st,y2,der = der)
+                y2 = splrep(xs,scups,s = 0)
+                sups = splev(st,y2,der = der)
                 ups[iscups] = sups
             if ttype == 3:
                 st = kte/(kte+cups)
-                y2 = interpolate.splrep(xs,scups,s = 0)
-                sups = interpolate.splev(st,y2,der=der)
+                y2 = splrep(xs,scups,s = 0)
+                sups = splev(st,y2,der=der)
                 ups[iscups] = sups/(kte+1.)
             if ttype == 4:
                 st = 1.-np.log(cups)/np.log(kte+cups)
-                y2 = interpolate.splrep(xs,scups,s = 0)
-                sups = interpolate.splev(st,y2,der=der)
+                y2 = splrep(xs,scups,s = 0)
+                sups = splev(st,y2,der=der)
                 ups[iscups] = sups*np.log(kte+cups)
             if ttype == 5:
                 # dielectronic rates
                 st = kte/(kte+cups)
-                y2 = interpolate.splrep(xs,scups,s=0)
-                sups = interpolate.splev(st,y2,der=der)
+                y2 = splrep(xs,scups,s=0)
+                sups = splev(st,y2,der=der)
                 ups[iscups] = sups/(kte+0.)
             #  descale proton values
             if ttype == 6:
                 st = kte/(kte+cups)
-                y2 = interpolate.splrep(xs,scups,s=0)
-                sups = interpolate.splev(st,y2,der=der)
+                y2 = splrep(xs,scups,s=0)
+                sups = splev(st,y2,der=der)
                 ups[iscups] = 10.**sups
             elif ttype > 6:  print(' t_type ne 1,2,3,4,5 = %5i %5i %5i '%(ttype,l1,l2))
 
@@ -1228,40 +1229,40 @@ class ion(ionTrails, specTrails):
             if ttype == 1:
                 st = 1.-np.log(cups)/np.log(kte+cups)
                 xs = dx*np.arange(nspl)
-                y2 = interpolate.splrep(xs,splups,s = 0)
-                sups = interpolate.splev(st,y2,der=der)
+                y2 = splrep(xs,splups,s = 0)
+                sups = splev(st,y2,der=der)
                 ups[isplups] = sups*np.log(kte+np.exp(1.))
             if ttype == 2:
                 st = kte/(kte+cups)
                 xs = dx*np.arange(nspl)
-                y2 = interpolate.splrep(xs,splups,s = 0)
-                sups = interpolate.splev(st,y2,der=der)
+                y2 = splrep(xs,splups,s = 0)
+                sups = splev(st,y2,der=der)
                 ups[isplups] = sups
             if ttype == 3:
                 st = kte/(kte+cups)
                 xs = dx*np.arange(nspl)
-                y2 = interpolate.splrep(xs,splups,s=0)
-                sups = interpolate.splev(st,y2,der=der)
+                y2 = splrep(xs,splups,s=0)
+                sups = splev(st,y2,der=der)
                 ups[isplups] = sups/(kte+1.)
             if ttype == 4:
                 st = 1.-np.log(cups)/np.log(kte+cups)
                 xs = dx*np.arange(nspl)
-                y2 = interpolate.splrep(xs,splups,s = 0)
-                sups = interpolate.splev(st,y2,der=der)
+                y2 = splrep(xs,splups,s = 0)
+                sups = splev(st,y2,der=der)
                 ups[isplups] = sups*np.log(kte+cups)
             if ttype == 5:
                 # dielectronic rates
                 st = kte/(kte+cups)
                 xs = dx*np.arange(nspl)
-                y2 = interpolate.splrep(xs,splups,s=0)
-                sups = interpolate.splev(st,y2,der=der)
+                y2 = splrep(xs,splups,s=0)
+                sups = splev(st,y2,der=der)
                 ups[isplups] = sups/(kte+0.)
             #  descale proton values
             if ttype == 6:
                 st = kte/(kte+cups)
                 xs = dx*np.arange(nspl)
-                y2 = interpolate.splrep(xs,splups,s = 0)
-                sups = interpolate.splev(st,y2,der=der)
+                y2 = splrep(xs,splups,s = 0)
+                sups = splev(st,y2,der=der)
                 ups[isplups] = 10.**sups
             elif ttype > 6:  print(
                             ' t_type ne 1,2,3,4,5 = %5i %5i %5i'%(ttype,l1,l2))
@@ -2679,26 +2680,26 @@ class ion(ionTrails, specTrails):
             sy = y
         #
         if 'lin' in scale:
-            y2 = interpolate.splrep(x, sy, s=0)
-            interpolatedData = interpolate.splev(data,y2)
+            y2 = splrep(x, sy, s=0)
+            interpolatedData = splev(data,y2)
             if plot:
                 plt.plot(sy, x)
                 plt.plot(interpolatedData, data, 'bD')
         elif scale == 'loglog':
-            y2 = interpolate.splrep(np.log(x), np.log(sy), s=0)
-            interpolatedData = np.exp(interpolate.splev(np.log(data),y2))
+            y2 = splrep(np.log(x), np.log(sy), s=0)
+            interpolatedData = np.exp(splev(np.log(data),y2))
             if plot:
                 plt.loglog(sy, x)
                 plt.loglog(interpolatedData, data, 'bD')
         elif scale == 'logx':
-            y2 = interpolate.splrep(x, np.log(sy), s=0)
-            interpolatedData = np.exp(interpolate.splev(data,y2))
+            y2 = splrep(x, np.log(sy), s=0)
+            interpolatedData = np.exp(splev(data,y2))
             if plot:
                 plt.semilogx(sy, x)
                 plt.semilogx(interpolatedData, data, 'bD')
         elif scale == 'logy':
-            y2 = interpolate.splrep(np.log(x), sy, s=0)
-            interpolatedData = interpolate.splev(np.log(data),y2)
+            y2 = splrep(np.log(x), sy, s=0)
+            interpolatedData = splev(np.log(data),y2)
             if plot:
                 plt.semilogy(sy, x)
                 plt.semilogy(interpolatedData, data, 'bD')
@@ -2708,46 +2709,6 @@ class ion(ionTrails, specTrails):
             print(' data, value = %12.3e %12.3e'%(data[i], avalue))
         self.IntensityRatioInterpolated = {'data':data, 'value':interpolatedData}
 
-    def ioneqOne(self):
-        '''
-        Provide the ionization equilibrium for the selected ion as a function of temperature.
-        returned in self.IoneqOne
-        '''
-        #
-        if hasattr(self, 'Temperature'):
-            temperature = self.Temperature
-        else:
-            return
-        #
-        if hasattr(self, 'IoneqAll'):
-            ioneqAll = self.IoneqAll
-        else:
-            ioneqAll = io.ioneqRead(ioneqname = self.Defaults['ioneqfile'])
-            self.ioneqAll = self.IoneqAll
-        #
-        ioneqTemperature = ioneqAll['ioneqTemperature']
-        Z = self.Z
-        Ion = self.Ion
-        Dielectronic = self.Dielectronic
-        ioneqOne = np.zeros_like(temperature)
-        #
-        thisIoneq = ioneqAll['ioneqAll'][Z-1,Ion-1 + Dielectronic].squeeze()
-        gioneq = thisIoneq > 0.
-        goodt1 = self.Temperature >= ioneqTemperature[gioneq].min()
-        goodt2 = self.Temperature <= ioneqTemperature[gioneq].max()
-        goodt = np.logical_and(goodt1,goodt2)
-        y2 = interpolate.splrep(np.log(ioneqTemperature[gioneq]),np.log(thisIoneq[gioneq]),s=0)
-        #
-        if goodt.sum() > 0:
-            if self.Temperature.size > 1:
-                gIoneq = interpolate.splev(np.log(self.Temperature[goodt]),y2)   #,der=0)
-                ioneqOne[goodt] = np.exp(gIoneq)
-            else:
-                gIoneq = interpolate.splev(np.log(self.Temperature),y2)
-                ioneqOne = np.exp(gIoneq)*np.ones(self.NTempDen, 'float64')
-            self.IoneqOne = ioneqOne
-        else:
-            self.IoneqOne = np.zeros_like(self.Temperature)
 
     def gofnt(self,wvlRange=0,top=10, verbose=0, plot = True):
         """
@@ -2983,8 +2944,8 @@ class ion(ionTrails, specTrails):
                 dist = io.twophotonHRead()
                 avalue = dist['avalue'][self.Z-1]
                 asum = dist['asum'][self.Z-1]
-                distr1 = interpolate.splrep(dist['y0'], dist['psi0'][self.Z-1], s=0)
-                distr = avalue*y*interpolate.splev(y, distr1)/(asum*wvl[goodWvl])
+                distr1 = splrep(dist['y0'], dist['psi0'][self.Z-1], s=0)
+                distr = avalue*y*splev(y, distr1)/(asum*wvl[goodWvl])
                 if self.Defaults['flux'] == 'energy':
                     f = (const.light*const.planck*1.e+8)/wvl[goodWvl]
                 else:
@@ -3004,8 +2965,8 @@ class ion(ionTrails, specTrails):
                 y = wvl0/wvl[goodWvl]
                 dist = io.twophotonHeRead()
                 avalue = dist['avalue'][self.Z-1]
-                distr1 = interpolate.splrep(dist['y0'], dist['psi0'][self.Z-1], s=0)
-                distr = avalue*y*interpolate.splev(y, distr1)/wvl[goodWvl]
+                distr1 = splrep(dist['y0'], dist['psi0'][self.Z-1], s=0)
+                distr = avalue*y*splev(y, distr1)/wvl[goodWvl]
                 if self.Defaults['flux'] == 'energy':
                     f = (const.light*const.planck*1.e+8)/wvl[goodWvl]
                 else:
@@ -3077,8 +3038,8 @@ class ion(ionTrails, specTrails):
                     dist = io.twophotonHRead()
                     avalue = dist['avalue'][self.Z-1]
                     asum = dist['asum'][self.Z-1]
-                    distr1 = interpolate.splrep(dist['y0'], dist['psi0'][self.Z-1], s=0)
-                    distr = avalue*y*interpolate.splev(y, distr1)/(asum*wvl[goodWvl])
+                    distr1 = splrep(dist['y0'], dist['psi0'][self.Z-1], s=0)
+                    distr = avalue*y*splev(y, distr1)/(asum*wvl[goodWvl])
                     if self.Defaults['flux'] == 'energy':
                         f = (const.light*const.planck*1.e+8)/(4.*const.pi*wvl[goodWvl])
                     else:
@@ -3100,8 +3061,8 @@ class ion(ionTrails, specTrails):
                     y = wvl0/wvl[goodWvl]
                     dist = io.twophotonHeRead()
                     avalue = dist['avalue'][self.Z-1]
-                    distr1 = interpolate.splrep(dist['y0'], dist['psi0'][self.Z-1], s=0)
-                    distr = avalue*y*interpolate.splev(y, distr1)/wvl[goodWvl]
+                    distr1 = splrep(dist['y0'], dist['psi0'][self.Z-1], s=0)
+                    distr = avalue*y*splev(y, distr1)/wvl[goodWvl]
                     if self.Defaults['flux'] == 'energy':
                         f = (const.light*const.planck*1.e+8)/(4.*const.pi*wvl[goodWvl])
                     else:

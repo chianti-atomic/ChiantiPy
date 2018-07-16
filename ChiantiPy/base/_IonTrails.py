@@ -251,10 +251,10 @@ class ionTrails(object):
             title = self.Spectroscopic
         else:
             title = ''
-            
+
         if not hasattr(self, 'Intensity'):
             try:
-                self.intensity(em=em)
+                self.intensity()
             except:
                 print(' emissivities not calculated and emiss() is unable to calculate them')
                 print(' perhaps the temperature and/or eDensity are not set')
@@ -599,3 +599,4 @@ class ionTrails(object):
             out.close()
         else:
             print(' in .intensityRatioSave(), no IntensityRatio is found')
+

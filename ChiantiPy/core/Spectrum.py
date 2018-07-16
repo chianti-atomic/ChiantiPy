@@ -337,8 +337,6 @@ class bunch(ionTrails, specTrails):
                 self.AbundanceName = abundance
             else:
                 abundChoices = list(chdata.Abundance.keys())
-#                for one in wvl[topLines]:
-#                    wvlChoices.append('%12.3f'%(one))
                 abundChoice = chGui.gui.selectorDialog(abundChoices,label='Select Abundance name', multiChoice=False)
                 abundChoice_idx = abundChoice.selectedIndex
                 self.AbundanceName = abundChoices[abundChoice_idx[0]]

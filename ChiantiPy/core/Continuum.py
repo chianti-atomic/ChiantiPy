@@ -1,20 +1,22 @@
 """
 Continuum module
 """
+import os
 
 import numpy as np
 from scipy.interpolate import splev, splrep
 from scipy.ndimage import map_coordinates
 
 from .Ioneq import ioneq
-import ChiantiPy.tools.data as ch_data
-import ChiantiPy.tools.util as ch_util
-import ChiantiPy.tools.io as ch_io
-import ChiantiPy.tools.constants as ch_const
+from ChiantiPy.base import ionTrails
+import ChiantiPy.tools.data as chdata
+import ChiantiPy.tools.util as util
+import ChiantiPy.tools.io as io
+import ChiantiPy.tools.constants as const
 import ChiantiPy.Gui as chGui
 
 
-class continuum(object):
+class continuum(ionTrails):
     """
     The top level class for continuum calculations. Includes methods for the calculation of the
     free-free and free-bound continua.
@@ -51,15 +53,16 @@ class continuum(object):
     their result to an attribute. See the respective docstrings for more information.
     """
 
-    def __init__(self, ion_string,  temperature, abundance=None, em=None):
-        self.ion_string = ion_string
-        self.nameDict = ch_util.convertName(ion_string)
+    def __init__(self, ionStr,  temperature, abundance=None, em=None):
+        self.IonStr = ionStr
+        self.nameDict = util.convertName(ionStr)
         self.Z = self.nameDict['Z']
-        self.stage = self.nameDict['Ion']
+        self.Stage = self.nameDict['Ion']
+        self.Ion = self.nameDict['Ion']
         self.Temperature = np.atleast_1d(temperature)
         self.NTemperature = self.Temperature.size
-        self.Defaults = ch_data.Defaults
-        
+        self.Defaults = chdata.Defaults
+
         if em is None:
             self.Em = 1.*np.ones_like(self.Temperature)
         elif type(em) is list:
@@ -68,26 +71,27 @@ class continuum(object):
             self.Em = em
         elif type(em) is float:
             self.Em = em*np.ones_like(self.Temperature)
-        self.Ip = ch_data.Ip[self.Z-1, self.stage-1]
-        self.Ipr = ch_data.Ip[self.Z-1, self.stage-2]
-        self.ionization_potential = ch_data.Ip[self.Z-1, self.stage-1]*ch_const.ev2Erg
-        self.IprErg = self.Ipr*ch_const.ev2Erg
+
+        self.Ip = chdata.Ip[self.Z-1, self.Stage-1]
+        self.Ipr = chdata.Ip[self.Z-1, self.Stage-2]
+        self.ionization_potential = chdata.Ip[self.Z-1, self.Stage-1]*const.ev2Erg
+        self.IprErg = self.Ipr*const.ev2Erg
         # Set abundance
         if abundance is not None:
             try:
                 self.Abundance = float(abundance)
             except ValueError:
-                if abundance in ch_data.AbundanceList:
+                if abundance in chdata.AbundanceList:
                     self.AbundanceName = abundance
                 else:
-                    abundChoices = ch_data.AbundanceList
+                    abundChoices = chdata.AbundanceList
                     abundChoice = chGui.gui.selectorDialog(abundChoices, label='Select Abundance name')
                     abundChoice_idx = abundChoice.selectedIndex
                     self.AbundanceName = abundChoices[abundChoice_idx[0]]
         else:
-            self.AbundanceName = ch_data.Defaults['abundfile']
+            self.AbundanceName = chdata.Defaults['abundfile']
         if not hasattr(self, 'Abundance'):
-            self.Abundance = ch_data.Abundance[self.AbundanceName]['abundance'][self.Z-1]
+            self.Abundance = chdata.Abundance[self.AbundanceName]['abundance'][self.Z-1]
         self.ioneqOne()
 
     def free_free_loss(self, **kwargs):
@@ -115,17 +119,17 @@ class continuum(object):
             <http://adsabs.harvard.edu/abs/1961ApJS....6..167K>`_
         """
         # interpolate wavelength-averaged K&L gaunt factors
-        gf_kl_info = ch_io.gffintRead()
-        gamma_squared = self.ionization_potential/ch_const.boltzmann/self.Temperature
+        gf_kl_info = io.gffintRead()
+        gamma_squared = self.ionization_potential/const.boltzmann/self.Temperature
         for i, atemp in enumerate(self.Temperature):
-            print('%s T:  %10.2e gamma_squared  %10.2e'%(self.ion_string, atemp, gamma_squared[i]))
+            print('%s T:  %10.2e gamma_squared  %10.2e'%(self.IonStr, atemp, gamma_squared[i]))
         gaunt_factor = splev(np.log(gamma_squared),
                              splrep(gf_kl_info['g2'],gf_kl_info['gffint']), ext=3)
         # calculate numerical constant
-        prefactor = (4.*(ch_const.fine**3)*(ch_const.planck**2)/3./(np.pi**2)/ch_const.emass
-                     * np.sqrt(2.*np.pi*ch_const.boltzmann/3./ch_const.emass))
+        prefactor = (4.*(const.fine**3)*(const.planck**2)/3./(np.pi**2)/const.emass
+                     * np.sqrt(2.*np.pi*const.boltzmann/3./const.emass))
         # include abundance and ionization equilibrium
-        prefactor *= self.Abundance*self.ioneq_one(self.stage, **kwargs)
+        prefactor *= self.Abundance*self.ioneq_one(self.Stage, **kwargs)
 
         self.free_free_loss = prefactor*(self.Z**2)*np.sqrt(self.Temperature)*gaunt_factor
 
@@ -172,9 +176,9 @@ class continuum(object):
         """
         wavelength = np.atleast_1d(wavelength)
         # define the numerical prefactor
-        prefactor = ((ch_const.light*1e8)/3./ch_const.emass
-                     * (ch_const.fine*ch_const.planck/np.pi)**3
-                     * np.sqrt(2.*np.pi/3./ch_const.emass/ch_const.boltzmann))
+        prefactor = ((const.light*1e8)/3./const.emass
+                     * (const.fine*const.planck/np.pi)**3
+                     * np.sqrt(2.*np.pi/3./const.emass/const.boltzmann))
         # include temperature dependence
         prefactor *= self.Z**2/np.sqrt(self.Temperature)
         if include_abundance:
@@ -184,7 +188,7 @@ class continuum(object):
         if self.Em is not None:
             prefactor *= self.Em
         # define exponential factor
-        exp_factor = np.exp(-ch_const.planck*(1.e8*ch_const.light)/ch_const.boltzmann
+        exp_factor = np.exp(-const.planck*(1.e8*const.light)/const.boltzmann
                             / np.outer(self.Temperature, wavelength))/(wavelength**2)
         # calculate gaunt factor
         gf_itoh = self.itoh_gaunt_factor(wavelength)
@@ -192,12 +196,12 @@ class continuum(object):
         gf = np.where(np.isnan(gf_itoh), gf_sutherland, gf_itoh)
         # express in units of ergs or photons
         energy_factor = 1.0
-        if ch_data.Defaults['flux'] == 'photon':
-            energy_factor = ch_const.planck*(1.e8*ch_const.light)/wavelength
+        if chdata.Defaults['flux'] == 'photon':
+            energy_factor = const.planck*(1.e8*const.light)/wavelength
 
         free_free_emission = (prefactor[:,np.newaxis]*exp_factor*gf/energy_factor).squeeze()
-        self.FreeFree = {'intensity':free_free_emission, 'temperature':self.Temperature, 'wvl':wavelength, 'em':self.Em, 'ions':self.ion_string}
-        
+        self.FreeFree = {'intensity':free_free_emission, 'temperature':self.Temperature, 'wvl':wavelength, 'em':self.Em, 'ions':self.IonStr}
+
     def freeFreeLoss(self, **kwargs):
         """
         Calculate the free-free energy loss rate of an ion. The result is returned to the
@@ -223,15 +227,15 @@ class continuum(object):
             <http://adsabs.harvard.edu/abs/1961ApJS....6..167K>`_
         """
         # interpolate wavelength-averaged K&L gaunt factors
-        gf_kl_info = ch_io.gffintRead()
-        gamma_squared = self.IprErg/ch_const.boltzmann/self.Temperature
+        gf_kl_info = io.gffintRead()
+        gamma_squared = self.IprErg/const.boltzmann/self.Temperature
 #        for i, atemp in enumerate(self.Temperature):
-#            print('%s T:  %10.2e gamma_squared  %10.2e'%(self.ion_string, atemp, gamma_squared[i]))
+#            print('%s T:  %10.2e gamma_squared  %10.2e'%(self.IonStr, atemp, gamma_squared[i]))
         gaunt_factor = splev(np.log(gamma_squared),
                              splrep(gf_kl_info['g2'],gf_kl_info['gffint']), ext=3)
         # calculate numerical constant
-        prefactor = (4.*(ch_const.fine**3)*(ch_const.planck**2)/3./(np.pi**2)/ch_const.emass
-                     * np.sqrt(2.*np.pi*ch_const.boltzmann/3./ch_const.emass))
+        prefactor = (4.*(const.fine**3)*(const.planck**2)/3./(np.pi**2)/const.emass
+                     * np.sqrt(2.*np.pi*const.boltzmann/3./const.emass))
         # include abundance and ionization equilibrium
         prefactor *= self.Abundance*self.IoneqOne
 
@@ -267,11 +271,11 @@ class continuum(object):
             <http://adsabs.harvard.edu/abs/2000ApJS..128..125I>`_
         """
         # calculate scaled energy and temperature
-        lower_u = ch_const.planck*(1.e8*ch_const.light)/ch_const.boltzmann/np.outer(self.Temperature, wavelength)
+        lower_u = const.planck*(1.e8*const.light)/const.boltzmann/np.outer(self.Temperature, wavelength)
         upper_u = 1./2.5*(np.log10(lower_u) + 1.5)
         t = 1./1.25*(np.log10(self.Temperature) - 7.25)
         # read in Itoh coefficients
-        itoh_coefficients = ch_io.itohRead()['itohCoef'][self.Z - 1].reshape(11,11)
+        itoh_coefficients = io.itohRead()['itohCoef'][self.Z - 1].reshape(11,11)
         # calculate Gaunt factor
         gf = np.zeros(upper_u.shape)
         for j in range(11):
@@ -298,13 +302,13 @@ class continuum(object):
         .. [1] Sutherland, R. S., 1998, MNRAS, `300, 321 <http://adsabs.harvard.edu/abs/1998MNRAS.300..321S>`_
         """
         # calculate scaled quantities
-        lower_u = ch_const.planck*(1.e8*ch_const.light)/ch_const.boltzmann/np.outer(self.Temperature,wavelength)
-        gamma_squared = (self.Z**2)*ch_const.ryd2erg/ch_const.boltzmann/self.Temperature[:,np.newaxis]*np.ones(lower_u.shape)
+        lower_u = const.planck*(1.e8*const.light)/const.boltzmann/np.outer(self.Temperature,wavelength)
+        gamma_squared = (self.Z**2)*const.ryd2erg/const.boltzmann/self.Temperature[:,np.newaxis]*np.ones(lower_u.shape)
         # convert to index coordinates
         i_lower_u = (np.log10(lower_u) + 4.)*10.
         i_gamma_squared = (np.log10(gamma_squared) + 4.)*5.
         # read in sutherland data
-        gf_sutherland_data = ch_io.gffRead()
+        gf_sutherland_data = io.gffRead()
         # interpolate data to scaled quantities
         gf_sutherland = map_coordinates(gf_sutherland_data['gff'],
                                         [i_gamma_squared.flatten(), i_lower_u.flatten()]).reshape(lower_u.shape)
@@ -338,12 +342,12 @@ class continuum(object):
         # Calculate Gaunt factor according to Mewe
         gaunt_factor = self.mewe_gaunt_factor()
         # Numerical prefactor
-        prefactor = (8./3.*np.sqrt(np.pi/6.)*(ch_const.planck**2)*(ch_const.fine**3)/(np.pi**2)
-                     * (ch_const.boltzmann**(1./2.))/(ch_const.emass**(3./2.)))
+        prefactor = (8./3.*np.sqrt(np.pi/6.)*(const.planck**2)*(const.fine**3)/(np.pi**2)
+                     * (const.boltzmann**(1./2.))/(const.emass**(3./2.)))
 
         self.free_bound_loss = gaunt_factor*np.sqrt(self.Temperature)*prefactor
 
-    def freeBoundLoss(self, **kwargs):
+    def freeBoundLossMewe(self, **kwargs):
         """
         Calculate the free-bound energy loss rate of an ion. The result is returned to the
         `free_bound_loss` attribute.
@@ -367,19 +371,19 @@ class continuum(object):
         .. [1] Gronenschild, E.H.B.M. and Mewe, R., 1978, A&AS, `32, 283 <http://adsabs.harvard.edu/abs/1978A%26AS...32..283G>`_
         .. [2] Mewe, R. et al., 1986, A&AS, `65, 511 <http://adsabs.harvard.edu/abs/1986A%26AS...65..511M>`_
         """
-        nameDict = ch_util.convertName(self.ion_string)
+        nameDict = util.convertName(self.IonStr)
         lower = nameDict['lower']
-        self.Recombined_fblvl = ch_io.fblvlRead(lower)
+        self.Recombined_fblvl = io.fblvlRead(lower)
         if 'errorMessage' in self.Recombined_fblvl:
-            errorMessage = 'No free-bound information available for {}'.format(self.ion_string)
+            errorMessage = 'No free-bound information available for {}'.format(self.IonStr)
             rate = np.zeros_like(self.Temperature)
             self.FreeBoundLoss = {'rate':rate, 'errorMessage':errorMessage}
             return
 # Calculate Gaunt factor according to Mewe
         gaunt_factor = self.mewe_gaunt_factor()
         # Numerical prefactor
-        prefactor = (8./3.*np.sqrt(np.pi/6.)*(ch_const.planck**2)*(ch_const.fine**3)/(np.pi**2)
-                     * (ch_const.boltzmann**(1./2.))/(ch_const.emass**(3./2.)))
+        prefactor = (8./3.*np.sqrt(np.pi/6.)*(const.planck**2)*(const.fine**3)/(np.pi**2)
+                     * (const.boltzmann**(1./2.))/(const.emass**(3./2.)))
 
         self.FreeBoundLoss = {'rate':gaunt_factor*np.sqrt(self.Temperature)*prefactor, 'temperature':self.Temperature}
 
@@ -416,33 +420,128 @@ class continuum(object):
         """
         # read in free-bound level information for the recombined ion
         # thermal energy scaled by H ionization potential
-        scaled_energy = ch_const.ryd2erg/ch_const.boltzmann/self.Temperature
+        scaled_energy = const.ryd2erg/const.boltzmann/self.Temperature
         # set variables used in Eq. 16 of Mewe et al.(1986)
         n_0 = self.Recombined_fblvl['pqn'][0]
-#        z_0 = np.sqrt(self.ionization_potential/ch_const.ryd2erg)*n_0
-        z_0 = np.sqrt(self.Ipr/ch_const.ryd2erg)*n_0
+#        z_0 = np.sqrt(self.ionization_potential/const.ryd2erg)*n_0
+        z_0 = np.sqrt(self.Ipr/const.ryd2erg)*n_0
 
         # calculate zeta_0, the number of vacancies in the recombining ion
         # see zeta_0 function in chianti/idl/continuum/fb_rad_loss.pro and
         # Table 1 of Mewe et al. (1986)
-        if self.Z - self.stage > 22:
-            zeta_0 = self.Z - self.stage + 55
-        elif 8 < self.Z - self.stage <= 22:
-            zeta_0 = self.Z - self.stage + 27
-        elif 0 < self.Z - self.stage <= 8:
-            zeta_0 = self.Z - self.stage + 9
+        if self.Z - self.Stage > 22:
+            zeta_0 = self.Z - self.Stage + 55
+        elif 8 < self.Z - self.Stage <= 22:
+            zeta_0 = self.Z - self.Stage + 27
+        elif 0 < self.Z - self.Stage <= 8:
+            zeta_0 = self.Z - self.Stage + 9
         else:
-            zeta_0 = self.Z - self.stage + 1
+            zeta_0 = self.Z - self.Stage + 1
 
-        ip = self.Ipr - self.Recombined_fblvl['ecm'][0]*ch_const.planck*ch_const.light
-#        ip = self.ionization_potential - recombined_fblvl['ecm'][0]*ch_const.planck*ch_const.light
-        f_2 = (0.9*zeta_0*(z_0**4)/(n_0**5)*np.exp(scaled_energy*(z_0**2)/(n_0**2) - ip/ch_const.boltzmann/self.Temperature)
-               + 0.42/(n_0**1.5)*(self.stage**4))
+        ip = self.Ipr - self.Recombined_fblvl['ecm'][0]*const.planck*const.light
+#        ip = self.ionization_potential - recombined_fblvl['ecm'][0]*const.planck*const.light
+        f_2 = (0.9*zeta_0*(z_0**4)/(n_0**5)*np.exp(scaled_energy*(z_0**2)/(n_0**2) - ip/const.boltzmann/self.Temperature)
+               + 0.42/(n_0**1.5)*(self.Stage**4))
 
-#        return scaled_energy*f_2*self.Abundance*self.ioneq_one(self.stage+1, **kwargs)
+#        return scaled_energy*f_2*self.Abundance*self.ioneq_one(self.Stage+1, **kwargs)
         return scaled_energy*f_2*self.Abundance*self.IoneqOne
+            #
 
-    def freeBound(self, wavelength, includeAbundance=True, includeIoneq=True, useVerner=True, **kwargs):
+    def freeBoundLoss(self):
+        '''
+        to calculate the free-bound (radiative recombination) energy loss rate coefficient of an ion,
+        the ion is taken to be the target ion,
+        including the elemental abundance and the ionization equilibrium population
+        uses the Gaunt factors of Karzas, W.J, Latter, R, 1961, ApJS, 6, 167
+        provides rate = ergs cm^-2 s^-1
+        '''
+        #
+        temperature = self.Temperature
+        #
+        nameDict = util.convertName(self.IonStr)
+        lowerDict = util.convertName(nameDict['lower'])
+        if hasattr(self, 'Fblvl'):
+            fblvl = self.Fblvl
+        else:
+            fblvlname = nameDict['filename']+'.fblvl'
+            if os.path.isfile(fblvlname):
+                self.Fblvl = io.fblvlRead(self.IonStr)
+                fblvl = self.Fblvl
+            elif self.Stage == self.Z+1:
+                fblvl = {'mult':[1., 1.]}
+            else:
+                self.FreeBoundLoss = {'errorMessage':' file does not exist %s .fblvl'%(fblvlname)}
+                return
+        #  need some data for the recombined ion
+        #
+        if hasattr(self, 'rFblvl'):
+            rFblvl = self.rFblvl
+        else:
+            rfblvlname = lowerDict['filename']+'.fblvl'
+            if os.path.isfile(rfblvlname):
+                self.rFblvl = io.fblvlRead(nameDict['lower'])
+                rFblvl = self.rFblvl
+            else:
+                self.FreeBoundLoss = {'errorMessage':' file does not exist %s .fblvl'%(rfblvlname)}
+                return
+        #
+        gIoneq = self.IoneqOne
+        #
+        abund = self.Abundance
+        #
+        #
+        nlvls = len(rFblvl['lvl'])
+        # pqn = principle quantum no. n
+        pqn = np.asarray(rFblvl['pqn'], 'int64')
+        # l is angular moment quantum no. L
+        l = rFblvl['l']
+        # energy level in inverse cm
+        ecm = rFblvl['ecm']
+        # statistical weigths/multiplicities
+        multr = rFblvl['mult']
+        mult = fblvl['mult']
+        #
+        #
+        # for the ionization potential, must use that of the recombined ion
+        #
+#        iprcm = self.Ipr/const.invCm2Ev
+        #
+        # get karzas-latter Gaunt factors
+        if hasattr(self, 'Klgfb'):
+            klgfb = self.Klgfb
+        else:
+            self.Klgfb = io.klgfbRead()
+            klgfb = self.Klgfb
+        #
+        nTemp = temperature.size
+        # statistical weigths/multiplicities
+        #
+        #
+        #wecm=1.e+8/(ipcm-ecm)
+        #
+        # sometime the rFblvl file does not exist
+        if 'mult' in fblvl.keys() and 'mult' in rFblvl.keys():
+            fbrate = np.zeros((nlvls,nTemp),'float64')
+            ratg = np.zeros((nlvls),'float64')
+            for ilvl in range(nlvls):
+                # scaled energy is relative to the ionization potential of each individual level
+                # will add the average energy of a free electron to this to get typical photon energy to
+                # evaluate the gaunt factor
+                hnuEv = 1.5*const.boltzmann*temperature/const.ev2Erg
+                iprLvlEv = self.Ipr - const.invCm2Ev*ecm[ilvl]
+                scaledE = np.log(hnuEv/iprLvlEv)
+                thisGf = klgfb['klgfb'][pqn[ilvl]-1, l[ilvl]]
+                spl = splrep(klgfb['pe'], thisGf)
+                gf = np.exp(splev(scaledE, spl))
+                ratg[ilvl] = float(multr[ilvl])/float(mult[0]) # ratio of statistical weights
+                iprLvlErg = const.ev2Erg*iprLvlEv
+                fbrate[ilvl] = ratg[ilvl]*(iprLvlErg**2/float(pqn[ilvl]))*gf/np.sqrt(temperature)
+            fbRate = abund*gIoneq*const.freeBoundLoss*(fbrate.sum(axis=0))
+        else:
+            fbRate = np.zeros((nTemp),'float64')
+        self.FreeBoundLoss = {'rate':fbRate, 'temperature':temperature}
+
+    def freeBoundwB(self, wavelength, includeAbundance=True, includeIoneq=True, useVerner=True, **kwargs):
         """
         Calculate the free-bound emission of an ion. The result is returned as a 2D array to the
         `free_bound_emission` attribute.
@@ -502,21 +601,21 @@ class continuum(object):
             return
         self.NWavelength = wavelength.size
         # calculate the photon energy in erg
-        photon_energy = ch_const.planck*(1.e8*ch_const.light)/wavelength
-        prefactor = (2./np.sqrt(2.*np.pi)/(4.*np.pi)/(ch_const.planck*(ch_const.light**3)
-                     * (ch_const.emass*ch_const.boltzmann)**(3./2.)))
+        photon_energy = const.planck*(1.e8*const.light)/wavelength
+        prefactor = (2./np.sqrt(2.*np.pi)/(4.*np.pi)/(const.planck*(const.light**3)
+                     * (const.emass*const.boltzmann)**(3./2.)))
         # read the free-bound level information for the recombined and recombining ion
-        recombining_fblvl = ch_io.fblvlRead(self.ion_string)
+        recombining_fblvl = io.fblvlRead(self.IonStr)
         # get the multiplicity of the ground state of the recombining ion
         if 'errorMessage' in recombining_fblvl:
             omega_0 = 1.
         else:
             omega_0 = recombining_fblvl['mult'][0]
-        
-        self.Recombined_fblvl = ch_io.fblvlRead(self.nameDict['lower'])
+
+        self.Recombined_fblvl = io.fblvlRead(self.nameDict['lower'])
         if 'errorMessage' in self.Recombined_fblvl:
-#            raise ValueError('No free-bound information available for {}'.format(ch_util.zion2name(self.Z, self.stage)))
-            errorMessage = 'No free-bound information available for {}'.format(ch_util.zion2name(self.Z, self.stage))
+#            raise ValueError('No free-bound information available for {}'.format(util.zion2name(self.Z, self.Stage)))
+            errorMessage = 'No free-bound information available for {}'.format(util.zion2name(self.Z, self.Stage))
             fb_emiss = np.zeros((self.NTemperature, self.NWavelength), 'float64')
 #            self.free_bound_emission = fb_emiss.squeeze()
             self.FreeBound = {'intensity':fb_emiss, 'temperature':self.Temperature,'wvl':wavelength,'em':self.Em, 'errorMessage':errorMessage}
@@ -531,19 +630,19 @@ class continuum(object):
         sum_factor = np.zeros((len(self.Temperature), len(wavelength)))
         for i,omega_i in enumerate(self.Recombined_fblvl['mult']):
             # ionization potential for level i
-#            ip = self.ionization_potential - recombined_fblvl['ecm'][i]*ch_const.planck*ch_const.light
-            ip = self.IprErg - self.Recombined_fblvl['ecm'][i]*ch_const.planck*ch_const.light
+#            ip = self.ionization_potential - recombined_fblvl['ecm'][i]*const.planck*const.light
+            ip = self.IprErg - self.Recombined_fblvl['ecm'][i]*const.planck*const.light
             # skip level if photon energy is not sufficiently high
             if ip < 0. or np.all(np.max(photon_energy) < (self.ionization_potential - ip)):
                 continue
             # calculate cross-section
             if i == 0 and useVerner:
-                cross_section = self.verner_cross_section(photon_energy)
+                cross_section = self.vernerCross(photon_energy)
             else:
-                cross_section = self.karzas_cross_section(photon_energy, ip,
+                cross_section = self.karzasCross(photon_energy, ip,
                                                           self.Recombined_fblvl['pqn'][i],
                                                           self.Recombined_fblvl['l'][i])
-            scaled_energy = np.outer(1./(ch_const.boltzmann*self.Temperature), photon_energy - ip)
+            scaled_energy = np.outer(1./(const.boltzmann*self.Temperature), photon_energy - ip)
             # the exponential term can go to infinity for low temperatures
             # but if the cross-section is zero this does not matter
             scaled_energy[:,np.where(cross_section == 0.0)] = 0.0
@@ -562,7 +661,7 @@ class continuum(object):
         if includeIoneq:
             if self.NTemperature > 1:
                 if self.NWavelength > 1:
-#                    fb_emiss *= self.ioneq_one(self.stage, **kwargs)[:,np.newaxis]
+#                    fb_emiss *= self.ioneq_one(self.Stage, **kwargs)[:,np.newaxis]
                     fb_emiss *= self.IoneqOne[:,np.newaxis]
                     includeAbundance = self.IoneqOne[:,np.newaxis]
                 else:
@@ -576,17 +675,384 @@ class continuum(object):
                 fb_emiss *= self.Em[:,np.newaxis]
             else:
                 fb_emiss *= self.Em
-                
-        if ch_data.Defaults['flux'] == 'photon':
+
+        if chdata.Defaults['flux'] == 'photon':
             fb_emiss /= photon_energy
         # the final units should be per angstrom
         fb_emiss /= 1e8
 
 #        self.free_bound_emission = fb_emiss.squeeze()
-        self.FreeBound = {'intensity':fb_emiss.squeeze(), 'temperature':self.Temperature,'wvl':wavelength,'em':self.Em, 'ions':self.ion_string,  'abundance':includeAbundance, 'ioneq':includeIoneq}
-        
+        self.FreeBound = {'intensity':fb_emiss.squeeze(), 'temperature':self.Temperature,'wvl':wavelength,'em':self.Em, 'ions':self.IonStr,  'abundance':includeAbundance, 'ioneq':includeIoneq}
 
-    def verner_cross_section(self, photon_energy):
+    def freeBound(self, wvl, verner=1):
+        '''
+        to calculate the free-bound (radiative recombination) continuum rate coefficient of an ion, where
+        the ion is taken to be the target ion,
+        including the elemental abundance and the ionization equilibrium population
+        uses the Gaunt factors of Karzas, W.J, Latter, R, 1961, ApJS, 6, 167
+        for recombination to the ground level, the photoionization cross sections of
+        Verner and Yakovlev, 1995, A&ASS, 109, 125
+        are used to develop the free-bound cross section
+        includes the elemental abundance and the ionization fraction
+        provides emissivity = ergs cm^-2 s^-1 str^-1 Angstrom ^-1
+        '''
+        wvl = np.asarray(wvl, 'float64')
+        temperature = self.Temperature
+        hnu = 1.e+8*const.planck*const.light/wvl
+        #
+        if hasattr(self, 'IoneqOne'):
+            gIoneq = self.IoneqOne
+        else:
+            self.ioneqOne()
+            gIoneq = self.IoneqOne
+        #
+        # put in freefree to go through ipymspectrum
+        if not np.any(gIoneq) > 0:
+            self.FreeBound = {'errorMessage':' no non-zero values of ioneq'}
+            return
+        #
+        em = self.Em
+        #
+        # the target ion contains that data for fblvl
+        #
+        if hasattr(self,'Fblvl'):
+            fblvl = self.Fblvl
+            if 'errorMessage' in fblvl.keys():
+                self.FreeBound = fblvl
+                return
+        elif self.Z == self.Stage-1:
+            #dealing with the fully ionized stage
+            self.Fblvl = {'mult':[2., 2.]}
+            fblvl = self.Fblvl
+        else:
+            fblvlname = self.nameDict['filename']+'.fblvl'
+            if os.path.isfile(fblvlname):
+                self.Fblvl = io.fblvlRead(self.IonStr)
+                fblvl = self.Fblvl
+            # in case there is no fblvl file
+            else:
+                self.FreeBound = {'errorMessage':' no fblvl file for ion %s'%(self.IonStr)}
+                return
+        #
+        #  need data for the recombined ion
+        #
+        if hasattr(self,'rFblvl'):
+            rfblvl = self.rFblvl
+        else:
+            lower = self.nameDict['lower']
+            lowerDict = util.convertName(lower)
+            fblvlname = lowerDict['filename'] +'.fblvl'
+            if os.path.isfile(fblvlname):
+                self.rFblvl = io.fblvlRead(lower)
+                rfblvl = self.rFblvl
+            else:
+                self.FreeBound = {'errorMessage':' no fblvl file for ion %s'%(self.IonStr)}
+                return
+        #
+        #
+        abund = self.Abundance
+        #
+        #
+        nlvls = len(rfblvl['lvl'])
+        # pqn = principle quantum no. n
+        pqn = rfblvl['pqn']
+        # l is angular moment quantum no. L
+        l = rfblvl['l']
+        # energy level in inverse cm
+        ecm = rfblvl['ecm']
+        # statistical weigths/multiplicities
+        multr = rfblvl['mult']
+        mult = fblvl['mult']
+        #
+        #
+        # for the ionization potential, must use that of the recombined ion
+        #
+        iprcm = self.Ipr/const.invCm2Ev
+        #
+        # get karzas-latter Gaunt factors
+        if hasattr(self,'Klgfb'):
+            klgfb = self.Klgfb
+        else:
+            self.Klgfb = io.klgfbRead()
+            klgfb = self.Klgfb
+        #
+        nWvl = wvl.size
+        nTemp = temperature.size
+        #
+        if verner:
+            lvl1 = 1
+        else:
+            lvl1 = 0
+            #
+        nWvl = wvl.size
+        nTemp = temperature.size
+        #
+        if verner:
+            self.vernerCross(wvl)
+            vCross = self.VernerCross
+        #
+        if (nTemp > 1) and (nWvl > 1):
+            mask = np.zeros((nlvls,nTemp,nWvl),'Bool')
+            fbrate = np.zeros((nlvls,nTemp,nWvl),'float64')
+            fbRate = np.zeros((nTemp,nWvl),'float64')
+            expf = np.zeros((nlvls,nTemp,nWvl),'float64')
+            ratg = np.zeros((nlvls),'float64')
+            ratg[0] = float(multr[0])/float(mult[0])
+            iprLvlEv = self.Ipr - const.invCm2Ev*ecm[0]
+            iprLvlErg = const.ev2Erg*iprLvlEv
+            iprLvlCm = (iprcm - ecm[0])
+            for itemp in range(nTemp):
+                mask[0,itemp] = 1.e+8/wvl < (iprcm - ecm[0])
+                expf[0,itemp] = np.exp((iprLvlErg - 1.e+8*const.planck*const.light/wvl)/(const.boltzmann*temperature[itemp]))
+                fbrate[0,itemp] = em[itemp]*abund*gIoneq[itemp]*(const.planck*const.light/(1.e-8*wvl))**5*const.verner*ratg[0]*expf[0,itemp]*vCross/temperature[itemp]**1.5
+            for ilvl in range(lvl1,nlvls):
+                iprLvlEv = self.Ipr - const.invCm2Ev*ecm[ilvl]
+                iprLvlErg = const.ev2Erg*iprLvlEv
+                scaledE = np.log(const.ev2Ang/(iprLvlEv*wvl))
+                thisGf = klgfb['klgfb'][pqn[ilvl]-1, l[ilvl]]
+                spl = splrep(klgfb['pe'], thisGf)
+                gf = np.exp(splev(scaledE, spl))
+                ratg[ilvl] = float(multr[ilvl])/float(mult[0]) # ratio of statistical weights
+            #
+                for itemp in range(nTemp):
+                    expf[ilvl] = np.exp((iprLvlErg - 1.e+8*const.planck*const.light/wvl)/(const.boltzmann*temperature[itemp]))
+                    expf[ilvl,itemp] = np.exp((iprLvlErg - 1.e+8*const.planck*const.light/wvl)/(const.boltzmann*temperature[itemp]))
+                    mask[ilvl,itemp] = 1.e+8/wvl < (iprcm - ecm[ilvl])
+                    fbrate[ilvl,itemp] = em[itemp]*abund*gIoneq[itemp]*const.freeBound*ratg[ilvl]*(iprLvlErg**2/float(pqn[ilvl]))*gf*expf[ilvl,itemp]/(temperature[itemp]**1.5*(wvl)**2)
+            fbrma = np.ma.array(fbrate)
+            fbrma.mask =  mask
+            fbrma.fill_value = 0.
+            fbIntensity = fbrma.sum(axis=0)
+#            for itemp in range(nTemp):
+#                fbRate += em[itemp]*abund*gIoneq[itemp]*fbrma[itemp]
+#            fbRate = fbrma.sum(axis=0)
+#            fbRate.fill_value = 0.
+            self.FreeBound = {'intensity':fbIntensity, 'temperature':temperature,'wvl':wvl,'em':em}
+            #
+        elif (nTemp == 1) and (nWvl > 1):
+            mask = np.zeros((nlvls,nWvl),'Bool')
+            fbrate = np.zeros((nlvls,nWvl),'float64')
+            expf = np.zeros((nlvls,nWvl),'float64')
+            ratg = np.zeros((nlvls),'float64')
+            # mask is true for bad values
+            ratg[0] = float(multr[0])/float(mult[0])
+            iprLvlEv = self.Ipr - const.invCm2Ev*ecm[0]
+            iprLvlErg = const.ev2Erg*iprLvlEv
+            iprLvlCm = (iprcm - ecm[0])
+            #
+            mask[0] = 1.e+8/wvl < iprcm
+            expf[0] = np.exp((iprLvlErg - hnu)/(const.boltzmann*temperature))
+            # both expressions for fbrate[0] match the IDL output
+            fbrate[0] = (const.planck*const.light/(1.e-8*wvl))**5*const.verner*ratg[0]*expf[0]*vCross/temperature**1.5
+            # factor of 1.e-8 converts to Angstrom^-1, otherwise it would be cm^-1
+#            fbrate[0] = 1.e-8*const.freeBounde*hnu**5*ratg[0]*expf[0]*vCross/temperature**1.5
+            #
+            for ilvl in range(lvl1,nlvls):
+                iprLvlEv = self.Ipr - const.invCm2Ev*ecm[ilvl]
+                iprLvlErg = const.ev2Erg*iprLvlEv
+                iprLvlCm = (iprcm - ecm[ilvl])
+                # scaled energy is relative to the ionization potential of each individual level
+                scaledE = np.log(const.ev2Ang/(iprLvlEv*wvl))
+                thisGf = klgfb['klgfb'][pqn[ilvl]-1, l[ilvl]]
+                spl = splrep(klgfb['pe'], thisGf)
+                gf = np.exp(splev(scaledE, spl))
+                mask[ilvl] = 1.e+8/wvl < iprLvlCm
+                ratg[ilvl] = float(multr[ilvl])/float(mult[0]) # ratio of statistical weights
+                expf[ilvl] = np.exp((iprLvlErg - hnu)/(const.boltzmann*temperature))
+                fbrate[ilvl] = const.freeBound*ratg[ilvl]*(iprLvlErg**2/float(pqn[ilvl]))*expf[ilvl]*gf/(temperature**1.5*(wvl)**2)
+            fbrma = np.ma.array(fbrate)
+            fbrma.mask =  mask
+            fbrma.fill_value = 0.
+            fbRate = em*abund*gIoneq*fbrma.sum(axis=0)
+            fbRate.fill_value = 0.
+            self.FreeBound = {'fbRate':fbRate, 'intensity':fbRate.data, 'temperature':temperature,'wvl':wvl, 'mask':mask, 'expf':expf,'vCross':vCross}
+        #elif (nTemp > 1) and (nWvl == 1):
+        else:
+            self.FreeBound = {'intensity':np.zeros(nTemp,'float64'),'errorMessage':' this is the case of a single wavelength'}
+
+    def freeBoundEmiss(self, wvl, verner=1):
+
+        """
+        Calculates the free-bound (radiative recombination) continuum emissivity of an ion.
+        Provides emissivity in units of ergs :math:`\mathrm{cm}^{-2}` :math:`\mathrm{s}^{-1}` :math:`\mathrm{str}^{-1}` :math:`\mathrm{\AA}^{-1}` for an individual ion.
+
+        Notes
+        -----
+        - Uses the Gaunt factors of [1]_ for recombination to the ground level
+        - Uses the photoionization cross sections of [2]_ to develop the free-bound cross section
+        - Does not include the elemental abundance or ionization fraction
+        - The specified ion is the target ion
+
+        References
+        ----------
+        .. [1] Karzas and Latter, 1961, ApJSS, `6, 167
+            <http://adsabs.harvard.edu/abs/1961ApJS....6..167K>`_
+        .. [2] Verner & Yakovlev, 1995, A&AS, `109, 125
+            <http://adsabs.harvard.edu/abs/1995A%26AS..109..125V>`_
+        """
+        wvl = np.asarray(wvl, 'float64')
+        temperature = self.Temperature
+        hnu = 1.e+8*const.planck*const.light/wvl
+        #
+        #
+        em = self.Em
+        #
+        # the target ion contains that data for fblvl
+        #
+        if hasattr(self,'Fblvl'):
+            fblvl = self.Fblvl
+            if 'errorMessage' in fblvl.keys():
+                self.FreeBound = fblvl
+                return
+        elif self.Z == self.Stage-1:
+            #dealing with the fully ionized stage
+            self.Fblvl = {'mult':[2., 2.]}
+            fblvl = self.Fblvl
+        else:
+            fblvlname = self.nameDict['filename']+'.fblvl'
+            if os.path.isfile(fblvlname):
+                self.Fblvl = io.fblvlRead(self.IonStr)
+                fblvl = self.Fblvl
+            # in case there is no fblvl file
+            else:
+                self.FreeBound = {'errorMessage':' no fblvl file for ion %s'%(self.IonStr)}
+                return
+        #
+        #  need data for the recombined ion
+        #
+        if hasattr(self,'rFblvl'):
+            rfblvl = self.rFblvl
+        else:
+            lower = self.nameDict['lower']
+            lowerDict = util.convertName(lower)
+            fblvlname = lowerDict['filename'] +'.fblvl'
+            if os.path.isfile(fblvlname):
+                self.rFblvl = io.fblvlRead(lower)
+                rfblvl = self.rFblvl
+            else:
+                self.FreeBound = {'errorMessage':' no fblvl file for ion %s'%(self.IonStr)}
+                return
+        #
+        #
+        nlvls = len(rfblvl['lvl'])
+        # pqn = principle quantum no. n
+        pqn = rfblvl['pqn']
+        # l is angular moment quantum no. L
+        l = rfblvl['l']
+        # energy level in inverse cm
+        ecm = rfblvl['ecm']
+        # statistical weigths/multiplicities
+        multr = rfblvl['mult']
+        mult = fblvl['mult']
+        #
+        #
+        # for the ionization potential, must use that of the recombined ion
+        #
+        iprcm = self.Ipr/const.invCm2Ev
+        #
+        # get karzas-latter Gaunt factors
+        if hasattr(self,'Klgfb'):
+            klgfb = self.Klgfb
+        else:
+            self.Klgfb = io.klgfbRead()
+            klgfb = self.Klgfb
+        #
+        nWvl = wvl.size
+        nTemp = temperature.size
+        #
+        if verner:
+            lvl1 = 1
+        else:
+            lvl1 = 0
+            #
+        nWvl = wvl.size
+        nTemp = temperature.size
+        #
+        if verner:
+            self.vernerCross(wvl)
+            vCross = self.VernerCross
+        #
+        if (nTemp > 1) and (nWvl > 1):
+            mask = np.zeros((nlvls,nTemp,nWvl),'Bool')
+            fbrate = np.zeros((nlvls,nTemp,nWvl),'float64')
+            fbRate = np.zeros((nTemp,nWvl),'float64')
+            expf = np.zeros((nlvls,nTemp,nWvl),'float64')
+            ratg = np.zeros((nlvls),'float64')
+            ratg[0] = float(multr[0])/float(mult[0])
+            iprLvlEv = self.Ipr - const.invCm2Ev*ecm[0]
+            iprLvlErg = const.ev2Erg*iprLvlEv
+            iprLvlCm = (iprcm - ecm[0])
+            for itemp in range(nTemp):
+                mask[0,itemp] = 1.e+8/wvl < (iprcm - ecm[0])
+                expf[0,itemp] = np.exp((iprLvlErg - 1.e+8*const.planck*const.light/wvl)/(const.boltzmann*temperature[itemp]))
+                fbrate[0,itemp] = em[itemp]*(const.planck*const.light/(1.e-8*wvl))**5*const.verner*ratg[0]*expf[0,itemp]*vCross/temperature[itemp]**1.5
+            for ilvl in range(lvl1,nlvls):
+                iprLvlEv = self.Ipr - const.invCm2Ev*ecm[ilvl]
+                iprLvlErg = const.ev2Erg*iprLvlEv
+                scaledE = np.log(const.ev2Ang/(iprLvlEv*wvl))
+                thisGf = klgfb['klgfb'][pqn[ilvl]-1, l[ilvl]]
+                spl = splrep(klgfb['pe'], thisGf)
+                gf = np.exp(splev(scaledE, spl))
+                ratg[ilvl] = float(multr[ilvl])/float(mult[0]) # ratio of statistical weights
+            #
+                for itemp in range(nTemp):
+                    expf[ilvl] = np.exp((iprLvlErg - 1.e+8*const.planck*const.light/wvl)/(const.boltzmann*temperature[itemp]))
+                    expf[ilvl,itemp] = np.exp((iprLvlErg - 1.e+8*const.planck*const.light/wvl)/(const.boltzmann*temperature[itemp]))
+                    mask[ilvl,itemp] = 1.e+8/wvl < (iprcm - ecm[ilvl])
+                    fbrate[ilvl,itemp] = em[itemp]*const.freeBound*ratg[ilvl]*(iprLvlErg**2/float(pqn[ilvl]))*gf*expf[ilvl,itemp]/(temperature[itemp]**1.5*(wvl)**2)
+            fbrma = np.ma.array(fbrate)
+            fbrma.mask =  mask
+            fbrma.fill_value = 0.
+            fbIntensity = fbrma.sum(axis=0)
+#            for itemp in range(nTemp):
+#                fbRate += em[itemp]*abund*gIoneq[itemp]*fbrma[itemp]
+#            fbRate = fbrma.sum(axis=0)
+#            fbRate.fill_value = 0.
+            self.FreeBoundEmiss = {'emiss':fbIntensity, 'temperature':temperature,'wvl':wvl,'em':em}
+            #
+        elif (nTemp == 1) and (nWvl > 1):
+            mask = np.zeros((nlvls,nWvl),'Bool')
+            fbrate = np.zeros((nlvls,nWvl),'float64')
+            expf = np.zeros((nlvls,nWvl),'float64')
+            ratg = np.zeros((nlvls),'float64')
+            # mask is true for bad values
+            ratg[0] = float(multr[0])/float(mult[0])
+            iprLvlEv = self.Ipr - const.invCm2Ev*ecm[0]
+            iprLvlErg = const.ev2Erg*iprLvlEv
+            iprLvlCm = (iprcm - ecm[0])
+            #
+            mask[0] = 1.e+8/wvl < iprcm
+            expf[0] = np.exp((iprLvlErg - hnu)/(const.boltzmann*temperature))
+            # both expressions for fbrate[0] match the IDL output
+            fbrate[0] = (const.planck*const.light/(1.e-8*wvl))**5*const.verner*ratg[0]*expf[0]*vCross/temperature**1.5
+            # factor of 1.e-8 converts to Angstrom^-1, otherwise it would be cm^-1
+#            fbrate[0] = 1.e-8*const.freeBounde*hnu**5*ratg[0]*expf[0]*vCross/temperature**1.5
+            #
+            for ilvl in range(lvl1,nlvls):
+                iprLvlEv = self.Ipr - const.invCm2Ev*ecm[ilvl]
+                iprLvlErg = const.ev2Erg*iprLvlEv
+                iprLvlCm = (iprcm - ecm[ilvl])
+                # scaled energy is relative to the ionization potential of each individual level
+                scaledE = np.log(const.ev2Ang/(iprLvlEv*wvl))
+                thisGf = klgfb['klgfb'][pqn[ilvl]-1, l[ilvl]]
+                spl = splrep(klgfb['pe'], thisGf)
+                gf = np.exp(splev(scaledE, spl))
+                mask[ilvl] = 1.e+8/wvl < iprLvlCm
+                ratg[ilvl] = float(multr[ilvl])/float(mult[0]) # ratio of statistical weights
+                expf[ilvl] = np.exp((iprLvlErg - hnu)/(const.boltzmann*temperature))
+                fbrate[ilvl] = const.freeBound*ratg[ilvl]*(iprLvlErg**2/float(pqn[ilvl]))*expf[ilvl]*gf/(temperature**1.5*(wvl)**2)
+            fbrma = np.ma.array(fbrate)
+            fbrma.mask =  mask
+            fbrma.fill_value = 0.
+            fbRate = em*fbrma.sum(axis=0)
+            fbRate.fill_value = 0.
+            self.FreeBoundEmiss = {'emiss':fbRate.data, 'temperature':temperature,'wvl':wvl, 'em':em}
+        #elif (nTemp > 1) and (nWvl == 1):
+        else:
+            self.FreeBoundEmiss = {'emiss':np.zeros(nTemp,'float64'),'errorMessage':' this is the case of a single wavelength'}
+
+
+    def vernerCross(self, wvl):
         """
         Calculates the photoionization cross-section using data from [1]_ for
         transitions to the ground state.
@@ -608,25 +1074,27 @@ class continuum(object):
             <http://adsabs.harvard.edu/abs/1995A%26AS..109..125V>`_
         """
         # read verner data
-        verner_info = ch_io.vernerRead()
-        eth = verner_info['eth'][self.Z,self.stage-1]*ch_const.ev2Erg
-        yw = verner_info['yw'][self.Z,self.stage-1]
-        ya = verner_info['ya'][self.Z,self.stage-1]
-        p = verner_info['p'][self.Z,self.stage-1]
+        verner_info = io.vernerRead()
+        eth = verner_info['eth'][self.Z,self.Stage-1]   #*const.ev2Erg
+        yw = verner_info['yw'][self.Z,self.Stage-1]
+        ya = verner_info['ya'][self.Z,self.Stage-1]
+        p = verner_info['p'][self.Z,self.Stage-1]
+
         # convert from megabarn to cm^2
-        sigma0 = verner_info['sig0'][self.Z,self.stage-1]*1e-18
-        e0 = verner_info['e0'][self.Z,self.stage-1]*ch_const.ev2Erg
-        q = 5.5 + verner_info['l'][self.Z,self.stage-1] - 0.5*p
+        sigma0 = verner_info['sig0'][self.Z,self.Stage-1]*1e-18
+        e0 = verner_info['e0'][self.Z,self.Stage-1]  #*const.ev2Erg
+        q = 5.5 + verner_info['l'][self.Z,self.Stage-1] - 0.5*p
 
         # scaled photon energy
-        y = photon_energy/e0
+        en = const.ev2Ang/wvl
+        y = en/e0
         # fitting function
         F = ((y - 1.)**2 + yw**2)*(y**(-q))*(1. + np.sqrt(y/ya))**(-p)
         cross_section = sigma0*F
 
-        return np.where(photon_energy < eth, 0., cross_section)
+        self.VernerCross = np.where(en < eth, 0., cross_section)
 
-    def karzas_cross_section(self, photon_energy, ionization_potential, n, l):
+    def karzasCross(self, photon_energy, ionization_potential, n, l):
         """
         Calculate the photoionization cross-sections using the Gaunt factors of [1]_.
 
@@ -661,7 +1129,7 @@ class continuum(object):
         # numerical constant, in Mbarn
         kl_constant = 1.077294e-1*8065.54e3
         # read in KL gaunt factor data
-        karzas_info = ch_io.klgfbRead()
+        karzas_info = io.klgfbRead()
         if n <= karzas_info['klgfb'].shape[0]:
             scaled_energy = np.log10(photon_energy/ionization_potential)
             f_gf = splrep(karzas_info['pe'], karzas_info['klgfb'][n-1,l,:])
@@ -670,36 +1138,37 @@ class continuum(object):
             gaunt_factor = 1.
 
         # scaled energy factor, converted to cm^-1
-        energy_factor = (((ionization_potential/ch_const.planck/ch_const.light)**2.)
-                         * ((photon_energy/ch_const.planck/ch_const.light)**(-3)))
+        energy_factor = (((ionization_potential/const.planck/const.light)**2.)
+                         * ((photon_energy/const.planck/const.light)**(-3)))
         # cross-section, convert to cm^2
         cross_section = (kl_constant*energy_factor*gaunt_factor/n)*1e-18
 
         return np.where(photon_energy >= ionization_potential, cross_section, 0.)
 
 
+
     def klgfbInterp(self, wvl, n, l):
         '''A Python version of the CHIANTI IDL procedure karzas_xs.
 
         Interpolates free-bound gaunt factor of Karzas and Latter, (1961, Astrophysical Journal
-        Supplement Series, 6, 167) as a function of wavelength (wvl).
-        '''
+        Supplement Series, 6, 167) as a function of wavelength (wvl).'''
         try:
             klgfb = self.Klgfb
         except:
-            self.Klgfb = ch_io.klgfbRead()
+            self.Klgfb = util.klgfbRead()
             klgfb = self.Klgfb
         # get log of photon energy relative to the ionization potential
-        sclE = np.log(self.Ip/(wvl*ch_const.ev2ang))
+        sclE = np.log(self.Ip/(wvl*const.ev2ang))
         thisGf = klgfb['klgfb'][n-1, l]
         spl = splrep(klgfb['pe'], thisGf)
         gf = splev(sclE, spl)
         return gf
-        
+
     def ioneqOne(self):
         '''
         Provide the ionization equilibrium for the selected ion as a function of temperature.
-        Similar to but not identical to ion.ioneqOne()
+        Similar to but not identical to ion.ioneqOne() - the ion class needs to be able to handle
+        the 'dielectronic' ions
         returned in self.IoneqOne
         '''
         #
@@ -711,12 +1180,12 @@ class continuum(object):
         if hasattr(self, 'IoneqAll'):
             ioneqAll = self.IoneqAll
         else:
-            self.IoneqAll = ch_io.ioneqRead(ioneqname = self.Defaults['ioneqfile'])
+            self.IoneqAll = io.ioneqRead(ioneqname = self.Defaults['ioneqfile'])
             ioneqAll = self.IoneqAll
         #
         ioneqTemperature = ioneqAll['ioneqTemperature']
         Z = self.Z
-        stage = self.stage
+        stage = self.Stage
         ioneqOne = np.zeros_like(temperature)
         #
         thisIoneq = ioneqAll['ioneqAll'][Z-1,stage-1].squeeze()

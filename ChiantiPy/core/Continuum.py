@@ -447,174 +447,6 @@ class continuum(ionTrails):
         return scaled_energy*f_2*self.Abundance*self.IoneqOne
             #
 
-    def freeBoundEmiss(self, wvl, verner=1):
-        """
-        Calculates the free-bound (radiative recombination) continuum emissivity of an ion.
-        Provides emissivity in units of ergs :math:`\mathrm{cm}^{-2}` :math:`\mathrm{s}^{-1}` :math:`\mathrm{str}^{-1}` :math:`\mathrm{\AA}^{-1}` for an individual ion.
-
-        Notes
-        -----
-        - Uses the Gaunt factors of [1]_ for recombination to the ground level
-        - Uses the photoionization cross sections of [2]_ to develop the free-bound cross section
-        - Does not include the elemental abundance or ionization fraction
-        - The specified ion is the target ion
-
-        References
-        ----------
-        .. [1] Karzas and Latter, 1961, ApJSS, `6, 167
-            <http://adsabs.harvard.edu/abs/1961ApJS....6..167K>`_
-        .. [2] Verner & Yakovlev, 1995, A&AS, `109, 125
-            <http://adsabs.harvard.edu/abs/1995A%26AS..109..125V>`_
-        """
-        #
-        wvl = np.asarray(wvl, 'float64')
-        temperature = self.Temperature
-        #
-        # data for the recombined ion
-        #
-        if hasattr(self, 'Fblvl'):
-            fblvl = self.Fblvl
-        else:
-            filename = self.nameDict['filename'] + '.fblvl'
-            if os.path.isfile(filename):
-                self.Fblvl = io.fblvlRead(self.IonStr)
-                fblvl = self.Fblvl
-            elif self.Stage == self.Z+1:
-                fblvl = {'mult':[1., 1.]}
-            if 'errorMessage' in fblvl.keys():
-                self.FreeBound = fblvl
-                return
-        #
-        #  need some data for the recombining ion
-        #
-        if hasattr(self, 'rFblvl'):
-            rFblvl = self.rFblvl
-        else:
-            rfblvlname = util.zion2filename(self.Z,self.Ion - 1)+'.fblvl'  # previously self.Ion)
-            if os.path.isfile(rfblvlname):
-                self.rFblvl = io.fblvlRead(self.nameDict['lower'])
-                rFblvl = self.rFblvl
-            else:
-                rFblvl = {'errorMessage':'no fblvl file for %s'%(self.nameDict['lower'])}
-                self.FreeBound = rFblvl
-                return
-        #
-        #  6/9/2010 the recombining ion is the present ion
-        #
-        nlvls = len(rFblvl['lvl'])
-        # pqn = principle quantum no. n
-        pqn = rFblvl['pqn']
-        # l is angular moment quantum no. L
-        l = rFblvl['l']
-        # energy level in inverse cm
-        ecm = rFblvl['ecm']
-        # statistical weigths/multiplicities
-        mult = fblvl['mult']
-        multr = rFblvl['mult']
-        #
-        #  Ipr
-        #
-        # for the ionization potential, must use that of the recombined ion
-#        Ipr = ip[self.Z-1, self.Ion-2]
-#        ipcm = self.Ip/const.invCm2Ev
-        iprcm = self.Ipr/const.invCm2Ev
-        #
-        # get karzas-latter Gaunt factors
-        if hasattr(self,'Klgfb'):
-            klgfb = self.Klgfb
-        else:
-            self.Klgfb = io.klgfbRead()
-            klgfb = self.Klgfb
-        #
-        #
-        nWvl = wvl.size
-        nTemp = temperature.size
-        #
-        if verner:
-            lvl1 = 1
-        else:
-            lvl1 = 0
-            #
-        if (nTemp > 1) and (nWvl > 1):
-            mask = np.zeros((nlvls,nTemp,nWvl),'Bool')
-            fbrate = np.zeros((nlvls,nTemp,nWvl),'float64')
-            expf = np.zeros((nlvls,nTemp,nWvl),'float64')
-            ratg = np.zeros((nlvls),'float64')
-            if verner:
-                self.vernerCross(wvl)
-                vCross = self.VernerCross
-            #
-            ratg[0] = float(multr[0])/float(mult[0])
-            iprLvlEv = self.Ipr - const.invCm2Ev*ecm[0]
-            iprLvlErg = const.ev2Erg*iprLvlEv
-            iprLvlCm = (iprcm - ecm[0])
-            for itemp in range(nTemp):
-                mask[0,itemp] = 1.e+8/wvl < (iprcm - ecm[0])
-                expf[0,itemp] = np.exp((iprLvlErg - 1.e+8*const.planck*const.light/wvl)/(const.boltzmann*temperature[itemp]))
-                fbrate[0,itemp] = (const.planck*const.light/(1.e-8*wvl))**5*const.verner*ratg[0]*expf[0,itemp]*vCross/temperature[itemp]**1.5
-            for ilvl in range(lvl1,nlvls):
-                iprLvlEv = self.Ipr - const.invCm2Ev*ecm[ilvl]
-                iprLvlErg = const.ev2Erg*iprLvlEv
-                scaledE = np.log(const.ev2Ang/(iprLvlEv*wvl))
-                thisGf = klgfb['klgfb'][pqn[ilvl]-1, l[ilvl]]
-                spl = splrep(klgfb['pe'], thisGf)
-                gf = np.exp(splev(scaledE, spl))
-                ratg[ilvl] = float(multr[ilvl])/float(mult[0]) # ratio of statistical weights
-            #
-                for itemp in range(nTemp):
-                    expf[ilvl,itemp] = np.exp((iprLvlErg - 1.e+8*const.planck*const.light/wvl)/(const.boltzmann*temperature[itemp]))
-                    mask[ilvl,itemp] = 1.e+8/wvl < (iprcm - ecm[ilvl])
-                    fbrate[ilvl,itemp] = const.freeBound*ratg[ilvl]*(iprLvlErg**2/float(pqn[ilvl]))*gf*expf[ilvl,itemp]/(temperature[itemp]**1.5*(wvl)**2)
-            fbrma = np.ma.array(fbrate)
-            fbrma.mask =  mask
-            fbrma.fill_value = 0.
-            fbRate = (fbrma).sum(axis=0)
-            fbRate.fill_value = 0.
-            self.FreeBoundEmiss = {'emiss':fbRate.data, 'temperature':temperature,'wvl':wvl}
-            #
-        elif (nTemp == 1) and (nWvl > 1):
-            mask = np.zeros((nlvls,nWvl),'Bool')
-            fbrate = np.zeros((nlvls,nWvl),'float64')
-            expf = np.zeros((nlvls,nWvl),'float64')
-            #ratg = np.zeros((nlvls),'float64')
-            if verner:
-                self.vernerCross(wvl)
-                vCross = self.VernerCross
-                #
-            ratg = float(mult[0])/float(multr[0])
-            iprLvlEv = self.Ipr - const.invCm2Ev*ecm[0]
-            iprLvlErg = const.ev2Erg*iprLvlEv
-            iprLvlCm = (iprcm - ecm[0])
-            #
-            mask[0] = 1.e+8/wvl < (iprcm - ecm[0])
-            expf[0] = np.exp((iprLvlErg - 1.e+8*const.planck*const.light/wvl)/(const.boltzmann*temperature))
-            fbrate[0] = (const.planck*const.light/(1.e-8*wvl))**5*const.verner*ratg*expf[0]*vCross/temperature**1.5
-            for ilvl in range(lvl1,nlvls):
-                iprLvlEv = self.Ipr - const.invCm2Ev*ecm[ilvl]
-                iprLvlErg = const.ev2Erg*iprLvlEv
-                iprLvlCm = (iprcm - ecm[ilvl])
-                mask[ilvl] = 1.e+8/wvl <  iprLvlCm
-    #                #                print ' ilvl, ipLvlEv = ', ilvl, ipLvlEv
-                scaledE = np.log(const.ev2Ang/(iprLvlEv*wvl))
-                thisGf = klgfb['klgfb'][pqn[ilvl]-1, l[ilvl]]
-                spl = splrep(klgfb['pe'], thisGf)
-                gf = np.exp(splev(scaledE, spl))
-                ratg = float(mult[ilvl])/float(multr[0]) # ratio of statistical weights
-                expf[ilvl] = np.exp((iprLvlErg - 1.e+8*const.planck*const.light/wvl)/(const.boltzmann*temperature))
-                fbrate[ilvl] = const.freeBound*ratg*expf[ilvl]*(iprLvlErg**2/float(pqn[ilvl]))*gf/(temperature**1.5*(wvl)**2)
-            fbrma = np.ma.array(fbrate)
-            fbrma.mask =  mask
-            fbrma.fill_value = 0.
-            fbRate = fbrma.sum(axis=0)
-            fbRate.fill_value = 0.
-            # factor of 1.e-8 converts to Angstrom^-1, otherwise it would be cm^-1
-            #            fbRate = (expf*fbrma).sum(axis=0)
-            #fbRma = np.ma.array(fbrate.sum(axis=0), mask=mask, fill_value=0.)
-            #            fbRate.fill_value = 0.
-            self.FreeBoundEmiss = {'fbRate':fbRate, 'emiss':fbRate.data, 'temperature':temperature,'wvl':wvl, 'mask':mask, 'expf':expf,'vCross':vCross}
-        else:
-            self.FreeBoundEmiss = {'errorMessage':' this is the case of a single wavelength'}
-
     def freeBoundLoss(self):
         '''
         to calculate the free-bound (radiative recombination) energy loss rate coefficient of an ion,
@@ -1033,10 +865,191 @@ class continuum(ionTrails):
             fbrma.fill_value = 0.
             fbRate = em*abund*gIoneq*fbrma.sum(axis=0)
             fbRate.fill_value = 0.
-            self.FreeBound = {'intensity':fbRate.data, 'temperature':temperature,'wvl':wvl, 'em':em}
+            self.FreeBound = {'fbRate':fbRate, 'intensity':fbRate.data, 'temperature':temperature,'wvl':wvl, 'mask':mask, 'expf':expf,'vCross':vCross}
         #elif (nTemp > 1) and (nWvl == 1):
         else:
             self.FreeBound = {'intensity':np.zeros(nTemp,'float64'),'errorMessage':' this is the case of a single wavelength'}
+
+    def freeBoundEmiss(self, wvl, verner=1):
+
+        """
+        Calculates the free-bound (radiative recombination) continuum emissivity of an ion.
+        Provides emissivity in units of ergs :math:`\mathrm{cm}^{-2}` :math:`\mathrm{s}^{-1}` :math:`\mathrm{str}^{-1}` :math:`\mathrm{\AA}^{-1}` for an individual ion.
+
+        Notes
+        -----
+        - Uses the Gaunt factors of [1]_ for recombination to the ground level
+        - Uses the photoionization cross sections of [2]_ to develop the free-bound cross section
+        - Does not include the elemental abundance or ionization fraction
+        - The specified ion is the target ion
+
+        References
+        ----------
+        .. [1] Karzas and Latter, 1961, ApJSS, `6, 167
+            <http://adsabs.harvard.edu/abs/1961ApJS....6..167K>`_
+        .. [2] Verner & Yakovlev, 1995, A&AS, `109, 125
+            <http://adsabs.harvard.edu/abs/1995A%26AS..109..125V>`_
+        """
+        wvl = np.asarray(wvl, 'float64')
+        temperature = self.Temperature
+        hnu = 1.e+8*const.planck*const.light/wvl
+        #
+        #
+        em = self.Em
+        #
+        # the target ion contains that data for fblvl
+        #
+        if hasattr(self,'Fblvl'):
+            fblvl = self.Fblvl
+            if 'errorMessage' in fblvl.keys():
+                self.FreeBound = fblvl
+                return
+        elif self.Z == self.Stage-1:
+            #dealing with the fully ionized stage
+            self.Fblvl = {'mult':[2., 2.]}
+            fblvl = self.Fblvl
+        else:
+            fblvlname = self.nameDict['filename']+'.fblvl'
+            if os.path.isfile(fblvlname):
+                self.Fblvl = io.fblvlRead(self.IonStr)
+                fblvl = self.Fblvl
+            # in case there is no fblvl file
+            else:
+                self.FreeBound = {'errorMessage':' no fblvl file for ion %s'%(self.IonStr)}
+                return
+        #
+        #  need data for the recombined ion
+        #
+        if hasattr(self,'rFblvl'):
+            rfblvl = self.rFblvl
+        else:
+            lower = self.nameDict['lower']
+            lowerDict = util.convertName(lower)
+            fblvlname = lowerDict['filename'] +'.fblvl'
+            if os.path.isfile(fblvlname):
+                self.rFblvl = io.fblvlRead(lower)
+                rfblvl = self.rFblvl
+            else:
+                self.FreeBound = {'errorMessage':' no fblvl file for ion %s'%(self.IonStr)}
+                return
+        #
+        #
+        nlvls = len(rfblvl['lvl'])
+        # pqn = principle quantum no. n
+        pqn = rfblvl['pqn']
+        # l is angular moment quantum no. L
+        l = rfblvl['l']
+        # energy level in inverse cm
+        ecm = rfblvl['ecm']
+        # statistical weigths/multiplicities
+        multr = rfblvl['mult']
+        mult = fblvl['mult']
+        #
+        #
+        # for the ionization potential, must use that of the recombined ion
+        #
+        iprcm = self.Ipr/const.invCm2Ev
+        #
+        # get karzas-latter Gaunt factors
+        if hasattr(self,'Klgfb'):
+            klgfb = self.Klgfb
+        else:
+            self.Klgfb = io.klgfbRead()
+            klgfb = self.Klgfb
+        #
+        nWvl = wvl.size
+        nTemp = temperature.size
+        #
+        if verner:
+            lvl1 = 1
+        else:
+            lvl1 = 0
+            #
+        nWvl = wvl.size
+        nTemp = temperature.size
+        #
+        if verner:
+            self.vernerCross(wvl)
+            vCross = self.VernerCross
+        #
+        if (nTemp > 1) and (nWvl > 1):
+            mask = np.zeros((nlvls,nTemp,nWvl),'Bool')
+            fbrate = np.zeros((nlvls,nTemp,nWvl),'float64')
+            fbRate = np.zeros((nTemp,nWvl),'float64')
+            expf = np.zeros((nlvls,nTemp,nWvl),'float64')
+            ratg = np.zeros((nlvls),'float64')
+            ratg[0] = float(multr[0])/float(mult[0])
+            iprLvlEv = self.Ipr - const.invCm2Ev*ecm[0]
+            iprLvlErg = const.ev2Erg*iprLvlEv
+            iprLvlCm = (iprcm - ecm[0])
+            for itemp in range(nTemp):
+                mask[0,itemp] = 1.e+8/wvl < (iprcm - ecm[0])
+                expf[0,itemp] = np.exp((iprLvlErg - 1.e+8*const.planck*const.light/wvl)/(const.boltzmann*temperature[itemp]))
+                fbrate[0,itemp] = em[itemp]*(const.planck*const.light/(1.e-8*wvl))**5*const.verner*ratg[0]*expf[0,itemp]*vCross/temperature[itemp]**1.5
+            for ilvl in range(lvl1,nlvls):
+                iprLvlEv = self.Ipr - const.invCm2Ev*ecm[ilvl]
+                iprLvlErg = const.ev2Erg*iprLvlEv
+                scaledE = np.log(const.ev2Ang/(iprLvlEv*wvl))
+                thisGf = klgfb['klgfb'][pqn[ilvl]-1, l[ilvl]]
+                spl = splrep(klgfb['pe'], thisGf)
+                gf = np.exp(splev(scaledE, spl))
+                ratg[ilvl] = float(multr[ilvl])/float(mult[0]) # ratio of statistical weights
+            #
+                for itemp in range(nTemp):
+                    expf[ilvl] = np.exp((iprLvlErg - 1.e+8*const.planck*const.light/wvl)/(const.boltzmann*temperature[itemp]))
+                    expf[ilvl,itemp] = np.exp((iprLvlErg - 1.e+8*const.planck*const.light/wvl)/(const.boltzmann*temperature[itemp]))
+                    mask[ilvl,itemp] = 1.e+8/wvl < (iprcm - ecm[ilvl])
+                    fbrate[ilvl,itemp] = em[itemp]*const.freeBound*ratg[ilvl]*(iprLvlErg**2/float(pqn[ilvl]))*gf*expf[ilvl,itemp]/(temperature[itemp]**1.5*(wvl)**2)
+            fbrma = np.ma.array(fbrate)
+            fbrma.mask =  mask
+            fbrma.fill_value = 0.
+            fbIntensity = fbrma.sum(axis=0)
+#            for itemp in range(nTemp):
+#                fbRate += em[itemp]*abund*gIoneq[itemp]*fbrma[itemp]
+#            fbRate = fbrma.sum(axis=0)
+#            fbRate.fill_value = 0.
+            self.FreeBoundEmiss = {'emiss':fbIntensity, 'temperature':temperature,'wvl':wvl,'em':em}
+            #
+        elif (nTemp == 1) and (nWvl > 1):
+            mask = np.zeros((nlvls,nWvl),'Bool')
+            fbrate = np.zeros((nlvls,nWvl),'float64')
+            expf = np.zeros((nlvls,nWvl),'float64')
+            ratg = np.zeros((nlvls),'float64')
+            # mask is true for bad values
+            ratg[0] = float(multr[0])/float(mult[0])
+            iprLvlEv = self.Ipr - const.invCm2Ev*ecm[0]
+            iprLvlErg = const.ev2Erg*iprLvlEv
+            iprLvlCm = (iprcm - ecm[0])
+            #
+            mask[0] = 1.e+8/wvl < iprcm
+            expf[0] = np.exp((iprLvlErg - hnu)/(const.boltzmann*temperature))
+            # both expressions for fbrate[0] match the IDL output
+            fbrate[0] = (const.planck*const.light/(1.e-8*wvl))**5*const.verner*ratg[0]*expf[0]*vCross/temperature**1.5
+            # factor of 1.e-8 converts to Angstrom^-1, otherwise it would be cm^-1
+#            fbrate[0] = 1.e-8*const.freeBounde*hnu**5*ratg[0]*expf[0]*vCross/temperature**1.5
+            #
+            for ilvl in range(lvl1,nlvls):
+                iprLvlEv = self.Ipr - const.invCm2Ev*ecm[ilvl]
+                iprLvlErg = const.ev2Erg*iprLvlEv
+                iprLvlCm = (iprcm - ecm[ilvl])
+                # scaled energy is relative to the ionization potential of each individual level
+                scaledE = np.log(const.ev2Ang/(iprLvlEv*wvl))
+                thisGf = klgfb['klgfb'][pqn[ilvl]-1, l[ilvl]]
+                spl = splrep(klgfb['pe'], thisGf)
+                gf = np.exp(splev(scaledE, spl))
+                mask[ilvl] = 1.e+8/wvl < iprLvlCm
+                ratg[ilvl] = float(multr[ilvl])/float(mult[0]) # ratio of statistical weights
+                expf[ilvl] = np.exp((iprLvlErg - hnu)/(const.boltzmann*temperature))
+                fbrate[ilvl] = const.freeBound*ratg[ilvl]*(iprLvlErg**2/float(pqn[ilvl]))*expf[ilvl]*gf/(temperature**1.5*(wvl)**2)
+            fbrma = np.ma.array(fbrate)
+            fbrma.mask =  mask
+            fbrma.fill_value = 0.
+            fbRate = em*fbrma.sum(axis=0)
+            fbRate.fill_value = 0.
+            self.FreeBoundEmiss = {'emiss':fbRate.data, 'temperature':temperature,'wvl':wvl, 'em':em}
+        #elif (nTemp > 1) and (nWvl == 1):
+        else:
+            self.FreeBoundEmiss = {'emiss':np.zeros(nTemp,'float64'),'errorMessage':' this is the case of a single wavelength'}
 
 
     def vernerCross(self, wvl):

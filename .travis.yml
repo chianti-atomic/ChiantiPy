@@ -10,7 +10,7 @@ env:
     #- NUMPY_VERSION='stable'
     - ASTROPY_VERSION='stable'
     - MAIN_CMD='python setup.py'
-    - CONDA_DEPENDENCIES='scipy matplotlib ipython ipyparallel pyqt sphinx_rtd_theme pytest-cov coverage'
+    - CONDA_DEPENDENCIES='scipy matplotlib ipython ipyparallel sphinx_rtd_theme pytest-cov coverage'
     - NUMPY_VERSION='1.11'
     - PYQT_VERSION='5.5.0'
   matrix:

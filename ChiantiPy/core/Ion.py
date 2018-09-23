@@ -1416,7 +1416,6 @@ class ion(ioneqOne, ionTrails, specTrails):
         for one in kwargs.keys():
             if one not in chdata.keywordArgs:
                 print(' following keyword is not understood - %20s '%(one))
-
         nlvls = self.Nlvls
         nwgfa = self.Nwgfa
         nscups = self.Nscups

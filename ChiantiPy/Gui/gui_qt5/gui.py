@@ -1,7 +1,7 @@
 '''
 PyQt5 widget selection dialogs
 '''
-import sys,  os
+import os
 from PyQt5 import QtGui, QtWidgets
 import ChiantiPy
 from ChiantiPy.Gui.gui_qt5.ui import *

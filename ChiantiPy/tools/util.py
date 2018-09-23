@@ -402,7 +402,7 @@ def listFiles(path):
 
     Notes
     -----
-    This can be replaced by functions in `os.path`.
+    This can be replaced by functions in `os.path`, as if 3.4, pathlib is probably better.
     """
     alist = os.walk(path)
 #    print(' getting file list')

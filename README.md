@@ -12,7 +12,7 @@ CHIANTI provides a database of atomic data that can be used to interpret the emi
 ## Installation
 The following dependencies are required to run ChiantiPy,
 
-* [Python](https://www.python.org/) (2.7, 3)
+* [Python](https://www.python.org/) (Python 3 is required)
 * [Numpy](http://www.numpy.org/)
 * [Scipy](https://www.scipy.org/)
 * [Matplotlib](http://matplotlib.org/)
@@ -25,9 +25,7 @@ The following two are extremely useful for running Python programs
 
 Optionally, if you'd like to use the GUI dialogs,
 
-* [PyQt5](https://riverbankcomputing.com/software/pyqt/intro) and/or
-* [PyQt4](https://riverbankcomputing.com/software/pyqt/intro) and/or
-* [wxPython](http://www.wxpython.org/) although wxPython is only compatible with Python 2
+* [PyQt5](https://riverbankcomputing.com/software/pyqt/intro)
 
 If you are not familiar with installing Python and the needed dependencies, we recommend the [Anaconda platform](https://www.continuum.io/downloads). Next, download the [CHIANTI database](http://www.chiantidatabase.org/chianti_download.html). Assuming you've placed the CHIANTI tree in `$HOME`, set the environment variable in your `.bashrc` file,
 ```Shell

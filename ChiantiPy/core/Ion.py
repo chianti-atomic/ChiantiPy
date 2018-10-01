@@ -1970,6 +1970,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             plt.xlabel(xlabel, fontsize=fontsize)
             plt.loglog(eDensity,pop[:,toplvl[0]], visible=False)
             ax2.xaxis.tick_top()
+            plt.tight_layout()
         if outFile:
             plt.savefig(outFile)
         self.Population['toplvl'] = toplvl

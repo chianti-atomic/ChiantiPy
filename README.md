@@ -12,7 +12,7 @@ CHIANTI provides a database of atomic data that can be used to interpret the emi
 ## Installation
 The following dependencies are required to run ChiantiPy,
 
-* [Python](https://www.python.org/) (2.7,3)
+* [Python](https://www.python.org/) (2.7, 3)
 * [Numpy](http://www.numpy.org/)
 * [Scipy](https://www.scipy.org/)
 * [Matplotlib](http://matplotlib.org/)

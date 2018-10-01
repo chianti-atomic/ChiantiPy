@@ -151,7 +151,7 @@ class specTrails(object):
                 elementList[i] = element.lower()
                 if verbose:
                     print('el = %s'%(element))
-                z = const.El.index(element.lower()) + 1 
+                z = const.El.index(element.lower()) + 1
                 for one in masterlist:
                     nameDict = util.convertName(one)
                     if nameDict['Element'].lower() in elementList:
@@ -160,7 +160,7 @@ class specTrails(object):
                         if doLines:
                             self.Todo[one] = 'line'
                 for stage in range(2, z+2):
-                    name = util.zion2name(z, stage)            
+                    name = util.zion2name(z, stage)
                     if doContinuum and not nameDict['Dielectronic']:
                         if name not in self.Todo.keys():
                             self.Todo[name] = 'ff'
@@ -304,6 +304,7 @@ class specTrails(object):
                     plt.title(' Temperature = %10.2e K for index = %3i'%(self.Temperature[index], index))
                 plt.xlabel(xlabel)
                 plt.ylabel(ylabel)
+        plt.tight_layout()
         if saveFile:
             plt.savefig(saveFile)
     #

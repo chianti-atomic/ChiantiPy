@@ -339,6 +339,7 @@ class ionTrails(object):
         plt.xlabel(xlabel)
         plt.ylabel(ylabel)
         plt.title(title+tstr+dstr)
+        plt.tight_layout()
         if wvlRange:
             plt.axis([wvlRange[0], wvlRange[1], ymin, intensity.max()])
         if plotFile:
@@ -492,6 +493,7 @@ class ionTrails(object):
         else:
             plt.ylim(ymin/1.2, 1.2*ymax)
             plt.title(title+desc_str,fontsize=fontsize)
+        plt.tight_layout()
         plt.draw()
         #  need time to let matplotlib finish plotting
         time.sleep(0.5)
@@ -555,6 +557,7 @@ class ionTrails(object):
             ax2.xaxis.tick_top()
         else:
             plt.title(desc,fontsize=fontsize)
+        plt.tight_layout()
 
         cnt = desc.count(' ')
         intensityRatioFileName = desc.replace(' ', '_', cnt) + '.rat'

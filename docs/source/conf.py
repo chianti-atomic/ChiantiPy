@@ -55,10 +55,10 @@ setup_cfg = dict(conf.items('metadata'))
 
 # Custom imports
 import subprocess
-#try:
-#    from mock import Mock as MagicMock
-#except ImportError:
-#    print("Cannot import mock. Only needed for RTD build.")
+try:
+    from mock import Mock as MagicMock
+except ImportError:
+    print("Cannot import mock. Only needed for RTD build.")
 
 # autodoc is already loaded by astropy_helpers
 
@@ -77,14 +77,15 @@ on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 # -- Module Mocking -------------------------------------------------------------
 if on_rtd:
     print(' ------ on RTD -----\n')
-    autodoc_mock_imports = ['PyQt4', 'PyQt4.QtGui']
-#    class Mock(MagicMock):
-#        @classmethod
-#        def __getattr__(cls,name):
-#            return Mock()
+    autodoc_mock_imports = ['PyQt5', 'PyQt5.QtGui', 'PyQt5.QtWidgets']
+    MOCK_MODULES = ['PyQt5', 'PyQt5.QtGui', 'PyQt5.QtWidgets','QtGui','QtWidgets']
+    class Mock(MagicMock):
+        @classmethod
+        def __getattr__(cls,name):
+            return Mock()
 
 #    MOCK_MODULES = ['scipy','scipy.interpolate','ipyparallel','ipyparallel.Client','matplotlib','matplotlib.pyplot','matplotlib.tri']
-#    sys.modules.update((mod_name,Mock()) for mod_name in MOCK_MODULES)
+    sys.modules.update((mod_name,Mock()) for mod_name in MOCK_MODULES)
 
 # -- General configuration ----------------------------------------------------
 

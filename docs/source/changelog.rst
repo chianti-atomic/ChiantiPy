@@ -7,9 +7,14 @@ changes from 0.7.0 to 0.7.1
 
 version 0.7.0 included some changes in the ChiantiPy naming conventions, largely in the continuum class.  These are being reverted to the original ChiantiPy naming conventions.
 
+the ion.freeBoundxxx methods have been fixed and this also fixes the problem with the RadLoss class.
+
 a pseudo-voigt filter has been added to tools.filters
 
 the keyword argument wvlRange has been removed from the ion.emiss and ion.intensity methods
+
+the keyword argument for the Emission Measure, em, has been removed from the ion.intensity and similar methods.  It is now necessary to specify
+the emission when the object is instantiated.
 
 a set of PyQt5 dialogs have been developed by **ktritz** and are now included
 

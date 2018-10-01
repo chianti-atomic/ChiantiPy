@@ -29,8 +29,13 @@ conf = ConfigParser()
 conf.read(['setup.cfg'])
 metadata = dict(conf.items('metadata'))
 
+with open("README.md", "r") as fh:
+    long_description = fh.read()
+
+
 PACKAGENAME = metadata.get('package_name', 'packagename')
 DESCRIPTION = metadata.get('description', 'Astropy affiliated package')
+LONG_DESCRIPTION = long_description
 AUTHOR = metadata.get('author', '')
 AUTHOR_EMAIL = metadata.get('author_email', '')
 LICENSE = metadata.get('license', 'unknown')
@@ -39,14 +44,14 @@ URL = metadata.get('url', 'http://astropy.org')
 # Get the long description from the package's docstring
 __import__(PACKAGENAME)
 package = sys.modules[PACKAGENAME]
-LONG_DESCRIPTION = package.__doc__
+
 
 # Store the package name in a built-in variable so it's easy
 # to get from other parts of the setup infrastructure
 builtins._ASTROPY_PACKAGE_NAME_ = PACKAGENAME
 
 # VERSION should be PEP386 compatible (http://www.python.org/dev/peps/pep-0386)
-VERSION = '0.7.dev'
+VERSION = '0.7.2'
 
 # Indicates if this version is a release version
 RELEASE = 'dev' not in VERSION

@@ -97,7 +97,7 @@ class spectrum(ionTrails, specTrails):
         nTempDen = self.NTempDen
         self.Wavelength = wavelength
         #
-        if em == None:
+        if em is None:
             em = np.ones(self.NTempDen, 'float64')
             ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
         elif type(em) == float and em > 0.:
@@ -323,7 +323,7 @@ class bunch(ionTrails, specTrails):
         elif tst1 and tst4:
             self.NTempDen = ntemp
         #
-        if em == None:
+        if em is None:
             em = np.ones(self.NTempDen, 'float64')
         elif type(em) == float and em > 0.:
             em = np.ones(self.NTempDen, 'float64')*em

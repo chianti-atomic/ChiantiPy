@@ -74,7 +74,7 @@ class mspectrum(ionTrails, specTrails):
         nTempDen = max([nTemp, nDen])
         self.NTempDen = nTempDen
         #
-        if em == None:
+        if em is None:
             em = np.ones(self.NTempDen, 'float64')
             ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
         elif type(em) == float and em > 0.:

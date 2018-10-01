@@ -7,7 +7,7 @@ import numpy as np
 
 from ChiantiPy.core import radLoss
 
-temperature = np.logspace(5,8,20)
+temperature = np.logspace(5,8,5)
 density = 1e+9
 minAbund = 1e-4
 

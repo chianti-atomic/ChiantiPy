@@ -33,31 +33,13 @@ try:
     hasPyQt5 = True
     print(' found PyQt5 widgets')
     del PyQt5
-except:
-    try:
-        import PyQt4
-        hasPyQt4 = True
-        print(' found PyQt4 widgets')
-        del PyQt4
-    except ImportError:
-        try:
-            import wx
-            hasWx = True
-            print(' found Wx widgets')
-            del wx
-        except ImportError:
-            print(' using cli')
+except ImportError:
+    print(' using cli')
 
 #set gui
 if hasPyQt5 and use_gui:
     from .gui_qt5 import gui
     print(' using PyQt5 widgets')
-elif hasPyQt4 and use_gui:
-    from .gui_qt import gui
-    print(' using PyQt4 widgets')
-elif hasWx and use_gui:
-    from .gui_wx import gui
-    print(' using Wx widgets')
 else:
     from .gui_cl import gui
     print(' using CLI for selections')

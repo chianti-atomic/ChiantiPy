@@ -13,13 +13,10 @@ env:
     - CONDA_DEPENDENCIES='scipy matplotlib ipython ipyparallel sphinx_rtd_theme pytest-cov coverage'
     - NUMPY_VERSION='1.11'
   matrix:
-    - PYTHON_VERSION=2.7 SETUP_CMD='install'
     - PYTHON_VERSION=3.4 SETUP_CMD='install'
     - PYTHON_VERSION=3.6 SETUP_CMD='install'
-    - PYTHON_VERSION=2.7 SETUP_CMD='test --coverage'
     - PYTHON_VERSION=3.4 SETUP_CMD='test --coverage'
     - PYTHON_VERSION=3.6 SETUP_CMD='test --coverage'
-    - PYTHON_VERSION=2.7 SETUP_CMD='build_docs --no-intersphinx'
     - PYTHON_VERSION=3.4 SETUP_CMD='build_docs --no-intersphinx'
     - PYTHON_VERSION=3.6 SETUP_CMD='build_docs --no-intersphinx'
 #install the ci helpers

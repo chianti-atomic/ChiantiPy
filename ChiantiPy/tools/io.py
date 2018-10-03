@@ -5,12 +5,7 @@ import os
 from datetime import date
 import fnmatch
 import pickle
-try:
-    #Python 3
-    import configparser
-except ImportError:
-    #Python 2
-    import ConfigParser as configparser
+import configparser
 
 import numpy as np
 
@@ -77,8 +72,8 @@ def zion2name(z,ion, dielectronic=False):
         the nuclear charge, for example 26 for Fe XIV
     ion : `int`
         the ion stage, for example, 14 for Fe XIV
-        
-        
+
+
     Notes
     -----
     A duplicate of the routine in `ChiantiPy.tools.util` but needed by masterList Info
@@ -101,13 +96,13 @@ def zion2name(z,ion, dielectronic=False):
 def convertName(name):
     """
     Convert ion name string to Z and Ion and other interesting info
-    
+
     Parameters
     ----------
     name :  `str`
         a generic name of an ion in the CHIANTI database,
         such as fe_14 for Fe XIV
-    
+
 
     Notes
     -----
@@ -139,7 +134,7 @@ def autoRead(ions, filename=None, total=True, verbose=False):
     filename : `str`
         Custom filename, will override that specified by `ions`
     elvlcname : `str`
-        If specified, the lsj term labels are returned in the 'pretty1' and 'pretty2' 
+        If specified, the lsj term labels are returned in the 'pretty1' and 'pretty2'
         keys of 'Wgfa' dict
     total : `bool`
         Return the summed level 2 autoionization rates in 'Auto'
@@ -148,14 +143,14 @@ def autoRead(ions, filename=None, total=True, verbose=False):
     Returns
     -------
     Auto : `dict`
-        Information read from the .wgfa file. The dictionary structure is 
+        Information read from the .wgfa file. The dictionary structure is
         {"lvl1", "lvl2", "avalue", "pretty1", "pretty2", "ref","ionS", "filename"}
 
     """
     #
     if filename:
         autoname = filename
-    
+
     else:
         fname = util.ion2filename(ions)
         autoname = fname+'.auto'
@@ -203,7 +198,7 @@ def autoRead(ions, filename=None, total=True, verbose=False):
         for iwvl in range(nwvl):
             avalueLvl[lvl2[iwvl] -1] += avalue[iwvl]
         Auto['avalueLvl'] = np.asarray(avalueLvl)
-    
+
     if verbose:
         pstring1 = '%5s %5s %12s %12s %20s - %20s'
         print(pstring1%('lvl1', 'lvl2', 'auto value', 'branch ratio', 'pretty1', 'pretty2'))
@@ -224,13 +219,13 @@ def autoWrite(info, outfile = None, minBranch = None):
     Parameters
     ----------
     info : `dict`
-        Should contain the following: 
-        ionS, the Chianti style name of the ion such as c_4 for C IV, 
-        lvl1, the lower level, the ground level is 1, 
-        lvl2, the upper level, wvl, the wavelength (in Angstroms), 
-        avalue, the autoionization rate, 
-        pretty1, descriptive text of the lower level (optional), 
-        pretty2, descriptive text of the upper level (optiona), 
+        Should contain the following:
+        ionS, the Chianti style name of the ion such as c_4 for C IV,
+        lvl1, the lower level, the ground level is 1,
+        lvl2, the upper level, wvl, the wavelength (in Angstroms),
+        avalue, the autoionization rate,
+        pretty1, descriptive text of the lower level (optional),
+        pretty2, descriptive text of the upper level (optiona),
         ref, reference text, a list of strings
     outfile : `str`
     minBranch : `~numpy.float64`
@@ -748,7 +743,7 @@ def elvlcWrite(info, outfile=None, round=0, addLvl=0, includeRyd=False, includeE
         thisTerm = aterm.ljust(29)
         thisLabel = info['label'][i].ljust(4)
 #        print, ' len of thisTerm = ', len(thisTerm)
-        pstring = '%7i%30s%5s%5i%5s%5.1f%15.3f%15.3f'%(i+1+addLvl, thisTerm, thisLabel, info['spin'][i], info['spd'][i],info['j'][i],  np.round(info['ecm'][i], round), np.round(info['ecmth'][i], round))        
+        pstring = '%7i%30s%5s%5i%5s%5.1f%15.3f%15.3f'%(i+1+addLvl, thisTerm, thisLabel, info['spin'][i], info['spd'][i],info['j'][i],  np.round(info['ecm'][i], round), np.round(info['ecmth'][i], round))
         if includeRyd:
              pstring += ' , %15.8f , %15.8f'%(info['eryd'][i], info['erydth'][i])
         if includeEv:
@@ -1330,10 +1325,10 @@ def rrRead(ions, filename=None):
         return RrParams
     else:
         return {'rrtype':-1}
-        
+
 def rrLossRead():
     ''' to read the Mao 2017 rr loss parameters
-    
+
     References
     ----------
     .. [1] Mao J., Kaastra J., Badnell N.R., `2017 Astron. Astrophys. 599, A10
@@ -1349,7 +1344,7 @@ def rrLossRead():
     b0 = []
     c0 = []
     a1 = []
-    b1 = []    
+    b1 = []
     a2 = []
     b2 = []
     mdp = []
@@ -1364,7 +1359,7 @@ def rrLossRead():
         a2.append(float(aline.split()[7]))
         b2.append(float(aline.split()[8]))
         mdp.append(float(aline.split()[9]))
-        
+
     return {'iso':iso, 'z':z, 'a0':a0, 'b0':b0, 'c0':c0, 'a1':a1, 'b1':b1, 'a2':a2, 'b2':b2, 'mdp':mdp}
 
 
@@ -1654,8 +1649,8 @@ def trRead(ionS):
         return {'temperature':np.asarray(temperature, 'float64'), 'rate':np.asarray(rate, 'float64')}
     else:
         return 'file does not exist'
-        
-    
+
+
 
 def twophotonHRead():
     """
@@ -1790,7 +1785,7 @@ def wgfaRead(ions, filename=None, elvlcname=0, total=False, verbose=False):
     filename : `str`
         Custom filename, will override that specified by `ions`
     elvlcname : `str`
-        If specified, the lsj term labels are returned in the 'pretty1' and 'pretty2' 
+        If specified, the lsj term labels are returned in the 'pretty1' and 'pretty2'
         keys of 'Wgfa' dict
     total : `bool`
         Return the summed level 2 avalue data in 'Wgfa'
@@ -1799,7 +1794,7 @@ def wgfaRead(ions, filename=None, elvlcname=0, total=False, verbose=False):
     Returns
     -------
     Wgfa : `dict`
-        Information read from the .wgfa file. The dictionary structure is 
+        Information read from the .wgfa file. The dictionary structure is
         {"lvl1","lvl2","wvl","gf","avalue","ref","ionS","filename"}
 
     See Also
@@ -1817,7 +1812,7 @@ def wgfaRead(ions, filename=None, elvlcname=0, total=False, verbose=False):
                 elvlc = 0
         else:
             elvlc = elvlcRead('',elvlcname)
-    
+
     else:
         fname = util.ion2filename(ions)
         wgfaname = fname+'.wgfa'
@@ -1901,15 +1896,15 @@ def wgfaWrite(info, outfile = None, minBranch = 1.e-5, rightDigits = 4):
     Parameters
     ----------
     info : `dict`
-        Should contain the following keys: 
-        ionS, the Chianti style name of the ion such as c_4 for C IV, 
-        lvl1, the lower level, the ground level is 1, 
-        lvl2, the upper level, 
-        wvl, the wavelength (in Angstroms), 
-        gf,the weighted oscillator strength, 
-        avalue, the A value, 
-        pretty1, descriptive text of the lower level (optional), 
-        pretty2, descriptive text of the upper level (optiona), 
+        Should contain the following keys:
+        ionS, the Chianti style name of the ion such as c_4 for C IV,
+        lvl1, the lower level, the ground level is 1,
+        lvl2, the upper level,
+        wvl, the wavelength (in Angstroms),
+        gf,the weighted oscillator strength,
+        avalue, the A value,
+        pretty1, descriptive text of the lower level (optional),
+        pretty2, descriptive text of the upper level (optiona),
         ref, reference text, a list of strings
     outfile : `str`
     minBranch : `~numpy.float64`

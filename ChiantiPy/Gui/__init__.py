@@ -4,12 +4,7 @@ Select GUI package
 
 #
 import os
-try:
-    #Python 3
-    import configparser
-except ImportError:
-    #Python 2
-    import ConfigParser as configparser
+import configparser
 
 #check chiantirc for gui selection
 rcfile=os.path.join(os.environ['HOME'],'.chianti/chiantirc')
@@ -25,8 +20,6 @@ except (KeyError,configparser.NoSectionError) as e:
     use_gui=True
 
 #check for available gui
-hasWx=False
-hasPyQt4=False
 hasPyQt5=False
 try:
     import PyQt5

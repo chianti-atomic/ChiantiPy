@@ -27,6 +27,7 @@ docs/_build
 
 # Pycharm editor project files
 .idea
+.eric6project
 
 # VSCode editor project files
 .vscode

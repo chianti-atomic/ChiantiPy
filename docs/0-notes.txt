@@ -1,0 +1,2 @@
+sphinx-build -a -v source /data2/gh/chianti-atomic.github.io
+

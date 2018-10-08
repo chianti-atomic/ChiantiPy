@@ -6,3 +6,9 @@ sphinx quick-start
     move _templates/layout.rst into _templates
     move all the _static files (mostly png) into the new _static
 
+in /docs
+
+sphinx-apidoc  -o source/api ../ChiantiPy
+
+then need to exit stuff in api ChiantiPy.base.rst to include the methods
+

@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Project SYSTEM "Project-5.1.dtd">
+<!-- eric project file for project ChiantiPy -->
+<!-- Saved: 2018-10-05, 13:01:39 -->
+<!-- Copyright (C) 2018 Ken Dere, kdere@gmu.edu -->
+<Project version="5.1">
+  <Language>en_US</Language>
+  <Hash>40dcc4780aaa942b255dabf4a318824c3b9aeafd</Hash>
+  <ProgLanguage mixed="0">Python3</ProgLanguage>
+  <ProjectType>Qt4C</ProjectType>
+  <Description>ChiantiPy is the Python package that enables the computation of the radiative properties of astrophysical spectra based on the CHIANTI atomic database for astrophysical spectroscopy</Description>
+  <Version>0.7.0</Version>
+  <Author>Ken Dere</Author>
+  <Email>kdere@gmu.edu</Email>
+  <Sources>
+    <Source>ChiantiPy/Gui/__init__.py</Source>
+    <Source>ChiantiPy/Gui/gui_cl/__init__.py</Source>
+    <Source>ChiantiPy/Gui/gui_cl/gui.py</Source>
+    <Source>ChiantiPy/Gui/gui_qt5/__init__.py</Source>
+    <Source>ChiantiPy/Gui/gui_qt5/gui.py</Source>
+    <Source>ChiantiPy/Gui/gui_qt5/ui.py</Source>
+    <Source>ChiantiPy/__init__.py</Source>
+    <Source>ChiantiPy/base/_IonTrails.py</Source>
+    <Source>ChiantiPy/base/_IoneqOne.py</Source>
+    <Source>ChiantiPy/base/_SpecTrails.py</Source>
+    <Source>ChiantiPy/base/__init__.py</Source>
+    <Source>ChiantiPy/core/Continuum.py</Source>
+    <Source>ChiantiPy/core/Ion.py</Source>
+    <Source>ChiantiPy/core/Ioneq.py</Source>
+    <Source>ChiantiPy/core/IpyMspectrum.py</Source>
+    <Source>ChiantiPy/core/Mspectrum.py</Source>
+    <Source>ChiantiPy/core/RadLoss.py</Source>
+    <Source>ChiantiPy/core/Spectrum.py</Source>
+    <Source>ChiantiPy/core/__init__.py</Source>
+    <Source>ChiantiPy/core/tests/__init__.py</Source>
+    <Source>ChiantiPy/core/tests/test_Continuum.py</Source>
+    <Source>ChiantiPy/core/tests/test_Ion.py</Source>
+    <Source>ChiantiPy/core/tests/test_Ioneq.py</Source>
+    <Source>ChiantiPy/core/tests/test_Spectrum.py</Source>
+    <Source>ChiantiPy/fortranformat/FortranRecordReader.py</Source>
+    <Source>ChiantiPy/fortranformat/FortranRecordWriter.py</Source>
+    <Source>ChiantiPy/fortranformat/__init__.py</Source>
+    <Source>ChiantiPy/fortranformat/_edit_descriptors.py</Source>
+    <Source>ChiantiPy/fortranformat/_exceptions.py</Source>
+    <Source>ChiantiPy/fortranformat/_input.py</Source>
+    <Source>ChiantiPy/fortranformat/_lexer.py</Source>
+    <Source>ChiantiPy/fortranformat/_misc.py</Source>
+    <Source>ChiantiPy/fortranformat/_output.py</Source>
+    <Source>ChiantiPy/fortranformat/_parser.py</Source>
+    <Source>ChiantiPy/fortranformat/config.py</Source>
+    <Source>ChiantiPy/static_version.py</Source>
+    <Source>ChiantiPy/tools/__init__.py</Source>
+    <Source>ChiantiPy/tools/archival.py</Source>
+    <Source>ChiantiPy/tools/constants.py</Source>
+    <Source>ChiantiPy/tools/data.py</Source>
+    <Source>ChiantiPy/tools/filters.py</Source>
+    <Source>ChiantiPy/tools/io.py</Source>
+    <Source>ChiantiPy/tools/mputil.py</Source>
+    <Source>ChiantiPy/tools/sources.py</Source>
+    <Source>ChiantiPy/tools/util.py</Source>
+    <Source>setup.py</Source>
+  </Sources>
+  <Vcs>
+    <VcsType>Git</VcsType>
+    <VcsOptions>
+      <dict>
+        <key>
+          <string>add</string>
+        </key>
+        <value>
+          <list>
+            <string></string>
+          </list>
+        </value>
+        <key>
+          <string>checkout</string>
+        </key>
+        <value>
+          <list>
+            <string></string>
+          </list>
+        </value>
+        <key>
+          <string>commit</string>
+        </key>
+        <value>
+          <list>
+            <string></string>
+          </list>
+        </value>
+        <key>
+          <string>diff</string>
+        </key>
+        <value>
+          <list>
+            <string></string>
+          </list>
+        </value>
+        <key>
+          <string>export</string>
+        </key>
+        <value>
+          <list>
+            <string></string>
+          </list>
+        </value>
+        <key>
+          <string>global</string>
+        </key>
+        <value>
+          <list>
+            <string></string>
+          </list>
+        </value>
+        <key>
+          <string>history</string>
+        </key>
+        <value>
+          <list>
+            <string></string>
+          </list>
+        </value>
+        <key>
+          <string>log</string>
+        </key>
+        <value>
+          <list>
+            <string></string>
+          </list>
+        </value>
+        <key>
+          <string>remove</string>
+        </key>
+        <value>
+          <list>
+            <string></string>
+          </list>
+        </value>
+        <key>
+          <string>status</string>
+        </key>
+        <value>
+          <list>
+            <string></string>
+          </list>
+        </value>
+        <key>
+          <string>tag</string>
+        </key>
+        <value>
+          <list>
+            <string></string>
+          </list>
+        </value>
+        <key>
+          <string>update</string>
+        </key>
+        <value>
+          <list>
+            <string></string>
+          </list>
+        </value>
+      </dict>
+    </VcsOptions>
+  </Vcs>
+  <FiletypeAssociations>
+    <FiletypeAssociation pattern="*.idl" type="INTERFACES"/>
+    <FiletypeAssociation pattern="*.py" type="SOURCES"/>
+    <FiletypeAssociation pattern="*.py3" type="SOURCES"/>
+    <FiletypeAssociation pattern="*.pyw" type="SOURCES"/>
+    <FiletypeAssociation pattern="*.pyw3" type="SOURCES"/>
+    <FiletypeAssociation pattern="*.qm" type="TRANSLATIONS"/>
+    <FiletypeAssociation pattern="*.qrc" type="RESOURCES"/>
+    <FiletypeAssociation pattern="*.ts" type="TRANSLATIONS"/>
+  </FiletypeAssociations>
+</Project>

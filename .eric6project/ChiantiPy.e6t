@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Tasks SYSTEM "Tasks-6.0.dtd">
+<!-- eric6 tasks file for project ChiantiPy -->
+<!-- Saved: 2018-10-05, 13:07:03 -->
+<Tasks version="6.0">
+  <ProjectScanFilter></ProjectScanFilter>
+  <Task priority="1" completed="False" type="1" uid="{958c4d6d-0f8f-47cc-96de-58d7bbb82247}">
+    <Summary>TODO: specify what exception to catch! or omit the try, catch</Summary>
+    <Description></Description>
+    <Created>2018-10-05, 13:04:09</Created>
+    <Resource>
+      <Filename>ChiantiPy/base/_IonTrails.py</Filename>
+      <Linenumber>100</Linenumber>
+    </Resource>
+  </Task>
+  <Task priority="1" completed="False" type="1" uid="{38b15b7f-c730-42f7-a59e-c6530c6e0d7f}">
+    <Summary>TODO: probably should check a few different ions, i.e. dielectronic, some without certain kinds</Summary>
+    <Description></Description>
+    <Created>2018-10-05, 13:04:09</Created>
+    <Resource>
+      <Filename>ChiantiPy/core/tests/test_Ion.py</Filename>
+      <Linenumber>13</Linenumber>
+    </Resource>
+  </Task>
+  <Task priority="1" completed="False" type="1" uid="{4778135c-02ed-4fd9-a2cf-69114393c1c6}">
+    <Summary>TODO: test case where neither are set/ one or the other is not set</Summary>
+    <Description></Description>
+    <Created>2018-10-05, 13:04:09</Created>
+    <Resource>
+      <Filename>ChiantiPy/core/tests/test_Ion.py</Filename>
+      <Linenumber>27</Linenumber>
+    </Resource>
+  </Task>
+  <Task priority="1" completed="False" type="0" uid="{4286880c-25a3-424f-b443-035ea5ed119d}">
+    <Summary>FIXME: if setting custom abundance, AbundanceName should not be set, but right</Summary>
+    <Description></Description>
+    <Created>2018-10-05, 13:04:09</Created>
+    <Resource>
+      <Filename>ChiantiPy/core/tests/test_Ion.py</Filename>
+      <Linenumber>56</Linenumber>
+    </Resource>
+  </Task>
+  <Task priority="1" completed="False" type="1" uid="{97143c57-b964-47d9-a180-0da55717e71d}">
+    <Summary>TODO: test temperatures out of valid extrapolation range</Summary>
+    <Description></Description>
+    <Created>2018-10-05, 13:04:09</Created>
+    <Resource>
+      <Filename>ChiantiPy/core/tests/test_Ioneq.py</Filename>
+      <Linenumber>16</Linenumber>
+    </Resource>
+  </Task>
+  <Task priority="1" completed="False" type="1" uid="{96e64ddf-6f1b-4222-aaab-2b3bb0dc1a9b}">
+    <Summary>TODO: need to assert something here, not clear what exactly to test yet</Summary>
+    <Description></Description>
+    <Created>2018-10-05, 13:04:09</Created>
+    <Resource>
+      <Filename>ChiantiPy/core/tests/test_Spectrum.py</Filename>
+      <Linenumber>36</Linenumber>
+    </Resource>
+  </Task>
+  <Task priority="1" completed="False" type="1" uid="{b8287ae3-c71b-4d7a-9548-e8bbe77fec18}">
+    <Summary>TODO: Implement halt if no more record input</Summary>
+    <Description></Description>
+    <Created>2018-10-05, 13:04:09</Created>
+    <Resource>
+      <Filename>ChiantiPy/fortranformat/_input.py</Filename>
+      <Linenumber>33</Linenumber>
+    </Resource>
+  </Task>
+  <Task priority="1" completed="False" type="1" uid="{1094b9dc-81a9-4553-824e-11c5be39b0da}">
+    <Summary>TODO: Are tabs blank characters?</Summary>
+    <Description></Description>
+    <Created>2018-10-05, 13:04:09</Created>
+    <Resource>
+      <Filename>ChiantiPy/fortranformat/_input.py</Filename>
+      <Linenumber>208</Linenumber>
+    </Resource>
+  </Task>
+  <Task priority="1" completed="False" type="1" uid="{7f5806dc-2d86-408c-92ba-49ba99a17664}">
+    <Summary>TODO: test if no chars transmitted, then poition does not change</Summary>
+    <Description></Description>
+    <Created>2018-10-05, 13:04:09</Created>
+    <Resource>
+      <Filename>ChiantiPy/fortranformat/_input.py</Filename>
+      <Linenumber>222</Linenumber>
+    </Resource>
+  </Task>
+  <Task priority="1" completed="False" type="1" uid="{663a714c-8f01-459c-af1c-de4b0017f1f2}">
+    <Summary>TODO: Is whitesapce allowed between sign and digit?</Summary>
+    <Description></Description>
+    <Created>2018-10-05, 13:04:09</Created>
+    <Resource>
+      <Filename>ChiantiPy/fortranformat/_lexer.py</Filename>
+      <Linenumber>71</Linenumber>
+    </Resource>
+  </Task>
+  <Task priority="1" completed="False" type="1" uid="{6c5fe590-0999-44df-9916-b35b52fefc0e}">
+    <Summary>TODO: this may not be right ...</Summary>
+    <Description></Description>
+    <Created>2018-10-05, 13:04:09</Created>
+    <Resource>
+      <Filename>ChiantiPy/fortranformat/_output.py</Filename>
+      <Linenumber>317</Linenumber>
+    </Resource>
+  </Task>
+  <Task priority="1" completed="False" type="1" uid="{4ed19d1b-668c-44b5-a277-d08c1151d2f2}">
+    <Summary>TODO: Find out what this is</Summary>
+    <Description></Description>
+    <Created>2018-10-05, 13:04:09</Created>
+    <Resource>
+      <Filename>ChiantiPy/fortranformat/_output.py</Filename>
+      <Linenumber>505</Linenumber>
+    </Resource>
+  </Task>
+  <Task priority="1" completed="False" type="1" uid="{7f651789-c954-4961-8fab-a13443470c3e}">
+    <Summary>TODO: something more responsible here ...</Summary>
+    <Description></Description>
+    <Created>2018-10-05, 13:04:09</Created>
+    <Resource>
+      <Filename>ChiantiPy/fortranformat/_parser.py</Filename>
+      <Linenumber>50</Linenumber>
+    </Resource>
+  </Task>
+  <Task priority="1" completed="False" type="1" uid="{041fee4e-28ca-417c-b04c-e06be78a7d63}">
+    <Summary>TODO: correct description)</Summary>
+    <Description></Description>
+    <Created>2018-10-05, 13:04:09</Created>
+    <Resource>
+      <Filename>ChiantiPy/tools/filters.py</Filename>
+      <Linenumber>114</Linenumber>
+    </Resource>
+  </Task>
+  <Task priority="1" completed="False" type="0" uid="{e4788dbb-df50-4ea1-b42e-c75cb2182f98}">
+    <Summary>FIXME: no need to do this by hand, scipy has GL routines</Summary>
+    <Description></Description>
+    <Created>2018-10-05, 13:04:26</Created>
+    <Resource>
+      <Filename>ChiantiPy/core/Ion.py</Filename>
+      <Linenumber>415</Linenumber>
+    </Resource>
+  </Task>
+  <Task priority="1" completed="False" type="0" uid="{8781ccb2-1178-4e1e-9327-b923157f1cb7}">
+    <Summary>FIXME: raise an error here?</Summary>
+    <Description></Description>
+    <Created>2018-10-05, 13:04:26</Created>
+    <Resource>
+      <Filename>ChiantiPy/core/Ion.py</Filename>
+      <Linenumber>593</Linenumber>
+    </Resource>
+  </Task>
+  <Task priority="1" completed="False" type="1" uid="{e3548ef1-99cc-4ac4-b1cc-cfd877d5668e}">
+    <Summary>TODO: Put in separate module to avoid multiple copies</Summary>
+    <Description></Description>
+    <Created>2018-10-05, 13:07:00</Created>
+    <Resource>
+      <Filename>ChiantiPy/tools/io.py</Filename>
+      <Linenumber>80</Linenumber>
+    </Resource>
+  </Task>
+  <Task priority="1" completed="False" type="1" uid="{721eb37b-3acf-4fc4-a931-ee3d855e4667}">
+    <Summary>TODO: Put in separate module to avoid multiple copies</Summary>
+    <Description></Description>
+    <Created>2018-10-05, 13:07:00</Created>
+    <Resource>
+      <Filename>ChiantiPy/tools/io.py</Filename>
+      <Linenumber>110</Linenumber>
+    </Resource>
+  </Task>
+  <Task priority="1" completed="False" type="1" uid="{fcd04b71-520e-485b-ae47-cab9d797a4da}">
+    <Summary>TODO: raise exception here or just let the open() function do that for us</Summary>
+    <Description></Description>
+    <Created>2018-10-05, 13:07:00</Created>
+    <Resource>
+      <Filename>ChiantiPy/tools/io.py</Filename>
+      <Linenumber>1562</Linenumber>
+    </Resource>
+  </Task>
+</Tasks>

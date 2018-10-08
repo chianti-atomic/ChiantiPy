@@ -1,2 +1,8 @@
-sphinx-build -a -v source /data2/gh/chianti-atomic.github.io
+in /docs
+sphinx quick-start
+    this creates build and source directories + Makefile
+    in the source directory, an conf.py and index.rst
+    move the usual document .rst files into source
+    move _templates/layout.rst into _templates
+    move all the _static files (mostly png) into the new _static
 

@@ -27,7 +27,11 @@ docs/_build
 
 # Pycharm editor project files
 .idea
+
+# Eric IDE
 .eric6project
+.eric6project/ChiantiPy.e4q
+.eric6project/ChiantiPy.e6t
 
 # VSCode editor project files
 .vscode

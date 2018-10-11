@@ -2,6 +2,13 @@
 Changelog
 ===========
 
+changes from 0.7.1 to 0.8.0
+===========================
+
+ChiantiPy is now only compliant with Python 3.  Development is currently with Python 3.6
+
+The use of the PyQt4 and WxWidgets packages have been dropped
+
 changes from 0.7.0 to 0.7.1
 ===========================
 
@@ -32,6 +39,8 @@ The primary change is that code developement has been moved to Github_.
 
 Also, in order to be more compliant with other astrophysical packages on Github (Astropy_ and SunPy_) the directory layout has been changed and renamed.
 
+
+.. _Astropy:  https/github.com/astropy
 .. _SunPy:  https://github.com/sunpy/sunpy
 
 The core routines are now imported as

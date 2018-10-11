@@ -10,7 +10,7 @@ Welcome to the ChiantiPy documentation. ChiantiPy is a pure Python package for p
 
 The latest version of ChiantiPy is 0.8.0 and is compatible with CHIANTI database version 8.0. It is not compatible with previous versions
 
-ChiantiPy v0.7.0 is released under a new license, the OSI approved ISC license. From `Wikipedia <https://en.wikipedia.org/w/index.php?title=ISC_license&oldid=664696993>`_: The ISC license is a permissive free software license written by the Internet Software Consortium (ISC). It is functionally equivalent to the simplified BSD and MIT/Expat licenses, ...
+ChiantiPy v0.8.0 is released under a new license, the OSI approved ISC license. From `Wikipedia <https://en.wikipedia.org/w/index.php?title=ISC_license&oldid=664696993>`_: The ISC license is a permissive free software license written by the Internet Software Consortium (ISC). It is functionally equivalent to the simplified BSD and MIT/Expat licenses, ...
 
 `CHIANTI <http://www.chiantidatabase.org/>`_ consists of a database of atomic data that can be used to interpret spectral lines and continua emitted from high-temperature, optically-thin astrophysical sources.
 

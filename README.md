@@ -54,6 +54,6 @@ As a quick example, we'll calculate the populations of the top 10 levels of Fe X
 ## Help
 For more information about installing and using either ChiantiPy or the CHIANTI atomic database, check out the following links:
 
-* [ChiantiPy Documentation](http://chiantipy.readthedocs.io/en/latest/)
+* [ChiantiPy Documentation](http://chianti-atomic.github.io/)
 * [Chianti Google Mailing List](https://groups.google.com/forum/#!forum/chianti)
 * [CHIANTI Atomic Database Webpage](http://www.chiantidatabase.org/)

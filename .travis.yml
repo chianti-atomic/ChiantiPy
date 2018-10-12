@@ -1,33 +1,10 @@
-#set language to c because we are using conda to install everything
-language: c
-sudo: false
-#set environment variables for versions of different packages
-#set up the build matrix for multiple versions of python
-env:
-  global:
-    - XUVTOP=$HOME"/chianti_dbase"
-    - PYTHON_VERSION=3.6
-    #- NUMPY_VERSION='stable'
-    - ASTROPY_VERSION='stable'
-    - MAIN_CMD='python setup.py'
-    - CONDA_DEPENDENCIES='scipy matplotlib ipython ipyparallel sphinx_rtd_theme pytest-cov coverage'
-    - NUMPY_VERSION='1.11'
-  matrix:
-    - PYTHON_VERSION=3.6 SETUP_CMD='install'
-    - PYTHON_VERSION=3.6 SETUP_CMD='test --coverage'
-    - PYTHON_VERSION=3.6 SETUP_CMD='build_docs --no-intersphinx'
-#install the ci helpers
+language: python
+python:
+  - "3.6"
+# command to install dependencies
 install:
-  - git clone https://github.com/astropy/ci-helpers.git
-  - source ci-helpers/travis/setup_conda_${TRAVIS_OS_NAME}.sh
-#install the chianti database and place rc file
-before_script:
-  - mkdir -p $HOME/.chianti
-  - cp chiantirc $HOME/.chianti
-  - mkdir -p $XUVTOP
-  - if [[ $SETUP_CMD == *test* ]]; then curl -L http://www.chiantidatabase.org/download/CHIANTI_8.0.6_data.tar.gz | tar xz -C $XUVTOP; fi
-#run the setup commands
+  - pip install -r requirements.txt
+# command to run tests
 script:
-  - $MAIN_CMD $SETUP_CMD
-after_success:
-  - if [[ $SETUP_CMD == *coverage* ]]; then coveralls --rcfile='./ChiantiPy/tests/coveragerc'; fi
+ - pytest
+

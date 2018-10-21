@@ -5,10 +5,11 @@ import os
 from PyQt5 import QtGui, QtWidgets
 import ChiantiPy
 from ChiantiPy.Gui.gui_qt5.ui import *
-' qt5 selection dialogs'
+''' qt5 selection dialogs'''
 
 def chpicker(dir, filter='*.*', label='ChiantiPy'):
-    '''Select a filename using a Qt gui dialog.'''
+    '''Select a filename using a Qt gui dialog.
+    '''
 #    app=QtWidgets.QApplication(sys.argv)
     a=QtWidgets.QFileDialog.getOpenFileName()
     a.SetFileMode(1)

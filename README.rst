@@ -1,8 +1,6 @@
 ChiantiPy
 =========
 
-| |Build Status|
-| |Documentation Status|
 
 ChiantiPy is the Python interface to the `CHIANTI atomic
 database <http://www.chiantidatabase.org>`__ for astrophysical
@@ -81,13 +79,8 @@ Help
 For more information about installing and using either ChiantiPy or the
 CHIANTI atomic database, check out the following links:
 
--  `ChiantiPy
-   Documentation <http://chianti-atomic.github.io/>`__
--  `Chianti Google Mailing
-   List <https://groups.google.com/forum/#!forum/chianti>`__
+-  `ChiantiPy Documentation <http://chianti-atomic.github.io/>`__
+-  `Chianti Google Mailing List <https://groups.google.com/forum/#!forum/chianti>`__
 -  `CHIANTI Atomic Database Webpage <http://www.chiantidatabase.org/>`__
 
-.. |Build Status| image:: https://travis-ci.org/chianti-atomic/ChiantiPy.svg?branch=master
-   :target: https://travis-ci.org/chianti-atomic/ChiantiPy
-.. |Documentation Status| image:: http://readthedocs.org/projects/chiantipy/badge/?version=latest
-   :target: http://chiantipy.readthedocs.io/en/latest/?badge=latest
+

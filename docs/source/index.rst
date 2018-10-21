@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 ChiantiPy Documentation
-=====================================
+=======================
 
 Welcome to the ChiantiPy documentation. ChiantiPy is a pure Python package for performing calculations of astrophysical spectra using the `CHIANTI atomic database <http://www.chiantidatabase.org/>`_.
 
@@ -19,6 +19,7 @@ CHIANTI is developed and maintained by scientists at George Mason University (US
 .. toctree::
    :maxdepth: 3
 
+.. include:: ../README.rst
    getting_started
    quick_start
    tutorial
@@ -28,8 +29,6 @@ CHIANTI is developed and maintained by scientists at George Mason University (US
    resources
    changelog
    bugs
-   api/modules
-
 
 
 Indices and tables

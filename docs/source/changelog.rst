@@ -7,7 +7,13 @@ changes from 0.7.1 to 0.8.0
 
 ChiantiPy is now only compliant with Python 3.  Development is currently with Python 3.6
 
-The use of the PyQt4 and WxWidgets packages have been dropped
+The use of the PyQt4 and WxWidgets packages have been dropped and PyQt5 is now used
+
+The documentation is now available on github.io_ and ReadTheDocs_
+
+.. _github.io:  https://chianti-atomic.github.io/
+
+.. _ReadTheDocs:  https://chiantipy.readthedocs.io/en/latest/?badge=latest
 
 changes from 0.7.0 to 0.7.1
 ===========================

@@ -23,7 +23,7 @@ try:
     Defaults = chio.defaultsRead()
     Ip = chio.ipRead()
     MasterList = chio.masterListRead()
-    IoneqAll = chio.ioneqRead(ioneqname=Defaults['ioneqfile'])
+    IoneqAll = chio.ioneqRead(ioneqName=Defaults['ioneqfile'])
     ChiantiVersion = chio.versionRead()
     keywordArgs = ['temperature', 'eDensity', 'hDensity', 'pDensity', 'radTemperature',
                    'rStar', 'distance']

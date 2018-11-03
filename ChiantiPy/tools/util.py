@@ -397,7 +397,7 @@ def dilute(radius):
     return d
 
 
-def listFiles(path):
+def listFiles(dir):
     """
     Walks the path and subdirectories to return a list of files.
 
@@ -405,8 +405,7 @@ def listFiles(path):
     -----
     This can be replaced by functions in `os.path`, as if 3.4, pathlib is probably better.
     """
-    alist = os.walk(path)
-#    print(' getting file list')
+    alist = os.walk(dir)
     listname = []
     for (dirpath,dirnames,filenames) in alist:
         if len(dirnames) == 0:
@@ -421,6 +420,30 @@ def listFiles(path):
                     listname.append(file)
     return listname
 
+
+def listRootNames(dir):
+    """
+    Walks the path and subdirectories to return a list of file root names.
+
+    Notes
+    -----
+    This can be replaced by functions in `os.path`, as if 3.4, pathlib is probably better.
+    """
+    alist = os.walk(dir)
+#    print(' getting file list')
+    rootNames = []
+    for (dirpath,dirnames,filenames) in alist:
+        if len(dirnames) == 0:
+            for f in filenames:
+                file = os.path.join(dirpath,f)
+                if os.path.isfile(file):
+                    rootNames.append(os.path.splitext(f)[0])
+        else:
+            for f in filenames:
+                file = os.path.join(dirpath,f)
+                if os.path.isfile(file):
+                    rootNames.append(os.path.splitext(f)[0])
+    return rootNames
 
 def scale_bti(evin,crossin,f,ev1):
     """

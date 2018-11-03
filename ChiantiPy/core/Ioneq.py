@@ -35,7 +35,7 @@ class ioneq(object):
         else:
             self.Z = el_or_z
 
-    def load(self, ioneqName=None):
+    def load(self, ioneqName = None):
         """
         Read temperature and ion fractions from a CHIANTI ".ioneq" file.
         """
@@ -44,6 +44,7 @@ class ioneq(object):
         ioneqAll = io.ioneqRead(ioneqName)
         self.Temperature = ioneqAll['ioneqTemperature']
         self.Ioneq = ioneqAll['ioneqAll'][self.Z - 1]
+        self.IoneqName = ioneqAll['ioneqname']
 
     def calculate(self, temperature):
         """
@@ -134,7 +135,7 @@ class ioneq(object):
                 ioneq[:, it] = ioneq[:, it]/ionsum
             self.Ioneq = ioneq
 
-    def plot(self, stages=0, xr=0, yr=0, oplot=0, label=1, title=1,  bw=0, semilogx = 0):
+    def plot(self, stages=0, xr=0, yr=0, oplot=False, label=1, title=1,  bw=0, semilogx = 0, verbose=0):
         '''
         Plots the ionization equilibria.
 
@@ -201,11 +202,11 @@ class ioneq(object):
         atitle = 'Chianti Ionization Equilibrium for '+const.El[self.Z-1].capitalize()
         #
         if oplot:
-            if oplot == 0:
-                result = io.ioneqRead(ioneqname='')
-#                print 'keys = ', result.keys()
+            if isinstance(oplot,int):
+                result = io.ioneqRead(ioneqName='')
+#                print('keys = ', result.keys()
                 if result != False:
-                    atitle += '  & '+result['ioneqname'].replace('.ioneq', '')
+                    atitle += '  & '+ result['ioneqname'].replace('.ioneq', '')
                     atitle += ' '+linestyle[0]
                     for iz in stages:
                         plt.plot(result['ioneqTemperature'], result['ioneqAll'][self.Z-1, iz-1],linestyle[1], lw=lw)

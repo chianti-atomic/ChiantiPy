@@ -3,25 +3,83 @@ PyQt5 widget selection dialogs
 '''
 import os
 from PyQt5 import QtGui, QtWidgets
+
+#from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QFileDialog
+#from PyQt5.QtGui import QIcon
+
 import ChiantiPy
 from ChiantiPy.Gui.gui_qt5.ui import *
-''' qt5 selection dialogs'''
+''' qt5 selection dialogs
+'''
 
-def chpicker(dir, filter='*.*', label='ChiantiPy'):
-    '''Select a filename using a Qt gui dialog.
+class chpicker(QtWidgets.QWidget):
+    ''' dialog to select a single file name under the directory
+    code largely taken from pythonspot.com
     '''
-#    app=QtWidgets.QApplication(sys.argv)
-    a=QtWidgets.QFileDialog.getOpenFileName()
-    a.SetFileMode(1)
-    a.setDirectory(dir)
-    # a.setFilter(filter)
-#    mylabel=QtCore.QString('some label')
-#    a.setLabelText(mylabel)
-    a.setWindowTitle(label)
-    a.setModal(True)
-    a.exec_()
-    qfilename=a.selectedFiles()
-    return str(qfilename[0])
+    def __init__(self, dir, label):
+        super().__init__()
+        self.title = 'PyQt5 file dialogs - pythonspot.com'
+        self.left = 10
+        self.top = 10
+        self.width = 640
+        self.height = 480
+        self.dir = dir
+        self.label = label
+        self.fileName = None
+        self.initUI()
+
+    def initUI(self):
+        self.setWindowTitle(self.title)
+        self.setGeometry(self.left, self.top, self.width, self.height)
+
+        self.openFileNameDialog()
+#        self.openFileNamesDialog()
+#        self.saveFileDialog()
+
+        self.show()
+        self.close()
+
+    def openFileNameDialog(self):
+        options = QtWidgets.QFileDialog.Options()
+        options |= QtWidgets.QFileDialog.DontUseNativeDialog
+        fileName, _ = QtWidgets.QFileDialog.getOpenFileName(self, self.label, self.dir,"All Files (*);;Python Files (*.py)", options=options)
+#        fileName, _ = QtWidgets.QFileDialog.getOpenFileName(self,"QFileDialog.getOpenFileName()", self.dir,"All Files (*);;Python Files (*.py)", options=options)
+        if fileName:
+            print(fileName)
+        self.fileName = fileName
+        self.baseName = os.path.split(fileName)[1]
+        self.rootName = os.path.splitext(self.baseName)[0]
+
+#    def openFileNamesDialog(self):
+#        options = QtWidgets.QFileDialog.Options()
+#        options |= QtWidgets.QFileDialog.DontUseNativeDialog
+#        files, _ = QtWidgets.QFileDialog.getOpenFileNames(self,"QFileDialog.getOpenFileNames()", "","All Files (*);;Python Files (*.py)", options=options)
+#        if files:
+#            print(files)
+
+#    def saveFileDialog(self):
+#        options = QFileDialog.Options()
+#        options |= QFileDialog.DontUseNativeDialog
+#        fileName, _ = QFileDialog.getSaveFileName(self,"QFileDialog.getSaveFileName()","","All Files (*);;Text Files (*.txt)", options=options)
+#        if fileName:
+#            print(fileName)
+
+
+#def chpicker(dir, filter='*.*', label='ChiantiPy'):
+#    '''Select a filename using a Qt gui dialog.
+#    '''
+##    app=QtWidgets.QApplication(sys.argv)
+#    a=QtWidgets.QFileDialog.getOpenFileName()
+#    a.SetFileMode(1)
+#    a.setDirectory(dir)
+#    # a.setFilter(filter)
+##    mylabel=QtCore.QString('some label')
+##    a.setLabelText(mylabel)
+#    a.setWindowTitle(label)
+#    a.setModal(True)
+#    a.exec_()
+#    qfilename=a.selectedFiles()
+#    return str(qfilename[0])
     #
 #
 class selectorDialog(QtWidgets.QDialog):

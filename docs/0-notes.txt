@@ -14,4 +14,8 @@ then need to exit stuff in api ChiantiPy.base.rst to include the methods
 
 sphinxdoc.css - line 20 14px -> 16px
 
+in api/index need to make link to ChiantiPy_logo to read ../_static/...
+    however, this only works for one more level down
+    can do this with text_replace
+
 

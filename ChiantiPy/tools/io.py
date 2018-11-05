@@ -959,7 +959,7 @@ def klgfbRead():
     return {'pe':pe, 'klgfb':gfb}
 
 
-def ioneqRead(ioneqname='', minIoneq=1.e-20, verbose=False):
+def ioneqRead(ioneqName='', minIoneq=1.e-20, verbose=False):
     """
     Reads an ioneq file
     ionization equilibrium values less then minIoneq are returns as zeros
@@ -970,10 +970,16 @@ def ioneqRead(ioneqname='', minIoneq=1.e-20, verbose=False):
     """
     dir = os.environ["XUVTOP"]
     ioneqdir = os.path.join(dir,'ioneq')
-    if ioneqname == '':
+    ioneqNames = util.listRootNames(ioneqdir)
+    if ioneqName not in ioneqNames:
         # the user will select an ioneq file
-        fname1 = chgui.gui.chpicker(ioneqdir,filter='*.ioneq',label = 'Select an Ionization Equilibrium file')
-        fname = os.path.join(ioneqdir, fname1)
+        choice = chgui.gui.chpicker(ioneqdir, label='Select a single ioneq file')
+        if choice.rootName in ioneqNames:
+            fname = choice.fileName
+            ioneqName = choice.rootName
+#        fname1 = choice.baseName
+#        fname1 = chgui.gui.chpicker(ioneqdir,filter='*.ioneq',label = 'Select an Ionization Equilibrium file')
+#        fname = os.path.join(ioneqdir, fname1)
         if fname == None:
             print(' no ioneq file selected')
             return False
@@ -982,26 +988,28 @@ def ioneqRead(ioneqname='', minIoneq=1.e-20, verbose=False):
             ioneqname,ext = os.path.splitext(ioneqfilename)
     else:
         filelist = util.listFiles(ioneqdir)
-        fname = os.path.join(dir,'ioneq',ioneqname+'.ioneq')
-        newlist = fnmatch.filter(filelist, '*.ioneq')
-        baselist = []
-        for one in newlist:
-            baselist.append(os.path.basename(one))
-        cnt = baselist.count(ioneqname+'.ioneq')
-        if cnt == 0:
-            print((' ioneq file not found:  ', fname))
-            print(' the following files do exist: ')
-            for one in newlist:
-                print((os.path.basename(one)))
-            return
-        elif cnt == 1:
-            idx = baselist.index(ioneqname+'.ioneq')
-            if verbose:
-                print((' file exists:  ', newlist[idx]))
-            fname = newlist[idx]
-        elif cnt > 1:
-            print((' found more than one ioneq file', fname))
-            return
+        idx = ioneqNames.index(ioneqName)
+        fname = filelist[idx]
+#        fname = os.path.join(dir,'ioneq',ioneqname+'.ioneq')
+#        newlist = fnmatch.filter(filelist, '*.ioneq')
+#        baselist = []
+#        for one in newlist:
+#            baselist.append(os.path.basename(one))
+#        cnt = baselist.count(ioneqname+'.ioneq')
+#        if cnt == 0:
+#            print((' ioneq file not found:  ', fname))
+#            print(' the following files do exist: ')
+#            for one in newlist:
+#                print((os.path.basename(one)))
+#            return
+#        elif cnt == 1:
+#            idx = baselist.index(ioneqname+'.ioneq')
+#            if verbose:
+#                print((' file exists:  ', newlist[idx]))
+#            fname = newlist[idx]
+#        elif cnt > 1:
+#            print((' found more than one ioneq file', fname))
+#            return
     #
     input = open(fname,'r')
     s1 = input.readlines()
@@ -1040,7 +1048,7 @@ def ioneqRead(ioneqname='', minIoneq=1.e-20, verbose=False):
     for one in s1[nlines+1:]:
         ioneqRef.append(one[:-1])  # gets rid of the \n
     del s1
-    return {'ioneqname':ioneqname,'ioneqAll':ioneqAll,'ioneqTemperature':ioneqTemperature,'ioneqRef':ioneqRef}
+    return {'ioneqname':ioneqName,'ioneqAll':ioneqAll,'ioneqTemperature':ioneqTemperature,'ioneqRef':ioneqRef}
 
 
 def ipRead(verbose=False):

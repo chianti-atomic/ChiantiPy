@@ -295,6 +295,8 @@ def cireclvlRead(ions, filename=None, filetype='cilvl'):
 
     paramname = fname + '.' + filetype
 
+    print('paramname %s'%(paramname))
+
     input = open(paramname,'r')
     lines = input.readlines()
     input.close()

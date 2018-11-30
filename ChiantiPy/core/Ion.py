@@ -20,6 +20,8 @@ from ChiantiPy.base import specTrails
 from ChiantiPy.base import ioneqOne
 
 heseqLvl2 = [-1,3,-1,-1,-1,5,6,6,-1,6,6,6,5,5,3,5,3,5,3,5,-1,-1,-1,-1,-1,4,-1,4,-1,4]
+# for populate and drPopulate to include populated lower levels for ionization
+enough = 10
 
 
 class ion(ioneqOne, ionTrails, specTrails):
@@ -109,9 +111,10 @@ class ion(ioneqOne, ionTrails, specTrails):
         self.Z = _tmp_convert_name['Z']
         self.Ion = _tmp_convert_name['Ion']
         self.Dielectronic = _tmp_convert_name['Dielectronic']
+        self.HigherName = _tmp_convert_name['higher']
         self.Spectroscopic = util.zion2spectroscopic(self.Z,self.Ion)
         self.FileName = util.zion2filename(self.Z,
-                                    self.Ion,dielectronic=self.Dielectronic )
+        self.Ion,dielectronic=self.Dielectronic )
         self.Defaults = chdata.Defaults
 
         if abundance is not None:
@@ -862,11 +865,11 @@ class ion(ioneqOne, ionTrails, specTrails):
                         index += 1
                 rate[itrans] = newRate
         if lvlType == 'reclvl':
-            self.ReclvlRate = {'rate':rate, 'lvl1':lvl['lvl1'], 'lvl2':lvl['lvl2'], 'temperature':temperature}
+            self.ReclvlRate = {'rate':rate, 'lvl1':lvl['lvl1'], 'lvl2':lvl['lvl2'], 'temperature':temperature, 'type':'reclvl'}
         elif lvlType == 'cilvl':
-            self.CilvlRate = {'rate':rate, 'lvl1':lvl['lvl1'], 'lvl2':lvl['lvl2'], 'temperature':temperature}
+            self.CilvlRate = {'rate':rate, 'lvl1':lvl['lvl1'], 'lvl2':lvl['lvl2'], 'temperature':temperature, 'type':'cilvl'}
         elif lvlType == 'rrlvl':
-            self.RrlvlRate = {'rate':rate, 'lvl1':lvl['lvl1'], 'lvl2':lvl['lvl2'], 'temperature':temperature}
+            self.RrlvlRate = {'rate':rate, 'lvl1':lvl['lvl1'], 'lvl2':lvl['lvl2'], 'temperature':temperature, 'type':'rrlvl'}
 
     def drRateLvl(self, verbose=0):
         """
@@ -1417,10 +1420,18 @@ class ion(ioneqOne, ionTrails, specTrails):
             if one not in chdata.keywordArgs:
                 print(' following keyword is not understood - %20s '%(one))
         nlvls = self.Nlvls
+#        if higher.Elvlc['lvl'][upperIdx] == 1:
+#                            dielRate = coef2[itemp]*gLower*expkt*avalue/(2.*gUpper)
+#                            popmat[ci + l2, -1] += self.EDensity[itemp]*dielRate
+#                            drTot += self.EDensity[itemp]*dielRate*branch[elvl2idx]
+
         nwgfa = self.Nwgfa
         nscups = self.Nscups
         npsplups = self.Npsplups
         nauto = self.Nauto
+        # the following is the number of lower levels to ionize the current ion  from
+        #  fixes the problem that the ionization rates are really just strictly for the ground leve
+        # which can become depopulated with increased density
 
         if 'temperature' in kwargs.keys():
             self.Temperature = np.asarray(kwargs['temperature'])
@@ -1507,7 +1518,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         if rec:
             # get ionization rate of this current ion
             self.ionizRate()
-            #  get the higher ionization stage and its recombination rates
+            #  get the higher ionization stage and its recombination rates to this ion
             highers = util.zion2name(self.Z, self.Ion+1)
             higher = ion(highers, temperature=self.Temperature, eDensity=self.EDensity, setup=0)
             higher.setupIonrec()
@@ -1635,9 +1646,10 @@ class ion(ioneqOne, ionTrails, specTrails):
                 popmat[1, 0] += (self.EDensity*lower.IonizRate['rate'] - ciTot)
                 popmat[0, 0] -= (self.EDensity*lower.IonizRate['rate'] - ciTot)
             if rec:
-
-                popmat[-1,  ci] += self.EDensity*self.IonizRate['rate']
-                popmat[ci, ci] -= self.EDensity*self.IonizRate['rate']
+                #  ionization is summed over the lowest levels that are likely to be populated
+                for ilvl in range(0, enough):
+                    popmat[-1,  ci + ilvl] += self.EDensity*self.IonizRate['rate']
+                    popmat[ci + ilvl, ci + ilvl] -= self.EDensity*self.IonizRate['rate']
 
                 if self.Nreclvl:
                     recTot = reclvlRate['rate'].sum(axis=0)
@@ -1706,6 +1718,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             if verbose:
                 print(' doing both ntemp: %5i  ndens:  %5i'%(ntemp, ndens))
             pop = np.zeros((ntemp,nlvls),"float64")
+            fullPop = np.zeros((ntemp, ci + nlvls + rec), 'float64')
             for itemp in range(ntemp):
                 temp = self.Temperature[itemp]
                 popmat = np.copy(rad)
@@ -1737,9 +1750,9 @@ class ion(ioneqOne, ionTrails, specTrails):
                     popmat[1, 0] += (self.EDensity[itemp]*lower.IonizRate['rate'][itemp] - ciTot)
                     popmat[0, 0] -= (self.EDensity[itemp]*lower.IonizRate['rate'][itemp] - ciTot)
                 if rec:
-
-                    popmat[-1,  ci] += self.EDensity[itemp]*self.IonizRate['rate'][itemp]
-                    popmat[ci, ci] -= self.EDensity[itemp]*self.IonizRate['rate'][itemp]
+                    for ilvl in range(0, enough):
+                        popmat[-1,  ci + ilvl] += self.EDensity[itemp]*self.IonizRate['rate'][itemp]
+                        popmat[ci + ilvl, ci + ilvl] -= self.EDensity[itemp]*self.IonizRate['rate'][itemp]
 
                     if self.Nreclvl:
                         recTot = self.ReclvlRate['rate'][:, itemp].sum()
@@ -1774,8 +1787,450 @@ class ion(ioneqOne, ionTrails, specTrails):
 
                         if higher.Elvlc['lvl'][upperIdx] == 1:
                             dielRate = coef2[itemp]*gLower*expkt*avalue/(2.*gUpper)
+#                            popmat[ci + l2, -1] += self.EDensity[itemp]*dielRate
                             popmat[ci + l2, -1] += self.EDensity[itemp]*dielRate
+                            popmat[-1, ci + l2] -= avalue
                             drTot += self.EDensity[itemp]*dielRate*branch[elvl2idx]
+
+                    if higher.RecombRate['rate'][itemp] > (recTot + drTot):
+                        popmat[ci, -1] += self.EDensity[itemp]*(higher.RecombRate['rate'][itemp] - recTot - drTot)
+                        popmat[-1, -1] -= self.EDensity[itemp]*(higher.RecombRate['rate'][itemp] - recTot - drTot)
+
+                norm = np.ones(nlvls+ci+rec,'float64')
+                self.Popmat = copy.copy(popmat)
+                if ci:
+                    norm[0] = 0.
+                if rec:
+                    norm[-1] = 0.
+                popmat[nlvls+ci+rec-1] = norm
+                b = np.zeros(nlvls+ci+rec,'float64')
+                b[nlvls+ci+rec-1] = 1.
+                try:
+                    thispop = np.linalg.solve(popmat,b)
+                    pop[itemp] = thispop[ci:ci+nlvls]
+                    fullPop[itemp] = thispop
+                except np.linalg.LinAlgError:
+                    pop[itemp] = np.zeros(nlvls, 'float64')
+                    errorMessage.append('linealgError for T index %5i'%(itemp))
+            #
+                pop = np.where(pop > 0., pop, 0.)
+
+        self.Population = {"temperature":temperature,"eDensity":eDensity,"population":pop, "protonDensity":protonDensity, "ci":ci, "rec":rec, 'popmat':popmat, 'fullPop':fullPop}
+        if len(errorMessage) > 0:
+            self.Population['errorMessage'] = errorMessage
+
+
+    def drPopulate(self, popCorrect=1, verbose=0, **kwargs):
+        """
+        Calculate level populations for specified ion.
+        possible keyword arguments include temperature, eDensity, pDensity, radTemperature and rStar
+        different from method populate() in that it includes the dielectronic recombination from all
+        levels specified by the .auto file - consequently, it also calculates the populations of the
+        higher ionization stage
+        """
+        if self.HigherName in chdata.MasterList:
+            print('higher ionization stage in MasterList')
+        else:
+            print('higher ionization stage not in MasterList')
+            return
+        if hasattr(self, 'Auto'):
+            print(' %s has autoionization rates'%(self.IonStr))
+        else:
+            print(' %s does not have autoionization rates'%(self.IonStr))
+            return
+
+        for one in kwargs.keys():
+            if one not in chdata.keywordArgs:
+                print(' following keyword is not understood - %20s '%(one))
+        nlvls = self.Nlvls
+        nwgfa = self.Nwgfa
+        nscups = self.Nscups
+        npsplups = self.Npsplups
+        nauto = self.Nauto
+
+        if 'temperature' in kwargs.keys():
+            self.Temperature = np.asarray(kwargs['temperature'])
+            temperature = self.Temperature
+        elif hasattr(self, 'Temperature'):
+            temperature = self.Temperature
+        else:
+                print(' no temperature values have been set')
+                return
+
+        if 'eDensity' in kwargs.keys():
+            self.EDensity = np.asarray(kwargs['eDensity'])
+            eDensity = self.EDensity
+        elif hasattr(self, 'EDensity'):
+            eDensity = self.EDensity
+        else:
+            print(' no eDensity values have been set')
+            return
+
+        if 'pDensity' in kwargs.keys():
+            if kwargs['pDensity'] == 'default':
+                self.p2eRatio()
+                protonDensity = self.ProtonDensityRatio*self.EDensity
+            else:
+                try:
+                    self.PDensity = np.asarray(kwargs['pDensity'])
+                except:
+                    print(' could not interpret value for keyword pDensity')
+                    print(' should be either "default" or a number or array')
+                    return
+        else:
+            if hasattr(self, 'PDensity'):
+                protonDensity = self.PDensity
+            else:
+                self.p2eRatio()
+                self.PDensity = self.ProtonDensityRatio*self.EDensity
+                protonDensity = self.PDensity
+                print(' proton density not specified, set to \"default\" ')
+        #
+        if 'radTemperature' in kwargs.keys() and 'rStar' in kwargs.keys():
+            self.RadTemperature = np.asarray(kwargs['radTemperature'])
+            radTemperature = np.array(self.RadTemperature)
+            self.RStar = np.asarray(kwargs['rStar'])
+            rStar = np.asarray(self.RStar)
+        elif hasattr(self, 'RadTemperature') and hasattr(self, 'RStar'):
+            radTemperature = self.RadTemperature
+            rStar = self.RStar
+
+        rec = 0
+        ci = 0
+        # the Dielectronic test should eventually go away
+        # since this ion has autoionization values, it is not a dielectronic (d) ion
+        # and  and (not self.Dielectronic) test has gone away
+        if popCorrect:
+            if self.Ncilvl:
+                ci = 1
+                cilvl = self.Cilvl
+                if hasattr(self, 'CilvlRate'):
+                    cilvlRate = self.CilvlRate
+                else:
+                    self.cireclvlDescale('cilvl')
+                    cilvlRate = self.CilvlRate
+                self.recombRate()
+                #
+                lowers = util.zion2name(self.Z, self.Ion-1)
+                # get the lower ionization stage
+                lower = ion(lowers, temperature=self.Temperature, eDensity = self.EDensity)
+                lower.ionizRate()
+                # need to get multiplicity of lower ionization stage
+                lowMult = lower.Elvlc['mult']
+            else:
+                ci = 0
+
+            if self.Nreclvl or self.Nauto:
+#                rec = max([max(self.Reclvl['lvl1']), max(self.Auto['lvl1'])])
+                rec = 1
+                if verbose:
+                    print('reclvl-lvl1 = %5i   auto-lvl1 = %5i'%(max(self.Reclvl['lvl1']), max(self.Auto['lvl1'])))
+                    print(' rec = %5i'%(rec))
+            else:
+                rec = 0
+
+            if self.Nreclvl:
+                reclvl = self.Reclvl
+                if hasattr(self, 'ReclvlRate'):
+                    reclvlRate = self.ReclvlRate
+                else:
+                    self.cireclvlDescale('reclvl')
+                    reclvlRate = self.ReclvlRate
+
+        if rec:
+            # get ionization rate of this current ion
+            self.ionizRate()
+            #  get the higher ionization stage and its recombination rates
+            highers = util.zion2name(self.Z, self.Ion+1)
+            higher = ion(highers, temperature=self.Temperature, eDensity=self.EDensity)
+#            higher = ion(highers, temperature=self.Temperature, eDensity=self.EDensity, setup=0)
+            higher.setupIonrec()
+            higher.recombRate()
+            higher.populate()
+
+        #  the populating matrix for radiative transitions
+        rad = np.zeros((nlvls+ci+rec,nlvls+ci+rec),"float64")
+
+        for iwgfa in range(nwgfa):
+            l1 = self.Wgfa["lvl1"][iwgfa]-1
+            l2 = self.Wgfa["lvl2"][iwgfa]-1
+            rad[l1+ci,l2+ci] += self.Wgfa["avalue"][iwgfa]
+            rad[l2+ci,l2+ci] -= self.Wgfa["avalue"][iwgfa]
+            # photo-excitation and stimulated emission
+            if self.RadTemperature:
+                if not self.RStar:
+                    dilute = 0.5
+                else:
+                    dilute = util.dilute(self.RStar)
+                # next - don't include autoionization lines
+                if abs(self.Wgfa['wvl'][iwgfa]) > 0.:
+                    de = const.invCm2Erg*(self.Elvlc['ecm'][l2] - self.Elvlc['ecm'][l1])
+                    dekt = de/(const.boltzmann*self.RadTemperature)
+                    # photoexcitation
+                    phexFactor = dilute*(float(self.Elvlc['mult'][l2])/float(self.Elvlc['mult'][l1]))/(np.exp(dekt) -1.)
+                    rad[l2+ci,l1+ci] += self.Wgfa["avalue"][iwgfa]*phexFactor
+                    rad[l1+ci,l1+ci] -= self.Wgfa["avalue"][iwgfa]*phexFactor
+                    # stimulated emission
+                    stemFactor = dilute/(np.exp(-dekt) -1.)
+                    rad[l1+ci,l2+ci] += self.Wgfa["avalue"][iwgfa]*stemFactor
+                    rad[l2+ci,l2+ci] -= self.Wgfa["avalue"][iwgfa]*stemFactor
+
+        # autoionization rates
+        for iauto in range(nauto):
+            l1 = self.Auto["lvl1"][iauto] - 1
+            l2 = self.Auto["lvl2"][iauto] - 1
+            # all autoionization eventually goes to the ground level of the higher ion
+            rad[l1+ci+rec,l2+ci] += self.Auto["avalue"][iauto]
+            rad[l2+ci,l2+ci] -= self.Auto["avalue"][iauto]
+
+
+        if self.Nscups:
+            self.upsilonDescale()
+            #ups = self.Upsilon['upsilon']
+            exRate = self.Upsilon['exRate']
+            dexRate = self.Upsilon['dexRate']
+
+        if npsplups:
+            self.upsilonDescaleSplups(prot=1)
+            pexRate = self.PUpsilon['exRate']
+            pdexRate = self.PUpsilon['dexRate']
+
+        if self.Nauto:
+            branch = np.zeros_like(self.Auto['avalueLvl'])
+            # first get branching ratio
+            for i, lvl in enumerate(self.Elvlc['lvl'][1:]):
+                if self.Wgfa['avalueLvl'][lvl-1] > 0.:
+                    branch[lvl-1] = self.Wgfa['avalueLvl'][lvl-1]/(self.Wgfa['avalueLvl'][lvl-1] + self.Auto['avalueLvl'][lvl-1])
+                else:
+                   branch[lvl-1] = 0.
+        temp = temperature
+        ntemp = temp.size
+        dens = self.EDensity
+        ndens = dens.size
+#        cc = const.collision*self.EDensity
+        #
+        # (4 pi a0^2)^(3/2) = 6.6011e-24 (Badnell et al, 2003, A&A 406, 1151
+        coef1 = 6.6011e-24*(const.hartree/(2.*const.boltzmann*self.Temperature))**1.5
+        coef2 = (const.planck)**3/(2.*const.pi*const.emass*const.boltzmann*self.Temperature)**1.5
+
+        #
+#        if npsplups:
+#            cp = const.collision*protonDensity
+        if ntemp > 1 and ndens >1 and ntemp != ndens:
+            print(' unless temperature or eDensity are single values')
+            print(' the number of temperatures values must match the ')
+            print(' the number of eDensity values')
+            return
+        #
+        # get corrections for recombination and excitation
+        nscups = self.Nscups
+        #
+        #
+        # the way temperature and density are now (9/2015) handled as arrays of the same size
+        # one the ndens == ntemp =1 case and the ndens >1 and ntemp>1 case are really needed
+        #
+        errorMessage = []
+        #  first, for ntemp=ndens=1
+        if ndens == 1 and ntemp == 1:
+            if verbose:
+                print('coef1 %12.2e  coef2: %12.2e'%(coef1, coef2))
+            popmat = np.copy(rad)
+            if verbose:
+                print(' doing ntemp: %5i  ndens:  %5i'%(ntemp, ndens))
+            for iscups in range(0,nscups):
+                l1 = self.Scups["lvl1"][iscups]-1
+                l2 = self.Scups["lvl2"][iscups]-1
+                #
+                popmat[l1+ci,l2+ci] += self.EDensity*dexRate[iscups]
+                popmat[l2+ci,l1+ci] += self.EDensity*exRate[iscups]
+                popmat[l1+ci,l1+ci] -= self.EDensity*exRate[iscups]
+                popmat[l2+ci,l2+ci] -= self.EDensity*dexRate[iscups]
+                #
+            for ipsplups in range(0,npsplups):
+                l1 = self.Psplups["lvl1"][ipsplups]-1
+                l2 = self.Psplups["lvl2"][ipsplups]-1
+                 #
+                popmat[l1+ci,l2+ci] += self.PDensity*pdexRate[ipsplups]
+                popmat[l2+ci,l1+ci] += self.PDensity*pexRate[ipsplups]
+                popmat[l1+ci,l1+ci] -= self.PDensity*pexRate[ipsplups]
+                popmat[l2+ci,l2+ci] -= self.PDensity*pdexRate[ipsplups]
+           # now include ionization rate from lower ionization stage
+            if ci:
+                # the ciRate can be computed for all temperatures
+                ciTot = 0.
+                for itrans in range(len(cilvl['lvl1'])):
+                    lvl1 = cilvl['lvl1'][itrans]-1
+                    lvl2 = cilvl['lvl2'][itrans]-1
+                    # this is kind of double booking the ionization rate
+                    # components
+                    popmat[lvl2+ci, lvl1] += self.EDensity*self.CilvlRate['rate'][itrans]
+                    popmat[lvl1, lvl1] -= self.EDensity*self.CilvlRate['rate'][itrans]
+                    ciTot += self.EDensity*self.CilvlRate['rate'][itrans]
+                #
+                popmat[1, 0] += (self.EDensity*lower.IonizRate['rate'] - ciTot)
+                popmat[0, 0] -= (self.EDensity*lower.IonizRate['rate'] - ciTot)
+            if rec:
+
+                for ilvl in range(0, enough):
+                    popmat[-1,  ci + ilvl] += self.EDensity*self.IonizRate['rate']
+                    popmat[ci + ilvl, ci + ilvl] -= self.EDensity*self.IonizRate['rate']
+#                popmat[-1,  ci] += self.EDensity*self.IonizRate['rate']
+#                popmat[ci, ci] -= self.EDensity*self.IonizRate['rate']
+
+                if self.Nreclvl:
+                    recTot = reclvlRate['rate'].sum(axis=0)
+                else:
+                    recTot = 0.
+
+                for itrans in range(self.Nreclvl):
+                    lvl1 = reclvl['lvl2'][itrans]-1
+                    lvl2 = reclvl['lvl2'][itrans]-1
+                    popmat[lvl2+ci, -1] += self.EDensity*reclvlRate['rate'][itrans]
+                    popmat[-1, -1] -= self.EDensity*reclvlRate['rate'][itrans]
+
+                if verbose:
+                    print(' recTot:  %12.2e  RrRate:  %12.2e'%(recTot, higher.RecombRate['rate']))
+                # next 2 lines take care of overbooking
+                #
+                drTot = 0.
+                if self.Nauto:
+                    for i, avalue in enumerate(self.Auto['avalue']):
+                        l1 = self.Auto['lvl1'][i] - 1
+                        l2 = self.Auto['lvl2'][i] - 1
+                        elvl1idx = self.Elvlc['lvl'].index(self.Auto['lvl1'][i])
+                        elvl2idx = self.Elvlc['lvl'].index(self.Auto['lvl2'][i])
+                        l2 = self.Auto['lvl2'][i] - 1
+                        upperIdx = higher.Elvlc['lvl'].index(self.Auto['lvl1'][i])
+                        gUpper = float(higher.Elvlc['mult'][upperIdx])
+                        gLower = float(self.Elvlc['mult'][elvl2idx])
+
+                        #ecm1 = self.Higher.Elvlc['ecmth'][l1]
+                        ecm2 = self.Elvlc['ecm'][elvl2idx]
+
+                        if ecm2 < 0.:
+                            ecm2 = self.Elvlc['ecmth'][elvl2idx]
+                        de1 = ecm2*const.invCm2Erg - self.Ip*const.ev2Erg
+                        dekt1 = de1/(const.boltzmann*self.Temperature)
+                        expkt = np.exp(-dekt1)
+
+#                        if higher.Elvlc['lvl'][upperIdx] == 1:
+#                            dielRate = coef2*gLower*expkt*avalue/(2.*gUpper)
+#                            popmat[ci + l2, -1] += self.EDensity*dielRate
+#                            drTot += self.EDensity*dielRate*branch[elvl2idx]
+
+                        hPop = higher.Population['population']
+                        dielRate = coef2*gLower*expkt*avalue*hPop[upperIdx]/(2.*gUpper)
+                        popmat[ci + l2, -1] += self.EDensity*dielRate
+                        drTot += self.EDensity*dielRate*branch[elvl2idx]
+
+                if higher.RecombRate['rate'] > (recTot + drTot):
+                    popmat[ci, -1] += self.EDensity*(higher.RecombRate['rate'] - recTot - drTot)
+                    popmat[-1, -1] -= self.EDensity*(higher.RecombRate['rate'] - recTot - drTot)
+
+            norm = np.ones(nlvls+ci+rec,'float64')
+            if ci:
+                norm[0] = 0.
+            if rec:
+                norm[nlvls+ci+rec-1] = 0.
+            if self.Dielectronic:
+                norm[nlvls-1] = 0.
+            popmat[nlvls+ci+rec-1] = norm
+            b = np.zeros(nlvls+ci+rec,'float64')
+            b[nlvls+ci+rec-1] = 1.
+
+            try:
+                thispop = np.linalg.solve(popmat,b)
+                pop = thispop[ci:ci+nlvls]
+            except np.linalg.LinAlgError:
+                pop = np.zeros(nlvls, 'float64')
+                errorMessage.append('linealgError for singe T')
+
+        elif ntemp>1  and ntemp==ndens:
+            if verbose:
+                print(' doing both ntemp: %5i  ndens:  %5i'%(ntemp, ndens))
+            pop = np.zeros((ntemp,nlvls),"float64")
+            for itemp in range(ntemp):
+                temp = self.Temperature[itemp]
+                popmat = np.copy(rad)
+                for iscups in range(nscups):
+                    l1 = self.Scups["lvl1"][iscups]-1
+                    l2 = self.Scups["lvl2"][iscups]-1
+                    popmat[l1+ci,l2+ci] += self.EDensity[itemp]*dexRate[iscups, itemp]
+                    popmat[l2+ci,l1+ci] += self.EDensity[itemp]*exRate[iscups, itemp]
+                    popmat[l1+ci,l1+ci] -= self.EDensity[itemp]*exRate[iscups, itemp]
+                    popmat[l2+ci,l2+ci] -= self.EDensity[itemp]*dexRate[iscups, itemp]
+                # proton rates
+                for ipslups in range(npsplups):
+                    l1 = self.Psplups["lvl1"][ipslups]-1
+                    l2 = self.Psplups["lvl2"][ipslups]-1
+                    popmat[l1+ci,l2+ci] += self.PDensity[itemp]*pdexRate[ipslups, itemp]
+                    popmat[l2+ci,l1+ci] += self.PDensity[itemp]*pexRate[ipslups, itemp]
+                    popmat[l1+ci,l1+ci] -= self.PDensity[itemp]*pexRate[ipslups, itemp]
+                    popmat[l2+ci,l2+ci] -= self.PDensity[itemp]*pdexRate[ipslups, itemp]
+                # now include ionization rate from the lower ionization stage
+                if ci:
+                    ciTot = 0.
+                    for itrans in range(len(cilvl['lvl1'])):
+                        lvl1 = cilvl['lvl1'][itrans] -1
+                        lvl2 = cilvl['lvl2'][itrans] -1
+                        popmat[lvl2+ci, lvl1] += self.EDensity[itemp]*self.CilvlRate['rate'][itrans, itemp]
+                        popmat[lvl1, lvl1] -= self.EDensity[itemp]*self.CilvlRate['rate'][itrans, itemp]
+                        ciTot += self.EDensity[itemp]*self.CilvlRate['rate'][itrans, itemp]
+
+                    popmat[1, 0] += (self.EDensity[itemp]*lower.IonizRate['rate'][itemp] - ciTot)
+                    popmat[0, 0] -= (self.EDensity[itemp]*lower.IonizRate['rate'][itemp] - ciTot)
+                if rec:
+
+                    for ilvl in range(0, enough):
+                        popmat[-1,  ci + ilvl] += self.EDensity[itemp]*self.IonizRate['rate'][itemp]
+                        popmat[ci + ilvl, ci + ilvl] -= self.EDensity[itemp]*self.IonizRate['rate'][itemp]
+#                    popmat[-1,  ci] += self.EDensity[itemp]*self.IonizRate['rate'][itemp]
+#                    popmat[ci, ci] -= self.EDensity[itemp]*self.IonizRate['rate'][itemp]
+
+                    if self.Nreclvl:
+                        recTot = self.ReclvlRate['rate'][:, itemp].sum()
+                    else:
+                        recTot = 0.
+
+                    for itrans in range(self.Nreclvl):
+                        lvl1 = reclvl['lvl1'][itrans]-1
+                        lvl2 = reclvl['lvl2'][itrans]-1
+                        popmat[lvl2+ci, -1] += self.EDensity[itemp]*self.ReclvlRate['rate'][itrans, itemp]
+                        popmat[-1, -1] -= self.EDensity[itemp]*self.ReclvlRate['rate'][itrans,itemp]
+
+                #
+                drTot = 0.
+                if self.Nauto:
+                    autoLvl2 = []
+                    hPop = higher.Population['population']
+                    if verbose:
+                        print(' total pop for itemp %5i %12.2e '%(itemp, hPop[itemp].sum()))
+                    for i, avalue in enumerate(self.Auto['avalue']):
+                        elvl1idx = self.Elvlc['lvl'].index(self.Auto['lvl1'][i])
+                        elvl2idx = self.Elvlc['lvl'].index(self.Auto['lvl2'][i])
+                        l2 = self.Auto['lvl2'][i] - 1
+                        autoLvl2.append(l2)
+                        upperIdx = higher.Elvlc['lvl'].index(self.Auto['lvl1'][i])
+                        gUpper = float(higher.Elvlc['mult'][upperIdx])
+                        gLower = float(self.Elvlc['mult'][elvl2idx])
+
+                        ecm2 = self.Elvlc['ecm'][elvl2idx]
+                        if ecm2 < 0.:
+                            ecm2 = self.Elvlc['ecmth'][elvl2idx]
+                        de1 = ecm2*const.invCm2Erg - self.Ip*const.ev2Erg
+                        dekt1 = de1/(const.boltzmann*self.Temperature[itemp])
+                        expkt = np.exp(-dekt1)
+
+#                        if higher.Elvlc['lvl'][upperIdx] == 1:
+#                            dielRate = coef2[itemp]*gLower*expkt*avalue/(2.*gUpper)
+#                            popmat[ci + l2, -1] += self.EDensity[itemp]*dielRate
+#                            drTot += self.EDensity[itemp]*dielRate*branch[elvl2idx]
+
+                        if verbose:
+                            print(' %5i itemp  %5i lvl2 %5i  upperIdx %5i  hPop  %12.2e avalue %12.2e'%(i, itemp, l2, upperIdx, hPop[itemp, upperIdx], avalue))
+                        dielRate = coef2[itemp]*gLower*expkt*avalue*hPop[itemp, upperIdx]/(2.*gUpper)
+                        popmat[ci + l2, -1] += self.EDensity[itemp]*dielRate
+                        drTot += self.EDensity[itemp]*dielRate*branch[elvl2idx - 1]
 
                     if higher.RecombRate['rate'][itemp] > (recTot + drTot):
                         popmat[ci, -1] += self.EDensity[itemp]*(higher.RecombRate['rate'][itemp] - recTot - drTot)
@@ -1802,6 +2257,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         self.Population = {"temperature":temperature,"eDensity":eDensity,"population":pop, "protonDensity":protonDensity, "ci":ci, "rec":rec, 'popmat':popmat}
         if len(errorMessage) > 0:
             self.Population['errorMessage'] = errorMessage
+
 
     def popPlot(self,top=10, plotFile=0, outFile=0, pub=0):
         """
@@ -1970,7 +2426,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             plt.xlabel(xlabel, fontsize=fontsize)
             plt.loglog(eDensity,pop[:,toplvl[0]], visible=False)
             ax2.xaxis.tick_top()
-            plt.tight_layout()
+        plt.tight_layout()
         if outFile:
             plt.savefig(outFile)
         self.Population['toplvl'] = toplvl

@@ -35,7 +35,7 @@ class ioneq(object):
         else:
             self.Z = el_or_z
 
-    def load(self, ioneqName=None):
+    def load(self, ioneqName = None):
         """
         Read temperature and ion fractions from a CHIANTI ".ioneq" file.
         """
@@ -44,6 +44,7 @@ class ioneq(object):
         ioneqAll = io.ioneqRead(ioneqName)
         self.Temperature = ioneqAll['ioneqTemperature']
         self.Ioneq = ioneqAll['ioneqAll'][self.Z - 1]
+        self.IoneqName = ioneqAll['ioneqname']
 
     def calculate(self, temperature):
         """
@@ -134,7 +135,7 @@ class ioneq(object):
                 ioneq[:, it] = ioneq[:, it]/ionsum
             self.Ioneq = ioneq
 
-    def plot(self, stages=0, xr=0, yr=0, oplot=0, label=1, title=1,  bw=0, semilogx = 0):
+    def plot(self, stages=0, xr=0, yr=0, oplot=False, label=1, title=1,  bw=0, semilogx = 0, verbose=0):
         '''
         Plots the ionization equilibria.
 
@@ -201,11 +202,11 @@ class ioneq(object):
         atitle = 'Chianti Ionization Equilibrium for '+const.El[self.Z-1].capitalize()
         #
         if oplot:
-            if oplot == 0:
-                result = io.ioneqRead(ioneqname='')
-#                print 'keys = ', result.keys()
+            if isinstance(oplot,int):
+                result = io.ioneqRead(ioneqName='')
+#                print('keys = ', result.keys()
                 if result != False:
-                    atitle += '  & '+result['ioneqname'].replace('.ioneq', '')
+                    atitle += '  & '+ result['ioneqname'].replace('.ioneq', '')
                     atitle += ' '+linestyle[0]
                     for iz in stages:
                         plt.plot(result['ioneqTemperature'], result['ioneqAll'][self.Z-1, iz-1],linestyle[1], lw=lw)
@@ -229,3 +230,61 @@ class ioneq(object):
             plt.title(atitle)
         plt.tight_layout()
         plt.axis(xyr)
+
+    def plotRatio(self, stageN, stageD, xr=0, yr=0, label=1, title=1,  bw=0, semilogx = 1, verbose=0):
+        '''
+        Plots the ratio of the ionization equilibria of two stages of a given element
+
+        self.plotRatio(stageN, stageD)
+        stages = sequence of ions to be plotted, neutral == 1, fully stripped == Z+1
+        stageN = numerator
+        stageD = denominator
+        xr = temperature range, yr = ion fraction range
+
+        '''
+        ionN = util.zion2name(self.Z, stageN)
+        ionD = util.zion2name(self.Z, stageD)
+        ionNS = util.zion2spectroscopic(self.Z, stageN)
+        ionDS = util.zion2spectroscopic(self.Z, stageD)
+
+        atitle = 'ratio of %s to %s '%(ionN, ionD)
+        alabel = 'ratio of %s to %s '%(ionNS, ionDS)
+        print(atitle)
+        if not hasattr(self, 'Ioneq'):
+            print(' must first load or calculate an ionization equilibrium')
+            return
+
+        if bw:
+            linestyle = ['k-','k--', 'k-.', 'k:']
+            plt.rcParams['font.size'] = 16.
+            lw = 2
+        else:
+            linestyle = ['b-','r--', 'g-.', 'm:']
+            plt.rcParams['font.size'] = 14.
+            lw = 2
+        #
+        goodTn = self.Ioneq[stageN - 1, :] > 0.
+        goodTd = self.Ioneq[stageD -1, : ] > 0.
+        realGoodT = np.logical_and(goodTn, goodTd)
+        goodT = self.Temperature[realGoodT]
+        goodR = self.Ioneq[stageN - 1, realGoodT]/self.Ioneq[stageD - 1, realGoodT]
+        if not xr:
+            xr = [goodT.min(), goodT.max()]
+        if not yr:
+            yr = [0.01, 1.1]
+        xyr = list(xr)
+        xyr.extend(list(yr))
+        #
+        if semilogx:
+            plt.semilogx(goodT, goodR, linestyle[0], lw=lw, label=alabel)
+        else:
+            plt.loglog(goodT, goodR, linestyle[0], lw=lw, label=alabel)
+        plt.xlabel('Temperature (K)')
+        plt.ylabel('Ratio')
+        if title:
+            atitle = 'CHIANTI Ionization Equilibrium'
+            plt.title(atitle)
+        plt.legend(loc='lower right')
+        plt.tight_layout()
+        self.Ratio={'Temperature':goodT, 'Ratio':goodR, 'label':alabel}
+#        plt.axis(xyr)

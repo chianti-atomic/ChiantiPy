@@ -441,12 +441,12 @@ class ionTrails(object):
             xvalues=self.Temperature
             outTemperature=self.Temperature
             outDensity = self.EDensity
-            desc_str=' Density = %10.2e (cm)$^{-3}$' % self.EDensity[0]
+            desc_str=' Density = %10.2e (cm$^{-3}$)' % self.EDensity[0]
         elif ntemp == 1:
             xvalues=self.EDensity
             outTemperature = self.Temperature
             outDensity=self.EDensity
-            xlabel=r'$\rm{Electron Density (cm)^{-3}}$'
+            xlabel=r'$\rm{Electron Density (cm$^{-3}$)}'
             desc_str=' Temp = %10.2e (K)' % self.Temperature[0]
         else:
             outTemperature=self.Temperature

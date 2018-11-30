@@ -1180,7 +1180,7 @@ class continuum(ionTrails):
         if hasattr(self, 'IoneqAll'):
             ioneqAll = self.IoneqAll
         else:
-            self.IoneqAll = io.ioneqRead(ioneqname = self.Defaults['ioneqfile'])
+            self.IoneqAll = io.ioneqRead(ioneqName = self.Defaults['ioneqfile'])
             ioneqAll = self.IoneqAll
         #
         ioneqTemperature = ioneqAll['ioneqTemperature']

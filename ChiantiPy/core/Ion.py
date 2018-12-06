@@ -1738,6 +1738,7 @@ class ion(ioneqOne, ionTrails, specTrails):
 
             try:
                 thispop = np.linalg.solve(popmat,b)
+                fullPop = thispop
                 pop = thispop[ci:ci+nlvls]
             except np.linalg.LinAlgError:
                 pop = np.zeros(nlvls, 'float64')

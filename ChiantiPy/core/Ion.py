@@ -193,6 +193,7 @@ class ion(ioneqOne, ionTrails, specTrails):
 
         Parameters
         -----------
+
         alternate_dir : `str`
             directory cotaining the necessary files for a ChiantiPy ion; use to
             setup an ion with files not in the current CHIANTI directory
@@ -200,6 +201,7 @@ class ion(ioneqOne, ionTrails, specTrails):
 
         Notes
         -----
+
         If ion is initiated with `setup=False`, call this method to do the
         setup at a later point.
         """
@@ -222,8 +224,9 @@ class ion(ioneqOne, ionTrails, specTrails):
         nlvlWgfa = max(self.Wgfa['lvl2'])
         nlvlList = [nlvlWgfa]
         scupsfile = fileName + '.scups'
-        cilvlfile = fileName + '.cilvl'
-        reclvlfile = fileName + '.reclvl'
+#        cilvlfile = fileName + '.cilvl'
+#        reclvlfile = fileName + '.reclvl'
+        rrlvlfile = fileName + '.rrlvl'
         autofile = fileName + '.auto'
         drParamsFile = fileName + '.drparams'
         rrParamsFile = fileName + '.rrparams'
@@ -237,22 +240,33 @@ class ion(ioneqOne, ionTrails, specTrails):
         else:
             self.Nscups = 0
             nlvlScups = 0
+        # ignoring these files for now, will just use rrlvl and auto for
+        # calculation level resolved recombination rates
         # read cilvl file
-        if os.path.isfile(cilvlfile):
-            self.Cilvl = io.cireclvlRead(self.IonStr, filetype='cilvl')
-            self.Ncilvl = len(self.Cilvl['lvl1'])
-            nlvlCilvl = max(self.Cilvl['lvl2'])
-            nlvlList.append(nlvlCilvl)
-        else:
-            self.Ncilvl = 0
+        self.Ncilvl = 0
+#        if os.path.isfile(cilvlfile):
+#            self.Cilvl = io.cireclvlRead(self.IonStr, filetype='cilvl')
+#            self.Ncilvl = len(self.Cilvl['lvl1'])
+#            nlvlCilvl = max(self.Cilvl['lvl2'])
+#            nlvlList.append(nlvlCilvl)
+#        else:
+#            self.Ncilvl = 0
         #  .reclvl file may not exist
-        if os.path.isfile(reclvlfile):
-            self.Reclvl = io.cireclvlRead(self.IonStr, filetype='reclvl')
-            self.Nreclvl = len(self.Reclvl['lvl1'])
-            nlvlReclvl = max(self.Reclvl['lvl2'])
-            nlvlList.append(nlvlReclvl)
+        self.Nreclvl = 0
+#        if os.path.isfile(reclvlfile):
+#            self.Reclvl = io.cireclvlRead(self.IonStr, filetype='reclvl')
+#            self.Nreclvl = len(self.Reclvl['lvl1'])
+#            nReclvl = max(self.Reclvl['lvl2'])
+#            nlvlList.append(nReclvl)
+#        else:
+#            self.Nreclvl = 0
+        if os.path.isfile(rrlvlfile):
+            self.Rrlvl = io.cireclvlRead(self.IonStr, filetype='rrlvl')
+            self.Nrrlvl = len(self.Rrlvl['lvl1'])
+            nRrlvl = max(self.Rrlvl['lvl2'])
+            nlvlList.append(nRrlvl)
         else:
-            self.Nreclvl = 0
+            self.Nrrlvl = 0
         #  psplups file may not exist
         psplupsfile = fileName +'.psplups'
         if os.path.isfile(psplupsfile):
@@ -1502,18 +1516,26 @@ class ion(ioneqOne, ionTrails, specTrails):
             else:
                 ci = 0
 
-            if self.Nreclvl or self.Nauto:
+            if self.Nrrlvl or self.Nauto:
                 rec = 1
             else:
                 rec = 0
 
-            if self.Nreclvl:
-                reclvl = self.Reclvl
-                if hasattr(self, 'ReclvlRate'):
-                    reclvlRate = self.ReclvlRate
+#            if self.Nreclvl:
+#                reclvl = self.Reclvl
+#                if hasattr(self, 'ReclvlRate'):
+#                    reclvlRate = self.ReclvlRate
+#                else:
+#                    self.cireclvlDescale('reclvl')
+#                    reclvlRate = self.ReclvlRate
+
+            if self.Nrrlvl:
+                rrlvl = self.Rrlvl
+                if hasattr(self, 'RrlvlRate'):
+                    rrlvlRate = self.RrlvlRate
                 else:
-                    self.cireclvlDescale('reclvl')
-                    reclvlRate = self.ReclvlRate
+                    self.cireclvlDescale('rrlvl')
+                    rrlvlRate = self.RrlvlRate
 
         if rec:
             # get ionization rate of this current ion
@@ -1652,15 +1674,22 @@ class ion(ioneqOne, ionTrails, specTrails):
                     popmat[ci + ilvl, ci + ilvl] -= self.EDensity*self.IonizRate['rate']
 
                 if self.Nreclvl:
-                    recTot = reclvlRate['rate'].sum(axis=0)
+                    recTot = rrlvlRate['rate'].sum(axis=0)
                 else:
                     recTot = 0.
 
-                for itrans in range(self.Nreclvl):
-                    lvl1 = reclvl['lvl2'][itrans]-1
-                    lvl2 = reclvl['lvl2'][itrans]-1
-                    popmat[lvl2+ci, -1] += self.EDensity*reclvlRate['rate'][itrans]
-                    popmat[-1, -1] -= self.EDensity*reclvlRate['rate'][itrans]
+#                for itrans in range(self.Nreclvl):
+#                    lvl1 = reclvl['lvl2'][itrans]-1
+#                    lvl2 = reclvl['lvl2'][itrans]-1
+#                    popmat[lvl2+ci, -1] += self.EDensity*reclvlRate['rate'][itrans]
+#                    popmat[-1, -1] -= self.EDensity*reclvlRate['rate'][itrans]
+
+                for itrans in range(self.Nrrlvl):
+                    lvl1 = rrlvl['lvl2'][itrans]-1
+                    lvl2 = rrlvl['lvl2'][itrans]-1
+                    popmat[lvl2+ci, -1] += self.EDensity*rrlvlRate['rate'][itrans]
+                    popmat[-1, -1] -= self.EDensity*rrlvlRate['rate'][itrans]
+
 
                 if verbose:
                     print(' recTot:  %12.2e  RrRate:  %12.2e'%(recTot, higher.RecombRate['rate']))
@@ -1709,6 +1738,7 @@ class ion(ioneqOne, ionTrails, specTrails):
 
             try:
                 thispop = np.linalg.solve(popmat,b)
+                fullPop = thispop
                 pop = thispop[ci:ci+nlvls]
             except np.linalg.LinAlgError:
                 pop = np.zeros(nlvls, 'float64')
@@ -1929,13 +1959,21 @@ class ion(ioneqOne, ionTrails, specTrails):
             else:
                 rec = 0
 
-            if self.Nreclvl:
-                reclvl = self.Reclvl
-                if hasattr(self, 'ReclvlRate'):
-                    reclvlRate = self.ReclvlRate
+#            if self.Nreclvl:
+#                reclvl = self.Reclvl
+#                if hasattr(self, 'ReclvlRate'):
+#                    reclvlRate = self.ReclvlRate
+#                else:
+#                    self.cireclvlDescale('reclvl')
+#                    reclvlRate = self.ReclvlRate
+
+            if self.Nrrlvl:
+                rrlvl = self.Rrlvl
+                if hasattr(self, 'RrlvlRate'):
+                    rrlvlRate = self.RrlvlRate
                 else:
-                    self.cireclvlDescale('reclvl')
-                    reclvlRate = self.ReclvlRate
+                    self.cireclvlDescale('rrlvl')
+                    rrlvlRate = self.RrlvlRate
 
         if rec:
             # get ionization rate of this current ion
@@ -1946,7 +1984,14 @@ class ion(ioneqOne, ionTrails, specTrails):
 #            higher = ion(highers, temperature=self.Temperature, eDensity=self.EDensity, setup=0)
             higher.setupIonrec()
             higher.recombRate()
-            higher.populate()
+            if max(self.Auto['lvl1']) == 1:
+                if self.NTempDen > 1:
+                    hPop = np.ones((self.NTempDen, 1), 'float64')
+                else:
+                    hPop = [1.]
+            else:
+                higher.populate()
+                hPop = higher.Population['population']
 
         #  the populating matrix for radiative transitions
         rad = np.zeros((nlvls+ci+rec,nlvls+ci+rec),"float64")
@@ -2069,27 +2114,38 @@ class ion(ioneqOne, ionTrails, specTrails):
                 #
                 popmat[1, 0] += (self.EDensity*lower.IonizRate['rate'] - ciTot)
                 popmat[0, 0] -= (self.EDensity*lower.IonizRate['rate'] - ciTot)
-            if rec:
 
+            if rec:
                 for ilvl in range(0, enough):
                     popmat[-1,  ci + ilvl] += self.EDensity*self.IonizRate['rate']
                     popmat[ci + ilvl, ci + ilvl] -= self.EDensity*self.IonizRate['rate']
 #                popmat[-1,  ci] += self.EDensity*self.IonizRate['rate']
 #                popmat[ci, ci] -= self.EDensity*self.IonizRate['rate']
 
-                if self.Nreclvl:
-                    recTot = reclvlRate['rate'].sum(axis=0)
-                else:
-                    recTot = 0.
+#                if self.Nreclvl:
+#                    recTot = reclvlRate['rate'].sum(axis=0)
+#                else:
+#                    recTot = 0.
 
-                for itrans in range(self.Nreclvl):
-                    lvl1 = reclvl['lvl2'][itrans]-1
-                    lvl2 = reclvl['lvl2'][itrans]-1
-                    popmat[lvl2+ci, -1] += self.EDensity*reclvlRate['rate'][itrans]
-                    popmat[-1, -1] -= self.EDensity*reclvlRate['rate'][itrans]
+                if self.Nrrlvl:
+                    rrTot = rrlvlRate['rate'].sum(axis=0)
+                else:
+                    rrTot = 0.
+
+#                for itrans in range(self.Nreclvl):
+#                    lvl1 = reclvl['lvl1'][itrans]-1
+#                    lvl2 = reclvl['lvl2'][itrans]-1
+#                    popmat[lvl2+ci, -1] += self.EDensity*reclvlRate['rate'][itrans]
+#                    popmat[-1, -1] -= self.EDensity*reclvlRate['rate'][itrans]
+
+                for itrans in range(self.Nrrlvl):
+                    lvl1 = rrlvl['lvl1'][itrans]-1
+                    lvl2 = rrlvl['lvl2'][itrans]-1
+                    popmat[lvl2+ci, -1] += self.EDensity*rrlvlRate['rate'][itrans]
+                    popmat[-1, -1] -= self.EDensity*rrlvlRate['rate'][itrans]
 
                 if verbose:
-                    print(' recTot:  %12.2e  RrRate:  %12.2e'%(recTot, higher.RecombRate['rate']))
+                    print(' rrTot:  %12.2e  RecombRate:  %12.2e'%(rrTot, higher.RecombRate['rate']))
                 # next 2 lines take care of overbooking
                 #
                 drTot = 0.
@@ -2117,15 +2173,23 @@ class ion(ioneqOne, ionTrails, specTrails):
 #                            dielRate = coef2*gLower*expkt*avalue/(2.*gUpper)
 #                            popmat[ci + l2, -1] += self.EDensity*dielRate
 #                            drTot += self.EDensity*dielRate*branch[elvl2idx]
+                #
+#                if higher.RecombRate['rate'] > (rrTot + drTot):
+#                    popmat[ci, -1] += self.EDensity*(higher.RecombRate['rate'] - rrTot - drTot)
+#                    popmat[-1, -1] -= self.EDensity*(higher.RecombRate['rate'] - rrTot - drTot)
 
-                        hPop = higher.Population['population']
+
                         dielRate = coef2*gLower*expkt*avalue*hPop[upperIdx]/(2.*gUpper)
                         popmat[ci + l2, -1] += self.EDensity*dielRate
                         drTot += self.EDensity*dielRate*branch[elvl2idx]
 
-                if higher.RecombRate['rate'] > (recTot + drTot):
-                    popmat[ci, -1] += self.EDensity*(higher.RecombRate['rate'] - recTot - drTot)
-                    popmat[-1, -1] -= self.EDensity*(higher.RecombRate['rate'] - recTot - drTot)
+#                if higher.RecombRate['rate'] > (recTot + drTot):
+#                    popmat[ci, -1] += self.EDensity*(higher.RecombRate['rate'] - recTot - drTot)
+#                    popmat[-1, -1] -= self.EDensity*(higher.RecombRate['rate'] - recTot - drTot)
+
+                if higher.RecombRate['rate'] > (rrTot + drTot):
+                    popmat[ci, -1] += self.EDensity*(higher.RecombRate['rate'] - rrTot - drTot)
+                    popmat[-1, -1] -= self.EDensity*(higher.RecombRate['rate'] - rrTot - drTot)
 
             norm = np.ones(nlvls+ci+rec,'float64')
             if ci:
@@ -2187,22 +2251,34 @@ class ion(ioneqOne, ionTrails, specTrails):
 #                    popmat[-1,  ci] += self.EDensity[itemp]*self.IonizRate['rate'][itemp]
 #                    popmat[ci, ci] -= self.EDensity[itemp]*self.IonizRate['rate'][itemp]
 
-                    if self.Nreclvl:
-                        recTot = self.ReclvlRate['rate'][:, itemp].sum()
-                    else:
-                        recTot = 0.
+#                    if self.Nreclvl:
+#                        recTot = self.ReclvlRate['rate'][:, itemp].sum()
+#                    else:
+#                        recTot = 0.
 
-                    for itrans in range(self.Nreclvl):
-                        lvl1 = reclvl['lvl1'][itrans]-1
-                        lvl2 = reclvl['lvl2'][itrans]-1
-                        popmat[lvl2+ci, -1] += self.EDensity[itemp]*self.ReclvlRate['rate'][itrans, itemp]
-                        popmat[-1, -1] -= self.EDensity[itemp]*self.ReclvlRate['rate'][itrans,itemp]
+                    if self.Nrrlvl:
+                        rrTot = self.RrlvlRate['rate'][:, itemp].sum()
+                    else:
+                        rrTot = 0.
+
+#                    for itrans in range(self.Nreclvl):
+#                        lvl1 = reclvl['lvl1'][itrans]-1
+#                        lvl2 = reclvl['lvl2'][itrans]-1
+#                        popmat[lvl2+ci, -1] += self.EDensity[itemp]*self.ReclvlRate['rate'][itrans, itemp]
+#                        popmat[-1, -1] -= self.EDensity[itemp]*self.ReclvlRate['rate'][itrans,itemp]
+
+
+                    for itrans in range(self.Nrrlvl):
+                        lvl1 = rrlvl['lvl1'][itrans]-1
+                        lvl2 = rrlvl['lvl2'][itrans]-1
+                        popmat[lvl2+ci, -1] += self.EDensity[itemp]*self.RrlvlRate['rate'][itrans, itemp]
+                        popmat[-1, -1] -= self.EDensity[itemp]*self.RrlvlRate['rate'][itrans,itemp]
 
                 #
                 drTot = 0.
                 if self.Nauto:
                     autoLvl2 = []
-                    hPop = higher.Population['population']
+#                    hPop = higher.Population['population']
                     if verbose:
                         print(' total pop for itemp %5i %12.2e '%(itemp, hPop[itemp].sum()))
                     for i, avalue in enumerate(self.Auto['avalue']):
@@ -2232,9 +2308,9 @@ class ion(ioneqOne, ionTrails, specTrails):
                         popmat[ci + l2, -1] += self.EDensity[itemp]*dielRate
                         drTot += self.EDensity[itemp]*dielRate*branch[elvl2idx - 1]
 
-                    if higher.RecombRate['rate'][itemp] > (recTot + drTot):
-                        popmat[ci, -1] += self.EDensity[itemp]*(higher.RecombRate['rate'][itemp] - recTot - drTot)
-                        popmat[-1, -1] -= self.EDensity[itemp]*(higher.RecombRate['rate'][itemp] - recTot - drTot)
+                    if higher.RecombRate['rate'][itemp] > (rrTot + drTot):
+                        popmat[ci, -1] += self.EDensity[itemp]*(higher.RecombRate['rate'][itemp] - rrTot - drTot)
+                        popmat[-1, -1] -= self.EDensity[itemp]*(higher.RecombRate['rate'][itemp] - rrTot - drTot)
 
                 norm = np.ones(nlvls+ci+rec,'float64')
                 self.Popmat = copy.copy(popmat)
@@ -2259,11 +2335,16 @@ class ion(ioneqOne, ionTrails, specTrails):
             self.Population['errorMessage'] = errorMessage
 
 
-    def popPlot(self,top=10, plotFile=0, outFile=0, pub=0):
+    def popPlot(self,top=10, plotLvls=[], normalize=0, plotFile=0, outFile=0, pub=0):
         """
         Plots populations vs temperature or eDensity.
 
-        top specifies the number of the most highly populated levels to plot
+        top specifies the number of the most highly populated levels to plot (the default)
+
+        or can set plotLvls to an array such as a list set the desired levels to plot
+
+        if normalize is set, then the population, if plotted vs. density, is divided by density
+
         if pub is set, the want publication plots (bw, lw=2).
         """
 
@@ -2299,15 +2380,23 @@ class ion(ioneqOne, ionTrails, specTrails):
             return
 
         # find the top most populated levels
-        lvl = self.Elvlc["lvl"]
-        nlvls = self.Nlvls
-        if top > nlvls:
-            top = nlvls
-        maxpop = np.zeros(nlvls,'Float64')
-        for ilvl in range(nlvls):
-            maxpop[ilvl] = pop[:,ilvl].max()
-        lvlsort = np.take(lvl,np.argsort(maxpop))
-        toplvl = lvlsort[-top:]
+        doTop = 0
+        doLvl = 0
+        if top:
+            doTop = 1
+            lvl = self.Elvlc["lvl"]
+            nlvls = self.Nlvls
+            if top > nlvls:
+                top = nlvls
+            maxpop = np.zeros(nlvls,'Float64')
+            for ilvl in range(nlvls):
+                maxpop[ilvl] = pop[:,ilvl].max()
+            lvlsort = np.take(lvl,np.argsort(maxpop))
+            toplvl = lvlsort[-top:]
+        elif len(plotLvls) > 0:
+            doLvl = 1
+            toplvl = plotLvls
+            top = len(plotLvls)
         ntemp = temperature.size
         if ntemp > 0:
             if temperature[0] == temperature[-1]:
@@ -2331,9 +2420,9 @@ class ion(ioneqOne, ionTrails, specTrails):
                 # for some low temperature, populations can not be calculated
                 good = pop[:, lvl-1] > 0
                 if pub:
-                    plt.loglog(temperature[good],pop[good,lvl-1], 'k',lw=2)
+                    plt.loglog(temperature[good],pop[good,lvl-1], 'k',lw=2, label=str(lvl))
                 else:
-                    plt.loglog(temperature[good],pop[good,lvl-1])
+                    plt.loglog(temperature[good],pop[good,lvl-1], label=str(lvl))
                 skip = 3
                 if good.sum() == ntemp:
                     start = divmod(lvl,ntemp)[1]
@@ -2353,7 +2442,21 @@ class ion(ioneqOne, ionTrails, specTrails):
             dstr = ' -  Density = %10.2e (cm$^{-3}$)' % eDensity[0]
             plt.title(title+dstr,fontsize=fontsize)
             plt.xlim(temperature.min(),temperature.max())
-            plt.ylim(ymin,1.2)
+            if doTop:
+                plt.ylim(ymin,1.2)
+            elif doLvl:
+                ymin = 2.
+                ymax = 0.
+                for ilvl in plotLvls:
+                    print(' ilvl %5i min max %12.2e %12.2e'%(ilvl, pop[:, ilvl-1].min(), pop[:, lvl-1].max()))
+                    if pop[:, ilvl-1].max() > ymax:
+                        ymax = pop[:, ilvl-1].max()
+                    if pop[:, ilvl-1].min() < ymin:
+                        ymin =  pop[:, ilvl-1].min()
+                print(' doLvl ymin %12.2e  ymax %12.2e'%(ymin, ymax))
+                plt.ylim(ymin/1.1, ymax*1.1 )
+            plt.legend(loc = 'lower right')
+
         elif ntemp == 1:
             xlabel = r'Electron Density (cm$^{-3}$)'
             toppops = np.zeros((top, ndens), 'float64')
@@ -2364,15 +2467,20 @@ class ion(ioneqOne, ionTrails, specTrails):
             for lvl in toplvl:
                 # for some low temperature, populations can not be calculated
                 good = pop[:, lvl-1] > 0
-                if pub:
-                    plt.loglog(eDensity[good],pop[good,lvl-1], 'k', lw=2)
+                if normalize:
+                    plt.loglog(eDensity[good],pop[good,lvl-1]/eDensity[good], lw=1.5, label=str(lvl))
+                elif pub:
+                    plt.loglog(eDensity[good],pop[good,lvl-1], 'k', lw=2, label=str(lvl))
                 else:
-                    plt.loglog(eDensity[good],pop[good,lvl-1])
+                    plt.loglog(eDensity[good],pop[good,lvl-1], label=str(lvl))
                 skip = 3
                 if good.sum() == ndens:
                     start = divmod(lvl,ndens)[1]
                     for idens in range(start,ndens,ndens//skip):
-                        plt.text(eDensity[idens],pop[idens,lvl-1],str(lvl))
+                        if normalize:
+                            plt.text(eDensity[idens],pop[idens,lvl-1]/eDensity[idens],str(lvl))
+                        else:
+                            plt.text(eDensity[idens],pop[idens,lvl-1],str(lvl))
                 else:
                     newdens = []
                     for i, one in enumerate(eDensity):
@@ -2386,8 +2494,27 @@ class ion(ioneqOne, ionTrails, specTrails):
             tstr = ' -  T = %10.2e (K)' % temperature[0]
             plt.title(title+tstr,fontsize=fontsize)
             plt.xlim(eDensity[eDensity.nonzero()].min(),eDensity.max())
-            yl = plt.ylim()
-            plt.ylim(yl[0],1.2)
+            if doTop:
+                plt.ylim(ymin,1.2)
+            elif doLvl:
+                ymin = 2.
+                ymax = 0.
+                for ilvl in plotLvls:
+                    if normalize:
+                        print(' ilvl %5i min max %12.2e %12.2e'%(ilvl, pop[:, ilvl-1].min(), pop[:, lvl-1].max()))
+                        if (pop[:, ilvl-1]/eDensity).max() > ymax:
+                            ymax = (pop[:, ilvl-1]/eDensity).max()
+                        if (pop[:, ilvl-1]/eDensity).min() < ymin:
+                            ymin =  (pop[:, ilvl-1]/eDensity).min()
+                    else:
+                        print(' ilvl %5i min max %12.2e %12.2e'%(ilvl, pop[:, ilvl-1].min(), pop[:, lvl-1].max()))
+                        if pop[:, ilvl-1].max() > ymax:
+                            ymax = pop[:, ilvl-1].max()
+                        if pop[:, ilvl-1].min() < ymin:
+                            ymin =  pop[:, ilvl-1].min()
+                print(' doLvl ymin %12.2e  ymax %12.2e'%(ymin, ymax))
+                plt.ylim(ymin/1.1, ymax*1.1 )
+            plt.legend(loc='lower right')
         else:
             ax = plt.subplot(111)
             toppops = np.zeros((top, ntemp), 'float64')

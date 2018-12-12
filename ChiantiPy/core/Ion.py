@@ -1784,16 +1784,40 @@ class ion(ioneqOne, ionTrails, specTrails):
                         popmat[-1,  ci + ilvl] += self.EDensity[itemp]*self.IonizRate['rate'][itemp]
                         popmat[ci + ilvl, ci + ilvl] -= self.EDensity[itemp]*self.IonizRate['rate'][itemp]
 
-                    if self.Nreclvl:
+#                    if self.Nreclvl:
+#                        recTot = self.ReclvlRate['rate'][:, itemp].sum()
+#                    else:
+#                        recTot = 0.
+
+                    if self.Nrrlvl:
                         recTot = self.ReclvlRate['rate'][:, itemp].sum()
                     else:
                         recTot = 0.
 
-                    for itrans in range(self.Nreclvl):
-                        lvl1 = reclvl['lvl1'][itrans]-1
-                        lvl2 = reclvl['lvl2'][itrans]-1
-                        popmat[lvl2+ci, -1] += self.EDensity[itemp]*self.ReclvlRate['rate'][itrans, itemp]
-                        popmat[-1, -1] -= self.EDensity[itemp]*self.ReclvlRate['rate'][itrans,itemp]
+                    if self.Nrrlvl:
+                        rrlvl = self.Rrlvl
+                        if hasattr(self, 'RrlvlRate'):
+                            rrlvl = self.Rrlvl
+                        if hasattr(self, 'RrlvlRate'):
+                            rrlvlRate = self.RrlvlRate
+                        else:
+                            self.cireclvlDescale('rrlvl')
+                            rrlvlRate = self.RrlvlRate
+                            for itrans in range(self.Nrrlvl):
+                                lvl1 = rrlvl['lvl1'][itrans]-1
+                                lvl2 = rrlvl['lvl2'][itrans]-1
+                                popmat[lvl2+ci, -1] += self.EDensity[itemp]*self.RrlvlRate['rate'][itrans, itemp]
+                                popmat[-1, -1] -= self.EDensity[itemp]*self.RrlvlRate['rate'][itrans,itemp]
+
+                            rrlvlRate = self.RrlvlRate
+                    else:
+                        self.cireclvlDescale('rrlvl')
+                        rrlvlRate = self.RrlvlRate
+                        for itrans in range(self.Nrrlvl):
+                            lvl1 = rrlvl['lvl1'][itrans]-1
+                            lvl2 = rrlvl['lvl2'][itrans]-1
+                            popmat[lvl2+ci, -1] += self.EDensity[itemp]*self.RrlvlRate['rate'][itrans, itemp]
+                            popmat[-1, -1] -= self.EDensity[itemp]*self.RrlvlRate['rate'][itrans,itemp]
 
                 #
                 drTot = 0.

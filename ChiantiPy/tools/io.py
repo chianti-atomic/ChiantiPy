@@ -1145,7 +1145,7 @@ def masterListInfo(force=False, verbose=False):
         defaults = defaultsRead()
         print((' defaults = %s'%(str(defaults))))
         ioneqName = defaults['ioneqfile']
-        ioneq = ioneqRead(ioneqname = ioneqName)
+        ioneq = ioneqRead(ioneqName = ioneqName)
         masterList = masterListRead()
         masterListInfo = {}
         haveZ = [0]*31
@@ -1899,7 +1899,7 @@ def wgfaRead(ions, filename=None, elvlcname=0, total=False, verbose=False):
     return Wgfa
 
 
-def wgfaWrite(info, outfile = None, minBranch = 1.e-5, rightDigits = 4):
+def wgfaWrite(info, outfile = None, minBranch = 1.e-5, rightDigits = 4, maxLvl1 = None):
     """
     Write data to a CHIANTI .wgfa file
 
@@ -1951,7 +1951,14 @@ def wgfaWrite(info, outfile = None, minBranch = 1.e-5, rightDigits = 4):
             branch = avalue/totalAvalue[info['lvl2'][itrans] -1]
         else:
             branch = 0.
-        if branch > minBranch and abs(info['lvl1'][itrans]) > 0 and info['lvl2'][itrans] > 0:
+        test1 = branch > minBranch
+        test2 = abs(info['lvl1'][itrans]) > 0
+        test3 = info['lvl2'][itrans] > 0
+        if maxLvl1:
+            test4 = info['lvl1'][itrans] <= maxLvl1
+        else:
+            test4 = True
+        if test1 and test2 and test3 and test4:
             if 'pretty1' in info:
                 # generally only useful with NIST data
                 if 'transType' in info:

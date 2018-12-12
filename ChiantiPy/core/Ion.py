@@ -2335,15 +2335,16 @@ class ion(ioneqOne, ionTrails, specTrails):
             self.Population['errorMessage'] = errorMessage
 
 
-    def popPlot(self,top=10, plotLvls=[], normalize=0, plotFile=0, outFile=0, pub=0):
+    def popPlot(self, top=10, levels=[], scale=0, plotFile=0, outFile=0, pub=0):
         """
         Plots populations vs temperature or eDensity.
 
         top specifies the number of the most highly populated levels to plot (the default)
 
-        or can set plotLvls to an array such as a list set the desired levels to plot
+        or can set levels to an array such as a list to set the desired levels to plot
 
-        if normalize is set, then the population, if plotted vs. density, is divided by density
+        if scale is set, then the population, if plotted vs. density, is divided by density -
+        only useful if plotting level populations vs density
 
         if pub is set, the want publication plots (bw, lw=2).
         """
@@ -2382,6 +2383,9 @@ class ion(ioneqOne, ionTrails, specTrails):
         # find the top most populated levels
         doTop = 0
         doLvl = 0
+        if top and len(levels) >1:
+            print(' to specifiy the levels to be plotted, top must be set to False or 0')
+            return
         if top:
             doTop = 1
             lvl = self.Elvlc["lvl"]
@@ -2393,10 +2397,10 @@ class ion(ioneqOne, ionTrails, specTrails):
                 maxpop[ilvl] = pop[:,ilvl].max()
             lvlsort = np.take(lvl,np.argsort(maxpop))
             toplvl = lvlsort[-top:]
-        elif len(plotLvls) > 0:
+        elif len(levels) > 0:
             doLvl = 1
-            toplvl = plotLvls
-            top = len(plotLvls)
+            toplvl = levels
+            top = len(levels)
         ntemp = temperature.size
         if ntemp > 0:
             if temperature[0] == temperature[-1]:
@@ -2447,7 +2451,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             elif doLvl:
                 ymin = 2.
                 ymax = 0.
-                for ilvl in plotLvls:
+                for ilvl in levels:
                     print(' ilvl %5i min max %12.2e %12.2e'%(ilvl, pop[:, ilvl-1].min(), pop[:, lvl-1].max()))
                     if pop[:, ilvl-1].max() > ymax:
                         ymax = pop[:, ilvl-1].max()
@@ -2467,7 +2471,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             for lvl in toplvl:
                 # for some low temperature, populations can not be calculated
                 good = pop[:, lvl-1] > 0
-                if normalize:
+                if scale:
                     plt.loglog(eDensity[good],pop[good,lvl-1]/eDensity[good], lw=1.5, label=str(lvl))
                 elif pub:
                     plt.loglog(eDensity[good],pop[good,lvl-1], 'k', lw=2, label=str(lvl))
@@ -2477,7 +2481,7 @@ class ion(ioneqOne, ionTrails, specTrails):
                 if good.sum() == ndens:
                     start = divmod(lvl,ndens)[1]
                     for idens in range(start,ndens,ndens//skip):
-                        if normalize:
+                        if scale:
                             plt.text(eDensity[idens],pop[idens,lvl-1]/eDensity[idens],str(lvl))
                         else:
                             plt.text(eDensity[idens],pop[idens,lvl-1],str(lvl))
@@ -2499,8 +2503,8 @@ class ion(ioneqOne, ionTrails, specTrails):
             elif doLvl:
                 ymin = 2.
                 ymax = 0.
-                for ilvl in plotLvls:
-                    if normalize:
+                for ilvl in levels:
+                    if scale:
                         print(' ilvl %5i min max %12.2e %12.2e'%(ilvl, pop[:, ilvl-1].min(), pop[:, lvl-1].max()))
                         if (pop[:, ilvl-1]/eDensity).max() > ymax:
                             ymax = (pop[:, ilvl-1]/eDensity).max()

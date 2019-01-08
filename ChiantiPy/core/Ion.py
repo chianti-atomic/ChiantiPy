@@ -3185,13 +3185,6 @@ class ion(ioneqOne, ionTrails, specTrails):
             else:
                 rec = 0
 
-#            if self.Nreclvl:
-#                reclvl = self.Reclvl
-#                if hasattr(self, 'ReclvlRate'):
-#                    reclvlRate = self.ReclvlRate
-#                else:
-#                    self.cireclvlDescale('reclvl')
-#                    reclvlRate = self.ReclvlRate
 
             if self.Nrrlvl:
                 rrlvl = self.Rrlvl
@@ -3210,7 +3203,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             higher.setupIonrec()
             higher.recombRate()
 
-        #  the populating matrix for radiative transitions
+        #  the populating matrix for radiative transitions and autoionization transitions
         rad = np.zeros((nlvls+ci+rec,nlvls+ci+rec),"float64")
 
         for iwgfa in range(nwgfa):
@@ -3258,14 +3251,15 @@ class ion(ioneqOne, ionTrails, specTrails):
             pdexRate = self.PUpsilon['dexRate']
 
         if self.Nauto:
-            branch = np.zeros_like(self.Wgfa['avalueLvl'])
+            branch = np.zeros_like(self.Auto['avalueLvl'])
             # first get branching ratio
-            for i, lvl2 in enumerate(self.Auto['lvl2']):
-                if self.Wgfa['avalueLvl'][lvl2-1] > 0.:
-                    branch[lvl2-1] = self.Wgfa['avalueLvl'][lvl2-1]/(self.Wgfa['avalueLvl'][lvl2-1] + self.Auto['avalueLvl'][lvl2-1])
+            for i, lvl in enumerate(self.Elvlc['lvl'][1:]):
+                if self.Wgfa['avalueLvl'][lvl-1] > 0.:
+                    branch[lvl-1] = self.Wgfa['avalueLvl'][lvl-1]/(self.Wgfa['avalueLvl'][lvl-1] + self.Auto['avalueLvl'][lvl-1])
                 else:
-                   branch[lvl2-1] = 0.
+                   branch[lvl-1] = 0.
         self.Branch = branch
+
         temp = temperature
         ntemp = temp.size
         dens = self.EDensity
@@ -3413,7 +3407,8 @@ class ion(ioneqOne, ionTrails, specTrails):
             pop = np.zeros((ntemp,nlvls),"float64")
             drPop = np.zeros((ntemp,nlvls),"float64")
             fullPop = np.zeros((ntemp, ci + nlvls + rec), 'float64')
-            dielRateTot = np.zeros(ntemp, 'float64')
+            drTot = np.zeros(ntemp, 'float64')
+            rrTot = np.zeros(ntemp, 'float64')
             recRate = np.zeros((ntemp,nlvls),"float64")
             #drEffRateTot = np.zeros(ntemp, 'float64')
             rrTot = np.zeros(ntemp, 'float64')
@@ -3606,6 +3601,7 @@ class ion(ioneqOne, ionTrails, specTrails):
                     dekt1 = de1/(const.boltzmann*self.Temperature[itemp])
                     expkt = np.exp(-dekt1)
 
+                    # only including dielectronic recombination from the lowest level
                     if l1 == 0:
                         dielRate = coef2[itemp]*gLower*expkt*avalue/(2.*gUpper)
                         popmat[ci + l2, -1] += self.EDensity[itemp]*dielRate
@@ -3615,27 +3611,20 @@ class ion(ioneqOne, ionTrails, specTrails):
                         #popmat[ci + l2, ci + l2] -= avalue
 #                            drTot += dielRate*branch[elvl2idx]
                         # seems to give the correct DR Rate
-                        dielRateTot[itemp] += dielRate*branch[l2]
+                        drTot[itemp] += dielRate*branch[l2]
                 for ilvl in range(0, 1):
                     popmat[-1,  ci + ilvl] += self.EDensity[itemp]*self.IonizRate['rate'][itemp]
                     popmat[ci + ilvl, ci + ilvl] -= self.EDensity[itemp]*self.IonizRate['rate'][itemp]
 
-                recTot[itemp] = rrTot[itemp] + dielRateTot[itemp]
+                recTot[itemp] = rrTot[itemp] + drTot[itemp]
                 if verbose:
-                    print('itemp rrTot dielRateTot %5i %10.2e %10.2e'%(itemp, rrTot[itemp], dielRateTot[itemp]))
+                    print('itemp rrTot dielRateTot %5i %10.2e %10.2e'%(itemp, rrTot[itemp], drTot[itemp]))
                     print('itemp, recTot RecombRate %5i %10.2e %10.2e'%(itemp, recTot[itemp], higher.RecombRate['rate'][itemp]))
 
                 # in this case, haven't completely accounted for recombination
                 if recTot[itemp] < higher.RecombRate['rate'][itemp]:
                     popmat[ci, -1] += self.EDensity[itemp]*(higher.RecombRate['rate'][itemp] - recTot[itemp])
                     popmat[-1, -1] -= self.EDensity[itemp]*(higher.RecombRate['rate'][itemp] - recTot[itemp])
-
-
-#                if higher.RecombRate['rate'][itemp] > (recTot[itemp]):
-#                    popmat[ci, -1] += self.EDensity[itemp]*(higher.RecombRate['rate'][itemp] - recTot[itemp])
-#                    popmat[-1, -1] -= self.EDensity[itemp]*(higher.RecombRate['rate'][itemp] - recTot[itemp])
-                #popmat[ci, -1] += self.EDensity[itemp]*(recTot[itemp])
-                #popmat[-1, -1] -= self.EDensity[itemp]*(recTot[itemp])
 
 
                 if verbose:
@@ -3663,8 +3652,8 @@ class ion(ioneqOne, ionTrails, specTrails):
         self.RecRate = recRate
         self.DrPop = drPop
         self.RrTot = rrTot
-        self.DielRateTot = dielRateTot
-        self.Population = {"temperature":temperature,"eDensity":eDensity,"population":pop, "protonDensity":protonDensity, "ci":ci, "rec":rec, 'popmat':popmat, 'fullPop':fullPop, 'recTot':recTot}
+        self.DrTot = drTot
+        self.Population = {"temperature":temperature,"eDensity":eDensity,"population":pop, "protonDensity":protonDensity, "ci":ci, "rec":rec, 'popmat':popmat, 'fullPop':fullPop, 'method':'populateNewest'}
         if len(errorMessage) > 0:
             self.Population['errorMessage'] = errorMessage
 
@@ -3683,11 +3672,13 @@ class ion(ioneqOne, ionTrails, specTrails):
             print('higher ionization stage in MasterList')
         else:
             print('higher ionization stage not in MasterList')
+            print('use method .populate()')
             return
         if hasattr(self, 'Auto'):
             print(' %s has autoionization rates'%(self.IonStr))
         else:
             print(' %s does not have autoionization rates'%(self.IonStr))
+            print('use method .populate()')
             return
 
         for one in kwargs.keys():
@@ -3749,6 +3740,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         rec = 0
         ci = 0
         # the Dielectronic test should eventually go away
+        # the current method is drPopulate which requires autoionization valelus
         # since this ion has autoionization values, it is not a dielectronic (d) ion
         # and  and (not self.Dielectronic) test has gone away
         if popCorrect:
@@ -3780,13 +3772,6 @@ class ion(ioneqOne, ionTrails, specTrails):
             else:
                 rec = 0
 
-#            if self.Nreclvl:
-#                reclvl = self.Reclvl
-#                if hasattr(self, 'ReclvlRate'):
-#                    reclvlRate = self.ReclvlRate
-#                else:
-#                    self.cireclvlDescale('reclvl')
-#                    reclvlRate = self.ReclvlRate
 
             if self.Nrrlvl:
                 rrlvl = self.Rrlvl
@@ -3811,7 +3796,7 @@ class ion(ioneqOne, ionTrails, specTrails):
                 else:
                     hPop = [1.]
             else:
-                higher.populate()
+                higher.populate(popCorrect=0)
                 hPop = higher.Population['population']
 
         #  the populating matrix for radiative transitions
@@ -3869,6 +3854,8 @@ class ion(ioneqOne, ionTrails, specTrails):
                     branch[lvl-1] = self.Wgfa['avalueLvl'][lvl-1]/(self.Wgfa['avalueLvl'][lvl-1] + self.Auto['avalueLvl'][lvl-1])
                 else:
                    branch[lvl-1] = 0.
+        self.Branch = branch
+
         temp = temperature
         ntemp = temp.size
         dens = self.EDensity
@@ -3942,24 +3929,11 @@ class ion(ioneqOne, ionTrails, specTrails):
                 for ilvl in range(0, enough):
                     popmat[-1,  ci + ilvl] += self.EDensity*self.IonizRate['rate']
                     popmat[ci + ilvl, ci + ilvl] -= self.EDensity*self.IonizRate['rate']
-#                popmat[-1,  ci] += self.EDensity*self.IonizRate['rate']
-#                popmat[ci, ci] -= self.EDensity*self.IonizRate['rate']
-
-#                if self.Nreclvl:
-#                    rrTot = reclvlRate['rate'].sum(axis=0)
-#                else:
-#                    rrTot = 0.
-
                 if self.Nrrlvl:
                     rrTot = rrlvlRate['rate'].sum(axis=0)
                 else:
                     rrTot = 0.
 
-#                for itrans in range(self.Nreclvl):
-#                    lvl1 = reclvl['lvl1'][itrans]-1
-#                    lvl2 = reclvl['lvl2'][itrans]-1
-#                    popmat[lvl2+ci, -1] += self.EDensity*reclvlRate['rate'][itrans]
-#                    popmat[-1, -1] -= self.EDensity*reclvlRate['rate'][itrans]
 
                 for itrans in range(self.Nrrlvl):
                     lvl1 = rrlvl['lvl1'][itrans]-1
@@ -3969,22 +3943,18 @@ class ion(ioneqOne, ionTrails, specTrails):
 
                 if verbose:
                     print(' rrTot:  %12.2e  RecombRate:  %12.2e'%(rrTot, higher.RecombRate['rate']))
-                # next 2 lines take care of overbooking
                 #
                 drTot = 0.
                 if self.Nauto:
                     for i, avalue in enumerate(self.Auto['avalue']):
                         l1 = self.Auto['lvl1'][i] - 1
                         l2 = self.Auto['lvl2'][i] - 1
-                        #elvl1idx = self.Elvlc['lvl'].index(self.Auto['lvl1'][i])
-                        #elvl2idx = self.Elvlc['lvl'].index(self.Auto['lvl2'][i])
-                        #l2 = self.Auto['lvl2'][i] - 1
                         upperIdx = higher.Elvlc['lvl'].index(self.Auto['lvl1'][i])
                         gUpper = float(higher.Elvlc['mult'][l1])
                         gLower = float(self.Elvlc['mult'][l2])
 
                         #ecm1 = self.Higher.Elvlc['ecmth'][l1]
-                        ecm2 = self.Elvlc['ecm'][l1]
+                        ecm2 = self.Elvlc['ecm'][l2]
 
                         if ecm2 < 0.:
                             ecm2 = self.Elvlc['ecmth'][l2]
@@ -3992,23 +3962,13 @@ class ion(ioneqOne, ionTrails, specTrails):
                         dekt1 = de1/(const.boltzmann*self.Temperature)
                         expkt = np.exp(-dekt1)
 
-                        if higher.Elvlc['lvl'][l1] == 1:
-                            dielRate = coef2*gLower*expkt*avalue/(2.*gUpper)
-                            popmat[ci + l2, -1] += self.EDensity*dielRate
-#                            drTot += self.EDensity*dielRate*branch[elvl2idx]
-                #
-#                if higher.RecombRate['rate'] > (rrTot + drTot):
-#                    popmat[ci, -1] += self.EDensity*(higher.RecombRate['rate'] - rrTot - drTot)
-#                    popmat[-1, -1] -= self.EDensity*(higher.RecombRate['rate'] - rrTot - drTot)
 
 
                         dielRate = coef2*gLower*expkt*avalue*hPop[upperIdx]/(2.*gUpper)
                         popmat[ci + l2, -1] += self.EDensity*dielRate
-                        drTot += self.EDensity*dielRate  #*branch[elvl2idx]
+                        drTot += dielRate*branch[l2]
 
-#                if higher.RecombRate['rate'] > (rrTot + drTot):
-#                    popmat[ci, -1] += self.EDensity*(higher.RecombRate['rate'] - rrTot - drTot)
-#                    popmat[-1, -1] -= self.EDensity*(higher.RecombRate['rate'] - rrTot - drTot)
+                # next lines take care of overbooking
 
                 if higher.RecombRate['rate'] > (rrTot + drTot):
                     popmat[ci, -1] += self.EDensity*(higher.RecombRate['rate'] - rrTot - drTot)
@@ -4037,6 +3997,8 @@ class ion(ioneqOne, ionTrails, specTrails):
         elif ntemp>1  and ntemp==ndens:
             if verbose:
                 print(' doing both ntemp: %5i  ndens:  %5i'%(ntemp, ndens))
+            drTot = np.zeros(ntemp, 'float64')
+            rrTot = np.zeros(ntemp, 'float64')
             pop = np.zeros((ntemp,nlvls),"float64")
             for itemp in range(ntemp):
                 temp = self.Temperature[itemp]
@@ -4076,22 +4038,11 @@ class ion(ioneqOne, ionTrails, specTrails):
 #                    popmat[-1,  ci] += self.EDensity[itemp]*self.IonizRate['rate'][itemp]
 #                    popmat[ci, ci] -= self.EDensity[itemp]*self.IonizRate['rate'][itemp]
 
-#                    if self.Nreclvl:
-#                        rrTot = self.ReclvlRate['rate'][:, itemp].sum()
-#                    else:
-#                        rrTot = 0.
 
                     if self.Nrrlvl:
-                        rrTot = self.RrlvlRate['rate'][:, itemp].sum()
+                        rrTot[itemp] = self.RrlvlRate['rate'][:, itemp].sum()
                     else:
-                        rrTot = 0.
-
-#                    for itrans in range(self.Nreclvl):
-#                        lvl1 = reclvl['lvl1'][itrans]-1
-#                        lvl2 = reclvl['lvl2'][itrans]-1
-#                        popmat[lvl2+ci, -1] += self.EDensity[itemp]*self.ReclvlRate['rate'][itrans, itemp]
-#                        popmat[-1, -1] -= self.EDensity[itemp]*self.ReclvlRate['rate'][itrans,itemp]
-
+                        rrTot[itemp] = 0.
 
                     for itrans in range(self.Nrrlvl):
                         lvl1 = rrlvl['lvl1'][itrans]-1
@@ -4100,7 +4051,6 @@ class ion(ioneqOne, ionTrails, specTrails):
                         popmat[-1, -1] -= self.EDensity[itemp]*self.RrlvlRate['rate'][itrans,itemp]
 
                 #
-                drTot = 0.
                 if self.Nauto:
                     autoLvl2 = []
 #                    hPop = higher.Population['population']
@@ -4108,8 +4058,6 @@ class ion(ioneqOne, ionTrails, specTrails):
                         print(' total pop for itemp %5i %12.2e '%(itemp, hPop[itemp].sum()))
                     for i, avalue in enumerate(self.Auto['avalue']):
                         l1 = self.Auto['lvl1'][i] - 1
-                        #elvl1idx = self.Elvlc['lvl'].index(self.Auto['lvl1'][i])
-                        #elvl2idx = self.Elvlc['lvl'].index(self.Auto['lvl2'][i])
                         l2 = self.Auto['lvl2'][i] - 1
                         autoLvl2.append(l2)
                         #upperIdx = higher.Elvlc['lvl'].index(self.Auto['lvl1'][i])
@@ -4123,20 +4071,16 @@ class ion(ioneqOne, ionTrails, specTrails):
                         dekt1 = de1/(const.boltzmann*self.Temperature[itemp])
                         expkt = np.exp(-dekt1)
 
-                        if l1 == 0:
-                            dielRate = coef2[itemp]*gLower*expkt*avalue/(2.*gUpper)
-                            popmat[ci + l2, -1] += self.EDensity[itemp]*dielRate
-#                            drTot += self.EDensity[itemp]*dielRate*branch[elvl2idx]
 
                         #if verbose:
                             #print(' %5i itemp  %5i lvl2 %5i  upperIdx %5i  hPop  %12.2e avalue %12.2e'%(i, itemp, l2, l1, hPop[itemp, l1], avalue))
                         dielRate = coef2[itemp]*gLower*expkt*avalue*hPop[itemp, l1]/(2.*gUpper)
                         popmat[ci + l2, -1] += self.EDensity[itemp]*dielRate
-                        drTot += self.EDensity[itemp]*dielRate  #*branch[elvl2idx - 1]
+                        drTot[itemp] += dielRate*branch[l2]
 
-                    if higher.RecombRate['rate'][itemp] > (rrTot + drTot):
-                        popmat[ci, -1] += self.EDensity[itemp]*(higher.RecombRate['rate'][itemp] - rrTot - drTot)
-                        popmat[-1, -1] -= self.EDensity[itemp]*(higher.RecombRate['rate'][itemp] - rrTot - drTot)
+                    if higher.RecombRate['rate'][itemp] > (rrTot[itemp] + drTot[itemp]):
+                        popmat[ci, -1] += self.EDensity[itemp]*(higher.RecombRate['rate'][itemp] - rrTot[itemp] - drTot[itemp])
+                        popmat[-1, -1] -= self.EDensity[itemp]*(higher.RecombRate['rate'][itemp] - rrTot[itemp] - drTot[itemp])
 
                 norm = np.ones(nlvls+ci+rec,'float64')
                 self.popmat = copy.copy(popmat)
@@ -4155,8 +4099,10 @@ class ion(ioneqOne, ionTrails, specTrails):
                     errorMessage.append('linealgError for T index %5i'%(itemp))
             #
                 pop = np.where(pop > 0., pop, 0.)
+        self.RrTot = rrTot
+        self.DrTot = drTot
 
-        self.Population = {"temperature":temperature,"eDensity":eDensity,"population":pop, "protonDensity":protonDensity, "ci":ci, "rec":rec, 'popmat':popmat}
+        self.Population = {"temperature":temperature,"eDensity":eDensity,"population":pop, "protonDensity":protonDensity, "ci":ci, "rec":rec, 'popmat':popmat, 'method':'drPopulate'}
         if len(errorMessage) > 0:
             self.Population['errorMessage'] = errorMessage
 

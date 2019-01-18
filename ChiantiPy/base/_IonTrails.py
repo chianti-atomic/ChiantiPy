@@ -420,6 +420,7 @@ class ionTrails(object):
         topLines=igvlsort[-top:]
         maxWvl='%5.3f' % wvl[topLines[-1]]
         topLines=topLines[wvl[topLines].argsort()]
+        print(' maxWvl = %s'%(maxWvl))
 
         # need to make sure there are no negative values before plotting
         good = intensity > 0.
@@ -446,7 +447,7 @@ class ionTrails(object):
             xvalues=self.EDensity
             outTemperature = self.Temperature
             outDensity=self.EDensity
-            xlabel=r'$\rm{Electron Density (cm$^{-3}$)}'
+            xlabel='Electron Density (cm$^{-3}$)'
             desc_str=' Temp = %10.2e (K)' % self.Temperature[0]
         else:
             outTemperature=self.Temperature
@@ -454,7 +455,6 @@ class ionTrails(object):
             xlabel='Temperature (K)'
             xvalues=self.Temperature
             desc_str=' Variable Density'
-
         # put all actual plotting here
         plt.ion()
         #  maxAll is an array
@@ -479,10 +479,12 @@ class ionTrails(object):
                 else:
                     text = '%s %10.4f'%(ionS[tline], wvl[tline])
                 plt.text(xvalues[ixvalue], intensity[ixvalue, tline]/maxAll[ixvalue], text)
-        plt.xlim(xvalues.min(),xvalues.max())
-        plt.xlabel(xlabel,fontsize=fontsize)
-        plt.ylabel(ylabel,fontsize=fontsize)
-        if ndens == ntemp and ntemp > 1:
+        if ndens == 1:
+            print('%12.2e  %12.2e '%(xvalues.min(),xvalues.max()))
+            plt.xlim(xvalues.min(),xvalues.max())
+            plt.xlabel(xlabel,fontsize=fontsize)
+            plt.ylabel(ylabel,fontsize=fontsize)
+        elif ntemp == 1:
             plt.text(0.07, 0.5,title, horizontalalignment='left', verticalalignment='center', fontsize=fontsize,  transform = ax.transAxes)
             ax2 = plt.twiny()
             xlabelDen=r'Electron Density (cm$^{-3}$)'

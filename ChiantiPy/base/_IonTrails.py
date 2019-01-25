@@ -325,7 +325,7 @@ class ionTrails(object):
         if relative:
             intensity = intensity/intensity[-1]
             ylabel += ' (Relative)'
-        xlabel = 'Wavelength ('+self.Defaults['wavelength'] +')'
+        xlbl = 'Wavelength ('+self.Defaults['wavelength'] +')'
         ymin = 10.**(np.log10(intensity[0].min()).round(0)-0.5 )
         plt.ion()
         for idx in range(top):
@@ -336,7 +336,7 @@ class ionTrails(object):
             else:
                 yy=[ymin/10., intensity[idx]]
                 plt.semilogy(xx, yy)
-        plt.xlabel(xlabel)
+        plt.xlabel(xlbl)
         plt.ylabel(ylabel)
         plt.title(title+tstr+dstr)
         plt.tight_layout()
@@ -438,7 +438,7 @@ class ionTrails(object):
             print(' only a single temperature and eDensity')
             return
         elif ndens == 1:
-            xlabel='Temperature (K)'
+            xlbl='Temperature (K)'
             xvalues=self.Temperature
             outTemperature=self.Temperature
             outDensity = self.EDensity
@@ -447,12 +447,12 @@ class ionTrails(object):
             xvalues=self.EDensity
             outTemperature = self.Temperature
             outDensity=self.EDensity
-            xlabel='Electron Density (cm$^{-3}$)'
+            xlbl='Electron Density (cm$^{-3}$)'
             desc_str=' Temp = %10.2e (K)' % self.Temperature[0]
         else:
             outTemperature=self.Temperature
             outDensity=self.EDensity
-            xlabel='Temperature (K)'
+            xlbl='Temperature (K)'
             xvalues=self.Temperature
             desc_str=' Variable Density'
         # put all actual plotting here
@@ -482,13 +482,13 @@ class ionTrails(object):
         if ndens == 1:
             print('%12.2e  %12.2e '%(xvalues.min(),xvalues.max()))
             plt.xlim(xvalues.min(),xvalues.max())
-            plt.xlabel(xlabel,fontsize=fontsize)
+            plt.xlabel(xlbl,fontsize=fontsize)
             plt.ylabel(ylabel,fontsize=fontsize)
         elif ntemp == 1:
             plt.text(0.07, 0.5,title, horizontalalignment='left', verticalalignment='center', fontsize=fontsize,  transform = ax.transAxes)
             ax2 = plt.twiny()
-            xlabelDen=r'Electron Density (cm$^{-3}$)'
-            plt.xlabel(xlabelDen, fontsize=fontsize)
+            xlblDen=r'Electron Density (cm$^{-3}$)'
+            plt.xlabel(xlblDen, fontsize=fontsize)
             plt.loglog(eDensity,intensity[:, topLines[top-1]]/maxAll, visible=False)
             ax2.xaxis.tick_top()
             plt.ylim(ymin/1.2, 1.2*ymax)
@@ -532,7 +532,7 @@ class ionTrails(object):
         ax = plt.subplot(111)
         plt.loglog(xvalues,numIntens/denIntens)
         plt.xlim(xvalues.min(),xvalues.max())
-        plt.xlabel(xlabel,fontsize=fontsize)
+        plt.xlabel(xlbl,fontsize=fontsize)
         plt.ylabel('Ratio ('+self.Defaults['flux']+')',fontsize=fontsize)
         if ionNum == 1:
             desc = ionS[0]
@@ -553,8 +553,8 @@ class ionTrails(object):
             plt.text(0.07, 0.5,desc, horizontalalignment='left', verticalalignment='center', fontsize=fontsize,  transform = ax.transAxes)
             #
             ax2 = plt.twiny()
-            xlabelDen=r'Electron Density (cm$^{-3}$)'
-            plt.xlabel(xlabelDen, fontsize=fontsize)
+            xlblDen=r'Electron Density (cm$^{-3}$)'
+            plt.xlabel(xlblDen, fontsize=fontsize)
             plt.loglog(eDensity,numIntens/denIntens, visible=False)
             ax2.xaxis.tick_top()
         else:

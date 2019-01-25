@@ -34,6 +34,7 @@ try:
         AbundanceList.append(os.path.splitext(os.path.basename(fname))[0])
     Abundance = {abundance: chio.abundanceRead(abundancename=abundance)
                  for abundance in AbundanceList}
+    GrndLevels = chio.grndLevelsRead()
 except (KeyError, IOError) as e:
     print(traceback.format_exc())
     if isinstance(e, KeyError):

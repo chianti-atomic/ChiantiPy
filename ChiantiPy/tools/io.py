@@ -295,6 +295,8 @@ def cireclvlRead(ions, filename=None, filetype='cilvl'):
 
     paramname = fname + '.' + filetype
 
+    #print('paramname %s'%(paramname))
+
     input = open(paramname,'r')
     lines = input.readlines()
     input.close()
@@ -820,6 +822,27 @@ def fblvlRead(ions, filename=None, verbose=False):
     else:
         return {'errorMessage':' fblvl file does not exist %s'%(fblvlName)}
 
+def grndLevelsRead():
+    ''' to read the grndLevels.dat file
+    give the number of ground levels to sum over
+    in populate and drPopulate
+    '''
+    filename = os.path.join(os.environ['XUVTOP'], 'ioneq', 'grndLevels.dat')
+    if os.path.isfile(filename):
+        with open(filename, 'r') as inpt:
+            lines = inpt.readlines()
+    else:
+        print(' did not fine file %s in %s'%(os.path.split(filename)))
+        return
+
+    for i, aline in enumerate(lines):
+        if '-1'  in aline:
+            divider = i
+    grndLevels = []
+    for aline in lines[:divider]:
+        print(aline)
+        grndLevels.append(int(aline.split()[1]))
+    return grndLevels
 
 def gffRead():
     """

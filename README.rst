@@ -1,5 +1,5 @@
-ChiantiPy
-=========
+ChiantiPy - this version is only a release candidate for the next version of CHIANTI
+====================================================================================
 
 
 ChiantiPy is the Python interface to the `CHIANTI atomic

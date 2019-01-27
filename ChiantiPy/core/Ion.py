@@ -1501,40 +1501,19 @@ class ion(ioneqOne, ionTrails, specTrails):
             rStar = self.RStar
         rec = 0
         ci = 0
-        # the Dielectronic test should eventually go away
-        if popCorrect and (not self.Dielectronic):
-            if self.Ncilvl:
-                ci = 1
-                cilvl = self.Cilvl
-                if hasattr(self, 'CilvlRate'):
-                    cilvlRate = self.CilvlRate
-                else:
-                    self.cireclvlDescale('cilvl')
-                    cilvlRate = self.CilvlRate
-                self.recombRate()
-                #
-                lowers = util.zion2name(self.Z, self.Ion-1)
-                # get the lower ionization stage
-                lower = ion(lowers, temperature=self.Temperature, eDensity = self.EDensity)
-                lower.ionizRate()
-                # need to get multiplicity of lower ionization stage
-                lowMult = lower.Elvlc['mult']
-            else:
-                ci = 0
+        if self.Nrrlvl or self.Nauto:
+            rec = 1
+        else:
+            rec = 0
 
-            if self.Nrrlvl or self.Nauto:
-                rec = 1
+        if self.Nrrlvl:
+            rrlvl = self.Rrlvl
+            if hasattr(self, 'RrlvlRate'):
+                rrlvlRate = self.RrlvlRate
             else:
-                rec = 0
-
-            if self.Nrrlvl:
-                rrlvl = self.Rrlvl
-                if hasattr(self, 'RrlvlRate'):
-                    rrlvlRate = self.RrlvlRate
-                else:
-                    self.cireclvlDescale('rrlvl')
-                    rrlvlRate = self.RrlvlRate
-                rrLvlIdx =[i for i,lvl1 in enumerate(self.Rrlvl['lvl1']) if lvl1 == 1]
+                self.cireclvlDescale('rrlvl')
+                rrlvlRate = self.RrlvlRate
+            rrLvlIdx =[i for i,lvl1 in enumerate(self.Rrlvl['lvl1']) if lvl1 == 1]
         if rec:
             # get ionization rate of this current ion
             self.ionizRate()
@@ -1655,21 +1634,7 @@ class ion(ioneqOne, ionTrails, specTrails):
                 popmat[l2+ci,l1+ci] += self.PDensity*pexRate[ipsplups]
                 popmat[l1+ci,l1+ci] -= self.PDensity*pexRate[ipsplups]
                 popmat[l2+ci,l2+ci] -= self.PDensity*pdexRate[ipsplups]
-           # now include ionization rate from lower ionization stage
-            if ci:
-                # the ciRate can be computed for all temperatures
-                ciTot = 0.
-                for itrans in range(len(cilvl['lvl1'])):
-                    lvl1 = cilvl['lvl1'][itrans]-1
-                    lvl2 = cilvl['lvl2'][itrans]-1
-                    # this is kind of double booking the ionization rate
-                    # components
-                    popmat[lvl2+ci, lvl1] += self.EDensity*self.CilvlRate['rate'][itrans]
-                    popmat[lvl1, lvl1] -= self.EDensity*self.CilvlRate['rate'][itrans]
-                    ciTot += self.EDensity*self.CilvlRate['rate'][itrans]
-                #
-                popmat[1, 0] += (self.EDensity*lower.IonizRate['rate'] - ciTot)
-                popmat[0, 0] -= (self.EDensity*lower.IonizRate['rate'] - ciTot)
+
             if rec:
                 rrTot = 0.
                 #  ionization is summed over the lowest levels that are likely to be populated
@@ -1714,6 +1679,7 @@ class ion(ioneqOne, ionTrails, specTrails):
                         if higher.Elvlc['lvl'][upperIdx] == 1:
                             dielRate = coef2*gLower*expkt*avalue/(2.*gUpper)
                             popmat[ci + l2, -1] += self.EDensity*dielRate
+                            popmat[-1, -1] -= self.EDensity*dielRate
 
                     self.DielRate = drTot/self.EDensity
 
@@ -1779,18 +1745,6 @@ class ion(ioneqOne, ionTrails, specTrails):
                     popmat[l1+ci,l1+ci] -= self.PDensity[itemp]*pexRate[ipslups, itemp]
                     popmat[l2+ci,l2+ci] -= self.PDensity[itemp]*pdexRate[ipslups, itemp]
 
-                # now include ionization rate from the lower ionization stage
-                if ci:
-                    ciTot = 0.
-                    for itrans in range(len(cilvl['lvl1'])):
-                        lvl1 = cilvl['lvl1'][itrans] -1
-                        lvl2 = cilvl['lvl2'][itrans] -1
-                        popmat[lvl2+ci, lvl1] += self.EDensity[itemp]*self.CilvlRate['rate'][itrans, itemp]
-                        popmat[lvl1, lvl1] -= self.EDensity[itemp]*self.CilvlRate['rate'][itrans, itemp]
-                        ciTot += self.EDensity[itemp]*self.CilvlRate['rate'][itrans, itemp]
-
-                    popmat[1, 0] += (self.EDensity[itemp]*lower.IonizRate['rate'][itemp] - ciTot)
-                    popmat[0, 0] -= (self.EDensity[itemp]*lower.IonizRate['rate'][itemp] - ciTot)
                 if rec:
                     for ilvl in range(0, self.GrndLevels):
                         popmat[-1,  ci + ilvl] += self.EDensity[itemp]*self.IonizRate['rate'][itemp]
@@ -1986,25 +1940,6 @@ class ion(ioneqOne, ionTrails, specTrails):
         # since this ion has autoionization values, it is not a dielectronic (d) ion
         # and  and (not self.Dielectronic) test has gone away
         if popCorrect:
-            #cilvl files are not used anymore 2019/1/21 kpd
-            if self.Ncilvl:
-                ci = 1
-                cilvl = self.Cilvl
-                if hasattr(self, 'CilvlRate'):
-                    cilvlRate = self.CilvlRate
-                else:
-                    self.cireclvlDescale('cilvl')
-                    cilvlRate = self.CilvlRate
-                self.recombRate()
-                #
-                lowers = util.zion2name(self.Z, self.Ion-1)
-                # get the lower ionization stage
-                lower = ion(lowers, temperature=self.Temperature, eDensity = self.EDensity)
-                lower.ionizRate()
-                # need to get multiplicity of lower ionization stage
-                lowMult = lower.Elvlc['mult']
-            else:
-                ci = 0
 
             if self.Nrrlvl or self.Nauto:
 #                rec = max([max(self.Reclvl['lvl1']), max(self.Auto['lvl1'])])
@@ -2163,20 +2098,6 @@ class ion(ioneqOne, ionTrails, specTrails):
                 popmat[l2+ci,l2+ci] -= self.PDensity*pdexRate[ipsplups]
            # now include ionization rate from lower ionization stage
            #  however, this is not really included anymore
-            if ci:
-                # the ciRate can be computed for all temperatures
-                ciTot = 0.
-                for itrans in range(len(cilvl['lvl1'])):
-                    lvl1 = cilvl['lvl1'][itrans]-1
-                    lvl2 = cilvl['lvl2'][itrans]-1
-                    # this is kind of double booking the ionization rate
-                    # components
-                    popmat[lvl2+ci, lvl1] += self.EDensity*self.CilvlRate['rate'][itrans]
-                    popmat[lvl1, lvl1] -= self.EDensity*self.CilvlRate['rate'][itrans]
-                    ciTot += self.EDensity*self.CilvlRate['rate'][itrans]
-                #
-                popmat[1, 0] += (self.EDensity*lower.IonizRate['rate'] - ciTot)
-                popmat[0, 0] -= (self.EDensity*lower.IonizRate['rate'] - ciTot)
 
             if rec:
                 for ilvl in range(0, self.GrndLevels):
@@ -2217,6 +2138,7 @@ class ion(ioneqOne, ionTrails, specTrails):
 
                         dielRate = coef2*gLower*expkt*avalue/(2.*gUpper)
                         popmat[ci + l2, -1] += self.EDensity*hPop[l1]*dielRate
+                        popmat[-1, -1] -= self.EDensity*hPop[l1]*dielRate
                         drTot += hPop[l1]*dielRate*branch[l2]
 
                 # next lines take care of overbooking
@@ -2271,17 +2193,7 @@ class ion(ioneqOne, ionTrails, specTrails):
                     popmat[l2+ci,l2+ci] -= self.PDensity[itemp]*pdexRate[ipslups, itemp]
                 # now include ionization rate from the lower ionization stage
                 # the cilvl file is no longer picked up
-                if ci:
-                    ciTot = 0.
-                    for itrans in range(len(cilvl['lvl1'])):
-                        lvl1 = cilvl['lvl1'][itrans] -1
-                        lvl2 = cilvl['lvl2'][itrans] -1
-                        popmat[lvl2+ci, lvl1] += self.EDensity[itemp]*self.CilvlRate['rate'][itrans, itemp]
-                        popmat[lvl1, lvl1] -= self.EDensity[itemp]*self.CilvlRate['rate'][itrans, itemp]
-                        ciTot += self.EDensity[itemp]*self.CilvlRate['rate'][itrans, itemp]
 
-                    popmat[1, 0] += (self.EDensity[itemp]*lower.IonizRate['rate'][itemp] - ciTot)
-                    popmat[0, 0] -= (self.EDensity[itemp]*lower.IonizRate['rate'][itemp] - ciTot)
                 if rec:
 
                     for ilvl in range(0, self.GrndLevels):
@@ -2326,6 +2238,7 @@ class ion(ioneqOne, ionTrails, specTrails):
                             #print(' %5i itemp  %5i lvl2 %5i  upperIdx %5i  hPop  %12.2e avalue %12.2e'%(i, itemp, l2, l1, hPop[itemp, l1], avalue))
                         dielRate = coef2[itemp]*gLower*expkt*avalue*hPop[itemp, l1]/(2.*gUpper)
                         popmat[ci + l2, -1] += self.EDensity[itemp]*dielRate
+                        popmat[-1, -1] -= self.EDensity[itemp]*dielRate
                         drTot[itemp] += dielRate*branch[l2]
 
                         dielLvlTot[itemp, l1, l2] += dielRate
@@ -2360,6 +2273,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         self.Population = {"temperature":temperature,"eDensity":eDensity,"population":pop, "protonDensity":protonDensity, "ci":ci, "rec":rec, 'popmat':popmat, 'method':'drPopulate'}
         if len(errorMessage) > 0:
             self.Population['errorMessage'] = errorMessage
+
 
 
     def popPlot(self, top=10, levels=[], scale=0, plotFile=0, outFile=0, pub=0, addTitle=None):

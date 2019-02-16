@@ -189,7 +189,6 @@ class ion(ioneqOne, ionTrails, specTrails):
             if hasattr(self, 'NTempDen'):
                 self.Em = np.tile(1., self.NTempDen)
         self.GrndLevels = chdata.GrndLevels[self.Iso]
-        print(' grndLevels = %5i'%(self.GrndLevels))
 
     def setup(self, alternate_dir=None, verbose=False):
         """

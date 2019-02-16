@@ -840,7 +840,6 @@ def grndLevelsRead():
             divider = i
     grndLevels = []
     for aline in lines[:divider]:
-        print(aline)
         grndLevels.append(int(aline.split()[1]))
     return grndLevels
 

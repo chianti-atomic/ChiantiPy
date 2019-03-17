@@ -33,8 +33,7 @@ The following two are extremely useful for running Python programs
 
 Optionally, if you'd like to use the GUI interfaces,
 
--  `PyQt4 <https://riverbankcomputing.com/software/pyqt/intro>`__ and/or
--  `wxPython <http://www.wxpython.org/>`__
+-  `PyQt5 <https://riverbankcomputing.com/software/pyqt/intro>`
 
 If you are not familiar with installing Python and the needed
 dependencies, we recommend the `Anaconda

@@ -25,7 +25,7 @@ Installation
 
 The following dependencies are required to run ChiantiPy,
 
--  `Python <https://www.python.org/>`__ (2.7,3)
+-  `Python <https://www.python.org/>`__ (Python 3 is now required)
 -  `Numpy <http://www.numpy.org/>`__
 -  `Scipy <https://www.scipy.org/>`__
 -  `Matplotlib <http://matplotlib.org/>`__
@@ -38,8 +38,7 @@ The following two are extremely useful for running Python programs
 
 Optionally, if you'd like to use the GUI interfaces,
 
--  `PyQt4 <https://riverbankcomputing.com/software/pyqt/intro>`__ and/or
--  `wxPython <http://www.wxpython.org/>`__
+-  `PyQt5 <https://riverbankcomputing.com/software/pyqt/intro>`
 
 If you are not familiar with installing Python and the needed
 dependencies, we recommend the `Anaconda

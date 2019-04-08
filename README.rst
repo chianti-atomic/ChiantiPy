@@ -1,5 +1,5 @@
-ChiantiPy - Version 0.8.1
-=========================
+ChiantiPy - this version is only a release candidate for the next version of CHIANTI
+====================================================================================
 
 
 ChiantiPy is the Python interface to the `CHIANTI atomic
@@ -33,7 +33,7 @@ The following two are extremely useful for running Python programs
 
 Optionally, if you'd like to use the GUI interfaces,
 
--  `PyQt5 <https://riverbankcomputing.com/software/pyqt/intro>`__
+-  `PyQt5 <https://riverbankcomputing.com/software/pyqt/intro>`
 
 If you are not familiar with installing Python and the needed
 dependencies, we recommend the `Anaconda

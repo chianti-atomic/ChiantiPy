@@ -1637,8 +1637,9 @@ class ion(ioneqOne, ionTrails, specTrails):
                 popmat[l1+ci,l1+ci] -= self.PDensity*pexRate[ipsplups]
                 popmat[l2+ci,l2+ci] -= self.PDensity*pdexRate[ipsplups]
 
+            rrTot = 0.
+            drTot = 0.
             if rec:
-                rrTot = 0.
                 #  ionization is summed over the lowest levels that are likely to be populated
                 for ilvl in range(0, self.GrndLevels):
                     popmat[-1,  ci + ilvl] += self.EDensity*self.IonizRate['rate']
@@ -1657,7 +1658,6 @@ class ion(ioneqOne, ionTrails, specTrails):
 #                    print(' rrTot:  %12.2e  RrRate:  %12.2e'%(rrTot, higher.RecombRate['rate']))
                 # next 2 lines take care of overbooking
                 #
-                drTot = 0.
                 if self.Nauto:
                     for i, avalue in enumerate(self.Auto['avalue']):
                         l1 = self.Auto['lvl1'][i] - 1
@@ -1682,12 +1682,14 @@ class ion(ioneqOne, ionTrails, specTrails):
                             dielRate = coef2*gLower*expkt*avalue/(2.*gUpper)
                             popmat[ci + l2, -1] += self.EDensity*dielRate
                             popmat[-1, -1] -= self.EDensity*dielRate
-
+                            drTot += dielRate*branch[l2]
                     self.DielRate = drTot/self.EDensity
-
+                recTot = rrTot + drTot
                 if higher.RecombRate['rate'] > (rrTot + drTot):
                     popmat[ci, -1] += self.EDensity*(higher.RecombRate['rate'] - rrTot - drTot)
                     popmat[-1, -1] -= self.EDensity*(higher.RecombRate['rate'] - rrTot - drTot)
+            else:
+                recTot = 0.
 
             norm = np.ones(nlvls+ci+rec,'float64')
             if ci:
@@ -1715,11 +1717,12 @@ class ion(ioneqOne, ionTrails, specTrails):
             if verbose:
                 print(' doing both ntemp: %5i  ndens:  %5i'%(ntemp, ndens))
             pop = np.zeros((ntemp,nlvls),"float64")
-            drPop = np.zeros((ntemp,nlvls),"float64")
+#            drPop = np.zeros((ntemp,nlvls),"float64")
             fullPop = np.zeros((ntemp, ci + nlvls + rec), 'float64')
             drTot = np.zeros(ntemp, 'float64')
-            rrTot = np.zeros(ntemp, 'float64')
-            recRate = np.zeros((ntemp,nlvls),"float64")
+            if self.Nrrlvl:
+                rrTot = np.zeros(ntemp, 'float64')
+#            recRate = np.zeros((ntemp,nlvls),"float64")
             #drEffRateTot = np.zeros(ntemp, 'float64')
             rrTot = np.zeros(ntemp, 'float64')
             recTot = np.zeros(ntemp, 'float64')
@@ -1792,23 +1795,32 @@ class ion(ioneqOne, ionTrails, specTrails):
                                 dielRate = coef2[itemp]*gLower*expkt*avalue/(2.*gUpper)
                                 popmat[ci + l2, -1] += self.EDensity[itemp]*dielRate
                                 popmat[-1, -1] -= self.EDensity[itemp]*dielRate
+
                                 # already included
                                 #popmat[-1, ci + l2] += avalue
+
                                 #popmat[ci + l2, ci + l2] -= avalue
         #                            drTot += dielRate*branch[elvl2idx]
                                 # seems to give the correct DR Rate
                                 drTot[itemp] += dielRate*branch[l2]
+                            if verbose:
+                                print('itemp rrTot dielRateTot %5i %10.2e %10.2e'%(itemp, rrTot[itemp], drTot[itemp]))
+                                print('itemp, recTot RecombRate %5i %10.2e %10.2e'%(itemp, recTot[itemp], higher.RecombRate['rate'][itemp]))
+                        else:
+                            drTot[itemp] = 0.
 
 
                     recTot[itemp] = rrTot[itemp] + drTot[itemp]
-#                    if verbose:
-#                        print('itemp rrTot dielRateTot %5i %10.2e %10.2e'%(itemp, rrTot[itemp], drTot[itemp]))
-#                        print('itemp, recTot RecombRate %5i %10.2e %10.2e'%(itemp, recTot[itemp], higher.RecombRate['rate'][itemp]))
-
-                # in this case, haven't completely accounted for recombination
                     if recTot[itemp] < higher.RecombRate['rate'][itemp]:
                         popmat[ci, -1] += self.EDensity[itemp]*(higher.RecombRate['rate'][itemp] - recTot[itemp])
                         popmat[-1, -1] -= self.EDensity[itemp]*(higher.RecombRate['rate'][itemp] - recTot[itemp])
+                    if verbose:
+                        print('itemp rrTot dielRateTot %5i %10.2e %10.2e'%(itemp, rrTot[itemp], drTot[itemp]))
+                        print('itemp, recTot RecombRate %5i %10.2e %10.2e'%(itemp, recTot[itemp], higher.RecombRate['rate'][itemp]))
+                else:
+                    recTot[itemp] = 0.
+
+                # in this case, haven't completely accounted for recombination
 
 
 #                    if verbose:
@@ -1833,8 +1845,8 @@ class ion(ioneqOne, ionTrails, specTrails):
             #
                 pop = np.where(pop > 0., pop, 0.)
         self.RecTot = recTot
-        self.RecRate = recRate
-        self.DrPop = drPop
+#        self.RecRate = recRate
+#        self.DrPop = drPop
         self.RrTot = rrTot
         self.DrTot = drTot
         self.Population = {"temperature":temperature,"eDensity":eDensity,"population":pop, "protonDensity":protonDensity, "ci":ci, "rec":rec, 'popmat':popmat, 'fullPop':fullPop, 'method':'populate'}

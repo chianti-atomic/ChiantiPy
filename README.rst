@@ -1,4 +1,4 @@
-ChiantiPy - this version is only a release candidate for the next version of CHIANTI
+ChiantiPy - Version 0.8.3
 ====================================================================================
 
 | |Documentation Status|

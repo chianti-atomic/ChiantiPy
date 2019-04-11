@@ -37,6 +37,7 @@ $ git clone --recursive https://github.com/chianti-atomic/ChiantiPy.git
 $ cd ChiantiPy
 $ python setup.py install
 ```
+The release is also available on [PyPI](https://pypi.org/project/ChiantiPy/)
 
 ## Usage
 As a quick example, we'll calculate the populations of the top 10 levels of Fe XIV as a function of temperature at constant density and plot them:

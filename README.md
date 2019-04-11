@@ -26,7 +26,7 @@ Optionally, if you'd like to use the GUI dialogs,
 
 * [PyQt5](https://riverbankcomputing.com/software/pyqt/intro)
 
-If you are not familiar with installing Python and the needed dependencies, we recommend the [Anaconda platform](https://www.continuum.io/downloads). Next, download the [CHIANTI database](http://www.chiantidatabase.org/chianti_download.html). Assuming you've placed the CHIANTI tree in `$HOME`, set the environment variable in your `.bashrc` file,
+If you are not familiar with installing Python and the needed dependencies, we recommend the [Anaconda platform](https://www.continuum.io/downloads). Next, download the [CHIANTI database](http://www.chiantidatabase.org/chianti_download.html), version 9.0 or later. Assuming you've placed the CHIANTI tree in `$HOME`, set the environment variable in your `.bashrc` file,
 ```Shell
 export XUVTOP=$HOME/chianti/dbase
 ```

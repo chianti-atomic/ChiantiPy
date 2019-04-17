@@ -2,6 +2,26 @@
 Changelog
 ===========
 
+Changes from 0.7.1 to 0.8.3
+===========================
+
+This is a major bug-fix release.
+================================
+
+a small but mighty bug was found in the important ion.populate method.
+
+Version 0.8.x files are necessary to use with the new CHIANTI Version 9.0 database
+==================================================================================
+
+Changes have been made to take into account the new way that CHIANTI is handling dielectronic recombination and autoionization
+
+The release is also available on [PyPI](https://pypi.org/project/ChiantiPy/)
+
+Documentation is available on [github.io](https://chianti-atomic.github.io/)
+
+and on [ReadTheDocs](https://chiantipy.readthedocs.io/en/latest/?badge=latest)
+
+
 changes from 0.7.1 to 0.8.0
 ===========================
 

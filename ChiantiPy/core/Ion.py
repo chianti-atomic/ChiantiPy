@@ -1587,6 +1587,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         ntemp = temp.size
         dens = self.EDensity
         ndens = dens.size
+        nscups = self.Nscups
 #        cc = const.collision*self.EDensity
         #
         # (4 pi a0^2)^(3/2) = 6.6011e-24 (Badnell et al, 2003, A&A 406, 1151
@@ -1603,7 +1604,6 @@ class ion(ioneqOne, ionTrails, specTrails):
             return
         #
         # get corrections for recombination and excitation
-        nscups = self.Nscups
         #
         #
         # the way temperature and density are now (9/2015) handled as arrays of the same size
@@ -1728,8 +1728,8 @@ class ion(ioneqOne, ionTrails, specTrails):
             recTot = np.zeros(ntemp, 'float64')
 #
 #
-            popmat = np.copy(rad)
             for itemp in range(ntemp):
+                popmat = np.copy(rad)
                 temp = self.Temperature[itemp]
                 dens = self.EDensity[itemp]
 
@@ -1827,7 +1827,7 @@ class ion(ioneqOne, ionTrails, specTrails):
 #                        print(' T recombRate, rrTot, rrTot %10.2e %10.2e %10.2e %10.2e'%(temp, higher.RrRate['rate'][itemp], rrTot[itemp], higher.DrRate['rate'][itemp]))
 
                 norm = np.ones(nlvls+ci+rec,'float64')
-                self.popmat = copy.copy(popmat)
+                self.popmat = np.copy(popmat)
                 if ci:
                     norm[0] = 0.
                 if rec:
@@ -1844,11 +1844,6 @@ class ion(ioneqOne, ionTrails, specTrails):
                     errorMessage.append('linealgError for T index %5i'%(itemp))
             #
                 pop = np.where(pop > 0., pop, 0.)
-        self.RecTot = recTot
-#        self.RecRate = recRate
-#        self.DrPop = drPop
-        self.RrTot = rrTot
-        self.DrTot = drTot
         self.Population = {"temperature":temperature,"eDensity":eDensity,"population":pop, "protonDensity":protonDensity, "ci":ci, "rec":rec, 'popmat':popmat, 'fullPop':fullPop, 'method':'populate'}
         if len(errorMessage) > 0:
             self.Population['errorMessage'] = errorMessage

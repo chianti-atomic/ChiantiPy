@@ -2,6 +2,15 @@
 Changelog
 ===========
 
+Changes from 0.8.3 to 0.8.4
+===========================
+
+This is a major bug-fix release.
+================================
+
+Another significant bug was fixed in the important ion.populate method.
+
+
 Changes from 0.7.1 to 0.8.3
 ===========================
 

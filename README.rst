@@ -1,4 +1,4 @@
-ChiantiPy - Version 0.8.3
+ChiantiPy - Version 0.8.4
 ====================================================================================
 
 | |Documentation Status|

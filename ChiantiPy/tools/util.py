@@ -250,7 +250,7 @@ def el2z(els):
 
 def qrp(z,u):
     """
-    Calculate :math:`Q_R^{\prime}(Z,u)`, where :math:`u=\epsilon/I` is the impact electron energy in threshold units, from Eq. 2.12 of [1]_.
+    Calculate :math:`Q_R^{\prime}(Z,u)`, where :math:`u=\epsilon/I` is the impact electron energy in threshold units, from Eq. 2.12 of [4]_.
 
     Parameters
     ----------
@@ -270,7 +270,7 @@ def qrp(z,u):
 
     References
     ----------
-    .. [1] Fontes, C. et al., 1999, PhRvA, `59, 1329 <http://adsabs.harvard.edu/abs/1999PhRvA..59.1329F>`_
+    .. [4] Fontes, C. et al., 1999, PhRvA, `59, 1329 <http://adsabs.harvard.edu/abs/1999PhRvA..59.1329F>`_
     """
     #
     aa = 1.13  # aa stands for A in equ 2.12
@@ -447,7 +447,7 @@ def listRootNames(dir):
 
 def scale_bti(evin,crossin,f,ev1):
     """
-    Apply ionization scaling of [1]_,[2]_ to energy and cross-section.
+    Apply ionization scaling of [7]_,[8]_, to energy and cross-section.
 
     Parameters
     ----------
@@ -475,8 +475,8 @@ def scale_bti(evin,crossin,f,ev1):
 
     References
     ----------
-    .. [1] Dere, K. P., 2007, A&A, `466, 771, <http://adsabs.harvard.edu/abs/2007A%26A...466..771D>`_
-    .. [2] Burgess, A. and Tully, J. A., 1992, A&A, `254, 436 <http://adsabs.harvard.edu/abs/1992A%26A...254..436B>`_
+    .. [7] Dere, K. P., 2007, A&A, `466, 771, <http://adsabs.harvard.edu/abs/2007A%26A...466..771D>`_
+    .. [8] Burgess, A. and Tully, J. A., 1992, A&A, `254, 436 <http://adsabs.harvard.edu/abs/1992A%26A...254..436B>`_
     """
     u = evin/ev1
     bte = 1.-np.log(f)/np.log(u-1.+f)
@@ -485,7 +485,7 @@ def scale_bti(evin,crossin,f,ev1):
 
 def descale_bt(bte,btomega,f,ev1):
     """
-    Apply excitation descaling of [1]_ to energy and collision strength
+    Apply excitation descaling of [3]_ to energy and collision strength
 
     Parameters
     ----------
@@ -511,7 +511,7 @@ def descale_bt(bte,btomega,f,ev1):
 
     References
     ----------
-    .. [1] Burgess, A. and Tully, J. A., 1992, A&A, `254, 436 <http://adsabs.harvard.edu/abs/1992A%26A...254..436B>`_
+    .. [3] Burgess, A. and Tully, J. A., 1992, A&A, `254, 436 <http://adsabs.harvard.edu/abs/1992A%26A...254..436B>`_
     """
     u = 1.-f+np.exp(np.log(f)/(1.-bte))
     energy = u*ev1
@@ -521,7 +521,7 @@ def descale_bt(bte,btomega,f,ev1):
 
 def descale_bti(bte,btx,f,ev1):
     """
-    Apply ionization descaling of [1]_ to energy and cross-section.
+    Apply ionization descaling of [9]_ to energy and cross-sections of [10]_.
 
     Parameters
     ----------
@@ -549,8 +549,8 @@ def descale_bti(bte,btx,f,ev1):
 
     References
     ----------
-    .. [1] Dere, K. P., 2007, A&A, `466, 771, <http://adsabs.harvard.edu/abs/2007A%26A...466..771D>`_
-    .. [2] Burgess, A. and Tully, J. A., 1992, A&A, `254, 436 <http://adsabs.harvard.edu/abs/1992A%26A...254..436B>`_
+    .. [10] Dere, K. P., 2007, A&A, `466, 771, <http://adsabs.harvard.edu/abs/2007A%26A...466..771D>`_
+    .. [9] Burgess, A. and Tully, J. A., 1992, A&A, `254, 436 <http://adsabs.harvard.edu/abs/1992A%26A...254..436B>`_
     """
     u = 1.-f + np.exp(np.log(f)/(1. - bte))
     energy = u*ev1
@@ -560,7 +560,7 @@ def descale_bti(bte,btx,f,ev1):
 
 def scale_bt(evin,omega,f,ev1):
     """
-    Apply excitation scaling of [1]_ to energy and collision strength.
+    Apply excitation scaling of [5]_ to energy and collision strength.
 
     Parameters
     ----------
@@ -584,7 +584,7 @@ def scale_bt(evin,omega,f,ev1):
 
     References
     ----------
-    .. [1] Burgess, A. and Tully, J. A., 1992, A&A, `254, 436 <http://adsabs.harvard.edu/abs/1992A%26A...254..436B>`_
+    .. [5] Burgess, A. and Tully, J. A., 1992, A&A, `254, 436 <http://adsabs.harvard.edu/abs/1992A%26A...254..436B>`_
     """
     u = evin/ev1
     bte = 1.-np.log(f)/np.log(u-1.+f)
@@ -593,7 +593,7 @@ def scale_bt(evin,omega,f,ev1):
 
 def scale_bt_rate(inDict, ip, f=1.7):
     """
-    Apply ionization descaling of [1]_, a Burgess-Tully type scaling to ionization rates and
+    Apply ionization descaling of [6]_, a Burgess-Tully type scaling to ionization rates and
     temperatures. The result of the scaling is to return a scaled temperature between 0 and 1 and a
     slowly varying scaled rate as a function of scaled temperature. In addition, the scaled rates
     vary slowly along an iso-electronic sequence.
@@ -614,7 +614,7 @@ def scale_bt_rate(inDict, ip, f=1.7):
 
     References
     ----------
-    .. [1] Dere, K. P., 2007, A&A, `466, 771 <http://adsabs.harvard.edu/abs/2007A%26A...466..771D>`_
+    .. [6] Dere, K. P., 2007, A&A, `466, 771 <http://adsabs.harvard.edu/abs/2007A%26A...466..771D>`_
     """
     if ('temperature' and 'rate') in inDict.keys():
         rT = inDict['temperature']*const.boltzmannEv/ip

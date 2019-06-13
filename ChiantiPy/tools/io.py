@@ -296,10 +296,13 @@ def cireclvlRead(ions, filename=None, filetype='cilvl'):
     paramname = fname + '.' + filetype
 
     #print('paramname %s'%(paramname))
-
-    input = open(paramname,'r')
-    lines = input.readlines()
-    input.close()
+    if os.path.isfile(paramname):
+        with open(paramname,'r') as input:
+            lines = input.readlines()
+            input.close()
+    else:
+        print('file:  %s  does not exist'%(paramname))
+        return
 
     iline = 0
     idx = -1

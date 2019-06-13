@@ -2,6 +2,17 @@
 Changelog
 ===========
 
+Changes from 0.8.4 to 0.8.5
+===========================
+
+This is a major bug-fix release.
+================================
+
+Errors in calculating the proton rates were corrected.
+
+All temperatures and densities are now numpy arrays
+
+
 Changes from 0.8.3 to 0.8.4
 ===========================
 

@@ -172,7 +172,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             self.Temperature = np.tile(self.Temperature, self.NTempDens)
         elif self.EDensity.size == 1 and self.Temperature.size > 1:
             self.EDensity = np.tile(self.EDensity, self.NTempDens)
-        #  needs to know self.NTempDen first
+        #  needs to know self.NTempDens first
         self.ioneqOne()
 
         if hasattr(self,'EDensity') and hasattr(self,'Temperature') \
@@ -820,10 +820,10 @@ class ion(ioneqOne, ionTrails, specTrails):
                 self.RrlvlRate = {'rate':np.zeros_like(temperature)}
                 return
 
-        #  the rates and temperatures in reclvl are not necessarily all the same
+        #  the rates and temperatures in rrlvl are not necessarily all the same
         nlvl = len(lvl['lvl1'])
 
-        rate = np.zeros(( nlvl, temperature.size), 'float64')
+        rate = np.zeros(( nlvl, self.Ntemp), 'float64')
         for itrans in range(nlvl):
 #            lvl2 = lvl['lvl2'][itrans]
             nTemp = lvl['ntemp'][itrans]
@@ -866,7 +866,7 @@ class ion(ioneqOne, ionTrails, specTrails):
                 for idx in range(goodHigh.sum()):
                     newRate[index] = 0.
                     index += 1
-            rate[itrans] = newRate
+            rate[itrans, :] = newRate[index]
         if lvlType == 'reclvl':
             self.ReclvlRate = {'rate':rate, 'lvl1':lvl['lvl1'], 'lvl2':lvl['lvl2'], 'temperature':temperature, 'type':'reclvl'}
         elif lvlType == 'cilvl':
@@ -1178,7 +1178,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         else:
             ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
         xlabel = 'Wavelength ('+self.Defaults['wavelength'] +')'
-        aspectrum = np.zeros((self.NTempDen, wavelength.size), 'float64')
+        aspectrum = np.zeros((self.NTempDens, wavelength.size), 'float64')
         if not 'errorMessage' in self.Intensity.keys():
             idx = util.between(self.Intensity['wvl'], wvlRange)
             if len(idx) == 0:
@@ -1186,7 +1186,7 @@ class ion(ioneqOne, ionTrails, specTrails):
 #                    self.Spectrum = {'errorMessage':' no lines in wavelength range %12.2f - %12.2f'%(wavelength.min(), wavelength.max())}
                 errorMessage =  'no lines in wavelength range %12.2f - %12.2f'%(wavelength.min(), wavelength.max())
             else:
-                for itemp in range(self.NTempDen):
+                for itemp in range(self.NTempDens):
                     for iwvl in idx:
                         wvlCalc = self.Intensity['wvl'][iwvl]
                         aspectrum[itemp] += useFilter(wavelength, wvlCalc, factor=useFactor)*self.Intensity['intensity'][itemp, iwvl]
@@ -1679,8 +1679,8 @@ class ion(ioneqOne, ionTrails, specTrails):
                 maxLvl1 = max([maxAutoLvl1, maxRrlvlLvl1])
 
                 if maxLvl1 == 1:
-                    if self.NTempDen > 1:
-                        hPop = np.ones((self.NTempDen, 1), 'float64')
+                    if self.NTempDens > 1:
+                        hPop = np.ones((self.NTempDens, 1), 'float64')
                     else:
                         hPop = [1.]
                 else:
@@ -1750,8 +1750,8 @@ class ion(ioneqOne, ionTrails, specTrails):
             minAutoLvl2 = min(self.Auto['lvl2'])
             maxAutoLvl2 = max(self.Auto['lvl2'])
             if verbose:
-                print('NTempDen: %5i maxAutoLvl1: %5i  minAutoLvl2:  %5i  maxAutoLvl2: %5i'%(self.NTempDen, maxAutoLvl1, minAutoLvl2, maxAutoLvl2))
-            dielLvlTot = np.zeros((self.NTempDen, maxAutoLvl1, maxAutoLvl2), 'float64')
+                print('NTempDens: %5i maxAutoLvl1: %5i  minAutoLvl2:  %5i  maxAutoLvl2: %5i'%(self.NTempDens, maxAutoLvl1, minAutoLvl2, maxAutoLvl2))
+            dielLvlTot = np.zeros((self.NTempDens, maxAutoLvl1, maxAutoLvl2), 'float64')
 
         temp = temperature
         ntemp = temp.size
@@ -2285,23 +2285,23 @@ class ion(ioneqOne, ionTrails, specTrails):
             factor = np.ones((nwvl),'Float64')/(4.*const.pi)
             plotLabels["yLabel"] = "photons cm^-3 s^-1"
 
-        if ntempden > 1:
-            for itempden in range(ntempden):
-                for iwvl in range(nwvl):
-                    p = pop[itempden,l2[iwvl]-1]
-                    em[iwvl, itempden] = factor[iwvl]*p*avalue[iwvl]
-            if self.Defaults['wavelength'] == 'kev':
-                wvl = const.ev2Ang/np.asarray(wvl)
-            elif self.Defaults['wavelength'] == 'nm':
-                wvl = wvl/10.
-        else:
-            for iwvl in range(0,nwvl):
-                p = pop[l2[iwvl]-1]
-                em[iwvl] = factor[iwvl]*p*avalue[iwvl]
-            if self.Defaults['wavelength'] == 'kev':
-                wvl = const.ev2Ang/np.asarray(wvl)
-            elif self.Defaults['wavelength'] == 'nm':
-                wvl = wvl/10.
+#        if ntempden > 1:
+        for itempden in range(ntempden):
+            for iwvl in range(nwvl):
+                p = pop[itempden,l2[iwvl]-1]
+                em[iwvl, itempden] = factor[iwvl]*p*avalue[iwvl]
+        if self.Defaults['wavelength'] == 'kev':
+            wvl = const.ev2Ang/np.asarray(wvl)
+        elif self.Defaults['wavelength'] == 'nm':
+            wvl = wvl/10.
+#        else:
+#            for iwvl in range(0,nwvl):
+#                p = pop[l2[iwvl]-1]
+#                em[iwvl] = factor[iwvl]*p*avalue[iwvl]
+#            if self.Defaults['wavelength'] == 'kev':
+#                wvl = const.ev2Ang/np.asarray(wvl)
+#            elif self.Defaults['wavelength'] == 'nm':
+#                wvl = wvl/10.
         nlvl = len(l1)
         ionS = np.asarray([self.IonStr]*nlvl)
         Emiss = {'ionS':ionS,"wvl":wvl, "emiss":em, "plotLabels":plotLabels, 'lvl1':l1, 'lvl2':l2, 'avalue':avalue, 'obs':obs, 'pretty1':pretty1, 'pretty2':pretty2}
@@ -3210,11 +3210,11 @@ class ion(ioneqOne, ionTrails, specTrails):
                     f = (const.light*const.planck*1.e+8)/wvl[goodWvl]
                 else:
                     f = 1.
-                if nTempDens == 1:
-                    emiss[goodWvl] = f*pop[l2]*distr/self.EDensity
-                else:
-                    for it in range(nTempDens):
-                        emiss[it, goodWvl] = f*pop[it, l2]*distr/self.EDensity[it]
+#                if nTempDens == 1:
+#                    emiss[goodWvl] = f*pop[l2]*distr/self.EDensity
+#                else:
+                for it in range(nTempDens):
+                    emiss[it, goodWvl] = f*pop[it, l2]*distr/self.EDensity[it]
                 self.TwoPhotonEmiss = {'wvl':wvl, 'emiss':emiss}
 
     def twoPhoton(self, wvl, verbose=False):
@@ -3251,21 +3251,21 @@ class ion(ioneqOne, ionTrails, specTrails):
                 self.populate()
                 pop = self.Population['population']
                 nTempDens = max(self.Temperature.size, self.EDensity.size)
-            if nTempDens > 1:
-                rate = np.zeros((nTempDens, nWvl), 'float64')
-                if self.EDensity.size == 1:
-                    eDensity = np.repeat(self.EDensity, nTempDens)
-                else:
-                    eDensity = self.EDensity
-                if self.Temperature.size == 1:
-                    temperature = np.repeat(self.Temperature, nTempDens)
-                    thisIoneq = np.repeat(thisIoneq, nTempDens)
-                else:
-                    temperature = self.Temperature
+#            if nTempDens > 1:
+            rate = np.zeros((nTempDens, nWvl), 'float64')
+            if self.EDensity.size == 1:
+                eDensity = np.repeat(self.EDensity, nTempDens)
             else:
-                rate = np.zeros(nWvl, 'float64')
                 eDensity = self.EDensity
+            if self.Temperature.size == 1:
+                temperature = np.repeat(self.Temperature, nTempDens)
+                thisIoneq = np.repeat(thisIoneq, nTempDens)
+            else:
                 temperature = self.Temperature
+#            else:
+#                rate = np.zeros(nWvl, 'float64')
+#                eDensity = self.EDensity
+#                temperature = self.Temperature
             if self.Z == self.Ion:
                 # H seq
                 l1 = 1-1
@@ -3283,11 +3283,11 @@ class ion(ioneqOne, ionTrails, specTrails):
                         f = (const.light*const.planck*1.e+8)/(4.*const.pi*wvl[goodWvl])
                     else:
                         f = 1./(4.*const.pi)
-                    if nTempDens == 1:
-                        rate[goodWvl] = f*pop[l2]*distr*ab*thisIoneq*self.Em/eDensity
-                    else:
-                       for it in range(nTempDens):
-                            rate[it, goodWvl] = f*pop[it, l2]*distr*ab*thisIoneq[it]*self.Em[it]/eDensity[it]
+#                    if nTempDens == 1:
+#                        rate[goodWvl] = f*pop[l2]*distr*ab*thisIoneq*self.Em/eDensity
+#                    else:
+                    for it in range(nTempDens):
+                        rate[it, goodWvl] = f*pop[it, l2]*distr*ab*thisIoneq[it]*self.Em[it]/eDensity[it]
                 self.TwoPhoton = {'wvl':wvl, 'intensity':rate}
 
             else:
@@ -3306,11 +3306,13 @@ class ion(ioneqOne, ionTrails, specTrails):
                         f = (const.light*const.planck*1.e+8)/(4.*const.pi*wvl[goodWvl])
                     else:
                         f = 1./(4.*const.pi)
-                    if nTempDens == 1:
-                        rate[goodWvl] = f*pop[l2]*distr*ab*thisIoneq*self.Em/eDensity
-                    else:
-                       for it in range(nTempDens):
-                            rate[it, goodWvl] = f*pop[it, l2]*distr*ab*thisIoneq[it]*self.Em[it]/eDensity[it]
+#                    if nTempDens == 1:
+#                        rate[goodWvl] = f*pop[l2]*distr*ab*thisIoneq*self.Em/eDensity
+#                    else:
+                    for it in range(nTempDens):
+                        if verbose:
+                            print(' it = %5i'%(it))
+                        rate[it, goodWvl] = f*pop[it, l2]*distr*ab*thisIoneq[it]*self.Em[it]/eDensity[it]
                 self.TwoPhoton = {'wvl':wvl, 'intensity':rate, 'em':self.Em}
 
     def twoPhotonLoss(self):
@@ -3343,14 +3345,14 @@ class ion(ioneqOne, ionTrails, specTrails):
                 self.populate()
                 pop = self.Population['population']
                 nTempDens = max(self.Temperature.size, self.EDensity.size)
-            if nTempDens > 1:
-                rate = np.zeros((nTempDens), 'float64')
-                if self.EDensity.size == 1:
-                    eDensity = np.repeat(self.EDensity, nTempDens)
-                else:
-                    eDensity = self.EDensity
-            else:
-                eDensity = self.EDensity
+#            if nTempDens > 1:
+#                rate = np.zeros((nTempDens), 'float64')
+#                if self.EDensity.size == 1:
+#                    eDensity = np.repeat(self.EDensity, nTempDens)
+#                else:
+#                    eDensity = self.EDensity
+#            else:
+            eDensity = self.EDensity
             if self.Z == self.Ion:
                 # H seq
                 l1 = 1 - 1
@@ -3359,11 +3361,11 @@ class ion(ioneqOne, ionTrails, specTrails):
                 dist = io.twophotonHRead()
                 avalue = dist['avalue'][self.Z-1]
                 f = (avalue*const.light*const.planck*1.e+8)/wvl0
-                if nTempDens == 1:
-                    rate = f*pop[l2]*ab*thisIoneq/eDensity
-                else:
-                   for it in range(nTempDens):
-                        rate[it] = f*pop[it, l2]*ab*thisIoneq[it]/eDensity[it]
+#                if nTempDens == 1:
+#                    rate = f*pop[l2]*ab*thisIoneq/eDensity
+#                else:
+                for it in range(nTempDens):
+                    rate[it] = f*pop[it, l2]*ab*thisIoneq[it]/eDensity[it]
                 self.TwoPhotonLoss = {'temperature':self.Temperature,'eDensity':self.EDensity,'rate':rate}
             else:
                 # He seq
@@ -3373,9 +3375,9 @@ class ion(ioneqOne, ionTrails, specTrails):
                 dist = io.twophotonHeRead()
                 avalue = dist['avalue'][self.Z-1]
                 f = (avalue*const.light*const.planck*1.e+8)/wvl0
-                if nTempDens == 1:
-                    rate = f*pop[l2]*ab*thisIoneq/eDensity
-                else:
-                   for it in range(nTempDens):
-                        rate[it] = f*pop[it, l2]*ab*thisIoneq[it]/eDensity[it]
+#                if nTempDens == 1:
+#                    rate = f*pop[l2]*ab*thisIoneq/eDensity
+#                else:
+                for it in range(nTempDens):
+                    rate[it] = f*pop[it, l2]*ab*thisIoneq[it]/eDensity[it]
                 self.TwoPhotonLoss = {'temperature':self.Temperature,'eDensity':self.EDensity,'rate':rate}

@@ -201,15 +201,14 @@ class spectrum(ionTrails, specTrails):
                     else:
                         setupIntensity = 1
                         self.Intensity  = thisIon.Intensity
-                    lineSpectrum += thisIon.Spectrum['intensity']
+                    lineSpectrum += thisIon.Spectrum['intensity'].squeeze()
                 else:
                     if verbose:
                         print(thisIon.Intensity['errorMessage'])
                 # get 2 photon emission for H and He sequences
                 if (Z - ionstage) in [0, 1] and not dielectronic:
                     thisIon.twoPhoton(wavelength)
-                    twoPhoton += thisIon.TwoPhoton['intensity']
-                    twoPhoton += thisIon.TwoPhoton['intensity']
+                    twoPhoton += thisIon.TwoPhoton['intensity'].squeeze()
 
         self.FreeFree = {'wavelength':wavelength, 'intensity':freeFree.squeeze()}
         self.FreeBound = {'wavelength':wavelength, 'intensity':freeBound.squeeze()}

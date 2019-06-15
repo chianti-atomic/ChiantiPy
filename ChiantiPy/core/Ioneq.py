@@ -51,7 +51,7 @@ class ioneq(object):
         Calculate ion fractions for given temperature array using the total
         ionization and recombination rates.
         """
-        self.Temperature = np.array(temperature, 'float64')
+        self.Temperature = np.array(temperature, np.float64)
         if self.Temperature.size == 1:
             print(' temperature must be an array')
             return
@@ -68,7 +68,7 @@ class ioneq(object):
 
         ntemp = chIons[0].IonizRate['temperature'].size
         if ntemp == 1:
-            ioneq = np.zeros((z+1), 'Float64')
+            ioneq = np.zeros((z+1), np.float64)
             factor = []
             for anIon in chIons:
                 if hasattr(anIon, 'RecombRate') and hasattr(anIon, 'IonizRate'):
@@ -94,7 +94,7 @@ class ioneq(object):
             ioneq = ioneq/ionsum
             self.Ioneq = ioneq
         else:
-            ioneq = np.zeros((z+1,ntemp ), 'Float64')
+            ioneq = np.zeros((z+1,ntemp ), np.float64)
             for it in range(ntemp):
                 factor = []
                 for anIon in chIons:

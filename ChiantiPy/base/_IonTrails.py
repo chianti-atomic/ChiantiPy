@@ -410,7 +410,7 @@ class ionTrails(object):
         if top > nlines:
             top=nlines
         intensity = self.Intensity['intensity']
-        maxIntens = np.zeros(nlines,'Float64')
+        maxIntens = np.zeros(nlines,np.float64)
         for iline in range(nlines):
             maxIntens[iline] = intensity[:, igvl[iline]].max()
         for iline in range(nlines):
@@ -518,11 +518,11 @@ class ionTrails(object):
         if len(den_idx) == 0:
             print(' no denominator lines were selected')
             return
-        numIntens=np.zeros(len(xvalues),'Float64')
+        numIntens=np.zeros(len(xvalues),np.float64)
         for aline in num_idx:
             numIntens += intensity[:, topLines[aline]]
 
-        denIntens = np.zeros(len(xvalues),'Float64')
+        denIntens = np.zeros(len(xvalues),np.float64)
         for aline in den_idx:
             denIntens += intensity[:, topLines[aline]]
 

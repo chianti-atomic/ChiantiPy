@@ -292,7 +292,7 @@ def qrp(z,u):
         cc += ((z-20.)/50.5)**1.11
     #
     bu = u <= 1.
-    q = np.ma.array(u, 'Float64', mask=bu, fill_value=0.)
+    q = np.ma.array(u, np.float64, mask=bu, fill_value=0.)
     #
     #
     q = (aa*np.ma.log(u) + dd*(1.-1./u)**2 + cc*u*(1.-1./u)**4 + (c/u+d/u**2)*(1.-1/u))/u
@@ -324,9 +324,9 @@ def splomDescale(splom, energy):
     # for these files, there are 5 spline points
     nspl = 5
     if nenergy > 1:
-        omega = np.zeros((nsplom,nenergy),"float64")
+        omega = np.zeros((nsplom,nenergy),np.float64)
     else:
-        omega = np.zeros(nsplom,"float64")
+        omega = np.zeros(nsplom,np.float64)
     #
     dx = 1./(float(nspl)-1.)
     sxint = dx*np.arange(nspl)  # IDL sx

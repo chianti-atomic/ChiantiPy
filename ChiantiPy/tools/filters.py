@@ -35,10 +35,10 @@ def gaussian(wvl, wvl0, factor=1.):
         Wavelength filter should be centered on.
     factor : `~numpy.float64`
         Gaussian width
-        
+
     integrated value is unity
     """
-    wvl = np.asarray(wvl, 'float64')
+    wvl = np.asarray(wvl, np.float64)
     dwvl = wvl - np.roll(wvl, 1)
     dwvl[0] = dwvl[1]
     return np.exp(-0.5*((wvl - wvl0)/factor)**2)/(np.sqrt(2.*np.pi)*factor)
@@ -57,7 +57,7 @@ def boxcar(wvl, wvl0, factor=None):
     factor : `~numpy.float64`
         Full width of the box-car filter
     """
-    wvl = np.asarray(wvl, 'float64')
+    wvl = np.asarray(wvl, np.float64)
     dwvl = wvl - np.roll(wvl, 1)
     dwvl[0] = dwvl[1]
     one = np.ones_like(wvl)
@@ -86,13 +86,13 @@ def lorentz(wvl, wvl0, factor=1.):
         Wavelength filter should be centered on.
     factor : `~numpy.float64`
         Value of the so-called constant gamma
-    
+
     integrated value is unity
     the FWHM is 2*gamma
 
     .. math::
         L = \\frac{1}{\pi \gamma} \\frac{ \gamma^2}{(\lambda - \lambda_0)^2 + \gamma^2}
-               
+
     """
     wvl = np.asarray(wvl)
     sigma = factor
@@ -117,11 +117,11 @@ def moffat(wvl, wvl0, factor=2.5):
     dwvl = np.abs(wvl[1] - wvl[0])
     moffat = 1./(1.+((wvl - wvl0)/0.0275)**2)**factor
     return moffat/(dwvl*moffat.sum())
-    
+
 def voigt(wvl, wvl0, factor=(0.5, 1.)):
     ''' pseudo-Voigt filter
     the sum of a Gaussian and a Lorentzian
-    
+
     Parameters
     ----------
     wvl : `~numpy.ndarray`

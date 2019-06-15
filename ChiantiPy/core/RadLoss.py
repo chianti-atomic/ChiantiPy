@@ -64,9 +64,9 @@ class radLoss(specTrails):
                         print(pstring)
             masterlist = alist
         self.Defaults=chdata.Defaults
-        self.Temperature = np.asarray(temperature, 'float64')
+        self.Temperature = np.asarray(temperature, np.float64)
         nTemp = self.Temperature.size
-        self.EDensity = np.asarray(eDensity, 'float64')
+        self.EDensity = np.asarray(eDensity, np.float64)
         nDen = self.EDensity.size
         nTempDen = max([nTemp, nDen])
 
@@ -103,11 +103,11 @@ class radLoss(specTrails):
         self.MinAbund = minAbund
 #        ionInfo = util.masterListInfo()
         #
-        freeFreeLoss = np.zeros((nTempDen), 'float64').squeeze()
-        freeBoundLoss = np.zeros((nTempDen), 'float64').squeeze()
-        twoPhotonLoss = np.zeros((nTempDen), 'float64').squeeze()
-        boundBoundLoss = np.zeros((nTempDen), 'float64').squeeze()
-        twoPhotonLoss = np.zeros((nTempDen), 'float64').squeeze()
+        freeFreeLoss = np.zeros((nTempDen), np.float64).squeeze()
+        freeBoundLoss = np.zeros((nTempDen), np.float64).squeeze()
+        twoPhotonLoss = np.zeros((nTempDen), np.float64).squeeze()
+        boundBoundLoss = np.zeros((nTempDen), np.float64).squeeze()
+        twoPhotonLoss = np.zeros((nTempDen), np.float64).squeeze()
         #
         self.IonsCalculated = []
         if keepIons:

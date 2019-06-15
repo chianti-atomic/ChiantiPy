@@ -1,5 +1,5 @@
 """
-Functions for reading pre-v8 CHIANTI files 
+Functions for reading pre-v8 CHIANTI files
 """
 
 import os
@@ -186,7 +186,7 @@ def wgfaRead(ions, filename=None, elvlcname=-1, total=False, verbose=False):
     if filename:
         wgfaname = filename
         if elvlcname < 0:
-            elvlcnamee = 0
+            elvlcname = 0
             elvlc = 0
         elif not elvlcname:
             elvlcname = os.path.splitext(wgfaname)[0] + '.elvlc'

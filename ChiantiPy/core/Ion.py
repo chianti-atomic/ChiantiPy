@@ -7,7 +7,7 @@ import time
 
 import numpy as np
 from scipy.interpolate import splev, splrep
-from scipy import special
+
 import matplotlib.pyplot as plt
 
 import ChiantiPy.tools.filters as chfilters
@@ -450,11 +450,10 @@ class ion(ioneqOne, ionTrails, specTrails):
         else:
             print(' temperature is not defined')
             return
+        # Gauss-Laguerre constants
+        xgl = const.xgl
+        wgl = const.wgl
 
-        ngl = 12
-        zgl = special.roots_laguerre(ngl)
-        xgl = zgl[0]
-        wgl = zgl[1]
         alpha = 5.287e+13
         tev = const.boltzmannEv*temperature
         ntemp = self.Ntemp
@@ -494,9 +493,9 @@ class ion(ioneqOne, ionTrails, specTrails):
         ntemp = temperature.size
         nsplups = len(eaparams['de'])
         if ntemp > 1:
-            ups = np.zeros((nsplups,ntemp),"Float64")
+            ups = np.zeros((nsplups,ntemp),np.float64)
         else:
-            ups = np.zeros(nsplups,"Float64")
+            ups = np.zeros(nsplups,np.float64)
 
         for isplups in range(0,nsplups):
             l1 = self.EaParams["lvl1"][isplups]-1
@@ -1030,13 +1029,13 @@ class ion(ioneqOne, ionTrails, specTrails):
         temp = np.asarray(temperature)
         ntemp = temp.size
         if ntemp > 1:
-            ups = np.zeros((nscups,ntemp),"Float64")
-            exRate = np.zeros((nscups,ntemp),"Float64")
-            dexRate = np.zeros((nscups,ntemp),"Float64")
+            ups = np.zeros((nscups,ntemp),np.float64)
+            exRate = np.zeros((nscups,ntemp),np.float64)
+            dexRate = np.zeros((nscups,ntemp),np.float64)
         else:
-            ups = np.zeros(nscups,"Float64")
-            exRate = np.zeros((nscups,ntemp),"Float64")
-            dexRate = np.zeros((nscups,ntemp),"Float64")
+            ups = np.zeros(nscups,np.float64)
+            exRate = np.zeros((nscups,ntemp),np.float64)
+            dexRate = np.zeros((nscups,ntemp),np.float64)
         deAll = []
         for iscups in range(nscups):
             if prot:
@@ -1305,7 +1304,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             higher.recombRate()
 
         #  the populating matrix for radiative transitions and autoionization transitions
-        rad = np.zeros((nlvls+ci+rec,nlvls+ci+rec),"float64")
+        rad = np.zeros((nlvls+ci+rec,nlvls+ci+rec),np.float64)
 
         for iwgfa in range(nwgfa):
             l1 = self.Wgfa["lvl1"][iwgfa]-1
@@ -1394,13 +1393,13 @@ class ion(ioneqOne, ionTrails, specTrails):
 
         if verbose:
             print(' doing both ntemp: %5i  ndens:  %5i'%(ntemp, ndens))
-        pop = np.zeros((ntemp,nlvls),"float64")
-#            drPop = np.zeros((ntemp,nlvls),"float64")
+        pop = np.zeros((ntemp,nlvls),np.float64)
+#            drPop = np.zeros((ntemp,nlvls),np.float64)
         fullPop = np.zeros((ntemp, ci + nlvls + rec), np.float64)
         drTot = np.zeros(ntemp, np.float64)
         if self.Nrrlvl:
             rrTot = np.zeros(ntemp, np.float64)
-#            recRate = np.zeros((ntemp,nlvls),"float64")
+#            recRate = np.zeros((ntemp,nlvls),np.float64)
         #drEffRateTot = np.zeros(ntemp, np.float64)
         rrTot = np.zeros(ntemp, np.float64)
         recTot = np.zeros(ntemp, np.float64)
@@ -1688,7 +1687,7 @@ class ion(ioneqOne, ionTrails, specTrails):
                     hPop = higher.Population['population']
 
         #  the populating matrix for radiative transitions
-        rad = np.zeros((nlvls+ci+rec,nlvls+ci+rec),"float64")
+        rad = np.zeros((nlvls+ci+rec,nlvls+ci+rec),np.float64)
 
         for iwgfa in range(nwgfa):
             l1 = self.Wgfa["lvl1"][iwgfa] - 1
@@ -1788,7 +1787,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             print(' doing both ntemp: %5i  ndens:  %5i'%(ntemp, ndens))
         drTot = np.zeros(ntemp, np.float64)
         rrTot = np.zeros(ntemp, np.float64)
-        pop = np.zeros((ntemp,nlvls),"float64")
+        pop = np.zeros((ntemp,nlvls),np.float64)
         for itemp in range(ntemp):
             temp = self.Temperature[itemp]
             popmat = np.copy(rad)
@@ -1878,7 +1877,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             print(' doing both ntemp: %5i  ndens:  %5i'%(ntemp, ndens))
         drTot = np.zeros(ntemp, np.float64)
         rrTot = np.zeros(ntemp, np.float64)
-        pop = np.zeros((ntemp,nlvls),"float64")
+        pop = np.zeros((ntemp,nlvls),np.float64)
         for itemp in range(ntemp):
             temp = self.Temperature[itemp]
             popmat = np.copy(rad)

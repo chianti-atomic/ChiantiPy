@@ -43,7 +43,7 @@ class ioneqOne(object):
                 ioneqOne[goodt] = np.exp(gIoneq)
             else:
                 gIoneq = splev(np.log(self.Temperature),y2)
-                ioneqOne = np.exp(gIoneq)*np.ones(self.NTempDens, 'float64')
+                ioneqOne = np.exp(gIoneq)*np.ones(self.NTempDens, np.float64)
             self.IoneqOne = ioneqOne
         else:
             self.IoneqOne = np.zeros_like(self.Temperature)

@@ -67,21 +67,21 @@ class mspectrum(ionTrails, specTrails):
         setupIntensity = 0
         #
         self.Defaults = chdata.Defaults
-        self.Temperature = np.asarray(temperature, 'float64')
+        self.Temperature = np.asarray(temperature, np.float64)
         nTemp = self.Temperature.size
-        self.EDensity = np.asarray(eDensity, 'float64')
+        self.EDensity = np.asarray(eDensity, np.float64)
         nDen = self.EDensity.size
         nTempDen = max([nTemp, nDen])
         self.NTempDen = nTempDen
         #
         if em is None:
-            em = np.ones(self.NTempDen, 'float64')
+            em = np.ones(self.NTempDen, np.float64)
             ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
         elif type(em) == float and em > 0.:
-            em = np.ones(self.NTempDen, 'float64')*em
+            em = np.ones(self.NTempDen, np.float64)*em
             ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ $'
         elif type(em) == list or type(em) == tuple or type(em) == np.ndarray:
-            em = np.asarray(em, 'float64')
+            em = np.asarray(em, np.float64)
             ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ $'
         self.Em = em
         #
@@ -123,10 +123,10 @@ class mspectrum(ionTrails, specTrails):
         #
         proc = min([proc, mp.cpu_count()])
         #
-        freeFree = np.zeros((nTempDen, nWvl), 'float64').squeeze()
-        freeBound = np.zeros((nTempDen, nWvl), 'float64').squeeze()
-        twoPhoton = np.zeros((nTempDen, nWvl), 'float64').squeeze()
-        lineSpectrum = np.zeros((nTempDen, nWvl), 'float64').squeeze()
+        freeFree = np.zeros((nTempDen, nWvl), np.float64).squeeze()
+        freeBound = np.zeros((nTempDen, nWvl), np.float64).squeeze()
+        twoPhoton = np.zeros((nTempDen, nWvl), np.float64).squeeze()
+        lineSpectrum = np.zeros((nTempDen, nWvl), np.float64).squeeze()
         #
         #  free-free multiprocessing setup
         ffWorkerQ = mp.Queue()

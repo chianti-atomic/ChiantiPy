@@ -88,8 +88,8 @@ class ipymspectrum(ionTrails, specTrails):
         #
         self.Defaults = chdata.Defaults
         #
-        self.Temperature = np.asarray(temperature,'float64')
-        self.EDensity = np.asarray(eDensity,'float64')
+        self.Temperature = np.asarray(temperature,np.float64)
+        self.EDensity = np.asarray(eDensity,np.float64)
         self.NEDens = self.EDensity.size
         ndens = self.EDensity.size
         ntemp = self.Temperature.size
@@ -113,13 +113,13 @@ class ipymspectrum(ionTrails, specTrails):
             #
         #
         if em is None:
-            em = np.ones(self.NTempDen, 'float64')
+            em = np.ones(self.NTempDen, np.float64)
             ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
         elif type(em) == float:
-            em = np.ones(self.NTempDen, 'float64')*em
+            em = np.ones(self.NTempDen, np.float64)*em
             ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ $'
         elif type(em) == list or type(em) == tuple or type(em) == np.ndarray:
-            em = np.asarray(em, 'float64')
+            em = np.asarray(em, np.float64)
             ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ $'
         self.Em = em
         if verbose:
@@ -159,10 +159,10 @@ class ipymspectrum(ionTrails, specTrails):
         self.Wavelength = wavelength
         #
         #
-        freeFree = np.zeros((self.NTempDen, nWvl), 'float64').squeeze()
-        freeBound = np.zeros((self.NTempDen, nWvl), 'float64').squeeze()
-        twoPhoton = np.zeros((self.NTempDen, nWvl), 'float64').squeeze()
-        lineSpectrum = np.zeros((self.NTempDen, nWvl), 'float64').squeeze()
+        freeFree = np.zeros((self.NTempDen, nWvl), np.float64).squeeze()
+        freeBound = np.zeros((self.NTempDen, nWvl), np.float64).squeeze()
+        twoPhoton = np.zeros((self.NTempDen, nWvl), np.float64).squeeze()
+        lineSpectrum = np.zeros((self.NTempDen, nWvl), np.float64).squeeze()
         #
          #
         allInpt = []

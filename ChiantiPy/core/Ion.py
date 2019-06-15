@@ -374,7 +374,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         if type(energy) == type(None):
             energy = self.Ip*10.**(0.025*np.arange(101))
         else:
-            energy = np.asarray(energy, 'float64')
+            energy = np.asarray(energy, np.float64)
         #
         if iso == 1 and self.Z >= 6:
             #  hydrogenic sequence
@@ -413,7 +413,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         else:
             if not hasattr(self, 'DiParams'):
                 self.DiParams = io.diRead(self.IonStr)
-            cross = np.zeros(len(energy), 'Float64')
+            cross = np.zeros(len(energy), np.float64)
             for ifac in range(self.DiParams['info']['nfac']):
                 # prob. better to do this with masked arrays
                 goode = energy > self.DiParams['ev1'][ifac]
@@ -435,7 +435,7 @@ class ion(ioneqOne, ionTrails, specTrails):
                                     self.DiParams['ysplom'][ifac])
                         plt.plot(btenergy, btcross)
                     if offset > 0:
-                        seq = [np.zeros(offset, 'Float64'), cross1]
+                        seq = [np.zeros(offset, np.float64), cross1]
                         cross1 = np.hstack(seq)
                     cross += cross1*1.e-14
             self.DiCross = {'energy':energy, 'cross':cross}
@@ -460,7 +460,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         ntemp = self.Ntemp
 
 
-        rate = np.zeros(ntemp, 'float64')
+        rate = np.zeros(ntemp, np.float64)
         for itemp in range(ntemp):
             x0 = self.Ip/tev[itemp]  # Ip in eV
             beta = np.sqrt(const.boltzmann*temperature[itemp])
@@ -595,7 +595,7 @@ class ion(ioneqOne, ionTrails, specTrails):
 
             totalCross = np.zeros_like(energy)
             ntrans = omega.shape[0]
-            partialCross = np.zeros((ntrans, energy.size), 'float64')
+            partialCross = np.zeros((ntrans, energy.size), np.float64)
             for itrans in range(ntrans):
                 #  the collision strengths have already by divided by the
                 #  statistical weight of the ground level 2j+1
@@ -622,7 +622,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             else:
                 btT = 0.1*np.arange(10)
                 btT[0] = 0.01
-                dum = np.ones(10, 'Float64')
+                dum = np.ones(10, np.float64)
                 [temperature, dum] = util.descale_bt(btT, dum, self.EaParams['cups'][0], self.DiParams['de'][0])
                 self.Temperature = temperature
             if hasattr(self, 'EaParams'):
@@ -635,8 +635,8 @@ class ion(ioneqOne, ionTrails, specTrails):
             nups = len(eaparams['de'])
             tev = const.boltzmannEv*temperature
             ntemp = temperature.size
-            partial = np.zeros((nups, ntemp), 'float64')
-            earate = np.zeros(temperature.size, 'Float64')
+            partial = np.zeros((nups, ntemp), np.float64)
+            earate = np.zeros(temperature.size, np.float64)
             eaev = self.DiParams['eaev']
             if len(eaev) == 1:
                 for iups in range(nups):
@@ -662,7 +662,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         if type(energy) == type(None):
             energy = self.Ip*1.01*10.**(0.025*np.arange(101))
         else:
-            energy = np.asarray(energy, 'float64')
+            energy = np.asarray(energy, np.float64)
 
         if self.Z < self.Ion:
             self.IonizCross = {'cross':np.zeros_like(energy), 'energy':energy}
@@ -766,7 +766,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             drcoef = drparams['cparams']
             gcoef = drenergy > 0.
             ncoef = gcoef.sum()
-            rate = np.zeros(temperature.size, 'float64')
+            rate = np.zeros(temperature.size, np.float64)
             for icoef in range(ncoef):
                 rate += drcoef[icoef]*np.exp(-drenergy[icoef]/temperature)
             rate = rate/temperature**1.5
@@ -823,7 +823,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         #  the rates and temperatures in rrlvl are not necessarily all the same
         nlvl = len(lvl['lvl1'])
 
-        rate = np.zeros(( nlvl, self.Ntemp), 'float64')
+        rate = np.zeros(( nlvl, self.Ntemp), np.float64)
         for itrans in range(nlvl):
 #            lvl2 = lvl['lvl2'][itrans]
             nTemp = lvl['ntemp'][itrans]
@@ -841,7 +841,7 @@ class ion(ioneqOne, ionTrails, specTrails):
                 highT = temperature[goodHigh]
 
             nTemp = lvl['ntemp'][itrans]
-            newRate = np.zeros_like(lvl['temperature'][itrans], 'float64')
+            newRate = np.zeros_like(lvl['temperature'][itrans], np.float64)
             index = 0
             if goodLow.sum() == 1:
                 newRate[index] = 0.
@@ -904,7 +904,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         lvl = []
         branch = []
         dekt = []
-        totalRate = np.zeros(nt, 'float64')
+        totalRate = np.zeros(nt, np.float64)
         for i, avalue in enumerate(self.Auto['avalue']):
             elvl1idx = self.Elvlc['lvl'].index(self.Auto['lvl1'][i])
             if elvl1idx == 1:
@@ -1178,7 +1178,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         else:
             ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
         xlabel = 'Wavelength ('+self.Defaults['wavelength'] +')'
-        aspectrum = np.zeros((self.NTempDens, wavelength.size), 'float64')
+        aspectrum = np.zeros((self.NTempDens, wavelength.size), np.float64)
         if not 'errorMessage' in self.Intensity.keys():
             idx = util.between(self.Intensity['wvl'], wvlRange)
             if len(idx) == 0:
@@ -1396,14 +1396,14 @@ class ion(ioneqOne, ionTrails, specTrails):
             print(' doing both ntemp: %5i  ndens:  %5i'%(ntemp, ndens))
         pop = np.zeros((ntemp,nlvls),"float64")
 #            drPop = np.zeros((ntemp,nlvls),"float64")
-        fullPop = np.zeros((ntemp, ci + nlvls + rec), 'float64')
-        drTot = np.zeros(ntemp, 'float64')
+        fullPop = np.zeros((ntemp, ci + nlvls + rec), np.float64)
+        drTot = np.zeros(ntemp, np.float64)
         if self.Nrrlvl:
-            rrTot = np.zeros(ntemp, 'float64')
+            rrTot = np.zeros(ntemp, np.float64)
 #            recRate = np.zeros((ntemp,nlvls),"float64")
-        #drEffRateTot = np.zeros(ntemp, 'float64')
-        rrTot = np.zeros(ntemp, 'float64')
-        recTot = np.zeros(ntemp, 'float64')
+        #drEffRateTot = np.zeros(ntemp, np.float64)
+        rrTot = np.zeros(ntemp, np.float64)
+        recTot = np.zeros(ntemp, np.float64)
 #
 #
         for itemp in range(ntemp):
@@ -1504,21 +1504,21 @@ class ion(ioneqOne, ionTrails, specTrails):
 #                    if verbose:
 #                        print(' T recombRate, rrTot, rrTot %10.2e %10.2e %10.2e %10.2e'%(temp, higher.RrRate['rate'][itemp], rrTot[itemp], higher.DrRate['rate'][itemp]))
 
-            norm = np.ones(nlvls+ci+rec,'float64')
+            norm = np.ones(nlvls+ci+rec,np.float64)
             self.popmat = np.copy(popmat)
             if ci:
                 norm[0] = 0.
             if rec:
                 norm[-1] = 0.
             popmat[nlvls+ci+rec-1] = norm
-            b = np.zeros(nlvls+ci+rec,'float64')
+            b = np.zeros(nlvls+ci+rec,np.float64)
             b[nlvls+ci+rec-1] = 1.
             try:
                 thispop = np.linalg.solve(popmat,b)
                 pop[itemp] = thispop[ci:ci+nlvls]
                 fullPop[itemp] = thispop
             except np.linalg.LinAlgError:
-                pop[itemp] = np.zeros(nlvls, 'float64')
+                pop[itemp] = np.zeros(nlvls, np.float64)
                 errorMessage.append('linealgError for T index %5i'%(itemp))
         #
             pop = np.where(pop > 0., pop, 0.)
@@ -1680,7 +1680,7 @@ class ion(ioneqOne, ionTrails, specTrails):
 
                 if maxLvl1 == 1:
                     if self.NTempDens > 1:
-                        hPop = np.ones((self.NTempDens, 1), 'float64')
+                        hPop = np.ones((self.NTempDens, 1), np.float64)
                     else:
                         hPop = [1.]
                 else:
@@ -1751,7 +1751,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             maxAutoLvl2 = max(self.Auto['lvl2'])
             if verbose:
                 print('NTempDens: %5i maxAutoLvl1: %5i  minAutoLvl2:  %5i  maxAutoLvl2: %5i'%(self.NTempDens, maxAutoLvl1, minAutoLvl2, maxAutoLvl2))
-            dielLvlTot = np.zeros((self.NTempDens, maxAutoLvl1, maxAutoLvl2), 'float64')
+            dielLvlTot = np.zeros((self.NTempDens, maxAutoLvl1, maxAutoLvl2), np.float64)
 
         temp = temperature
         ntemp = temp.size
@@ -1786,8 +1786,8 @@ class ion(ioneqOne, ionTrails, specTrails):
 
         if verbose:
             print(' doing both ntemp: %5i  ndens:  %5i'%(ntemp, ndens))
-        drTot = np.zeros(ntemp, 'float64')
-        rrTot = np.zeros(ntemp, 'float64')
+        drTot = np.zeros(ntemp, np.float64)
+        rrTot = np.zeros(ntemp, np.float64)
         pop = np.zeros((ntemp,nlvls),"float64")
         for itemp in range(ntemp):
             temp = self.Temperature[itemp]
@@ -1865,19 +1865,19 @@ class ion(ioneqOne, ionTrails, specTrails):
                 popmat[ci, -1] += self.EDensity[itemp]*(higher.RecombRate['rate'][itemp] - rrTot[itemp] - drTot[itemp])
                 popmat[-1, -1] -= self.EDensity[itemp]*(higher.RecombRate['rate'][itemp] - rrTot[itemp] - drTot[itemp])
 
-            norm = np.ones(nlvls+ci+rec,'float64')
+            norm = np.ones(nlvls+ci+rec,np.float64)
             self.popmat = copy.copy(popmat)
             if ci:
                 norm[0] = 0.
             if rec:
                 norm[-1] = 0.
             popmat[nlvls+ci+rec-1] = norm
-            b = np.zeros(nlvls+ci+rec,'float64')
+            b = np.zeros(nlvls+ci+rec,np.float64)
             b[nlvls+ci+rec-1] = 1.
         if verbose:
             print(' doing both ntemp: %5i  ndens:  %5i'%(ntemp, ndens))
-        drTot = np.zeros(ntemp, 'float64')
-        rrTot = np.zeros(ntemp, 'float64')
+        drTot = np.zeros(ntemp, np.float64)
+        rrTot = np.zeros(ntemp, np.float64)
         pop = np.zeros((ntemp,nlvls),"float64")
         for itemp in range(ntemp):
             temp = self.Temperature[itemp]
@@ -1955,20 +1955,20 @@ class ion(ioneqOne, ionTrails, specTrails):
                 popmat[ci, -1] += self.EDensity[itemp]*(higher.RecombRate['rate'][itemp] - rrTot[itemp] - drTot[itemp])
                 popmat[-1, -1] -= self.EDensity[itemp]*(higher.RecombRate['rate'][itemp] - rrTot[itemp] - drTot[itemp])
 
-            norm = np.ones(nlvls+ci+rec,'float64')
+            norm = np.ones(nlvls+ci+rec,np.float64)
             self.popmat = copy.copy(popmat)
             if ci:
                 norm[0] = 0.
             if rec:
                 norm[-1] = 0.
             popmat[nlvls+ci+rec-1] = norm
-            b = np.zeros(nlvls+ci+rec,'float64')
+            b = np.zeros(nlvls+ci+rec,np.float64)
             b[nlvls+ci+rec-1] = 1.
             try:
                 thispop = np.linalg.solve(popmat,b)
                 pop[itemp] = thispop[ci:ci+nlvls]
             except np.linalg.LinAlgError:
-                pop[itemp] = np.zeros(nlvls, 'float64')
+                pop[itemp] = np.zeros(nlvls, np.float64)
                 errorMessage.append('linealgError for T index %5i'%(itemp))
         #
             pop = np.where(pop > 0., pop, 0.)
@@ -1977,7 +1977,7 @@ class ion(ioneqOne, ionTrails, specTrails):
                 thispop = np.linalg.solve(popmat,b)
                 pop[itemp] = thispop[ci:ci+nlvls]
             except np.linalg.LinAlgError:
-                pop[itemp] = np.zeros(nlvls, 'float64')
+                pop[itemp] = np.zeros(nlvls, np.float64)
                 errorMessage.append('linealgError for T index %5i'%(itemp))
         #
             pop = np.where(pop > 0., pop, 0.)
@@ -2049,7 +2049,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             nlvls = self.Nlvls
             if top > nlvls:
                 top = nlvls
-            maxpop = np.zeros(nlvls,'Float64')
+            maxpop = np.zeros(nlvls,np.float64)
             for ilvl in range(nlvls):
                 maxpop[ilvl] = pop[:,ilvl].max()
             lvlsort = np.take(lvl,np.argsort(maxpop))
@@ -2066,7 +2066,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         plt.figure()
         plt.ion()
         if ndens == 1:
-            toppops = np.zeros((top, ntemp), 'float64')
+            toppops = np.zeros((top, ntemp), np.float64)
             for ilvl in range(top):
                 toppops[ilvl] = pop[:, toplvl[ilvl]-1]
             nonzero = toppops > 0.
@@ -2118,7 +2118,7 @@ class ion(ioneqOne, ionTrails, specTrails):
 
         elif ntemp == 1:
             xlabel = r'Electron Density (cm$^{-3}$)'
-            toppops = np.zeros((top, ndens), 'float64')
+            toppops = np.zeros((top, ndens), np.float64)
             for ilvl in range(top):
                 toppops[ilvl] = pop[:, toplvl[ilvl]-1]
             nonzero = toppops > 0.
@@ -2179,7 +2179,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             plt.legend(loc='lower right')
         else:
             ax = plt.subplot(111)
-            toppops = np.zeros((top, ntemp), 'float64')
+            toppops = np.zeros((top, ntemp), np.float64)
             for ilvl in range(top):
                 toppops[ilvl] = pop[:, toplvl[ilvl]-1]
             nonzero = toppops > 0.
@@ -2239,13 +2239,13 @@ class ion(ioneqOne, ionTrails, specTrails):
             self.populate()
             pop = self.Population["population"]
 
-        wvl = np.asarray(self.Wgfa["wvl"], 'float64')
+        wvl = np.asarray(self.Wgfa["wvl"], np.float64)
         obs = np.where(wvl > 0., 'Y', 'N')
         if allLines:
             wvl=np.abs(wvl)
         l1  =  np.asarray(self.Wgfa['lvl1'], 'int64')
         l2 = np.asarray(self.Wgfa["lvl2"], 'int64')
-        avalue = np.asarray(self.Wgfa["avalue"], 'float64')
+        avalue = np.asarray(self.Wgfa["avalue"], np.float64)
         if 'pretty1' in self.Wgfa.keys():
             pretty1 = np.asarray(self.Wgfa['pretty1'])
         if 'pretty2' in self.Wgfa.keys():
@@ -2266,10 +2266,10 @@ class ion(ioneqOne, ionTrails, specTrails):
 
         try:
             ntempden,nlvls = pop.shape
-            em = np.zeros((nwvl, ntempden),'Float64')
+            em = np.zeros((nwvl, ntempden),np.float64)
         except:
             ntempden = 1
-            em = np.zeros(nwvl,'Float64')
+            em = np.zeros(nwvl,np.float64)
         plotLabels = {}
         if self.Defaults['wavelength'] == 'angstrom':
             plotLabels["xLabel"] = "Angstroms"
@@ -2282,7 +2282,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             factor = const.planck*const.light/(4.*const.pi*1.e-8*wvl)
             plotLabels["yLabel"] = "ergs cm^-3 s^-1"
         elif self.Defaults['flux'] == 'photon':
-            factor = np.ones((nwvl),'Float64')/(4.*const.pi)
+            factor = np.ones((nwvl),np.float64)/(4.*const.pi)
             plotLabels["yLabel"] = "photons cm^-3 s^-1"
 
 #        if ntempden > 1:
@@ -2613,7 +2613,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         if top > nlines:
             top = nlines
             #
-        maxEmiss = np.zeros(nlines,'Float64')
+        maxEmiss = np.zeros(nlines,np.float64)
         print(' maxEmiss.shape = %s'%(str(maxEmiss.shape)))
         for iline in range(nlines):
             maxEmiss[iline] = emiss[igvl[iline]].max()
@@ -2642,12 +2642,12 @@ class ion(ioneqOne, ionTrails, specTrails):
             xlabel = 'Temperature (K)'
             xvalues = self.Temperature
             outTemperature = self.Temperature
-            outDensity = np.zeros(ntemp,'Float64')
+            outDensity = np.zeros(ntemp,np.float64)
             outDensity.fill(self.EDensity)
             desc_str = ' at  Density = %10.2e (cm)$^{-3}$' % self.EDensity
         elif ntemp == 1:
             xvalues = self.EDensity
-            outTemperature = np.zeros(ndens,'Float64')
+            outTemperature = np.zeros(ndens,np.float64)
             outTemperature.fill(self.Temperature)
             outDensity = self.EDensity
             xlabel = r'$\rm{Electron Density (cm)^{-3}}$'
@@ -2718,11 +2718,11 @@ class ion(ioneqOne, ionTrails, specTrails):
             print(' no denominator lines were selected')
             return
         #
-        numEmiss = np.zeros(len(xvalues),'Float64')
+        numEmiss = np.zeros(len(xvalues),np.float64)
         for aline in num_idx:
             numEmiss += emiss[topLines[aline]]
         #
-        denEmiss = np.zeros(len(xvalues),'Float64')
+        denEmiss = np.zeros(len(xvalues),np.float64)
         for aline in den_idx:
             denEmiss += emiss[topLines[aline]]
         #
@@ -2805,10 +2805,10 @@ class ion(ioneqOne, ionTrails, specTrails):
 
         if len(emissivity.shape) > 1:
             nwvl, ntempden =  emissivity.shape
-            intensity = np.zeros((ntempden, nwvl),'Float64')
+            intensity = np.zeros((ntempden, nwvl),np.float64)
             good = self.IoneqOne > 0.
             if good.sum() == 0.:
-                intensity = np.zeros((ntempden, nwvl),'Float64')
+                intensity = np.zeros((ntempden, nwvl),np.float64)
                 errorMessage = 'ioneq = zero in temperature range'
                 self.Intensity = {'intensity':intensity, 'errorMessage':errorMessage}
                 return
@@ -2881,9 +2881,9 @@ class ion(ioneqOne, ionTrails, specTrails):
         # should probably replace this with an if statement based on len of em.shape
         try:
             nwvl, ntempden = em.shape
-            intensity = np.zeros((ntempden, nwvl),'Float64')
+            intensity = np.zeros((ntempden, nwvl),np.float64)
             if thisIoneq.size == 1:
-                thisIoneq = np.ones(ntempden, 'float64')*thisIoneq
+                thisIoneq = np.ones(ntempden, np.float64)*thisIoneq
             for it in range(ntempden):
                 if self.Defaults['flux'] != 'energy':
                     intensity[it] = 4.*const.pi*(const.planck*const.light*1.e+8/wvl)*ab*thisIoneq[it]*em[:, it]
@@ -3000,7 +3000,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         # find the top most intense lines
         if top > nlines:
             top = nlines
-        maxEmiss = np.zeros(nlines,'Float64')
+        maxEmiss = np.zeros(nlines,np.float64)
         for iline in range(nlines):
             maxEmiss[iline] = emiss[igvl[iline]].max()
         for iline in range(nlines):
@@ -3114,7 +3114,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         if plot:
                 plt.figure()
         g_line = topLines[gline_idx]#  [0]
-        gofnt = np.zeros(ngofnt,'float64')
+        gofnt = np.zeros(ngofnt,np.float64)
         if plot:
             for aline in g_line:
                 gofnt += gAbund*gIoneq*emiss[aline].squeeze()
@@ -3150,7 +3150,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         """
         To calculate the two-photon continuum rate coefficient - only for hydrogen- and helium-like ions
         """
-        wvl = np.array(wvl, 'float64')
+        wvl = np.array(wvl, np.float64)
         nWvl = wvl.size
         if self.Z -self.Ion > 1 or self.Dielectronic:
             # this is not a hydrogen-like or helium-like ion
@@ -3165,13 +3165,13 @@ class ion(ioneqOne, ionTrails, specTrails):
                 pop = self.Population['population']
                 nTempDens = max(self.Temperature.size, self.EDensity.size)
             if nTempDens > 1:
-                emiss = np.zeros((nTempDens, nWvl), 'float64')
+                emiss = np.zeros((nTempDens, nWvl), np.float64)
                 if self.EDensity.size == 1:
                     eDensity = np.repeat(self.EDensity, nTempDens)
                 else:
                     eDensity = self.EDensity
             else:
-                emiss = np.zeros(nWvl, 'float64')
+                emiss = np.zeros(nWvl, np.float64)
                 eDensity = self.EDensity
             if self.Z == self.Ion:
                 # H seq
@@ -3223,7 +3223,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         includes the elemental abundance and the ionization equilibrium
         includes the emission measure if specified
         '''
-        wvl = np.array(wvl, 'float64')
+        wvl = np.array(wvl, np.float64)
         #
         #
         nWvl = wvl.size
@@ -3231,7 +3231,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             # this is not a hydrogen-like or helium-like ion
             if verbose:
                 print(' not doing 2 photon for %s'%(self.IonStr))
-            self.TwoPhoton = {'emiss':np.zeros(nWvl, 'float64'), 'wvl':wvl}
+            self.TwoPhoton = {'emiss':np.zeros(nWvl, np.float64), 'wvl':wvl}
             return
         else:
             if hasattr(self, 'Abundance'):
@@ -3252,7 +3252,7 @@ class ion(ioneqOne, ionTrails, specTrails):
                 pop = self.Population['population']
                 nTempDens = max(self.Temperature.size, self.EDensity.size)
 #            if nTempDens > 1:
-            rate = np.zeros((nTempDens, nWvl), 'float64')
+            rate = np.zeros((nTempDens, nWvl), np.float64)
             if self.EDensity.size == 1:
                 eDensity = np.repeat(self.EDensity, nTempDens)
             else:
@@ -3263,7 +3263,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             else:
                 temperature = self.Temperature
 #            else:
-#                rate = np.zeros(nWvl, 'float64')
+#                rate = np.zeros(nWvl, np.float64)
 #                eDensity = self.EDensity
 #                temperature = self.Temperature
             if self.Z == self.Ion:
@@ -3325,7 +3325,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             # this is not a hydrogen-like or helium-like ion
             nTempDens = max(self.Temperature.size, self.EDensity.size)
 #            if nTempDens > 1:
-            rate = np.zeros((nTempDens), 'float64')
+            rate = np.zeros((nTempDens), np.float64)
             self.TwoPhotonLoss = {'rate':rate}
         else:
             if hasattr(self, 'Abundance'):
@@ -3346,7 +3346,7 @@ class ion(ioneqOne, ionTrails, specTrails):
                 pop = self.Population['population']
                 nTempDens = max(self.Temperature.size, self.EDensity.size)
 #            if nTempDens > 1:
-#                rate = np.zeros((nTempDens), 'float64')
+#                rate = np.zeros((nTempDens), np.float64)
 #                if self.EDensity.size == 1:
 #                    eDensity = np.repeat(self.EDensity, nTempDens)
 #                else:

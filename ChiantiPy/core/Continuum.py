@@ -521,8 +521,8 @@ class continuum(ionTrails):
         #
         # sometime the rFblvl file does not exist
         if 'mult' in fblvl.keys() and 'mult' in rFblvl.keys():
-            fbrate = np.zeros((nlvls,nTemp),'float64')
-            ratg = np.zeros((nlvls),'float64')
+            fbrate = np.zeros((nlvls,nTemp),np.float64)
+            ratg = np.zeros((nlvls),np.float64)
             for ilvl in range(nlvls):
                 # scaled energy is relative to the ionization potential of each individual level
                 # will add the average energy of a free electron to this to get typical photon energy to
@@ -538,7 +538,7 @@ class continuum(ionTrails):
                 fbrate[ilvl] = ratg[ilvl]*(iprLvlErg**2/float(pqn[ilvl]))*gf/np.sqrt(temperature)
             fbRate = abund*gIoneq*const.freeBoundLoss*(fbrate.sum(axis=0))
         else:
-            fbRate = np.zeros((nTemp),'float64')
+            fbRate = np.zeros((nTemp),np.float64)
         self.FreeBoundLoss = {'rate':fbRate, 'temperature':temperature}
 
     def freeBoundwB(self, wavelength, includeAbundance=True, includeIoneq=True, useVerner=True, **kwargs):
@@ -616,7 +616,7 @@ class continuum(ionTrails):
         if 'errorMessage' in self.Recombined_fblvl:
 #            raise ValueError('No free-bound information available for {}'.format(util.zion2name(self.Z, self.Stage)))
             errorMessage = 'No free-bound information available for {}'.format(util.zion2name(self.Z, self.Stage))
-            fb_emiss = np.zeros((self.NTemperature, self.NWavelength), 'float64')
+            fb_emiss = np.zeros((self.NTemperature, self.NWavelength), np.float64)
 #            self.free_bound_emission = fb_emiss.squeeze()
             self.FreeBound = {'intensity':fb_emiss, 'temperature':self.Temperature,'wvl':wavelength,'em':self.Em, 'errorMessage':errorMessage}
             return
@@ -696,7 +696,7 @@ class continuum(ionTrails):
         includes the elemental abundance and the ionization fraction
         provides emissivity = ergs cm^-2 s^-1 str^-1 Angstrom ^-1
         '''
-        wvl = np.asarray(wvl, 'float64')
+        wvl = np.asarray(wvl, np.float64)
         temperature = self.Temperature
         hnu = 1.e+8*const.planck*const.light/wvl
         #
@@ -792,11 +792,11 @@ class continuum(ionTrails):
             vCross = self.VernerCross
         #
         if (nTemp > 1) and (nWvl > 1):
-            mask = np.zeros((nlvls,nTemp,nWvl),'Bool')
-            fbrate = np.zeros((nlvls,nTemp,nWvl),'float64')
-            fbRate = np.zeros((nTemp,nWvl),'float64')
-            expf = np.zeros((nlvls,nTemp,nWvl),'float64')
-            ratg = np.zeros((nlvls),'float64')
+            mask = np.zeros((nlvls,nTemp,nWvl),np.bool_)
+            fbrate = np.zeros((nlvls,nTemp,nWvl),np.float64)
+            fbRate = np.zeros((nTemp,nWvl),np.float64)
+            expf = np.zeros((nlvls,nTemp,nWvl),np.float64)
+            ratg = np.zeros((nlvls),np.float64)
             ratg[0] = float(multr[0])/float(mult[0])
             iprLvlEv = self.Ipr - const.invCm2Ev*ecm[0]
             iprLvlErg = const.ev2Erg*iprLvlEv
@@ -830,10 +830,10 @@ class continuum(ionTrails):
             self.FreeBound = {'intensity':fbIntensity, 'temperature':temperature,'wvl':wvl,'em':em}
             #
         elif (nTemp == 1) and (nWvl > 1):
-            mask = np.zeros((nlvls,nWvl),'Bool')
-            fbrate = np.zeros((nlvls,nWvl),'float64')
-            expf = np.zeros((nlvls,nWvl),'float64')
-            ratg = np.zeros((nlvls),'float64')
+            mask = np.zeros((nlvls,nWvl),np.bool_)
+            fbrate = np.zeros((nlvls,nWvl),np.float64)
+            expf = np.zeros((nlvls,nWvl),np.float64)
+            ratg = np.zeros((nlvls),np.float64)
             # mask is true for bad values
             ratg[0] = float(multr[0])/float(mult[0])
             iprLvlEv = self.Ipr - const.invCm2Ev*ecm[0]
@@ -868,7 +868,7 @@ class continuum(ionTrails):
             self.FreeBound = {'fbRate':fbRate, 'intensity':fbRate.data, 'temperature':temperature,'wvl':wvl, 'mask':mask, 'expf':expf,'vCross':vCross}
         #elif (nTemp > 1) and (nWvl == 1):
         else:
-            self.FreeBound = {'intensity':np.zeros(nTemp,'float64'),'errorMessage':' this is the case of a single wavelength'}
+            self.FreeBound = {'intensity':np.zeros(nTemp,np.float64),'errorMessage':' this is the case of a single wavelength'}
 
     def freeBoundEmiss(self, wvl, verner=1):
 
@@ -890,7 +890,7 @@ class continuum(ionTrails):
         .. [2] Verner & Yakovlev, 1995, A&AS, `109, 125
             <http://adsabs.harvard.edu/abs/1995A%26AS..109..125V>`_
         """
-        wvl = np.asarray(wvl, 'float64')
+        wvl = np.asarray(wvl, np.float64)
         temperature = self.Temperature
         hnu = 1.e+8*const.planck*const.light/wvl
         #
@@ -973,11 +973,11 @@ class continuum(ionTrails):
             vCross = self.VernerCross
         #
         if (nTemp > 1) and (nWvl > 1):
-            mask = np.zeros((nlvls,nTemp,nWvl),'Bool')
-            fbrate = np.zeros((nlvls,nTemp,nWvl),'float64')
-            fbRate = np.zeros((nTemp,nWvl),'float64')
-            expf = np.zeros((nlvls,nTemp,nWvl),'float64')
-            ratg = np.zeros((nlvls),'float64')
+            mask = np.zeros((nlvls,nTemp,nWvl),np.bool_)
+            fbrate = np.zeros((nlvls,nTemp,nWvl),np.float64)
+            fbRate = np.zeros((nTemp,nWvl),np.float64)
+            expf = np.zeros((nlvls,nTemp,nWvl),np.float64)
+            ratg = np.zeros((nlvls),np.float64)
             ratg[0] = float(multr[0])/float(mult[0])
             iprLvlEv = self.Ipr - const.invCm2Ev*ecm[0]
             iprLvlErg = const.ev2Erg*iprLvlEv
@@ -1011,10 +1011,10 @@ class continuum(ionTrails):
             self.FreeBoundEmiss = {'emiss':fbIntensity, 'temperature':temperature,'wvl':wvl,'em':em}
             #
         elif (nTemp == 1) and (nWvl > 1):
-            mask = np.zeros((nlvls,nWvl),'Bool')
-            fbrate = np.zeros((nlvls,nWvl),'float64')
-            expf = np.zeros((nlvls,nWvl),'float64')
-            ratg = np.zeros((nlvls),'float64')
+            mask = np.zeros((nlvls,nWvl),np.bool_)
+            fbrate = np.zeros((nlvls,nWvl),np.float64)
+            expf = np.zeros((nlvls,nWvl),np.float64)
+            ratg = np.zeros((nlvls),np.float64)
             # mask is true for bad values
             ratg[0] = float(multr[0])/float(mult[0])
             iprLvlEv = self.Ipr - const.invCm2Ev*ecm[0]
@@ -1049,7 +1049,7 @@ class continuum(ionTrails):
             self.FreeBoundEmiss = {'emiss':fbRate.data, 'temperature':temperature,'wvl':wvl, 'em':em}
         #elif (nTemp > 1) and (nWvl == 1):
         else:
-            self.FreeBoundEmiss = {'emiss':np.zeros(nTemp,'float64'),'errorMessage':' this is the case of a single wavelength'}
+            self.FreeBoundEmiss = {'emiss':np.zeros(nTemp,np.float64),'errorMessage':' this is the case of a single wavelength'}
 
 
     def vernerCross(self, wvl):

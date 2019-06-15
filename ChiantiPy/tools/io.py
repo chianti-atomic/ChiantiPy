@@ -19,7 +19,7 @@ def abundanceRead(abundancename=''):
     """
     Read abundance file `abundancename` and return the abundance values relative to hydrogen
     """
-    abundance = np.zeros((50),'Float64')
+    abundance = np.zeros((50),np.float64)
     xuvtop = os.environ["XUVTOP"]
     if abundancename:
         # a specific abundance file name has been specified
@@ -246,7 +246,7 @@ def autoWrite(info, outfile = None, minBranch = None):
     out = open(autoname, 'w')
     #ntrans = len(info['lvl1'])
     nlvl = max(info['lvl2'])
-    totalAvalue = np.zeros(nlvl, 'float64')
+    totalAvalue = np.zeros(nlvl, np.float64)
     if 'pretty1' in info:
         pformat = '%7i%7i%12.2e%30s - %30s'
     else:
@@ -324,11 +324,11 @@ def cireclvlRead(ions, filename=None, filetype='cilvl'):
         iline += 1
     maxNtemp = ntemp.max()
 #   print ' maxNtemp = ', maxNtemp
-    temp = np.zeros((ntrans,maxNtemp), 'float64')
+    temp = np.zeros((ntrans,maxNtemp), np.float64)
     iline = 0
     for jline in range(0, ndata, 2):
         recdat = lines[jline].replace(os.linesep, '').split()
-        shortT = np.asarray(recdat[4:], 'float64')
+        shortT = np.asarray(recdat[4:], np.float64)
         # the result of the next statement is to continue to replicate t
         t = np.resize(shortT, maxNtemp)
         if filetype == 'rrlvl':
@@ -339,12 +339,12 @@ def cireclvlRead(ions, filename=None, filetype='cilvl'):
     #
     lvl1 = np.zeros(ntrans, 'int64')
     lvl2 = np.zeros(ntrans, 'int64')
-    ci = np.zeros((ntrans, maxNtemp), 'float64')
+    ci = np.zeros((ntrans, maxNtemp), np.float64)
     #
     idat = 0
     for jline in range(1, ndata, 2):
         cidat = lines[jline].replace(os.linesep, '').split()
-        shortCi = np.asarray(cidat[4:], 'float64')
+        shortCi = np.asarray(cidat[4:], np.float64)
         lvl1[idat] = int(cidat[2])
         lvl2[idat] = int(cidat[3])
         ci[idat] = np.resize(shortCi, maxNtemp)
@@ -417,10 +417,10 @@ def diRead(ions, filename=None):
 #    inpt =header_line.read(s1[i][0:115])
 
     #
-    ev1 = np.zeros(nfac,'Float64')
-    btf = np.zeros(nfac,'Float64')
-    xsplom = np.zeros([nfac, nspl],'Float64')
-    ysplom = np.zeros([nfac, nspl],'Float64')
+    ev1 = np.zeros(nfac,np.float64)
+    btf = np.zeros(nfac,np.float64)
+    xsplom = np.zeros([nfac, nspl],np.float64)
+    ysplom = np.zeros([nfac, nspl],np.float64)
     #
     for ifac in range(nfac):
         line = input.readline()
@@ -477,16 +477,16 @@ def drRead(ions, filename=None):
                 header_line =  FortranRecordReader('2i5,9e12.4')
             inpt1 = header_line.read(lines[1])
             inpt2 = header_line.read(lines[2])
-            eparams = np.asarray(inpt1[2:], 'float64')
-            cparams = np.asarray(inpt2[2:], 'float64')
+            eparams = np.asarray(inpt1[2:], np.float64)
+            cparams = np.asarray(inpt2[2:], np.float64)
             DrParams = {'drtype':drtype, 'eparams':eparams,'cparams':cparams,  'ref':ref}
         elif drtype == 2:
             # shull type
 #            fmt=FortranFormat('2i5,4e12.4')
             header_line =  FortranRecordReader('2i5,4e12.4')
             inpt1 = header_line.read(lines[1])
-#            params=np.asarray(FortranLine(lines[1],fmt)[2:], 'float64')
-            params = np.asarray(inpt1[2:], 'float64')
+#            params=np.asarray(FortranLine(lines[1],fmt)[2:], np.float64)
+            params = np.asarray(inpt1[2:], np.float64)
             DrParams = {'drtype':drtype, 'params':params, 'ref':ref}
         else:
             DrParams = None
@@ -541,7 +541,7 @@ def eaRead(ions, filename=None):
         de = [0.]*nsplups
         cups = [0.]*nsplups
         nspl = [0]*nsplups
-        splups = np.zeros((nsplups,9),'Float64')
+        splups = np.zeros((nsplups,9),np.float64)
 #        splupsFormat1='(6x,3i3,8e10.0)'
 #        splupsFormat2='(6x,3i3,12e10.0)'
         #
@@ -869,12 +869,12 @@ def gffRead():
     ngamma = 41
     nu = 81
     nvalues = ngamma*nu
-    g2 = np.zeros(ngamma, 'float64')
-    g21d = np.zeros(nvalues, 'float64')
-    u = np.zeros(nu, 'float64')
-    u1d = np.zeros(nvalues, 'float64')
-    gff = np.zeros((ngamma, nu), 'float64')
-    gff1d = np.zeros(nvalues, 'float64')
+    g2 = np.zeros(ngamma, np.float64)
+    g21d = np.zeros(nvalues, np.float64)
+    u = np.zeros(nu, np.float64)
+    u1d = np.zeros(nvalues, np.float64)
+    gff = np.zeros((ngamma, nu), np.float64)
+    gff1d = np.zeros(nvalues, np.float64)
     #
     iline = 5
     ivalue = 0
@@ -909,11 +909,11 @@ def gffintRead():
     input.close()
     #
     ngamma = 41
-    g2 = np.zeros(ngamma, 'float64')
-    gffint = np.zeros(ngamma, 'float64')
-    s1 = np.zeros(ngamma, 'float64')
-    s2 = np.zeros(ngamma, 'float64')
-    s3 = np.zeros(ngamma, 'float64')
+    g2 = np.zeros(ngamma, np.float64)
+    gffint = np.zeros(ngamma, np.float64)
+    s1 = np.zeros(ngamma, np.float64)
+    s2 = np.zeros(ngamma, np.float64)
+    s3 = np.zeros(ngamma, np.float64)
     #
     ivalue = 0
     start = 4
@@ -943,9 +943,9 @@ def itohRead():
     input = open(itohName)
     lines = input.readlines()
     input.close()
-    gff = np.zeros((30, 121), 'float64')
+    gff = np.zeros((30, 121), np.float64)
     for iline in range(30):
-        gff[iline] = np.asarray(lines[iline].split(), 'float64')
+        gff[iline] = np.asarray(lines[iline].split(), np.float64)
     return {'itohCoef':gff}
 
 
@@ -972,15 +972,15 @@ def klgfbRead():
     ngfb = int(lines[0].split()[0])
     nume = int(lines[0].split()[1])
 
-    gfb = np.zeros((ngfb, ngfb, nume), 'float64')
+    gfb = np.zeros((ngfb, ngfb, nume), np.float64)
     nlines = len(lines)
 #        print 'nlines, nume, ngfb = ', nlines,  nume, ngfb
-    pe = np.asarray(lines[1].split(), 'float64')
+    pe = np.asarray(lines[1].split(), np.float64)
     for iline in range(2, nlines):
         data = lines[iline].split()
         n = int(data[0])
         l = int(data[1])
-        gfb[n-1, l] = np.array(data[2:], 'float64')
+        gfb[n-1, l] = np.array(data[2:], np.float64)
     return {'pe':pe, 'klgfb':gfb}
 
 
@@ -1047,7 +1047,7 @@ def ioneqRead(ioneqName='', minIoneq=1.e-20, verbose=False):
     #
     header_linet = FortranRecordReader(str(nTemperature)+'f6.2')
     ioneqTemperature = header_linet.read(s1[1])
-    ioneqTemperature = np.asarray(ioneqTemperature[:],'Float64')
+    ioneqTemperature = np.asarray(ioneqTemperature[:],np.float64)
     ioneqTemperature = 10.**ioneqTemperature
     nlines = 0
     idx = -1
@@ -1061,13 +1061,13 @@ def ioneqRead(ioneqName='', minIoneq=1.e-20, verbose=False):
 #    ioneqformat=FortranFormat('2i3,'+str(nTemperature)+'e10.2')
     header_lineq = FortranRecordReader('2i3,'+str(nTemperature)+'e10.2')
     #
-    ioneqAll = np.zeros((nElement,nElement+1,nTemperature),'Float64')
+    ioneqAll = np.zeros((nElement,nElement+1,nTemperature),np.float64)
     for iline in range(2,nlines):
 #        out=FortranLine(s1[iline],ioneqformat)
         out = header_lineq.read(s1[iline])
         iz = out[0]
         ion = out[1]
-        ioneqAll[iz-1,ion-1].put(list(range(nTemperature)),np.asarray(out[2:],'Float64'))
+        ioneqAll[iz-1,ion-1].put(list(range(nTemperature)),np.asarray(out[2:],np.float64))
     ioneqAll = np.where(ioneqAll > minIoneq, ioneqAll, 0.)
     ioneqRef = []
     for one in s1[nlines+1:]:
@@ -1103,7 +1103,7 @@ def ipRead(verbose=False):
     if verbose:
         print((' maxz = %5i'%(maxz)))
     nip = nip-1
-    ip = np.zeros((maxz, maxz), 'Float64')
+    ip = np.zeros((maxz, maxz), np.float64)
     for aline in data[0:nip]:
         s2 = aline.split()
         iz = int(s2[0])
@@ -1200,7 +1200,7 @@ def masterListInfo(force=False, verbose=False):
                 wgfa['wvl'].remove(0.)
                 nZeros = wgfa['wvl'].count(0.)
             # unobserved lines are denoted with a negative wavelength
-            wvl = np.abs(np.asarray(wgfa['wvl'], 'float64'))
+            wvl = np.abs(np.asarray(wgfa['wvl'], np.float64))
             wmin = float(wvl.min())
             wmax = float(wvl.max())
             masterListInfo[one] = {'wmin':wmin, 'wmax':wmax, 'tmin':tmin, 'tmax':tmax, 'tIoneqMax':vgoodTemp}
@@ -1284,7 +1284,7 @@ def photoxRead(ions):
         lvl11 = int(lines[icounter][:8])
         lvl21 = int(lines[icounter][8:15])
         ener = lines[icounter][15:].split()
-        energy1 = np.asarray(ener, 'float64')
+        energy1 = np.asarray(ener, np.float64)
         #
         icounter += 1
         irsl = int(lines[icounter][:8])
@@ -1295,7 +1295,7 @@ def photoxRead(ions):
             print((' irsl, indo = %7i %7i'%(irsl,  ind0)))
             return
         crs = lines[icounter][15:].split()
-        cross1 = np.asarray(crs, 'float64')
+        cross1 = np.asarray(crs, np.float64)
         lvl1.append(lvl11)
         lvl2.append(lvl21)
         energy.append(energy1)
@@ -1303,8 +1303,8 @@ def photoxRead(ions):
         icounter += 1
         dataEnd = lines[icounter].count('-1')
     ref = lines[icounter+1:-1]
-    cross = np.asarray(cross, 'float64')
-    energy = np.asarray(energy, 'float64')
+    cross = np.asarray(cross, np.float64)
+    energy = np.asarray(energy, np.float64)
     return {'lvl1':lvl1, 'lvl2':lvl2,'energy':energy, 'cross':cross,  'ref':ref}
 
 
@@ -1436,7 +1436,7 @@ def scupsRead(ions, filename=None, verbose=False):
         return {'errorMessage':'file does not exist' +str(scupsFileName)}
         return
     #ll = lines[1].split()
-    #temp = np.asarray(ll[3:], 'float64')
+    #temp = np.asarray(ll[3:], np.float64)
     minusOne = 0
     counter = 0
     while not minusOne:
@@ -1477,8 +1477,8 @@ def scupsRead(ions, filename=None, verbose=False):
         ll3 = lines[counter+2].split()
 #        print ' ll2 = ', ll2
 #        print ' gf = ', ll2[2]
-        btemp.append(np.asarray(ll2, 'float64'))
-        bscups.append(np.asarray(ll3, 'float64'))
+        btemp.append(np.asarray(ll2, np.float64))
+        bscups.append(np.asarray(ll3, np.float64))
         counter += 3
     counter += 1
     ref = []
@@ -1558,8 +1558,8 @@ def splomRead(ions, ea=False, filename=None):
         iline = iline+1
         data = len(lines[iline].split(' ',2))
     hdr = lines[iline+1:-1]
-    de = np.asarray(de,'Float64')
-    splomout = np.asarray(splom,'Float64')
+    de = np.asarray(de,np.float64)
+    splomout = np.asarray(splom,np.float64)
     splomout = np.transpose(splomout)
     input.close()
     # note:  de is in Rydbergs
@@ -1610,11 +1610,11 @@ def splupsRead(ions, filename=None, filetype='splups'):
         lvl1 = [0]*nsplups
         lvl2 = [0]*nsplups
         ttype = [0]*nsplups
-        gf = np.zeros(nsplups, 'float64')
-        de = np.zeros(nsplups, 'float64')
-        cups = np.zeros(nsplups, 'float64')
+        gf = np.zeros(nsplups, np.float64)
+        de = np.zeros(nsplups, np.float64)
+        cups = np.zeros(nsplups, np.float64)
         nspl = [0]*nsplups
-#        splups=np.zeros((nsplups,9),'Float64')
+#        splups=np.zeros((nsplups,9),np.float64)
         splups = [0.]*nsplups
         if filetype == 'psplups':
 #            splupsFormat1 = FortranFormat('3i3,8e10.3')
@@ -1643,7 +1643,7 @@ def splupsRead(ions, filename=None, filetype='splups'):
             header_line3 = FortranRecordReader(str(nspl[i])+'e10.3' )
 #            inpt = FortranLine(as1, splupsFormat3)
             inpt = header_line3.read(as1)
-            spl1 = np.asarray(inpt[:], 'float64')
+            spl1 = np.asarray(inpt[:], np.float64)
             splups[i] = spl1
         #
         ref = []
@@ -1679,7 +1679,7 @@ def trRead(ionS):
             dummy = lines[jline].replace(os.linesep, '').split()
             temperature.append(float(dummy[0]))
             rate.append(float(dummy[1]))
-        return {'temperature':np.asarray(temperature, 'float64'), 'rate':np.asarray(rate, 'float64')}
+        return {'temperature':np.asarray(temperature, np.float64), 'rate':np.asarray(rate, np.float64)}
     else:
         return 'file does not exist'
 
@@ -1701,9 +1701,9 @@ def twophotonHRead():
     a = dFile.readline()
     z0 = np.asarray(a.split())
     nz = 30
-    avalue = np.zeros(nz, 'float64')
-    asum = np.zeros(nz, 'float64')
-    psi0 = np.zeros((nz, 17), 'float64')
+    avalue = np.zeros(nz, np.float64)
+    asum = np.zeros(nz, np.float64)
+    psi0 = np.zeros((nz, 17), np.float64)
     for iz in range(nz):
         a = dFile.readline().split()
         avalue[iz] = float(a[1])
@@ -1728,8 +1728,8 @@ def twophotonHeRead():
     a = dFile.readline()
     y0 = np.asarray(a.split())
     nz = 30
-    avalue = np.zeros(nz, 'float64')
-    psi0 = np.zeros((nz, 41), 'float64')
+    avalue = np.zeros(nz, np.float64)
+    psi0 = np.zeros((nz, 41), np.float64)
     for iz in range(1, nz):
         a = dFile.readline().split()
         avalue[iz] = float(a[1])
@@ -1766,12 +1766,12 @@ def vernerRead():
     #nel = np.array(nlines,'int32')
     pqn = np.zeros((maxZ,maxNel),'int32')
     l = np.zeros((maxZ,maxNel),'int32')
-    eth = np.zeros((maxZ,maxNel),'float64')
-    e0 = np.zeros((maxZ,maxNel),'float64')
-    sig0 = np.zeros((maxZ,maxNel),'float64')
-    ya = np.zeros((maxZ,maxNel),'float64')
-    p = np.zeros((maxZ,maxNel),'float64')
-    yw = np.zeros((maxZ,maxNel),'float64')
+    eth = np.zeros((maxZ,maxNel),np.float64)
+    e0 = np.zeros((maxZ,maxNel),np.float64)
+    sig0 = np.zeros((maxZ,maxNel),np.float64)
+    ya = np.zeros((maxZ,maxNel),np.float64)
+    p = np.zeros((maxZ,maxNel),np.float64)
+    yw = np.zeros((maxZ,maxNel),np.float64)
     #
     fstring = 'i2,i3,i2,i2,6f11.3'
     header_line = FortranRecordReader(fstring)
@@ -1957,7 +1957,7 @@ def wgfaWrite(info, outfile = None, minBranch = 1.e-5, rightDigits = 4, maxLvl1 
     out = open(wgfaname, 'w')
     #ntrans = len(info['lvl1'])
     nlvl = max(info['lvl2'])
-    totalAvalue = np.zeros(nlvl, 'float64')
+    totalAvalue = np.zeros(nlvl, np.float64)
     if 'pretty1' in info:
         pformat = '%5i%5i%15.' + str(rightDigits) + 'f%15.3e%15.3e%30s - %30s'
     else:

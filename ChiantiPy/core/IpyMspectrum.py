@@ -248,7 +248,7 @@ class ipymspectrum(ionTrails, specTrails):
                             twoPhoton += tp['intensity']
                         else:
                             for iTempDen in range(self.NTempDen):
-                                twoPhoton[iTempDen] += tp['rate'][iTempDen]
+                                twoPhoton[iTempDen] += tp['intensity'][iTempDen]
                 else:
                     if 'errorMessage' in sorted(thisIon.Intensity.keys()):
                         print(thisIon.Intensity['errorMessage'])

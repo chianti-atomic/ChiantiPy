@@ -167,10 +167,13 @@ class ion(ioneqOne, ionTrails, specTrails):
                 print(' all densities must be positive')
                 return
             self.Ndens = self.EDensity.size
-        self.NTempDens = max(self.EDensity.size,self.Temperature.size)
-        if self.EDensity.size > 1 and self.Temperature.size == 1:
+        # needed when doing ioneq.calculate()
+        else:
+            self.Ndens = 0
+        self.NTempDens = max(self.Ndens,self.Ntemp)
+        if self.Ndens > 1 and self.Ntemp == 1:
             self.Temperature = np.tile(self.Temperature, self.NTempDens)
-        elif self.EDensity.size == 1 and self.Temperature.size > 1:
+        elif self.Ndens == 1 and self.Ntemp > 1:
             self.EDensity = np.tile(self.EDensity, self.NTempDens)
         #  needs to know self.NTempDens first
         self.ioneqOne()
@@ -183,8 +186,8 @@ class ion(ioneqOne, ionTrails, specTrails):
             self.PDensity = self.ProtonDensityRatio*self.EDensity
         else:
             self.PDensity = np.atleast_1d(pDensity)
-            if self.PDensity.size < self.NeDens:
-                np.tile(self.PDensity, self.NeDens)
+            if self.PDensity.size < self.Ndens:
+                np.tile(self.PDensity, self.Ndens)
                 self.NpDens = self.NpDens.size
 
         if setup:

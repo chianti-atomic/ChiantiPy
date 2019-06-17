@@ -144,69 +144,26 @@ class ion(ioneqOne, ionTrails, specTrails):
             if self.Dielectronic:
                 self.UpperIp = chdata.Ip[self.Z-1, self.Ion-1]
 
-        if temperature is not None:
-            self.Temperature = np.atleast_1d(temperature)
-            if isinstance(self.Temperature[0], str):
-                print(' temperature can not be a string')
-                return
-            if np.any(self.Temperature <= 0.):
-                print(' all temperatures must be positive')
-                return
-            self.Ntemp = self.Temperature.size
-        self.IoneqAll = chdata.IoneqAll
-        #  this needs to go after setting temperature and reading ionization
-        #  equilibria
-        if pDensity == 'default':
-            self.p2eRatio()
-        if eDensity is not None:
-            self.EDensity = np.atleast_1d(eDensity)
-            if isinstance(self.EDensity[0], str):
-                print(' EDensity can not be a string')
-                return
-            if np.any(self.EDensity <= 0.):
-                print(' all densities must be positive')
-                return
-            self.Ndens = self.EDensity.size
-        # needed when doing ioneq.calculate()
-        else:
-            self.Ndens = 0
-        self.NTempDens = max(self.Ndens,self.Ntemp)
-        if self.Ndens > 1 and self.Ntemp == 1:
-            self.Temperature = np.tile(self.Temperature, self.NTempDens)
-        elif self.Ndens == 1 and self.Ntemp > 1:
-            self.EDensity = np.tile(self.EDensity, self.NTempDens)
-        #  needs to know self.NTempDens first
-        self.ioneqOne()
 
-        if hasattr(self,'EDensity') and hasattr(self,'Temperature') \
-        and self.EDensity.size != self.Temperature.size:
-            raise ValueError('Temperature and density must be the same size.')
-
-        if pDensity == 'default' and eDensity is not None:
-            self.PDensity = self.ProtonDensityRatio*self.EDensity
-        else:
-            self.PDensity = np.atleast_1d(pDensity)
-            if self.PDensity.size < self.Ndens:
-                np.tile(self.PDensity, self.Ndens)
-                self.NpDens = self.NpDens.size
 
         if setup:
             if self.IonStr in chdata.MasterList:
-                self.setup()
-            else:
-                if verbose:
-                    print(' ion %s not in masterlist, just various attributes, ionization, recombination rates'%(self.IonStr))
-                self.setupIonrec()
+                self.IoneqAll = chdata.IoneqAll
+                #  this needs to go after setting temperature and reading ionization
+                #  equilibria
+                #  needs to know self.NTempDens first
+                self.argCheck(temperature, eDensity, pDensity, em)
+                self.ioneqOne()
 
-        if em is not None:
-            em = np.atleast_1d(em)
-            if em.size == 1:
-                self.Em = np.tile(em,self.NTempDens)
-            else:
-                self.Em = em
+                self.setup()
         else:
-            if hasattr(self, 'NTempDens'):
-                self.Em = np.tile(1., self.NTempDens)
+            if verbose:
+                print(' ion %s not in masterlist, just various attributes, ionization, recombination rates'%(self.IonStr))
+            if np.any(temperature) is not None:
+                self.Temperature = np.atleast_1d(temperature)
+                self.Ntemp = self.Temperature.size
+            self.setupIonrec()
+
 
         self.GrndLevels = chdata.GrndLevels[self.Iso]
 
@@ -451,7 +408,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         if hasattr(self, 'Temperature'):
             temperature = self.Temperature
         else:
-            print(' temperature is not defined')
+            print(' temperature is not defined in diRate')
             return
         # Gauss-Laguerre constants
         xgl = const.xgl
@@ -491,7 +448,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         if hasattr(self, 'Temperature'):
             temperature = self.Temperature
         else:
-            print(' temperature is not defined')
+            print(' temperature is not defined in eaDescale')
             return
         ntemp = temperature.size
         nsplups = len(eaparams['de'])
@@ -576,8 +533,6 @@ class ion(ioneqOne, ionTrails, specTrails):
             return
 
         else:
-            if verbose:
-                print('got here')
             if hasattr(self, 'Easplom'):
                 easplom = self.Easplom
             else:
@@ -704,7 +659,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         if hasattr(self, 'Temperature'):
             temperature = self.Temperature
         else:
-            print(' temperature is not defined')
+            print(' temperature is not defined in rrRate')
             return
 
         rrparamsfile = util.ion2filename(self.IonStr) + '.rrparams'
@@ -742,6 +697,40 @@ class ion(ioneqOne, ionTrails, specTrails):
         else:
             self.RrRate = {'temperature':temperature, 'rate':np.zeros_like(temperature)}
 
+    def rrlvlDescale(self,  verbose=1):
+        """
+        Interpolate and extrapolate rrlvl rates.
+        Used in level population calculations.
+        """
+        if hasattr(self, 'Temperature'):
+            temperature = self.Temperature
+        else:
+            print(' temperature is not defined in rrlvlDescale')
+            return {'errorMessage':' temperature is not defined in rrlvlDescale'}
+        lvlfile = util.ion2filename(self.IonStr)+'.rrlvl'
+        if hasattr(self, 'Rrlvl'):
+            lvl = self.Rrlvl
+        elif os.path.isfile(lvlfile):
+            self.Rrlvl = io.cireclvlRead(self.IonStr, '.'+ 'rrlvl')
+            lvl = self.Rrlvl
+        else:
+            self.RrlvlRate = {'rate':np.zeros_like(temperature)}
+            return
+
+        #  the rates and temperatures in rrlvl are not necessarily all the same
+        nlvl = len(lvl['lvl1'])
+
+        rate = np.zeros(( nlvl, self.Ntemp), np.float64)
+        for itrans in range(nlvl):
+#            lvl2 = lvl['lvl2'][itrans]
+            nTemp = lvl['ntemp'][itrans]
+            y2 = splrep(np.log(lvl['temperature'][itrans, :nTemp]), np.log(lvl['rate'][itrans, :nTemp]))
+            rr = np.exp(splev(np.log(self.Temperature),y2))
+            rate[itrans] = rr
+
+
+        self.RrlvlRate = {'rate':rate, 'lvl1':lvl['lvl1'], 'lvl2':lvl['lvl2'], 'temperature':temperature, 'type':'rrlvl'}
+
     def drRate(self):
         """
         Provide the dielectronic recombination rate coefficient as a function of temperature (K).
@@ -749,8 +738,8 @@ class ion(ioneqOne, ionTrails, specTrails):
         if hasattr(self, 'Temperature'):
             temperature = self.Temperature
         else:
-            print(' temperature is not defined')
-            return {'errorMessage':' temperature is not defined'}
+            print(' temperature is not defined in drRate')
+            return {'errorMessage':' temperature is not defined in drRate'}
         drparamsfile = util.ion2filename(self.IonStr) + '.drparams'
 
         if hasattr(self, 'DrParams'):
@@ -783,98 +772,6 @@ class ion(ioneqOne, ionTrails, specTrails):
             rate = adi*np.exp(-t0/temperature)*(1.+bdi*np.exp(-t1/temperature))/temperature**1.5
             self.DrRate = {'temperature':temperature, 'rate':rate}
 
-    def cireclvlDescale(self, lvlType):
-        """
-        Interpolate and extrapolate cilvl and reclvl rates.
-        lvltype must be either 'reclvl', 'cilvl' or 'rrlvl'
-        Used in level population calculations.
-        """
-        if hasattr(self, 'Temperature'):
-            temperature = self.Temperature
-        else:
-            print(' temperature is not defined')
-            return {'errorMessage':' temperature is not defined'}
-        lvlfile = util.ion2filename(self.IonStr)+'.' + lvlType
-        if lvlType == 'reclvl':
-            if hasattr(self, 'Reclvl'):
-                lvl = self.Reclvl
-            elif os.path.isfile(lvlfile):
-                self.Reclvl = io.cireclvlRead(self.IonStr, '.'+lvlType)
-                lvl = self.Reclvl
-            else:
-                self.ReclvlRate = {'rate':np.zeros_like(temperature)}
-                return
-        elif lvlType == 'cilvl':
-            if hasattr(self, 'Cilvl'):
-                lvl = self.Cilvl
-            elif os.path.isfile(lvlfile):
-                self.Cilvl = io.cireclvlRead(self.IonStr, '.'+lvlType)
-                lvl = self.Cilvl
-            else:
-                return
-        elif lvlType == 'rrlvl':
-            if hasattr(self, 'Rrlvl'):
-                lvl = self.Rrlvl
-            elif os.path.isfile(lvlfile):
-                self.Rrlvl = io.cireclvlRead(self.IonStr, '.'+lvlType)
-                lvl = self.Rrlvl
-            else:
-                self.RrlvlRate = {'rate':np.zeros_like(temperature)}
-                return
-
-        #  the rates and temperatures in rrlvl are not necessarily all the same
-        nlvl = len(lvl['lvl1'])
-
-        rate = np.zeros(( nlvl, self.Ntemp), np.float64)
-        for itrans in range(nlvl):
-#            lvl2 = lvl['lvl2'][itrans]
-            nTemp = lvl['ntemp'][itrans]
-            y2 = splrep(np.log(lvl['temperature'][itrans, :nTemp]), np.log(lvl['rate'][itrans, :nTemp]))
-            goodLow = temperature < lvl['temperature'][itrans].min()
-            if goodLow.sum() > 0:
-                lowT = temperature[goodLow]
-            good1 = temperature >= lvl['temperature'][itrans].min()
-            good2 = temperature <= lvl['temperature'][itrans].max()
-            realgood = np.logical_and(good1,good2)
-            if realgood.sum() > 0:
-                midT = temperature[realgood]
-            goodHigh = temperature > lvl['temperature'][itrans].max()
-            if goodHigh.sum() > 0:
-                highT = temperature[goodHigh]
-
-            nTemp = lvl['ntemp'][itrans]
-            newRate = np.zeros_like(lvl['temperature'][itrans], np.float64)
-            index = 0
-            if goodLow.sum() == 1:
-                newRate[index] = 0.
-                index += 1
-            elif goodLow.sum() > 1:
-                for idx in range(goodLow.sum()):
-                    newRate[index] = 0.
-                    index += 1
-            if realgood.sum() == 1:
-                midRec = np.exp(splev(np.log(midT),y2))
-                newRate[index] = midRec
-                index += 1
-            elif realgood.sum() > 1:
-                midRec = np.exp(splev(np.log(midT),y2))
-                for idx in range(realgood.sum()):
-                    newRate[index] = midRec[idx]
-                    index += 1
-            if goodHigh.sum() == 1:
-                newRate[index] = 0.
-                index += 1
-            elif goodHigh.sum() > 1:
-                for idx in range(goodHigh.sum()):
-                    newRate[index] = 0.
-                    index += 1
-            rate[itrans, :] = newRate[index]
-        if lvlType == 'reclvl':
-            self.ReclvlRate = {'rate':rate, 'lvl1':lvl['lvl1'], 'lvl2':lvl['lvl2'], 'temperature':temperature, 'type':'reclvl'}
-        elif lvlType == 'cilvl':
-            self.CilvlRate = {'rate':rate, 'lvl1':lvl['lvl1'], 'lvl2':lvl['lvl2'], 'temperature':temperature, 'type':'cilvl'}
-        elif lvlType == 'rrlvl':
-            self.RrlvlRate = {'rate':rate, 'lvl1':lvl['lvl1'], 'lvl2':lvl['lvl2'], 'temperature':temperature, 'type':'rrlvl'}
 
     def drRateLvl(self, verbose=0):
         """
@@ -941,17 +838,17 @@ class ion(ioneqOne, ionTrails, specTrails):
         if hasattr(self, 'Temperature'):
             temperature = self.Temperature
         else:
-            print(' temperature is not defined')
-            self.RecombRate = {'errorMessage':' temperature is not defined'}
+            print(' temperature is not defined in recombRate ion = %s'%(self.IonStr))
+            self.RecombRate = {'errorMessage':' temperature is not defined in recombRate'}
         if self.Ion == 1:
             self.RecombRate = {'rate':np.zeros_like(temperature), 'temperature':temperature}
             return
         self.rrRate()
         self.drRate()
-        if not hasattr(self, 'DrRate'):
-            rate = self.RrRate['rate']
-        else:
-            rate = self.RrRate['rate']+self.DrRate['rate']
+        if hasattr(self, 'DrRate'):
+            rate = self.DrRate['rate']
+        if hasattr(self, 'RrRate'):
+            rate += self.RrRate['rate']
         self.RecombRate = {'rate':rate, 'temperature':temperature}
 
     def p2eRatio(self):
@@ -1020,8 +917,8 @@ class ion(ioneqOne, ionTrails, specTrails):
         if hasattr(self, 'Temperature'):
             temperature = self.Temperature
         else:
-            print(' Temperature undefined')
-            return {'errorMessage':' Temperature undefined'}
+            print(' Temperature undefined in upsilonDescale')
+            return {'errorMessage':' Temperature undefined in upsilonDescale'}
 
         if not hasattr(self, 'Elvlc'):
             self.elvlcRead()
@@ -1211,7 +1108,7 @@ class ion(ioneqOne, ionTrails, specTrails):
 
 
 
-    def populate(self, popCorrect=1, verbose=0, **kwargs):
+    def populate(self, popCorrect=1, verbose=0):
         """
         Calculate level populations for specified ion.
         possible keyword arguments include temperature, eDensity, pDensity, radTemperature and rStar
@@ -1220,9 +1117,6 @@ class ion(ioneqOne, ionTrails, specTrails):
         use drPopulate() for cases where the population of various levels in the higher ionization stage
         figure into the calculation
         """
-        for one in kwargs.keys():
-            if one not in chdata.keywordArgs:
-                print(' following keyword is not understood - %20s '%(one))
         nlvls = self.Nlvls
 
         nwgfa = self.Nwgfa
@@ -1233,50 +1127,16 @@ class ion(ioneqOne, ionTrails, specTrails):
         #  fixes the problem that the ionization rates are really just strictly for the ground leve
         # which can become depopulated with increased density
 
-        if 'temperature' in kwargs.keys():
-            self.Temperature = np.asarray(kwargs['temperature'])
-            temperature = self.Temperature
-        elif hasattr(self, 'Temperature'):
-            temperature = self.Temperature
-        else:
-                print(' no temperature values have been set')
-                return
 
-        if 'eDensity' in kwargs.keys():
-            self.EDensity = np.asarray(kwargs['eDensity'])
-            eDensity = self.EDensity
-        elif hasattr(self, 'EDensity'):
-            eDensity = self.EDensity
+        if hasattr(self, 'PDensity'):
+            protonDensity = self.PDensity
         else:
-            print(' no eDensity values have been set')
-            return
-
-        if 'pDensity' in kwargs.keys():
-            if kwargs['pDensity'] == 'default':
-                self.p2eRatio()
-                protonDensity = self.ProtonDensityRatio*self.EDensity
-            else:
-                try:
-                    self.PDensity = np.asarray(kwargs['pDensity'])
-                except:
-                    print(' could not interpret value for keyword pDensity')
-                    print(' should be either "default" or a number or array')
-                    return
-        else:
-            if hasattr(self, 'PDensity'):
-                protonDensity = self.PDensity
-            else:
-                self.p2eRatio()
-                self.PDensity = self.ProtonDensityRatio*self.EDensity
-                protonDensity = self.PDensity
-                print(' proton density not specified, set to \"default\" ')
+            self.p2eRatio()
+            self.PDensity = self.ProtonDensityRatio*self.EDensity
+            protonDensity = self.PDensity
+            print(' proton density not specified, set to \"default\" ')
         #
-        if 'radTemperature' in kwargs.keys() and 'rStar' in kwargs.keys():
-            self.RadTemperature = np.asarray(kwargs['radTemperature'])
-            radTemperature = np.array(self.RadTemperature)
-            self.RStar = np.asarray(kwargs['rStar'])
-            rStar = np.asarray(self.RStar)
-        elif hasattr(self, 'RadTemperature') and hasattr(self, 'RStar'):
+        if hasattr(self, 'RadTemperature') and hasattr(self, 'RStar'):
             radTemperature = self.RadTemperature
             rStar = self.RStar
         rec = 0
@@ -1285,24 +1145,24 @@ class ion(ioneqOne, ionTrails, specTrails):
             rec = 1
         else:
             rec = 0
-
         if self.Nrrlvl:
             rrlvl = self.Rrlvl
             if hasattr(self, 'RrlvlRate'):
                 rrlvlRate = self.RrlvlRate
             else:
-                self.cireclvlDescale('rrlvl')
+                self.rrlvlDescale('rrlvl')
                 rrlvlRate = self.RrlvlRate
             rrLvlIdx =[i for i,lvl1 in enumerate(self.Rrlvl['lvl1']) if lvl1 == 1]
             self.RrLvlIdx = rrLvlIdx
+        temperature = self.Temperature
+        dDensity = self.EDensity
         if rec:
             # get ionization rate of this current ion
             self.ionizRate()
+            self.recombRate()
             #  get the higher ionization stage and its recombination rates to this ion
             highers = util.zion2name(self.Z, self.Ion+1)
-            if verbose:
-                print('higher ion:  %s'%(highers))
-            higher = ion(highers, temperature=self.Temperature, eDensity=self.EDensity, setup=0)
+            higher = ion(highers, temperature, setup=0)
             higher.setupIonrec()
             higher.recombRate()
 
@@ -1363,10 +1223,10 @@ class ion(ioneqOne, ionTrails, specTrails):
                    branch[lvl-1] = 0.
             self.Branch = branch
 
-        temp = temperature
-        ntemp = temp.size
-        dens = self.EDensity
-        ndens = dens.size
+        temp = self.Temperature
+        ntemp = self.Ntemp
+        eDensity = self.EDensity
+        ndens = self.Ndens
         nscups = self.Nscups
 #        cc = const.collision*self.EDensity
         #
@@ -1377,11 +1237,6 @@ class ion(ioneqOne, ionTrails, specTrails):
         #
 #        if npsplups:
 #            cp = const.collision*protonDensity
-        if ntemp > 1 and ndens >1 and ntemp != ndens:
-            print(' unless temperature or eDensity are single values')
-            print(' the number of temperatures values must match the ')
-            print(' the number of eDensity values')
-            return
         #
         # get corrections for recombination and excitation
         #
@@ -1396,19 +1251,19 @@ class ion(ioneqOne, ionTrails, specTrails):
 
         if verbose:
             print(' doing both ntemp: %5i  ndens:  %5i'%(ntemp, ndens))
-        pop = np.zeros((ntemp,nlvls),np.float64)
+        pop = np.zeros((self.NTempDens,nlvls),np.float64)
 #            drPop = np.zeros((ntemp,nlvls),np.float64)
-        fullPop = np.zeros((ntemp, ci + nlvls + rec), np.float64)
-        drTot = np.zeros(ntemp, np.float64)
+        fullPop = np.zeros((self.NTempDens, ci + nlvls + rec), np.float64)
+        drTot = np.zeros(self.NTempDens, np.float64)
         if self.Nrrlvl:
-            rrTot = np.zeros(ntemp, np.float64)
+            rrTot = np.zeros(self.NTempDens, np.float64)
 #            recRate = np.zeros((ntemp,nlvls),np.float64)
         #drEffRateTot = np.zeros(ntemp, np.float64)
-        rrTot = np.zeros(ntemp, np.float64)
-        recTot = np.zeros(ntemp, np.float64)
+        rrTot = np.zeros(self.NTempDens, np.float64)
+        recTot = np.zeros(self.NTempDens, np.float64)
 #
 #
-        for itemp in range(ntemp):
+        for itemp in range(self.NTempDens):
             popmat = np.copy(rad)
             temp = self.Temperature[itemp]
             dens = self.EDensity[itemp]
@@ -1436,13 +1291,13 @@ class ion(ioneqOne, ionTrails, specTrails):
                     popmat[ci + ilvl, ci + ilvl] -= self.EDensity[itemp]*self.IonizRate['rate'][itemp]
 
                 if self.Nrrlvl:
-                    rrlvl = self.Rrlvl
-                    if hasattr(self, 'RrlvlRate'):
-                        rrlvl = self.Rrlvl
+#                    rrlvl = self.Rrlvl
+#                    if hasattr(self, 'RrlvlRate'):
+#                        rrlvl = self.Rrlvl
                     if hasattr(self, 'RrlvlRate'):
                         rrlvlRate = self.RrlvlRate
                     else:
-                        self.cireclvlDescale('rrlvl')
+                        self.rrlvlDescale()
                         rrlvlRate = self.RrlvlRate
                         # only include rr from ground level
                     for itrans in rrLvlIdx:
@@ -1529,7 +1384,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             self.Population['errorMessage'] = errorMessage
 
 
-    def drPopulate(self, popCorrect=1, verbose=0, **kwargs):
+    def drPopulate(self, popCorrect=1, verbose=0):
         """
         Calculate level populations for specified ion.
         possible keyword arguments include temperature, eDensity, pDensity, radTemperature and rStar
@@ -1568,9 +1423,6 @@ class ion(ioneqOne, ionTrails, specTrails):
             else:
                 print(' %s does not have autoionization rates'%(self.IonStr))
 
-        for one in kwargs.keys():
-            if one not in chdata.keywordArgs:
-                print(' following keyword is not understood - %20s '%(one))
 
         nlvls = self.Nlvls
         nwgfa = self.Nwgfa
@@ -1578,51 +1430,15 @@ class ion(ioneqOne, ionTrails, specTrails):
         npsplups = self.Npsplups
         nauto = self.Nauto
 
-        if 'temperature' in kwargs.keys():
-            self.Temperature = np.asarray(kwargs['temperature'])
-            temperature = self.Temperature
-        elif hasattr(self, 'Temperature'):
-            temperature = self.Temperature
-        else:
-                print(' no temperature values have been set')
 
-        if 'eDensity' in kwargs.keys():
-            self.EDensity = np.asarray(kwargs['eDensity'])
-            eDensity = self.EDensity
-        elif hasattr(self, 'EDensity'):
-            eDensity = self.EDensity
+        if hasattr(self, 'PDensity'):
+            protonDensity = self.PDensity
         else:
-            print(' no eDensity values have been set')
-            return
-
-        if 'pDensity' in kwargs.keys():
-            if kwargs['pDensity'] == 'default':
-                self.p2eRatio()
-                protonDensity = self.ProtonDensityRatio*self.EDensity
-            else:
-                try:
-                    self.PDensity = np.asarray(kwargs['pDensity'])
-                except:
-                    print(' could not interpret value for keyword pDensity')
-                    print(' should be either "default" or a number or array')
-                    return
-        else:
-            if hasattr(self, 'PDensity'):
-                protonDensity = self.PDensity
-            else:
-                self.p2eRatio()
-                self.PDensity = self.ProtonDensityRatio*self.EDensity
-                protonDensity = self.PDensity
-                print(' proton density not specified, set to \"default\" ')
+            self.p2eRatio()
+            self.PDensity = self.ProtonDensityRatio*self.EDensity
+            protonDensity = self.PDensity
+            print(' proton density not specified, set to \"default\" ')
         #
-        if 'radTemperature' in kwargs.keys() and 'rStar' in kwargs.keys():
-            self.RadTemperature = np.asarray(kwargs['radTemperature'])
-            radTemperature = np.array(self.RadTemperature)
-            self.RStar = np.asarray(kwargs['rStar'])
-            rStar = np.asarray(self.RStar)
-        elif hasattr(self, 'RadTemperature') and hasattr(self, 'RStar'):
-            radTemperature = self.RadTemperature
-            rStar = self.RStar
 
         rec = 0
         ci = 0
@@ -1654,7 +1470,7 @@ class ion(ioneqOne, ionTrails, specTrails):
                 if hasattr(self, 'RrlvlRate'):
                     rrlvlRate = self.RrlvlRate
                 else:
-                    self.cireclvlDescale('rrlvl')
+                    self.rrlvlDescale('rrlvl')
                     rrlvlRate = self.RrlvlRate
 
             if rec:
@@ -1768,11 +1584,6 @@ class ion(ioneqOne, ionTrails, specTrails):
         #
 #        if npsplups:
 #            cp = const.collision*protonDensity
-        if ntemp > 1 and ndens >1 and ntemp != ndens:
-            print(' unless temperature or eDensity are single values')
-            print(' the number of temperatures values must match the ')
-            print(' the number of eDensity values')
-            return
         #
         # get corrections for recombination and excitation
         nscups = self.Nscups
@@ -1834,9 +1645,6 @@ class ion(ioneqOne, ionTrails, specTrails):
             #
                 if self.Nauto:
                     autoLvl2 = []
-#                    hPop = higher.Population['population']
-#                    if verbose:
-#                        print(' total pop for itemp %5i %12.2e '%(itemp, hPop[itemp].sum()))
                     for i, avalue in enumerate(self.Auto['avalue']):
                         l1 = self.Auto['lvl1'][i] - 1
                         l2 = self.Auto['lvl2'][i] - 1
@@ -2126,8 +1934,8 @@ class ion(ioneqOne, ionTrails, specTrails):
             nonzero = toppops > 0.
             ymin = min(toppops[nonzero])
             for lvl in toplvl:
-                # for some low temperature, populations can not be calculated
-                good = pop[:, lvl-1] > 0
+                 # for some low temperature, populations can not be calculated
+                good = pop[:, lvl-1] > 0.
                 if scale:
                     plt.loglog(eDensity[good],pop[good,lvl-1]/eDensity[good], lw=1.5, label=str(lvl))
                 elif pub:
@@ -2616,7 +2424,6 @@ class ion(ioneqOne, ionTrails, specTrails):
             top = nlines
             #
         maxEmiss = np.zeros(nlines,np.float64)
-        print(' maxEmiss.shape = %s'%(str(maxEmiss.shape)))
         for iline in range(nlines):
             maxEmiss[iline] = emiss[igvl[iline]].max()
         for iline in range(nlines):
@@ -2766,7 +2573,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         self.IntensityRatio = {'ratio':numEmiss/denEmiss,'desc':desc,
                 'temperature':outTemperature,'eDensity':outDensity,'filename':intensityRatioFileName, 'numIdx':num_idx, 'denIdx':den_idx}
 
-    def intensity(self, allLines=1):
+    def intensity(self, allLines=1, verbose=0):
         """
         Calculate  the intensities for lines of the specified ion.
 
@@ -2807,6 +2614,8 @@ class ion(ioneqOne, ionTrails, specTrails):
 
         if len(emissivity.shape) > 1:
             nwvl, ntempden =  emissivity.shape
+            if verbose:
+                print('nwvl:  %5i  ntempden:  %5i'%(nwvl, ntempden))
             intensity = np.zeros((ntempden, nwvl),np.float64)
             good = self.IoneqOne > 0.
             if good.sum() == 0.:
@@ -3312,8 +3121,6 @@ class ion(ioneqOne, ionTrails, specTrails):
 #                        rate[goodWvl] = f*pop[l2]*distr*ab*thisIoneq*self.Em/eDensity
 #                    else:
                     for it in range(nTempDens):
-                        if verbose:
-                            print(' it = %5i'%(it))
                         rate[it, goodWvl] = f*pop[it, l2]*distr*ab*thisIoneq[it]*self.Em[it]/eDensity[it]
                 self.TwoPhoton = {'wvl':wvl, 'intensity':rate, 'em':self.Em}
 

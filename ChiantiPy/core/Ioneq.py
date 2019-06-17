@@ -61,7 +61,8 @@ class ioneq(object):
         for stage in range(1, z+2):
             ionStr = util.zion2name(z, stage)
             ionList.append(ionStr)
-            atom = ion(ionStr, temperature = self.Temperature)
+            atom = ion(ionStr, temperature = self.Temperature, setup=0)
+            atom.setupIonrec()
             atom.ionizRate()
             atom.recombRate()
             chIons.append(atom)

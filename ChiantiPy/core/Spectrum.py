@@ -93,21 +93,22 @@ class spectrum(ionTrails, specTrails):
         nTemp = self.Temperature.size
         self.EDensity = np.asarray(eDensity, 'float64')
         nDen = self.EDensity.size
-        self.NTempDen = max([nTemp, nDen])
-        nTempDen = self.NTempDen
+        self.NTempDens = max([nTemp, nDen])
+        nTempDens = self.NTempDens
         self.Wavelength = wavelength
         #
         if em is None:
-            em = np.ones(self.NTempDen, 'float64')
+            self.Em = np.ones(nTempDens, np.float64)
             ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
         elif type(em) == float and em > 0.:
-            em = np.ones(self.NTempDen, 'float64')*em
+            self.Em = em*np.ones(nTempDens, np.float64)
             ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ $'
         elif type(em) == list or type(em) == tuple or type(em) == np.ndarray:
-            em = np.asarray(em, 'float64')
+            self.Em = np.asarray(em, 'float64')
             ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ $'
-        self.Em = em
+#        self.Em = em
         #
+#        print(' em = %12.2e '%(em[0]))
         #
         if self.Defaults['wavelength'] == 'angstrom':
             xlabel = 'Wavelength ('+self.Defaults['wavelength'].capitalize() +')'
@@ -142,10 +143,10 @@ class spectrum(ionTrails, specTrails):
         nWvl = wavelength.size
         self.Wavelength = wavelength
         #
-        freeFree = np.zeros((nTempDen, nWvl), 'float64').squeeze()
-        freeBound = np.zeros((nTempDen, nWvl), 'float64').squeeze()
-        twoPhoton = np.zeros((nTempDen, nWvl), 'float64').squeeze()
-        lineSpectrum = np.zeros((nTempDen, nWvl), 'float64').squeeze()
+        freeFree = np.zeros((nTempDens, nWvl), np.float64).squeeze()
+        freeBound = np.zeros((nTempDens, nWvl), np.float64).squeeze()
+        twoPhoton = np.zeros((nTempDens, nWvl), np.float64).squeeze()
+        lineSpectrum = np.zeros((nTempDens, nWvl), np.float64).squeeze()
         #
         self.IonsCalculated = []
         if keepIons:
@@ -221,7 +222,7 @@ class spectrum(ionTrails, specTrails):
         t2 = datetime.now()
         dt=t2-t1
         print(' elapsed seconds = %12.3f'%(dt.seconds))
-        if nTempDen == 1:
+        if nTempDens == 1:
             integrated = total
         else:
             integrated = total.sum(axis=0)
@@ -312,20 +313,20 @@ class bunch(ionTrails, specTrails):
         tst3 = ndens > 1
         tst4 = ndens > 1 and ntemp > 1
         if tst1 and ntemp == 1:
-            self.NTempDen = 1
+            self.NTempDens = 1
         elif tst1a and (tst2 or tst3) and not tst4:
-            self.NTempDen = ntemp*ndens
-            if ntemp == self.NTempDen and ndens != self.NTempDen:
+            self.NTempDens = ntemp*ndens
+            if ntemp == self.NTempDens and ndens != self.NTempDens:
                 self.EDensity = np.ones_like(self.Temperature)*self.EDensity
-            elif ndens == self.NTempDen and ntemp != self.NTempDen:
+            elif ndens == self.NTempDens and ntemp != self.NTempDens:
                 self.Temperature = np.ones_like(self.EDensity)*self.Temperature
         elif tst1 and tst4:
-            self.NTempDen = ntemp
+            self.NTempDens = ntemp
         #
         if em is None:
-            em = np.ones(self.NTempDen, 'float64')
+            em = np.ones(self.NTempDens, 'float64')
         elif type(em) == float and em > 0.:
-            em = np.ones(self.NTempDen, 'float64')*em
+            em = np.ones(self.NTempDens, 'float64')*em
         elif type(em) == list or type(em) == tuple or type(em) == np.ndarray:
             em = np.asarray(em, 'float64')
         self.Em = em

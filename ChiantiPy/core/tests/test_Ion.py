@@ -26,26 +26,26 @@ tmp_ion = ion(test_ion, temperature=temperature_2, eDensity=density_2)
 def test_temperature_density():
     # TODO: test case where neither are set/ one or the other is not set
     # Two single values
-    _tmp_ion = ion(test_ion, temperature=temperature_1, eDensity=density_1, setup=False)
+    _tmp_ion = ion(test_ion, temperature=temperature_1, eDensity=density_1, setup=True)
     assert _tmp_ion.Temperature == np.array(temperature_1)
     assert _tmp_ion.EDensity == np.array(density_1)
     # Multiple temperatures, one density
-    _tmp_ion = ion(test_ion, temperature=temperature_2, eDensity=density_1, setup=False)
+    _tmp_ion = ion(test_ion, temperature=temperature_2, eDensity=density_1, setup=True)
     assert np.all(_tmp_ion.Temperature == temperature_2)
     assert np.all(_tmp_ion.EDensity == np.array(temperature_2.size*[density_1]))
     # One temperature, multiple densities
-    _tmp_ion = ion(test_ion, temperature=temperature_1, eDensity=density_2, setup=False)
+    _tmp_ion = ion(test_ion, temperature=temperature_1, eDensity=density_2, setup=True)
     assert np.all(_tmp_ion.Temperature == np.array(density_2.size*[temperature_1]))
     assert np.all(_tmp_ion.EDensity == density_2)
     # Two equal-sized temperature and density arrays
-    _tmp_ion = ion(test_ion, temperature=temperature_2, eDensity=density_2, setup=False)
+    _tmp_ion = ion(test_ion, temperature=temperature_2, eDensity=density_2, setup=True)
     assert np.all(_tmp_ion.Temperature == temperature_2)
     assert np.all(_tmp_ion.EDensity == density_2)
     # Two unequal sized temperature and density arrays
     with pytest.raises(ValueError,
                        message='''Expecting ValueError when temperature and density are not of
                                 equal size.'''):
-        _tmp_ion = ion(test_ion, temperature=temperature_2, eDensity=density_3, setup=False)
+        _tmp_ion = ion(test_ion, temperature=temperature_2, eDensity=density_3, setup=True)
 
 
 # Check how abundance is set

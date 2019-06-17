@@ -2,6 +2,13 @@
 Changelog
 ===========
 
+Changes from 0.8.5 to 0.8.6
+===========================
+
+another bug-fix release
+
+added argCheck method to make sure that sizes of temperature, density and emission measure were compatible
+
 Changes from 0.8.4 to 0.8.5
 ===========================
 

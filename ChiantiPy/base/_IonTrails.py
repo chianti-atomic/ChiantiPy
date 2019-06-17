@@ -16,6 +16,67 @@ class ionTrails(object):
     Base class for `ChiantiPy.core.ion` and `ChiantiPy.core.spectrum`
     """
 
+    def argCheck(self, temperature=None, eDensity=None, pDensity='default', em = None):
+        ''' to check the compatibility of the three arguments
+        and put them into numpy arrays of atleast_1d
+        '''
+        if temperature is not None:
+            self.Temperature = np.atleast_1d(temperature)
+            if isinstance(self.Temperature[0], str):
+                print(' temperature can not be a string')
+                return
+            if np.any(self.Temperature <= 0.):
+                print(' all temperatures must be positive')
+                return
+            self.Ntemp = self.Temperature.size
+
+        if pDensity == 'default':
+            self.p2eRatio()
+
+        if eDensity is not None:
+            self.EDensity = np.atleast_1d(eDensity)
+            if isinstance(self.EDensity[0], str):
+                print(' EDensity can not be a string')
+                return
+            if np.any(self.EDensity <= 0.):
+                print(' all densities must be positive')
+                return
+            self.Ndens = self.EDensity.size
+        # needed when doing ioneq.calculate()
+        else:
+            self.Ndens = 0
+
+        self.NTempDens = max(self.Ndens,self.Ntemp)
+        if self.Ndens > 1 and self.Ntemp == 1:
+            self.Temperature = np.tile(self.Temperature, self.NTempDens)
+        elif self.Ndens == 1 and self.Ntemp > 1:
+            self.EDensity = np.tile(self.EDensity, self.NTempDens)
+
+        if hasattr(self,'EDensity') and hasattr(self,'Temperature') \
+        and self.EDensity.size != self.Temperature.size:
+            raise ValueError('Temperature and density must be the same size.')
+
+        if pDensity == 'default' and eDensity is not None:
+            self.PDensity = self.ProtonDensityRatio*self.EDensity
+        else:
+            self.PDensity = np.atleast_1d(pDensity)
+            if self.PDensity.size < self.Ndens:
+                np.tile(self.PDensity, self.Ndens)
+                self.NpDens = self.NpDens.size
+
+        if em is not None:
+            em = np.atleast_1d(em)
+            self.Em = em
+            if em.size == 1:
+                self.Em = np.tile(em,self.NTempDens)
+            elif em.size != self.NTempDens:
+                print(' the size of em, the emission measure must be either 1 or')
+                print(' the size of the large of temperature or density %5i'%(self.NTempDens))
+                return
+        else:
+            if hasattr(self, 'NTempDens'):
+                self.Em = np.ones(self.NTempDens, np.float64)
+
     def intensityList(self, index=-1, wvlRange=None, wvlRanges=None, top=10, relative=0, outFile=0, rightDigits=4 ):
         """
         List the line intensities. Checks to see if there is an existing Intensity attribute. If it exists, then those values are used.

@@ -89,24 +89,17 @@ class spectrum(ionTrails, specTrails):
         setupIntensity = 0
         #
         self.Defaults=chdata.Defaults
-        self.Temperature = np.asarray(temperature, 'float64')
-        nTemp = self.Temperature.size
-        self.EDensity = np.asarray(eDensity, 'float64')
-        nDen = self.EDensity.size
-        self.NTempDens = max([nTemp, nDen])
-        nTempDens = self.NTempDens
         self.Wavelength = wavelength
         #
-        if em is None:
-            self.Em = np.ones(nTempDens, np.float64)
+        self.argCheck(temperature=temperature, eDensity=eDensity, pDensity=None,  em=em)
+
+        nTempDens = self.NTempDens
+
+        if self.Em.max() == 1.:
             ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
-        elif type(em) == float and em > 0.:
-            self.Em = em*np.ones(nTempDens, np.float64)
+        else:
             ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ $'
-        elif type(em) == list or type(em) == tuple or type(em) == np.ndarray:
-            self.Em = np.asarray(em, 'float64')
-            ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ $'
-#        self.Em = em
+
         #
 #        print(' em = %12.2e '%(em[0]))
         #
@@ -188,7 +181,7 @@ class spectrum(ionTrails, specTrails):
             if 'line' in self.Todo[akey]:
                 if verbose:
                     print(' calculating spectrum for  :  %s'%(akey))
-                thisIon = ChiantiPy.core.ion(akey, temperature, eDensity, abundance=abundance, em=em)
+                thisIon = ChiantiPy.core.ion(akey, temperature, eDensity, pDensity='default', abundance=abundance, em=em)
                 thisIon.intensity(allLines=allLines)
                 self.IonsCalculated.append(akey)
                 if 'errorMessage' not in  list(thisIon.Intensity.keys()):
@@ -296,40 +289,8 @@ class bunch(ionTrails, specTrails):
         # creates Intensity dict from first ion calculated
         setupIntensity = 0
         #
+        self.argCheck(temperature=temperature, eDensity=eDensity, pDensity=None, em=em)
         self.Defaults=chdata.Defaults
-        temperature = np.asarray(temperature, 'float64')
-        self.Temperature = temperature
-        eDensity = np.asarray(eDensity, 'float64')
-        self.EDensity = eDensity
-
-        #
-        self.EDensity = np.asarray(eDensity,'float64')
-        self.NEDens = self.EDensity.size
-        ndens = self.EDensity.size
-        ntemp = self.Temperature.size
-        tst1 = ndens == ntemp
-        tst1a = ndens != ntemp
-        tst2 = ntemp > 1
-        tst3 = ndens > 1
-        tst4 = ndens > 1 and ntemp > 1
-        if tst1 and ntemp == 1:
-            self.NTempDens = 1
-        elif tst1a and (tst2 or tst3) and not tst4:
-            self.NTempDens = ntemp*ndens
-            if ntemp == self.NTempDens and ndens != self.NTempDens:
-                self.EDensity = np.ones_like(self.Temperature)*self.EDensity
-            elif ndens == self.NTempDens and ntemp != self.NTempDens:
-                self.Temperature = np.ones_like(self.EDensity)*self.Temperature
-        elif tst1 and tst4:
-            self.NTempDens = ntemp
-        #
-        if em is None:
-            em = np.ones(self.NTempDens, 'float64')
-        elif type(em) == float and em > 0.:
-            em = np.ones(self.NTempDens, 'float64')*em
-        elif type(em) == list or type(em) == tuple or type(em) == np.ndarray:
-            em = np.asarray(em, 'float64')
-        self.Em = em
         #
         #
         if abundance != None:

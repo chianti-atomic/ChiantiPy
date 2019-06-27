@@ -282,7 +282,8 @@ class ion(ioneqOne, ionTrails, specTrails):
         Allows a bare-bones ion object to be setup up with just the ionization and recombination
         rates. For ions without a complete set of files - one that is not in the MasterList.
         """
-
+        if hasattr(self, 'Temperature'):
+            self.NTempDens = self.Temperature.size
         if alternate_dir:
             fileName = os.path.join(alternate_dir, self.IonStr)
         else:
@@ -417,19 +418,35 @@ class ion(ioneqOne, ionTrails, specTrails):
         alpha = 5.287e+13
         tev = const.boltzmannEv*temperature
         ntemp = self.Ntemp
+        nTempDens = self.NTempDens
 
-
-        rate = np.zeros(ntemp, np.float64)
-        for itemp in range(ntemp):
-            x0 = self.Ip/tev[itemp]  # Ip in eV
-            beta = np.sqrt(const.boltzmann*temperature[itemp])
-            egl = self.Ip+xgl*tev[itemp]
+        rate = np.zeros(nTempDens, np.float64)
+        tset = set(temperature)
+        if len(tset) == 1:
+            t1 = temperature[0]
+            tev1 = const.boltzmannEv*t1
+            x0 = self.Ip/tev1 # Ip in eV
+            beta = np.sqrt(const.boltzmann*t1)
+            egl = self.Ip+xgl*tev1
             self.diCross(energy=egl)
             crossgl = self.DiCross['cross']
             term1 = wgl*xgl*crossgl
             term2 = wgl*crossgl
             newcross = alpha*beta*np.exp(-x0)*(term1.sum()+x0*term2.sum())
-            rate[itemp] = newcross
+            rate1 = newcross
+            for itemp in range(nTempDens):
+                rate[itemp] = rate1
+        else:
+            for itemp in range(nTempDens):
+                x0 = self.Ip/tev[itemp]  # Ip in eV
+                beta = np.sqrt(const.boltzmann*temperature[itemp])
+                egl = self.Ip+xgl*tev[itemp]
+                self.diCross(energy=egl)
+                crossgl = self.DiCross['cross']
+                term1 = wgl*xgl*crossgl
+                term2 = wgl*crossgl
+                newcross = alpha*beta*np.exp(-x0)*(term1.sum()+x0*term2.sum())
+                rate[itemp] = newcross
         self.DiRate = {'temperature':temperature, 'rate':rate}
 
     def eaDescale(self):
@@ -720,13 +737,15 @@ class ion(ioneqOne, ionTrails, specTrails):
         #  the rates and temperatures in rrlvl are not necessarily all the same
         nlvl = len(lvl['lvl1'])
 
-        rate = np.zeros(( nlvl, self.Ntemp), np.float64)
+#        rate = np.zeros(( nlvl, self.Ntemp), np.float64)
+        rate = []
         for itrans in range(nlvl):
 #            lvl2 = lvl['lvl2'][itrans]
             nTemp = lvl['ntemp'][itrans]
-            y2 = splrep(np.log(lvl['temperature'][itrans, :nTemp]), np.log(lvl['rate'][itrans, :nTemp]))
+            y2 = splrep(np.log(lvl['temperature'][itrans, :nTemp-1]), np.log(lvl['rate'][itrans, :nTemp-1]))
             rr = np.exp(splev(np.log(self.Temperature),y2))
-            rate[itrans] = rr
+            rate.append(rr)
+        rate = np.asarray(rate, np.float64)
 
 
         self.RrlvlRate = {'rate':rate, 'lvl1':lvl['lvl1'], 'lvl2':lvl['lvl2'], 'temperature':temperature, 'type':'rrlvl'}
@@ -850,38 +869,6 @@ class ion(ioneqOne, ionTrails, specTrails):
         if hasattr(self, 'RrRate'):
             rate += self.RrRate['rate']
         self.RecombRate = {'rate':rate, 'temperature':temperature}
-
-    def p2eRatio(self):
-        """
-        Calculates the proton density to electron density ratio using Eq. 7 of [1]_.
-
-        Notes
-        ------
-        Uses the abundance and ionization equilibrium.
-
-        References
-        ----------
-        .. [1] Young, P. R. et al., 2003, ApJS, `144, 135 <http://adsabs.harvard.edu/abs/2003ApJS..144..135Y>`_
-        """
-        if hasattr(self, 'Temperature'):
-            temperature = self.Temperature
-        else:
-            temperature = self.IoneqAll['ioneqTemperature']
-        if not hasattr(self, 'AbundanceName'):
-            AbundanceName = self.Defaults['abundfile']
-        else:
-            AbundanceName = self.AbundanceName
-
-        tmp_abundance = io.abundanceRead(abundancename=AbundanceName)
-        abundance = tmp_abundance['abundance'][tmp_abundance['abundance']>0]
-        denominator = np.zeros(len(self.IoneqAll['ioneqTemperature']))
-        for i in range(len(abundance)):
-            for z in range(1,i+2):
-                denominator += z*self.IoneqAll['ioneqAll'][i,z,:]*abundance[i]
-
-        p2eratio = abundance[0]*self.IoneqAll['ioneqAll'][0,1,:]/denominator
-        nots = splrep(np.log10(self.IoneqAll['ioneqTemperature']),p2eratio,s=0)
-        self.ProtonDensityRatio = splev(np.log10(temperature),nots,der=0,ext=1)
 
     def upsilonDescale(self, prot=0):
         """
@@ -1076,14 +1063,14 @@ class ion(ioneqOne, ionTrails, specTrails):
             ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ '
         else:
             ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
-        xlabel = 'Wavelength ('+self.Defaults['wavelength'] +')'
+        xlabel = 'Wavelength ('+self.Defaults['wavelength'].capitalize() +')'
         aspectrum = np.zeros((self.NTempDens, wavelength.size), np.float64)
         if not 'errorMessage' in self.Intensity.keys():
             idx = util.between(self.Intensity['wvl'], wvlRange)
             if len(idx) == 0:
 #                    print(' no lines in wavelength range %12.2f - %12.2f'%(wavelength.min(), wavelength.max()))
 #                    self.Spectrum = {'errorMessage':' no lines in wavelength range %12.2f - %12.2f'%(wavelength.min(), wavelength.max())}
-                errorMessage =  'no lines in wavelength range %12.2f - %12.2f'%(wavelength.min(), wavelength.max())
+                errorMessage =  '%s no lines in wavelength range %12.2f - %12.2f'%(self.IonStr, wavelength.min(), wavelength.max())
             else:
                 for itemp in range(self.NTempDens):
                     for iwvl in idx:
@@ -1094,15 +1081,15 @@ class ion(ioneqOne, ionTrails, specTrails):
 
         if type(label) == type(''):
             if hasattr(self, 'Spectrum'):
-                self.Spectrum[label] = {'intensity':aspectrum,  'wvl':wavelength, 'filter':useFilter.__name__, 'filterWidth':useFactor, 'allLines':allLines, 'em':em, 'xlabel':xlabel, 'ylabel':ylabel}
+                self.Spectrum[label] = {'intensity':aspectrum.squeeze(),  'wvl':wavelength, 'filter':useFilter.__name__, 'filterWidth':useFactor, 'allLines':allLines, 'em':em, 'xlabel':xlabel, 'ylabel':ylabel}
                 if errorMessage != None:
                     self.Spectrum[label]['errorMessage'] = errorMessage
             else:
-                self.Spectrum = {label:{'intensity':aspectrum,  'wvl':wavelength, 'filter':useFilter.__name__, 'filterWidth':useFactor, 'allLines':allLines, 'em':em, 'xlabel':xlabel, 'ylabel':ylabel}}
+                self.Spectrum = {label:{'intensity':aspectrum.squeeze(),  'wvl':wavelength, 'filter':useFilter.__name__, 'filterWidth':useFactor, 'allLines':allLines, 'em':em, 'xlabel':xlabel, 'ylabel':ylabel}}
                 if errorMessage != None:
                     self.Spectrum[label]['errorMessage'] = errorMessage
         else:
-            self.Spectrum = {'intensity':aspectrum,  'wvl':wavelength, 'filter':useFilter.__name__, 'filterWidth':useFactor, 'allLines':allLines, 'em':em, 'xlabel':xlabel, 'ylabel':ylabel}
+            self.Spectrum = {'intensity':aspectrum.squeeze(),  'wvl':wavelength, 'filter':useFilter.__name__, 'filterWidth':useFactor, 'allLines':allLines, 'em':em, 'xlabel':xlabel, 'ylabel':ylabel}
             if errorMessage != None:
                 self.Spectrum['errorMessage'] = errorMessage
 
@@ -1799,6 +1786,38 @@ class ion(ioneqOne, ionTrails, specTrails):
         self.Population = {"temperature":temperature,"eDensity":eDensity,"population":pop, "protonDensity":protonDensity, "ci":ci, "rec":rec, 'popmat':popmat, 'method':'drPopulate'}
         if len(errorMessage) > 0:
             self.Population['errorMessage'] = errorMessage
+
+    def p2eRatio(self):
+        """
+        Calculates the proton density to electron density ratio using Eq. 7 of [1]_.
+
+        Notes
+        ------
+        Uses the abundance and ionization equilibrium.
+
+        References
+        ----------
+        .. [1] Young, P. R. et al., 2003, ApJS, `144, 135 <http://adsabs.harvard.edu/abs/2003ApJS..144..135Y>`_
+        """
+        if hasattr(self, 'Temperature'):
+            temperature = self.Temperature
+        else:
+            temperature = self.IoneqAll['ioneqTemperature']
+        if not hasattr(self, 'AbundanceName'):
+            AbundanceName = self.Defaults['abundfile']
+        else:
+            AbundanceName = self.AbundanceName
+
+        tmp_abundance = io.abundanceRead(abundancename=AbundanceName)
+        abundance = tmp_abundance['abundance'][tmp_abundance['abundance']>0]
+        denominator = np.zeros(len(self.IoneqAll['ioneqTemperature']))
+        for i in range(len(abundance)):
+            for z in range(1,i+2):
+                denominator += z*self.IoneqAll['ioneqAll'][i,z,:]*abundance[i]
+
+        p2eratio = abundance[0]*self.IoneqAll['ioneqAll'][0,1,:]/denominator
+        nots = splrep(np.log10(self.IoneqAll['ioneqTemperature']),p2eratio,s=0)
+        self.ProtonDensityRatio = splev(np.log10(temperature),nots,der=0,ext=1)
 
 
 
@@ -2793,11 +2812,6 @@ class ion(ioneqOne, ionTrails, specTrails):
         lvl1 = em['lvl1']
         lvl2 = em['lvl2']
 
-        if plot:
-            plotLabels = em["plotLabels"]
-            xLabel = plotLabels["xLabel"]
-            yLabel = plotLabels["yLabel"]
-
         # find which lines are in the wavelength range if it is set
         if type(wvlRange) != type(1):
             igvl = util.between(wvl,wvlRange)
@@ -2870,7 +2884,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             ax = plt.subplot(111)
             nxvalues = len(xvalues)
             ymax = 1.2
-            ymin = ymax
+            ymin = 0.01
             for iline in range(top):
                 tline = topLines[iline]
                 plt.loglog(xvalues,emiss[tline]/maxAll)
@@ -2923,7 +2937,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         gIoneq = self.IoneqOne/eDensity
         # plot the desired ratio
         if plot:
-                plt.figure()
+            plt.figure()
         g_line = topLines[gline_idx]#  [0]
         gofnt = np.zeros(ngofnt,np.float64)
         if plot:
@@ -2956,6 +2970,9 @@ class ion(ioneqOne, ionTrails, specTrails):
                 ax2.xaxis.tick_top()
             else:
                 plt.title(newTitle, fontsize=fontsize)
+            self.Gofnt['transition'] = newTitle
+            self.Gofnt['xlabel'] = xlabel
+            self.Gofnt['ylabel'] = ylabel
 
     def twoPhotonEmiss(self, wvl):
         """
@@ -3154,12 +3171,11 @@ class ion(ioneqOne, ionTrails, specTrails):
                 self.populate()
                 pop = self.Population['population']
                 nTempDens = max(self.Temperature.size, self.EDensity.size)
-#            if nTempDens > 1:
-#                rate = np.zeros((nTempDens), np.float64)
+            rate = np.zeros((nTempDens), np.float64)
 #                if self.EDensity.size == 1:
 #                    eDensity = np.repeat(self.EDensity, nTempDens)
 #                else:
-#                    eDensity = self.EDensity
+            eDensity = self.EDensity
 #            else:
             eDensity = self.EDensity
             if self.Z == self.Ion:

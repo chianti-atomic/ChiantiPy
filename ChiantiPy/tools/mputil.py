@@ -76,7 +76,7 @@ def doIonQ(inQueue, outQueue):
         abund = inpts[6]
         em = inpts[7]
         doContinuum = inpts[8]
-        thisIon = ChiantiPy.core.Ion.ion(ionS, temperature, density, abundance=abund, em=em)
+        thisIon = ChiantiPy.core.Ion.ion(ionS, temperature, density, pDensity='default', abundance=abund, em=em)
         thisIon.intensity(allLines = allLines)
         if 'errorMessage' not in sorted(thisIon.Intensity.keys()):
             thisIon.spectrum(wavelength,  filter=filter)

@@ -67,23 +67,16 @@ class mspectrum(ionTrails, specTrails):
         setupIntensity = 0
         #
         self.Defaults = chdata.Defaults
-        self.Temperature = np.asarray(temperature, np.float64)
-        nTemp = self.Temperature.size
-        self.EDensity = np.asarray(eDensity, np.float64)
-        nDen = self.EDensity.size
-        nTempDen = max([nTemp, nDen])
-        self.NTempDen = nTempDen
         #
-        if em is None:
-            em = np.ones(self.NTempDen, np.float64)
+
+        self.argCheck(temperature=temperature, eDensity=eDensity, pDensity=None, em=em)
+
+        nTempDens = self.NTempDens
+
+        if self.Em.max() == 1.:
             ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
-        elif type(em) == float and em > 0.:
-            em = np.ones(self.NTempDen, np.float64)*em
+        else:
             ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ $'
-        elif type(em) == list or type(em) == tuple or type(em) == np.ndarray:
-            em = np.asarray(em, np.float64)
-            ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ $'
-        self.Em = em
         #
         #
         if self.Defaults['wavelength'] == 'angstrom':
@@ -123,10 +116,10 @@ class mspectrum(ionTrails, specTrails):
         #
         proc = min([proc, mp.cpu_count()])
         #
-        freeFree = np.zeros((nTempDen, nWvl), np.float64).squeeze()
-        freeBound = np.zeros((nTempDen, nWvl), np.float64).squeeze()
-        twoPhoton = np.zeros((nTempDen, nWvl), np.float64).squeeze()
-        lineSpectrum = np.zeros((nTempDen, nWvl), np.float64).squeeze()
+        freeFree = np.zeros((nTempDens, nWvl), np.float64).squeeze()
+        freeBound = np.zeros((nTempDens, nWvl), np.float64).squeeze()
+        twoPhoton = np.zeros((nTempDens, nWvl), np.float64).squeeze()
+        lineSpectrum = np.zeros((nTempDens, nWvl), np.float64).squeeze()
         #
         #  free-free multiprocessing setup
         ffWorkerQ = mp.Queue()
@@ -243,7 +236,7 @@ class mspectrum(ionTrails, specTrails):
                    # check for two-photon emission
                     if len(out) == 3:
                         tp = out[2]
-                        twoPhoton += tp['intensity']
+                        twoPhoton += tp['intensity'].squeeze()
                 else:
                     if 'errorMessage' in sorted(thisIntensity.keys()):
                         print(thisIntensity['errorMessage'])
@@ -265,7 +258,7 @@ class mspectrum(ionTrails, specTrails):
         dt=t2-t1
         print(' elapsed seconds = %12.3f'%(dt.seconds))
         #
-        if nTempDen == 1:
+        if nTempDens == 1:
             integrated = total
         else:
             integrated = total.sum(axis=0)

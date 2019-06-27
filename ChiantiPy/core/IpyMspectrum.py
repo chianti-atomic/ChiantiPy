@@ -24,8 +24,6 @@ class ipymspectrum(ionTrails, specTrails):
 
     be for creating an instance, it is necessary to type something like the following into a console
 
-    > ipcluster3 start   --n=3
-    or
     > ipcluster start   --n=3
 
     this is the way to invoke things under the IPython 6 notation
@@ -88,48 +86,19 @@ class ipymspectrum(ionTrails, specTrails):
         #
         self.Defaults = chdata.Defaults
         #
-        self.Temperature = np.asarray(temperature,np.float64)
-        self.EDensity = np.asarray(eDensity,np.float64)
-        self.NEDens = self.EDensity.size
-        ndens = self.EDensity.size
-        ntemp = self.Temperature.size
-        tst1 = ndens == ntemp
-        tst1a = ndens != ntemp
-        tst2 = ntemp > 1
-        tst3 = ndens > 1
-        tst4 = ndens > 1 and ntemp > 1
-        if tst1 and ntemp == 1:
-            self.NTempDen = 1
-        elif tst1a and (tst2 or tst3) and not tst4:
-            self.NTempDen = ntemp*ndens
-            if ntemp == self.NTempDen and ndens != self.NTempDen:
-                self.EDensity = np.ones_like(self.Temperature)*self.EDensity
-            elif ndens == self.NTempDen and ntemp != self.NTempDen:
-                self.Temperature = np.ones_like(self.EDensity)*self.Temperature
-        elif tst1 and tst4:
-            self.NTempDen = ntemp
+        self.argCheck(temperature=temperature, eDensity=eDensity, pDensity = None,  em=em)
         if verbose:
-            print('NTempDen:  %5i'%(self.NTempDen))
+            print('NTempDens:  %5i'%(self.NTempDens))
             #
         #
-        if em is None:
-            em = np.ones(self.NTempDen, np.float64)
+        if self.Em.max() == 1.:
             ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
-        elif type(em) == float:
-            em = np.ones(self.NTempDen, np.float64)*em
+        else:
             ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ $'
-        elif type(em) == list or type(em) == tuple or type(em) == np.ndarray:
-            em = np.asarray(em, np.float64)
-            ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ $'
-        self.Em = em
         if verbose:
             print('len of self.Em %5i'%(len(self.Em)))
         #
         #
-        if self.Em.any() > 0.:
-            ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ $'
-        else:
-            ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
         #
         xlabel = 'Wavelength ('+self.Defaults['wavelength'] +')'
         #
@@ -157,12 +126,13 @@ class ipymspectrum(ionTrails, specTrails):
         wavelength = np.asarray(wavelength)
         nWvl = wavelength.size
         self.Wavelength = wavelength
+        ntemp = self.Ntemp
         #
         #
-        freeFree = np.zeros((self.NTempDen, nWvl), np.float64).squeeze()
-        freeBound = np.zeros((self.NTempDen, nWvl), np.float64).squeeze()
-        twoPhoton = np.zeros((self.NTempDen, nWvl), np.float64).squeeze()
-        lineSpectrum = np.zeros((self.NTempDen, nWvl), np.float64).squeeze()
+        freeFree = np.zeros((ntemp, nWvl), np.float64).squeeze()
+        freeBound = np.zeros((ntemp, nWvl), np.float64).squeeze()
+        twoPhoton = np.zeros((self.NTempDens, nWvl), np.float64).squeeze()
+        lineSpectrum = np.zeros((self.NTempDens, nWvl), np.float64).squeeze()
         #
          #
         allInpt = []
@@ -244,10 +214,13 @@ class ipymspectrum(ionTrails, specTrails):
                    # check for two-photon emission
                     if len(out) == 4:
                         tp = out[3]
-                        if self.NTempDen == 1:
-                            twoPhoton += tp['intensity']
+                        if verbose:
+                            for akey in tp:
+                                print(' tp keys %s'%(akey))
+                        if self.NTempDens == 1:
+                            twoPhoton += tp['intensity'].squeeze()
                         else:
-                            for iTempDen in range(self.NTempDen):
+                            for iTempDen in range(self.NTempDens):
                                 twoPhoton[iTempDen] += tp['intensity'][iTempDen]
                 else:
                     if 'errorMessage' in sorted(thisIon.Intensity.keys()):
@@ -269,7 +242,7 @@ class ipymspectrum(ionTrails, specTrails):
         print(' elapsed seconds = %12.3e'%(dt.seconds))
         rcAll.purge_results('all')
         #
-        if self.NTempDen == 1:
+        if self.NTempDens == 1:
             integrated = total
         else:
             integrated = total.sum(axis=0)

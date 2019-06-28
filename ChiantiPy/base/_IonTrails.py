@@ -5,6 +5,7 @@ classes. Mostly printing, plotting and saving routines.
 import copy
 import time
 import numpy as np
+
 import matplotlib.pyplot as plt
 import ChiantiPy.tools.util as util
 import ChiantiPy.Gui as chGui
@@ -30,7 +31,7 @@ class ionTrails(object):
                 return
             self.Ntemp = self.Temperature.size
 
-        if pDensity == 'default':
+        if pDensity is 'default':
             self.p2eRatio()
 
         if eDensity is not None:
@@ -55,14 +56,14 @@ class ionTrails(object):
         if hasattr(self,'EDensity') and hasattr(self,'Temperature') \
         and self.EDensity.size != self.Temperature.size:
             raise ValueError('Temperature and density must be the same size.')
-
-        if pDensity == 'default' and eDensity is not None:
-            self.PDensity = self.ProtonDensityRatio*self.EDensity
-        else:
-            self.PDensity = np.atleast_1d(pDensity)
-            if self.PDensity.size < self.Ndens:
-                np.tile(self.PDensity, self.Ndens)
-                self.NpDens = self.NpDens.size
+        if pDensity is not None:
+            if pDensity is 'default' and eDensity is not None:
+                self.PDensity = self.ProtonDensityRatio*self.EDensity
+            else:
+                self.PDensity = np.atleast_1d(pDensity)
+                if self.PDensity.size < self.Ndens:
+                    np.tile(self.PDensity, self.Ndens)
+                    self.NpDens = self.NpDens.size
 
         if em is not None:
             em = np.atleast_1d(em)
@@ -186,8 +187,12 @@ class ionTrails(object):
         avalue = intens['avalue']
 
         if ndens == 1 and ntemp == 1:
-            dstr = ' -  Density = %10.2e (cm$^{-3}$)' %(eDensity)
-            tstr = ' -  T = %10.2e (K)' %(temperature)
+            if index < 0:
+                index = 0
+            dstr = ' -  Density = %10.2e (cm$^{-3}$)' %(eDensity[index])
+            tstr = ' -  T = %10.2e (K)' %(temperature[index])
+            intensity = intensity[index]
+            print(' temperature =  %10.2e eDensity = %10.2e'%(temperature[index], eDensity[index]))
         elif ndens == 1 and ntemp > 1:
             if index < 0:
                 index = ntemp//2
@@ -328,8 +333,11 @@ class ionTrails(object):
         ntemp = temperature.size
 
         if ndens == 1 and ntemp == 1:
-            dstr = ' -  Density = %10.2e (cm$^{-3}$)' %(eDensity)
-            tstr = ' -  T = %10.2e (K)' %(temperature)
+            if index < 0:
+                index = 0
+            intensity = self.Intensity['intensity'][index]
+            dstr = ' -  Density = %10.2e (cm$^{-3}$)' %(eDensity[index])
+            tstr = ' -  T = %10.2e (K)' %(temperature[index])
         elif ndens == 1 and ntemp > 1:
             if index < 0:
                 index = ntemp//2

@@ -58,7 +58,7 @@ class specTrails(object):
         else:
             self.Wavelength = wavelength
             nWvl = len(wavelength)
-        lineSpectrum = np.zeros((self.NTempDen, nWvl), np.float64).squeeze()
+        lineSpectrum = np.zeros((self.NTempDens, nWvl), np.float64).squeeze()
         for akey in sorted(self.IonInstances.keys()):
             if verbose:
                 print( ' trying ion = %s'%(akey))
@@ -72,10 +72,10 @@ class specTrails(object):
                     print(self.IonInstances[akey].Spectrum['errorMessage'])
                 else:
                     lineSpectrum += self.IonInstances[akey].Spectrum['intensity']
-#                if self.NTempDen == 1:
+#                if self.NTempDens == 1:
 #                    lineSpectrum += thisIon.Spectrum['intensity']
 #                else:
-#                    for iTempDen in range(self.NTempDen):
+#                    for iTempDen in range(self.NTempDens):
 #                        lineSpectrum[iTempDen] += thisIon.Spectrum['intensity'][iTempDen]
             else:
                 if 'errorMessage' in sorted(self.IonInstances[akey].Intensity.keys()):
@@ -96,7 +96,7 @@ class specTrails(object):
         self.Total = total
         #
         #
-        if self.NTempDen == 1:
+        if self.NTempDens == 1:
             integrated = total
         else:
             integrated = total.sum(axis=0)
@@ -286,8 +286,8 @@ class specTrails(object):
             plt.ylabel(ylabel)
             plt.title('integrated spectrum')
         else:
-            nTempDen = self.NTempDen
-            if nTempDen == 1:
+            nTempDens = self.NTempDens
+            if nTempDens == 1:
             #
                 if 'wavelength' in sorted(self.Spectrum.keys()):
                     plt.plot(self.Spectrum['wavelength'], self.Spectrum['intensity'])
@@ -296,7 +296,7 @@ class specTrails(object):
                     plt.title(' Temperature = %10.2e K'%(self.Temperature))
             else:
                 if index < 0:
-                    index = nTempDen/2
+                    index = nTempDens/2
                 if 'wavelength' in sorted(self.Spectrum.keys()):
                     plt.plot(self.Spectrum['wavelength'], self.Spectrum['intensity'][index])
                 elif 'wvl' in sorted(self.Spectrum.keys()):
@@ -336,8 +336,8 @@ class specTrails(object):
             plt.ylabel(ylabel)
             plt.title('integrated spectrum')
         else:
-            nTempDen = self.NTempDen
-            if nTempDen == 1:
+            nTempDens = self.NTempDens
+            if nTempDens == 1:
             #
                 plt.plot(self.LineSpectrum['wavelength'], self.LineSpectrum['intensity'])
                 plt.title(' Temperature = %10.2e K '%(self.Temperature))

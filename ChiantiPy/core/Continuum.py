@@ -53,7 +53,7 @@ class continuum(ionTrails):
     their result to an attribute. See the respective docstrings for more information.
     """
 
-    def __init__(self, ionStr,  temperature, abundance=None, em=None):
+    def __init__(self, ionStr,  temperature, abundance=None, em=None, verbose=0):
         self.IonStr = ionStr
         self.nameDict = util.convertName(ionStr)
         self.Z = self.nameDict['Z']
@@ -63,14 +63,8 @@ class continuum(ionTrails):
         self.NTemperature = self.Temperature.size
         self.Defaults = chdata.Defaults
 
-        if em is None:
-            self.Em = 1.*np.ones_like(self.Temperature)
-        elif type(em) is list:
-            self.Em = np.asarray(em)
-        elif type(em) is np.ndarray:
-            self.Em = em
-        elif type(em) is float:
-            self.Em = em*np.ones_like(self.Temperature)
+
+        self.argCheck(temperature=temperature, eDensity=None, pDensity=None, em=em, verbose=verbose)
 
         self.Ip = chdata.Ip[self.Z-1, self.Stage-1]
         self.Ipr = chdata.Ip[self.Z-1, self.Stage-2]

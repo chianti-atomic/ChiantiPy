@@ -11,9 +11,10 @@ import ChiantiPy.tools.constants as const
 import ChiantiPy.tools.util as util
 import ChiantiPy.Gui as chGui
 from ChiantiPy.base import specTrails
+from ChiantiPy.base import ionTrails
 
 
-class radLoss(specTrails):
+class radLoss(ionTrails, specTrails):
     '''
     Calculate the emission spectrum as a function of temperature and density.
 
@@ -64,11 +65,7 @@ class radLoss(specTrails):
                         print(pstring)
             masterlist = alist
         self.Defaults=chdata.Defaults
-        self.Temperature = np.asarray(temperature, np.float64)
-        nTemp = self.Temperature.size
-        self.EDensity = np.asarray(eDensity, np.float64)
-        nDen = self.EDensity.size
-        nTempDen = max([nTemp, nDen])
+        self.argCheck(temperature=temperature, eDensity=eDensity, pDensity=None, em=None)
 
         #
         if abundance is not None:
@@ -103,11 +100,12 @@ class radLoss(specTrails):
         self.MinAbund = minAbund
 #        ionInfo = util.masterListInfo()
         #
-        freeFreeLoss = np.zeros((nTempDen), np.float64).squeeze()
-        freeBoundLoss = np.zeros((nTempDen), np.float64).squeeze()
-        twoPhotonLoss = np.zeros((nTempDen), np.float64).squeeze()
-        boundBoundLoss = np.zeros((nTempDen), np.float64).squeeze()
-        twoPhotonLoss = np.zeros((nTempDen), np.float64).squeeze()
+        nTempDens = self.NTempDens
+        freeFreeLoss = np.zeros_like(self.Temperature)
+        freeBoundLoss = np.zeros_like(self.Temperature)
+        twoPhotonLoss = np.zeros_like(self.Temperature)
+        boundBoundLoss = np.zeros_like(self.Temperature)
+        twoPhotonLoss = np.zeros_like(self.Temperature)
         #
         self.IonsCalculated = []
         if keepIons:
@@ -150,7 +148,7 @@ class radLoss(specTrails):
                 thisIon = ion(akey, temperature, eDensity, abundance=abundance)
                 thisIon.intensity(allLines=allLines)
                 self.IonsCalculated.append(akey)
-                if 'errorMessage' not in  list(thisIon.Intensity.keys()):
+                if 'errorMessage' not in  thisIon.Intensity.keys():
                     self.Finished.append(akey)
                     thisIon.boundBoundLoss()
                     boundBoundLoss += thisIon.BoundBoundLoss['rate']
@@ -192,3 +190,4 @@ class radLoss(specTrails):
             if self.EDensity.size == 1:
                 title += ', density = %10.2e'%(self.EDensity)
             plt.title(title, fontsize=fontsize)
+        plt.tight_layout()

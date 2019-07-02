@@ -4,6 +4,7 @@ classes. Mostly printing, plotting and saving routines.
 """
 import copy
 import time
+import sys
 import numpy as np
 
 import matplotlib.pyplot as plt
@@ -17,19 +18,19 @@ class ionTrails(object):
     Base class for `ChiantiPy.core.ion` and `ChiantiPy.core.spectrum`
     """
 
-    def argCheck(self, temperature=None, eDensity=None, pDensity='default', em = None):
+    def argCheck(self, temperature=None, eDensity=None, pDensity='default', em = None,  verbose=0):
         ''' to check the compatibility of the three arguments
         and put them into numpy arrays of atleast_1d
         '''
         if temperature is not None:
             self.Temperature = np.atleast_1d(temperature)
             if isinstance(self.Temperature[0], str):
-                print(' temperature can not be a string')
-                return
+                raise ValueError(' temperature can not be a string')
             if np.any(self.Temperature <= 0.):
-                print(' all temperatures must be positive')
-                return
+                raise ValueError(' all temperatures must be positive')
             self.Ntemp = self.Temperature.size
+        else:
+            raise ValueError('temperature not defined')
 
         if pDensity is 'default':
             self.p2eRatio()
@@ -37,15 +38,16 @@ class ionTrails(object):
         if eDensity is not None:
             self.EDensity = np.atleast_1d(eDensity)
             if isinstance(self.EDensity[0], str):
-                print(' EDensity can not be a string')
-                return
+                raise ValueError(' EDensity can not be a string')
             if np.any(self.EDensity <= 0.):
-                print(' all densities must be positive')
-                return
+                raise ValueError(' all densities must be positive')
             self.Ndens = self.EDensity.size
         # needed when doing ioneq.calculate()
         else:
             self.Ndens = 0
+
+        if verbose:
+            print('Temperature size:  %5i  Density size:  %5i'%(self.Ntemp, self.Ndens))
 
         self.NTempDens = max(self.Ndens,self.Ntemp)
         if self.Ndens > 1 and self.Ntemp == 1:
@@ -53,8 +55,7 @@ class ionTrails(object):
         elif self.Ndens == 1 and self.Ntemp > 1:
             self.EDensity = np.tile(self.EDensity, self.NTempDens)
 
-        if hasattr(self,'EDensity') and hasattr(self,'Temperature') \
-        and self.EDensity.size != self.Temperature.size:
+        if hasattr(self,'EDensity') and hasattr(self,'Temperature') and self.Temperature.size != self.EDensity.size:
             raise ValueError('Temperature and density must be the same size.')
         if pDensity is not None:
             if pDensity is 'default' and eDensity is not None:
@@ -65,18 +66,19 @@ class ionTrails(object):
                     np.tile(self.PDensity, self.Ndens)
                     self.NpDens = self.NpDens.size
 
+
         if em is not None:
             em = np.atleast_1d(em)
             self.Em = em
             if em.size == 1:
                 self.Em = np.tile(em,self.NTempDens)
+
             elif em.size != self.NTempDens:
-                print(' the size of em, the emission measure must be either 1 or')
-                print(' the size of the large of temperature or density %5i'%(self.NTempDens))
-                return
+                raise ValueError('the size of em must be either 1 or the size of the larger of temperature or density %5i'%(self.NTempDens))
         else:
-            if hasattr(self, 'NTempDens'):
-                self.Em = np.ones(self.NTempDens, np.float64)
+            self.Em = np.ones_like(self.Temperature, np.float64)
+        if verbose:
+            print('Em size:  %5i'%(self.Em.size))
 
     def intensityList(self, index=-1, wvlRange=None, wvlRanges=None, top=10, relative=0, outFile=0, rightDigits=4 ):
         """

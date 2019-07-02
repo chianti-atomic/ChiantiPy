@@ -15,7 +15,7 @@ except ImportError as error:
 # These tests verify that the spectrum classes (Spectrum, Mspectrum, and IpyMspectrum) and the Bunch class accept the
 # same kind of basic array/container arguments for temperature, density, emission measure and minimum abundance.
 
-_spectrum_like_type = (spectrum, bunch, mspectrum, ipymspectrum)
+_spectrum_like_type = (spectrum, bunch, mspectrum)
 _container_type = (np.array,)  # tuple, list, np.atleast_2d)
 _array_lengths = (1, 5)
 
@@ -66,7 +66,7 @@ def test_spectrum_container_length_compatibility(spectrum_like_type, container_t
         pytest.xfail("The %s class could not be imported; you may be missing ipyparallel." % str(spectrum_like_type))
 
     if em_length is not None:
-        emission_measure = container_type(np.linspace(1e16, 2e16, em_length))
+        emission_measure = container_type(np.linspace(1e16, 2e16, temperature_length))
     else:
         emission_measure = None
 
@@ -93,7 +93,7 @@ def test_spectrum_container_scalar_compatibility(spectrum_like_type, container_t
         pytest.xfail("The %s class could not be imported; you may be missing ipyparallel." % str(spectrum_like_type))
 
     if em_length is not None:
-        emission_measure = container_type(np.linspace(1e16, 2e16, em_length))
+        emission_measure = container_type(np.linspace(1e16, 2e16, density_length))
     else:
         emission_measure = None
 

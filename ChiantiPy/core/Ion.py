@@ -3116,7 +3116,7 @@ class ion(ioneqOne, ionTrails, specTrails):
 #                    else:
                     for it in range(nTempDens):
                         rate[it, goodWvl] = f*pop[it, l2]*distr*ab*thisIoneq[it]*self.Em[it]/eDensity[it]
-                self.TwoPhoton = {'wvl':wvl, 'intensity':rate}
+                self.TwoPhoton = {'wvl':wvl, 'intensity':rate.squeeze()}
 
             else:
                 # He seq
@@ -3139,7 +3139,7 @@ class ion(ioneqOne, ionTrails, specTrails):
 #                    else:
                     for it in range(nTempDens):
                         rate[it, goodWvl] = f*pop[it, l2]*distr*ab*thisIoneq[it]*self.Em[it]/eDensity[it]
-                self.TwoPhoton = {'wvl':wvl, 'intensity':rate, 'em':self.Em}
+                self.TwoPhoton = {'wvl':wvl, 'intensity':rate.squeeze(), 'em':self.Em}
 
     def twoPhotonLoss(self):
         '''

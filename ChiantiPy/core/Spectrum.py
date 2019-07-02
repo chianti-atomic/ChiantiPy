@@ -91,7 +91,7 @@ class spectrum(ionTrails, specTrails):
         self.Defaults=chdata.Defaults
         self.Wavelength = wavelength
         #
-        self.argCheck(temperature=temperature, eDensity=eDensity, pDensity=None,  em=em)
+        self.argCheck(temperature=temperature, eDensity=eDensity, pDensity=None,  em=em,  verbose=verbose)
 
         nTempDens = self.NTempDens
 
@@ -289,7 +289,7 @@ class bunch(ionTrails, specTrails):
         # creates Intensity dict from first ion calculated
         setupIntensity = 0
         #
-        self.argCheck(temperature=temperature, eDensity=eDensity, pDensity=None, em=em)
+        self.argCheck(temperature=temperature, eDensity=eDensity, pDensity=None, em=em, verbose=verbose)
         self.Defaults=chdata.Defaults
         #
         #

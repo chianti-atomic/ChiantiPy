@@ -2,6 +2,12 @@
 Changelog
 ===========
 
+Changes from 0.8.6 to 0.8.7
+===========================
+
+continued code cleanup
+
+
 Changes from 0.8.5 to 0.8.6
 ===========================
 

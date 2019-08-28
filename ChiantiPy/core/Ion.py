@@ -225,13 +225,6 @@ class ion(ioneqOne, ionTrails, specTrails):
         # calculation level resolved recombination rates
         # read cilvl file
         self.Ncilvl = 0
-#        if os.path.isfile(cilvlfile):
-#            self.Cilvl = io.cireclvlRead(self.IonStr, filetype='cilvl')
-#            self.Ncilvl = len(self.Cilvl['lvl1'])
-#            nlvlCilvl = max(self.Cilvl['lvl2'])
-#            nlvlList.append(nlvlCilvl)
-#        else:
-#            self.Ncilvl = 0
         #  .reclvl file may not exist
         self.Nreclvl = 0
 #        if os.path.isfile(reclvlfile):
@@ -323,15 +316,26 @@ class ion(ioneqOne, ionTrails, specTrails):
 
     def diCross(self, energy=None, verbose=False):
         """
-        Calculate the direct ionization cross section as a function of the
-        incident electron energy in eV, puts values into DiCross
+        Calculate the direct ionization cross section (cm$^2) as a function of the
+        incident electron energy in eV, puts values into attribute DiCross
+
+        Parameters
+        ----------
+
+        energy:  array-like
+            incident electron energy in eV
+
+        verbose:  bool, int
+            with verbose set to True, printing is enabled
+
+        Attributes
+        ----------
+
+            DiCross:  dict
+
+                keys:  energy, cross
         """
         iso = self.Z - self.Ion + 1
-#        if energy == None:
-#            btenergy = 0.1*np.arange(10)
-#            btenergy[0] = 0.01
-#            dum = np.ones(len(btenergy))
-#            [energy, dum] = util.descale_bti(btenergy, dum, 2., self.Ip)
         if type(energy) == type(None):
             energy = self.Ip*10.**(0.025*np.arange(101))
         else:
@@ -417,7 +421,7 @@ class ion(ioneqOne, ionTrails, specTrails):
 
         alpha = 5.287e+13
         tev = const.boltzmannEv*temperature
-        ntemp = self.Ntemp
+
         nTempDens = self.NTempDens
 
         rate = np.zeros(nTempDens, np.float64)

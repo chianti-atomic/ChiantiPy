@@ -38,20 +38,32 @@ def between(array,limits):
 def z2element(z):
     """
     Convert atomic number `z` to its elemental symbol.
+
+    Parameters
+    ----------
+    z : `int`
+        The atomic number/nuclear charge
+
+    Returns
+    -------
+
+    element : `str`
+            the abbreviated element name
     """
     if z-1 < len(const.El):
-        thisel = const.El[z-1]
+        element = const.El[z-1]
     else:
-        thisel = ''
-    return thisel
+        element = 'unkn'
+    return element
 
 
 def spectroscopic2name(el,roman):
     """
-    Convert from spectroscopic notation, e.g. Fe XI to 'fe_11'
+    Convert from spectroscopic notation, e.g. Fe XI to 'fe_11'.
 
     Parameters
     ----------
+
     el : `str`
         Elemental symbol, e.g. Fe for iron
     roman : `str`
@@ -70,9 +82,18 @@ def zion2name(z,ion, dielectronic=False):
 
     Parameters
     ----------
+
     z : `int`
+        The atomic number/nuclear charge
     ion : `int`
+        the ionization stage, 1 for the neutral, 2 for the first ionization stage, ...
     dielectronic : `bool`, optional
+
+    Returns
+    -------
+
+    thisone : str
+        the CHIANTI style ion name, such as 'fe_13'
     """
     if ion == 0:
         thisone = 0
@@ -94,11 +115,20 @@ def zion2dir(z,ion, dielectronic=False, xuvtop=''):
 
     Parameters
     ----------
+
     z : `int`
+        The atomic number/nuclear charge
     ion : `int`
+        the ionization stage, 1 for the neutral, 2 for the first ionization stage, ...
     dielectronic : `bool`, optional
     xuvtop : `str`, optional
         Set different CHIANTI database than the default
+
+    Returns
+    -------
+
+    fname : str
+        the CHIANTI directory where the file for the ion specified by z and ion are found
     """
     if xuvtop:
         dir = xuvtop
@@ -121,15 +151,23 @@ def zion2dir(z,ion, dielectronic=False, xuvtop=''):
 
 def zion2filename(z,ion, dielectronic=False, xuvtop=''):
     """
-    Convert atomic number and ion number to CHIANTI database filename.
+    Convert nuclear charge/atomic number and ion number to CHIANTI database filename.
 
     Parameters
     ----------
     z : `int`
+        The atomic number/nuclear charge
     ion : `int`
+        the ionization stage, 1 for neutrals, 2 for singly ionized
     dielectronic : `bool`, optional
+        whether the ion is the simple dielectronic model
     xuvtop : `str`, optional
-        Set different CHIANTI database than the default
+        the top directory of the CHIANTI database to be used
+
+    Returns
+    -------
+    fname : str
+        CHIANTI database filename
     """
     if xuvtop:
         dir = xuvtop
@@ -158,7 +196,9 @@ def zion2localFilename(z,ion, dielectronic=False):
     ----------
 
     z : `int`
+        The atomic number/nuclear charge
     ion : `int`
+        the ionization stage, 1 for neutrals, 2 for singly ionized
     dielectronic : `bool`, optional
     """
     dir = '.'
@@ -183,9 +223,17 @@ def zion2spectroscopic(z,ion, dielectronic=False):
 
     Parameters
     ----------
+
     z : `int`
+        The atomic number/nuclear charge
     ion : `int`
+        the ionization stage, 1 for neutrals, 2 for singly ionized
     dielectronic : `bool`, optional
+
+    Returns
+    -------
+    spect : `str`
+        the spectroscopic notation for the ion, such as Fe XIV
     """
     if (z-1 < len(const.El)) and (ion <= z+1):
         spect = const.El[z-1].capitalize()+' '+const.Ionstage[ion-1]
@@ -197,12 +245,12 @@ def zion2spectroscopic(z,ion, dielectronic=False):
 
 def convertName(name):
     """
-    Convert ion name string (e.g. 'fe_13') to atomic number and ion number
+    Convert ion name string (e.g. 'fe_13') to atomic number and ion number.
 
     Parameters
     ----------
     name : `str`
-
+        the CHIANTI style name for an ion, such as fe_14
     Returns
     -------
     {'Z', 'Ion', 'Dielectronic', 'Element', 'higher', 'lower'} : `dict`
@@ -231,6 +279,17 @@ def ion2filename(ions):
     """
     Convert ion name string to generic directory-file name.
     convertName has probably made this redundant
+
+    Parameters
+    ----------
+    ions : str
+        the CHIANTI style name for an ion, such as fe_14
+
+    Returns
+    -------
+    fname:  str
+        the full file name of the ion directory in the CHIANTI database
+        assumes a top directory from the environmental variable XUVTOP
     """
     dir = os.environ["XUVTOP"]
     nameDict = convertName(ions)
@@ -243,6 +302,18 @@ def ion2filename(ions):
 def el2z(els):
     """
     Convert elemental symbol to atomic number
+
+    Parameters
+    ----------
+
+    els : str
+        the abreviated element name
+
+    Returns
+    -------
+
+    z : int
+        the atomic number or nuclear charge of the element
     """
     z = const.El.index(els.lower())+1
     return z
@@ -401,9 +472,23 @@ def listFiles(dir):
     """
     Walks the path and subdirectories to return a list of files.
 
+    Parameters
+    ----------
+
+    dir : str
+        the top directory to search
+        subdirectories are also searched
+
+    Returns
+    -------
+
+    listname:  list
+        a list of files in dir and  subdirectories
+
     Notes
     -----
     This can be replaced by functions in `os.path`, as if 3.4, pathlib is probably better.
+    It is not clear that this function is used anywhere in ChiantiPy
     """
     alist = os.walk(dir)
     listname = []
@@ -428,6 +513,7 @@ def listRootNames(dir):
     Notes
     -----
     This can be replaced by functions in `os.path`, as if 3.4, pathlib is probably better.
+    Only seems to be used by
     """
     alist = os.walk(dir)
 #    print(' getting file list')
@@ -521,7 +607,7 @@ def descale_bt(bte,btomega,f,ev1):
 
 def descale_bti(bte,btx,f,ev1):
     """
-    Apply ionization descaling of [9]_ to energy and cross-sections of [10]_.
+    Apply ionization descaling of [9]_ to energy and cross-sections of [7]_.
 
     Parameters
     ----------
@@ -541,7 +627,7 @@ def descale_bti(bte,btx,f,ev1):
 
     Notes
     -----
-    This is the scaling used and discussed in the Dere (2007) calculation [1] of cross sections.  It was derived from similar scalings provided by reference [2]
+    This is the scaling used and discussed in the Dere (2007) calculation [7]_ of cross sections.  It was derived from similar scalings provided by reference [2]
 
     See Also
     --------
@@ -549,7 +635,6 @@ def descale_bti(bte,btx,f,ev1):
 
     References
     ----------
-    .. [10] Dere, K. P., 2007, A&A, `466, 771, <http://adsabs.harvard.edu/abs/2007A%26A...466..771D>`_
     .. [9] Burgess, A. and Tully, J. A., 1992, A&A, `254, 436 <http://adsabs.harvard.edu/abs/1992A%26A...254..436B>`_
     """
     u = 1.-f + np.exp(np.log(f)/(1. - bte))
@@ -560,7 +645,7 @@ def descale_bti(bte,btx,f,ev1):
 
 def scale_bt(evin,omega,f,ev1):
     """
-    Apply excitation scaling of [5]_ to energy and collision strength.
+    Apply excitation scaling of [8]_ to energy and collision strength.
 
     Parameters
     ----------
@@ -582,9 +667,6 @@ def scale_bt(evin,omega,f,ev1):
     --------
     descale_bt : Descale excitation energy and cross-section
 
-    References
-    ----------
-    .. [5] Burgess, A. and Tully, J. A., 1992, A&A, `254, 436 <http://adsabs.harvard.edu/abs/1992A%26A...254..436B>`_
     """
     u = evin/ev1
     bte = 1.-np.log(f)/np.log(u-1.+f)
@@ -593,7 +675,7 @@ def scale_bt(evin,omega,f,ev1):
 
 def scale_bt_rate(inDict, ip, f=1.7):
     """
-    Apply ionization descaling of [6]_, a Burgess-Tully type scaling to ionization rates and
+    Apply ionization descaling of [7]_, a Burgess-Tully type scaling to ionization rates and
     temperatures. The result of the scaling is to return a scaled temperature between 0 and 1 and a
     slowly varying scaled rate as a function of scaled temperature. In addition, the scaled rates
     vary slowly along an iso-electronic sequence.
@@ -611,10 +693,6 @@ def scale_bt_rate(inDict, ip, f=1.7):
     Notes
     -----
     `btTemperature` and `btRate` keys are added to `inDict`
-
-    References
-    ----------
-    .. [6] Dere, K. P., 2007, A&A, `466, 771 <http://adsabs.harvard.edu/abs/2007A%26A...466..771D>`_
     """
     if ('temperature' and 'rate') in inDict.keys():
         rT = inDict['temperature']*const.boltzmannEv/ip
@@ -629,7 +707,7 @@ def scale_bt_rate(inDict, ip, f=1.7):
 
 def scale_classical(inDict, ip):
     """
-    to apply the 'classical' scaling to the input data
+    Apply the classical scaling to the input data
 
     Parameters
     ----------
@@ -653,6 +731,7 @@ def scale_classical(inDict, ip):
     -------
     {'csEnergy', 'csCross', 'ip'} or {'csTemperature', 'csRate', 'ip'}
     """
+
     if ('energy' and 'cross') in inDict.keys():
         csEnergy = inDict['energy']/ip
         csCross = inDict['cross']*ip**2

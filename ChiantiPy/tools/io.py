@@ -698,9 +698,9 @@ def elvlcWrite(info, outfile=None, round=0, addLvl=0, includeRyd=False, includeE
         erydth, the calculated energy from the scattering calculation in Rydbergs
         ref, the references in the literature to the data in the input info
     outfile : `str`
-        Output filename. ionS+'.elvlc' (in current directory) if None
+        Output filename. ionS + '.elvlc' (in current directory) if None
     round : `int`
-        input to `np.round' to round input values to maintain the correct number of significant figures
+        input to 'np.round' to round input values to maintain the correct number of significant figures
     addLvl : `int`
         Add a constant value to the index of all levels
     includeRyd : `bool`
@@ -736,7 +736,7 @@ def elvlcWrite(info, outfile=None, round=0, addLvl=0, includeRyd=False, includeE
         info['label'] = [' ']*nlvl
     if 'eryd' not in info:
         info['eryd'] = [x*const.invCm2ryd  if x > 0. else  -1. for x in info['ecm']]
-    if 'erydth 'not in info:
+    if 'erydth' not in info:
         info['erydth'] = [x*const.invCm2ryd  if x > 0. else  -1. for x in info['ecmth']]
     if 'eV' not in info:
         info['eV'] = [x*const.invCm2Ev if x > 0. else  -1. for x in info['ecm']]
@@ -744,11 +744,12 @@ def elvlcWrite(info, outfile=None, round=0, addLvl=0, includeRyd=False, includeE
         info['eVth'] = [x*const.invCm2Ev if x > 0. else  -1. for x in info['ecmth']]
    #
     out = open(elvlcName, 'w')
+    pformat = '%7i%30s%5s%5i%5s%5.1f%15.3f%15.3f'
     for i,  aterm in enumerate(info['term']):
         thisTerm = aterm.ljust(29)
         thisLabel = info['label'][i].ljust(4)
-#        print, ' len of thisTerm = ', len(thisTerm)
-        pstring = '%7i%30s%5s%5i%5s%5.1f%15.3f%15.3f'%(i+1+addLvl, thisTerm, thisLabel, info['spin'][i], info['spd'][i],info['j'][i],  np.round(info['ecm'][i], round), np.round(info['ecmth'][i], round))
+        pstring = pformat%(i+1+addLvl, thisTerm, thisLabel, info['spin'][i], info['spd'][i],info['j'][i],
+            np.round(info['ecm'][i], round), np.round(info['ecmth'][i], round))
         if includeRyd:
              pstring += ' , %15.8f , %15.8f'%(info['eryd'][i], info['erydth'][i])
         if includeEv:
@@ -897,10 +898,6 @@ def gffintRead():
     """
     Read the integrated free-free gaunt factors of [1]_.
 
-    References
-    ----------
-    .. [1] Sutherland, R. S., 1998, MNRAS, `300, 321
-        <http://adsabs.harvard.edu/abs/1998MNRAS.300..321S>`_
     """
     xuvtop = os.environ['XUVTOP']
     fileName = os.path.join(xuvtop, 'continuum','gffint.dat' )
@@ -931,11 +928,11 @@ def gffintRead():
 
 def itohRead():
     """
-    Read in the free-free gaunt factors of [1]_.
+    Read in the free-free gaunt factors of [2]_.
 
     References
     ----------
-    .. [1] Itoh, N. et al., 2000, ApJS, `128, 125
+    .. [2] Itoh, N. et al., 2000, ApJS, `128, 125
         <http://adsabs.harvard.edu/abs/2000ApJS..128..125I>`_
     """
     xuvtop = os.environ['XUVTOP']
@@ -951,7 +948,7 @@ def itohRead():
 
 def klgfbRead():
     """
-    Read CHIANTI files containing the free-bound gaunt factors for n=1-6 from [1]_.
+    Read CHIANTI files containing the free-bound gaunt factors for n=1-6 from [13]_.
 
     Returns
     -------
@@ -960,7 +957,7 @@ def klgfbRead():
 
     References
     ----------
-    .. [1] Karzas and Latter, 1961, ApJSS, `6, 167
+    .. [13] Karzas and Latter, 1961, ApJSS, `6, 167
         <http://adsabs.harvard.edu/abs/1961ApJS....6..167K>`_
     """
     xuvtop = os.environ['XUVTOP']
@@ -1015,26 +1012,6 @@ def ioneqRead(ioneqName='', minIoneq=1.e-20, verbose=False):
         filelist = util.listFiles(ioneqdir)
         idx = ioneqNames.index(ioneqName)
         fname = filelist[idx]
-#        fname = os.path.join(dir,'ioneq',ioneqname+'.ioneq')
-#        newlist = fnmatch.filter(filelist, '*.ioneq')
-#        baselist = []
-#        for one in newlist:
-#            baselist.append(os.path.basename(one))
-#        cnt = baselist.count(ioneqname+'.ioneq')
-#        if cnt == 0:
-#            print((' ioneq file not found:  ', fname))
-#            print(' the following files do exist: ')
-#            for one in newlist:
-#                print((os.path.basename(one)))
-#            return
-#        elif cnt == 1:
-#            idx = baselist.index(ioneqname+'.ioneq')
-#            if verbose:
-#                print((' file exists:  ', newlist[idx]))
-#            fname = newlist[idx]
-#        elif cnt > 1:
-#            print((' found more than one ioneq file', fname))
-#            return
     #
     input = open(fname,'r')
     s1 = input.readlines()
@@ -1058,12 +1035,10 @@ def ioneqRead(ioneqName='', minIoneq=1.e-20, verbose=False):
     nlines -= 1
     #
     #
-#    ioneqformat=FortranFormat('2i3,'+str(nTemperature)+'e10.2')
     header_lineq = FortranRecordReader('2i3,'+str(nTemperature)+'e10.2')
     #
     ioneqAll = np.zeros((nElement,nElement+1,nTemperature),np.float64)
     for iline in range(2,nlines):
-#        out=FortranLine(s1[iline],ioneqformat)
         out = header_lineq.read(s1[iline])
         iz = out[0]
         ion = out[1]
@@ -1360,11 +1335,11 @@ def rrRead(ions, filename=None):
         return {'rrtype':-1}
 
 def rrLossRead():
-    ''' to read the Mao 2017 rr loss parameters
+    ''' to read the Mao 2017 rr loss parameters [12]_
 
     References
     ----------
-    .. [1] Mao J., Kaastra J., Badnell N.R., `2017 Astron. Astrophys. 599, A10
+    .. [12] Mao J., Kaastra J., Badnell N.R., `2017 Astron. Astrophys. 599, A10
         <http://adsabs.harvard.edu/abs/2017A%26A...599A..10M>`_
     '''
     filename = os.path.join(os.environ['XUVTOP'], 'continuum', 'rrloss_mao_2017_pars.dat')
@@ -1398,7 +1373,7 @@ def rrLossRead():
 
 def scupsRead(ions, filename=None, verbose=False):
     '''
-    Read the new format v8 scups file containing the scaled temperature and upsilons from [1]_.
+    Read the new format v8 scups file containing the scaled temperature and upsilons from [8]_.
 
     Parameters
     ----------
@@ -1408,9 +1383,6 @@ def scupsRead(ions, filename=None, verbose=False):
         Custom filename, will override that specified by `ions`
     verbose : `bool`
 
-    References
-    ----------
-    .. [1] Burgess, A. and Tully, J. A., 1992, A&A, `254, 436 <http://adsabs.harvard.edu/abs/1992A%26A...254..436B>`_
     '''
     #
     if filename:
@@ -1741,7 +1713,7 @@ def twophotonHeRead():
 
 def vernerRead():
     """
-    Reads the photoionization cross-section data from [1]_.
+    Reads the photoionization cross-section data from [6]_.
 
     Returns
     -------
@@ -1750,7 +1722,7 @@ def vernerRead():
 
     References
     ----------
-    .. [1] Verner & Yakovlev, 1995, A&AS, `109, 125 <http://adsabs.harvard.edu/abs/1995A%26AS..109..125V>`_
+    .. [6] Verner & Yakovlev, 1995, A&AS, `109, 125 <http://adsabs.harvard.edu/abs/1995A%26AS..109..125V>`_
     """
     xuvtop = os.environ['XUVTOP']
     fname = os.path.join(xuvtop, 'continuum', 'verner_short.txt')

@@ -251,7 +251,7 @@ this will calculate the spectrum of fe_14 over the specified wavelength range an
 .. image:: _static/fe14.spectrum.png
     :align:  center
 
-other filters available in chianti.filters include a boxcar filter and a gaussian filter where the width can be specified directly
+other filters available in chianti.tools.filters include a boxcar filter and a gaussian filter where the width can be specified directly
 
 ::
 
@@ -264,7 +264,7 @@ Emission Measure =     1.00e+27
 
 ::
 
-  import chianti.filters as chfilters
+  import chianti.tools.filters as chfilters
   fe14.spectrum(wvl,filter=(chfilters.gaussian,.04))
 
 calculates the spectrum of fe_14 for a gaussian filter with a width of 0.04 Angstroms.
@@ -325,7 +325,8 @@ The module continuum provides the ability to calculate the free-free and free-bo
 ::
 
   temperature = 2.e+7
-  c = ch.continuum('fe_25', temperature = temperature)
+  em = [2.e+27,1.e+27]
+  c = ch.continuum('fe_25', temperature = temperature, em = em)
   wvl = 1. + 0.002*arange(4501)
   c.freeFree(wvl)
   plot(wvl, c.FreeFree['intensity'])

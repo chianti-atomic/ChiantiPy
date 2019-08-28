@@ -10,7 +10,7 @@ in /docs
 
 sphinx-apidoc  -o source/api ../ChiantiPy
 
-then need to exit stuff in api ChiantiPy.base.rst to include the methods
+then need to edit stuff in api ChiantiPy.base.rst to include the methods
 
 sphinxdoc.css - line 20 14px -> 16px
 

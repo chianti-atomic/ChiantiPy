@@ -325,7 +325,7 @@ The module continuum provides the ability to calculate the free-free and free-bo
 ::
 
   temperature = 2.e+7
-  em = [2.e+27,1.e+27]
+  em = 1.e+27
   c = ch.continuum('fe_25', temperature = temperature, em = em)
   wvl = 1. + 0.002*arange(4501)
   c.freeFree(wvl)

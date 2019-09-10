@@ -272,7 +272,8 @@ def convertName(name):
     filename = zion2filename(Z, stage, dielectronic = dielectronic)
     iso = Z - stage + 1
     isoEl = const.El[iso - 1].capitalize()
-    return {'Z':Z,'Ion':stage,'Dielectronic':dielectronic, 'Element':els.capitalize(), 'higher':higher, 'lower':lower, 'filename':filename, 'iso':iso, 'isoEl':isoEl}
+    spectro = zion2spectroscopic(Z, stage)
+    return {'Z':Z,'Ion':stage,'Dielectronic':dielectronic, 'Element':els.capitalize(), 'higher':higher, 'lower':lower, 'filename':filename, 'iso':iso, 'isoEl':isoEl, 'spectroscopic':spectro}
 
 
 def ion2filename(ions):

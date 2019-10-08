@@ -2,7 +2,6 @@
 Ionization equilibrium class
 """
 import numpy as np
-from scipy import interpolate
 import matplotlib.pyplot as plt
 
 import ChiantiPy.tools.util as util
@@ -136,17 +135,18 @@ class ioneq(object):
                 ioneq[:, it] = ioneq[:, it]/ionsum
             self.Ioneq = ioneq
 
-    def plot(self, stages=0, xr=0, yr=0, oplot=False, label=1, title=1,  bw=0, semilogx = 0, verbose=0):
+    def plot(self, stages=0, tRange=0, yr=0, oplot=False, label=1, title=1,  bw=False, semilogx = 0, verbose=0):
         '''
         Plots the ionization equilibria.
 
-        self.plot(xr=None, yr=None, oplot=False)
+        self.plot(tRange=None, yr=None, oplot=False)
         stages = sequence of ions to be plotted, neutral == 1, fully stripped == Z+1
-        xr = temperature range, yr = ion fraction range
+        tRange = temperature range, yr = ion fraction range
 
         for overplotting:
         oplot="ioneqfilename" such as 'mazzotta'
         or if oplot=True or oplot=1 and a widget will come up so that a file can be selected.
+        bw, if True, the plot is made in black and white
         '''
         if hasattr(self, 'Ioneq'):
             ioneq = getattr(self, 'Ioneq')
@@ -167,11 +167,11 @@ class ioneq(object):
             stages = range(1, self.Z+2)
         elif min(stages) < 1 or max(stages) > self.Z+1:
             stages = range(1, self.Z+2)  #  spectroscopic notation
-        if not xr:
-            xr = [self.Temperature.min(), self.Temperature.max()]
+        if not tRange:
+            tRange = [self.Temperature.min(), self.Temperature.max()]
         if not yr:
             yr = [0.01, 1.1]
-        xyr = list(xr)
+        xyr = list(tRange)
         xyr.extend(list(yr))
         #
         iz = stages[0]
@@ -232,7 +232,7 @@ class ioneq(object):
         plt.tight_layout()
         plt.axis(xyr)
 
-    def plotRatio(self, stageN, stageD, xr=0, yr=0, label=1, title=1,  bw=0, semilogx = 1, verbose=0):
+    def plotRatio(self, stageN, stageD, tRange=0, yr=0, label=1, title=1,  bw=0, semilogx = 1, verbose=0):
         '''
         Plots the ratio of the ionization equilibria of two stages of a given element
 
@@ -240,7 +240,7 @@ class ioneq(object):
         stages = sequence of ions to be plotted, neutral == 1, fully stripped == Z+1
         stageN = numerator
         stageD = denominator
-        xr = temperature range, yr = ion fraction range
+        tRange = temperature range, yr = ion fraction range
 
         '''
         ionN = util.zion2name(self.Z, stageN)
@@ -269,11 +269,11 @@ class ioneq(object):
         realGoodT = np.logical_and(goodTn, goodTd)
         goodT = self.Temperature[realGoodT]
         goodR = self.Ioneq[stageN - 1, realGoodT]/self.Ioneq[stageD - 1, realGoodT]
-        if not xr:
-            xr = [goodT.min(), goodT.max()]
+        if not tRange:
+            tRange = [goodT.min(), goodT.max()]
         if not yr:
             yr = [0.01, 1.1]
-        xyr = list(xr)
+        xyr = list(tRange)
         xyr.extend(list(yr))
         #
         if semilogx:
@@ -288,4 +288,3 @@ class ioneq(object):
         plt.legend(loc='lower right')
         plt.tight_layout()
         self.Ratio={'Temperature':goodT, 'Ratio':goodR, 'label':alabel}
-#        plt.axis(xyr)

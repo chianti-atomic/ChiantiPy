@@ -30,6 +30,7 @@ In ChiantiPy, temperatures are currently given in degrees Kelvin and densities a
 
 note that eDensity is the new keyword for electron density
 
+
 Level populations
 -----------------
 
@@ -184,6 +185,37 @@ once the axes are properly scaled, this produces the same values as fe14.Gofnt['
 .. image:: _static/fe14.gofnt_alternate.png
     :align:  center
 
+
+Ionization Equilibrium
+----------------------
+
+For the Fe XIV example, the temperature was chosen to center around 2.e+6.  It was not immediately apparent why this was done but in most of the following examples it is necessary to pick an appropriate temperature.  This can be done with the **ioneq** class.  To look at the ionization equilibrium for the iron ions (Z = 26, or 'fe')
+
+::
+
+  fe = ch.ioneq(26)
+  fe.load()
+  fe.plot()
+  plt.tight_layout()
+
+brings up a plot showing the ionization equilibrium for all of the stages of iron as a function of temperature
+
+.. image::  _static/fe_ioneq.png
+    :align:  center
+
+This is pretty crowded and we are only interested in Fe XIV (fe_14), so
+
+::
+
+  plt.figure()
+  fe.plot(stages=[13,14,15],tRange=[1.e+6, 6.e+6], yr = [1.e-2, 0.4])
+  plt.tight_layout()
+
+produces a plot of the ionization equilibria of Fe XIII, XIV and XV over a limited temperature range (tRange) and vertical range (yr)
+
+.. image::  _static/fe_13_14_15_ioneq.png
+
+from this it is clear that Fe XIV (fe_14) is formed at temperatures near :math:`2 \times 10^6` K
 
 Intensity Ratios
 ----------------

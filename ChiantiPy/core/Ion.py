@@ -1033,7 +1033,7 @@ class ion(ioneqOne, ionTrails, specTrails):
 
         can be called multiple times to use different filters and widths
         uses label to keep the separate applications of spectrum sorted by the label
-        for example, do .spectrum( .... labe='test1')
+        for example, do .spectrum( .... label = 'test1')
         and do          .spectrum( ....  label = 'test2')
         then will get self.Spectrum.keys() = test1, test2 and
         self.Spectrum['test1'] = {'intensity':aspectrum,  'wvl':wavelength, 'filter':useFilter.__name__, 'filterWidth':useFactor}
@@ -1146,7 +1146,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             rrLvlIdx =[i for i,lvl1 in enumerate(self.Rrlvl['lvl1']) if lvl1 == 1]
             self.RrLvlIdx = rrLvlIdx
         temperature = self.Temperature
-        dDensity = self.EDensity
+        eDensity = self.EDensity
         if rec:
             # get ionization rate of this current ion
             self.ionizRate()

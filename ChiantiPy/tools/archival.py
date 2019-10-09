@@ -6,7 +6,6 @@ import os
 
 #from .FortranFormat import *
 from  ChiantiPy.fortranformat import FortranRecordReader
-import ChiantiPy.tools.constants as const
 import ChiantiPy.tools.util as util
     #
     # -------------------------------------------------------------------------------------

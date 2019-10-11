@@ -85,7 +85,10 @@ class match:
         Parameters
         ----------
         specData : dict
-            contains the observed line wavelengths, intensities, identities, dwvl
+            contains the following keys
+            intensity - a list of observed line intensities
+            wvlObs - a list of observed wavelengths
+            identities, dwvl
         wghtFactor : float
             the factor used in calculating the weight chi-squared
         ionList :  list
@@ -122,8 +125,7 @@ class match:
         self.MinAbund = minAbund
         print(' minimum abundance = %10.2e'%(minAbund))
         mlInfo = io.masterListInfo()
-        if 'Intensity' in specData.keys():
-            self.Intensity = specData['Intensity']
+        self.Intensity = specData['intensity']
         self.IonS = specData['ions']
         self.IonSet = set(specData['ions'])
         reduceNobs = 0.

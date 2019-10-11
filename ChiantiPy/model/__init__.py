@@ -1,1 +1,1 @@
-""" classes and methods for modelling observed spectra """
+""" classes and methods for modeling observed spectra. """

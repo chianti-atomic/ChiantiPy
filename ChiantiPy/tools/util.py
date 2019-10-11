@@ -18,10 +18,6 @@ def between(array,limits):
     """
     Find the indices of `array` corresponding to values in the range given by `limits`
 
-    Parameters
-    ----------
-    array : 'list` or ~numpy.ndarray`
-    limits : `list`, `tuple` or ~numpy.ndarray` of length 2
     """
     array = np.asarray(array)
     nlines = len(array)

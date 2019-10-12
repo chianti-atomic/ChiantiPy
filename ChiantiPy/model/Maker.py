@@ -19,12 +19,12 @@ import ChiantiPy.tools.util as util
 import ChiantiPy.tools.constants as const
 import ChiantiPy.tools.data as chdata
 import ChiantiPy.Gui as chGui
-    #
+from ChiantiPy.base import ionTrails    #
     # --------------------------------------------------------------------------
     #
 def doDemGofntQ(inQueue, outQueue):
     '''
-    helper for multiprocessing with match.mgofnt()
+    helper for multiprocessing with maker.mgofnt()
     '''
     for inputs in iter(inQueue.get, 'STOP'):
         ionS = inputs[0]
@@ -52,7 +52,7 @@ def makeMatchPkl(specData, temp, dens, wghtFactor = 0.25,  abundanceName = None,
         the observed line intensities, wavelegths ...
     '''
 
-    mydem = match(specData, wghtFactor = wghtFactor, abundanceName =  abundanceName, minAbund=minAbund, verbose=verbose)
+    mydem = maker(specData, wghtFactor = wghtFactor, abundanceName =  abundanceName, minAbund=minAbund, verbose=verbose)
     if useMgofnt:
         mydem.mgofnt(temp, dens, verbose=1)
     else:
@@ -69,7 +69,7 @@ def makeMatchPkl(specData, temp, dens, wghtFactor = 0.25,  abundanceName = None,
     #
     #-----------------------------------------------------
     #
-class match:
+class maker(ionTrails):
     '''
     a class matching observed lines to lines in the CHIANTI database
     '''
@@ -419,18 +419,6 @@ class match:
         self.XUVTOP = os.environ['XUVTOP']
         #  quick and dirty
         self.argCheck(temperature=temperature, eDensity=density, pDensity=None,  verbose=0)
-
-#        if not np.iterable(temperature):
-#            temperature = [temperature]
-#        if not np.iterable(density):
-#            density = [density]
-#        self.Temperature = np.asarray(temperature)
-#        self.Density = np.asarray(density)
-#        nTempDens = max([len(temperature), len(density)])
-#        if nTempDens == 1:
-#            print(' the number of temperatures or densities should be greater than 1')
-#            return
-#        self.NTempDens = nTempDens
 
         temperature = self.Temperature
         density = self.EDensity

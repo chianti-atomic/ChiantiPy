@@ -73,7 +73,7 @@ class maker(ionTrails):
     '''
     a class matching observed lines to lines in the CHIANTI database
     '''
-    def __init__(self, specData, wghtFactor = 0., ionList=0, allLines=0, abundanceName = None, minAbund=1.e-6, verbose=False):
+    def __init__(self, specData, wghtFactor = 0., ionList=False, allLines=True, abundanceName = None, minAbund=1.e-6, verbose=False):
         '''
         input a list of wavelengths and a wavelength difference
         find a list of predicted spectral lines for each wavelength
@@ -128,6 +128,7 @@ class maker(ionTrails):
         self.Intensity = specData['intensity']
         self.IonS = specData['ions']
         self.IonSet = set(specData['ions'])
+        self.Dwvl = specData['dwvl']
         reduceNobs = 0.
         for anion in self.IonSet:
             same = specData['ions'].count(anion)
@@ -145,24 +146,9 @@ class maker(ionTrails):
             for iwvl in range(self.Nobs):
                 self.WghtFactor = self.SpecData['intStd'][iwvl]/self.SpecData['intensity'][iwvl]
         #
-        if dwvl:
-            dwvlA = np.ones(len(specData['dwvl']), 'float64')*dwvl
-            self.Dwvl = dwvlA
-        else:
-            self.Dwvl = specData['dwvl']
         self.AllLines = allLines
-        if 'cmmt' in specData.keys():
-            self.Counts = specData['cmmt'][:, 0]
-        elif 'cmmts' in specData.keys():
-            self.Counts = specData['cmmts'][:, 0]
-        elif 'intensity' in specData.keys():
+        if 'intensity' in specData.keys():
             self.Intensity = specData['intensity']
-        if distance:
-            self.Distance = distance*const.parsec
-        elif AU:
-            self.Distance = 1.   #*1.496e+10   # cm
-        else:
-            self.Distance = 1.
         masterlist = io.masterListRead()
 #        matches = [{'ion':[], 'wvl':[]}]*len(wvl) - it won't work this way
         matches = []
@@ -382,10 +368,10 @@ class maker(ionTrails):
                         predictedLine = []
                         for aline in amatch['lineIdx'][kon]:
                             #print(' %s   %6i  %12.3f '%( someIon, aline, thisIon.Intensity['wvl'][aline]))
-                            self.match[iwvl]['intensitySum'] += intensity[:, aline]/self.Distance**2
+                            self.match[iwvl]['intensitySum'] += intensity[:, aline]
                             iPredictedLine = self.match[iwvl]['iPredictedLine']
                             predictedLine.append(iPredictedLine)
-                            self.match[iwvl]['intensity'][iPredictedLine] = intensity[:, aline]/self.Distance**2
+                            self.match[iwvl]['intensity'][iPredictedLine] = intensity[:, aline]
                             self.match[iwvl]['iPredictedLine'] += 1
                         self.match[iwvl]['predictedLine'][kon] = predictedLine
                 self.Tmax = np.zeros_like(self.Wvl)
@@ -437,7 +423,7 @@ class maker(ionTrails):
                 if someIon not in ionList:
                     ionList.append(someIon)
 
-        self.ionList = ionList
+        self.ionList =ionList
 
         for iwvl in range(len(self.match)):
             self.match[iwvl]['intensitySum'] = np.zeros(nTempDens, 'float64')
@@ -495,10 +481,10 @@ class maker(ionTrails):
                     predictedLine = []
                     for aline in amatch['lineIdx'][kon]:
     #                    print ' ion, lineIdx = ', anIon, aline
-                        self.match[iwvl]['intensitySum'] += intensity[:, aline]/self.Distance**2
+                        self.match[iwvl]['intensitySum'] += intensity[:, aline]
                         iPredictedLine = self.match[iwvl]['iPredictedLine']
                         predictedLine.append(iPredictedLine)
-                        self.match[iwvl]['intensity'][iPredictedLine] = intensity[:, aline]/self.Distance**2
+                        self.match[iwvl]['intensity'][iPredictedLine] = intensity[:, aline]
                         self.match[iwvl]['iPredictedLine'] += 1
                     self.match[iwvl]['predictedLine'][kon]=predictedLine
         #

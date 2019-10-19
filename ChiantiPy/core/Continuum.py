@@ -738,7 +738,8 @@ class continuum(ionTrails):
             klgfb = self.Klgfb
         #
         nWvl = wvl.size
-        nTemp = temperature.size
+#        nTemp = temperature.size
+        nTemp = self.Ntemp
         #
         if verner:
             lvl1 = 1
@@ -752,84 +753,38 @@ class continuum(ionTrails):
             self.vernerCross(wvl)
             vCross = self.VernerCross
         #
-        if (nTemp > 1) and (nWvl > 1):
-            mask = np.zeros((nlvls,nTemp,nWvl),np.bool_)
-            fbrate = np.zeros((nlvls,nTemp,nWvl),np.float64)
-            fbRate = np.zeros((nTemp,nWvl),np.float64)
-            expf = np.zeros((nlvls,nTemp,nWvl),np.float64)
-            ratg = np.zeros((nlvls),np.float64)
-            ratg[0] = float(multr[0])/float(mult[0])
-            iprLvlEv = self.Ipr - const.invCm2Ev*ecm[0]
+        mask = np.zeros((nlvls,nTemp,nWvl),np.bool_)
+        fbrate = np.zeros((nlvls,nTemp,nWvl),np.float64)
+        expf = np.zeros((nlvls,nTemp,nWvl),np.float64)
+        ratg = np.zeros((nlvls),np.float64)
+        ratg[0] = float(multr[0])/float(mult[0])
+        iprLvlEv = self.Ipr - const.invCm2Ev*ecm[0]
+        iprLvlErg = const.ev2Erg*iprLvlEv
+        iprLvlCm = (iprcm - ecm[0])
+        for itemp in range(nTemp):
+            mask[0,itemp] = 1.e+8/wvl < (iprcm - ecm[0])
+            expf[0,itemp] = np.exp((iprLvlErg - 1.e+8*const.planck*const.light/wvl)/(const.boltzmann*temperature[itemp]))
+            fbrate[0,itemp] = em[itemp]*abund*gIoneq[itemp]*(const.planck*const.light/(1.e-8*wvl))**5*const.verner*ratg[0]*expf[0,itemp]*vCross/temperature[itemp]**1.5
+        for ilvl in range(lvl1,nlvls):
+            iprLvlEv = self.Ipr - const.invCm2Ev*ecm[ilvl]
             iprLvlErg = const.ev2Erg*iprLvlEv
-            iprLvlCm = (iprcm - ecm[0])
+            scaledE = np.log(const.ev2Ang/(iprLvlEv*wvl))
+            thisGf = klgfb['klgfb'][pqn[ilvl]-1, l[ilvl]]
+            spl = splrep(klgfb['pe'], thisGf)
+            gf = np.exp(splev(scaledE, spl))
+            ratg[ilvl] = float(multr[ilvl])/float(mult[0]) # ratio of statistical weights
+        #
             for itemp in range(nTemp):
-                mask[0,itemp] = 1.e+8/wvl < (iprcm - ecm[0])
-                expf[0,itemp] = np.exp((iprLvlErg - 1.e+8*const.planck*const.light/wvl)/(const.boltzmann*temperature[itemp]))
-                fbrate[0,itemp] = em[itemp]*abund*gIoneq[itemp]*(const.planck*const.light/(1.e-8*wvl))**5*const.verner*ratg[0]*expf[0,itemp]*vCross/temperature[itemp]**1.5
-            for ilvl in range(lvl1,nlvls):
-                iprLvlEv = self.Ipr - const.invCm2Ev*ecm[ilvl]
-                iprLvlErg = const.ev2Erg*iprLvlEv
-                scaledE = np.log(const.ev2Ang/(iprLvlEv*wvl))
-                thisGf = klgfb['klgfb'][pqn[ilvl]-1, l[ilvl]]
-                spl = splrep(klgfb['pe'], thisGf)
-                gf = np.exp(splev(scaledE, spl))
-                ratg[ilvl] = float(multr[ilvl])/float(mult[0]) # ratio of statistical weights
-            #
-                for itemp in range(nTemp):
-                    expf[ilvl] = np.exp((iprLvlErg - 1.e+8*const.planck*const.light/wvl)/(const.boltzmann*temperature[itemp]))
-                    expf[ilvl,itemp] = np.exp((iprLvlErg - 1.e+8*const.planck*const.light/wvl)/(const.boltzmann*temperature[itemp]))
-                    mask[ilvl,itemp] = 1.e+8/wvl < (iprcm - ecm[ilvl])
-                    fbrate[ilvl,itemp] = em[itemp]*abund*gIoneq[itemp]*const.freeBound*ratg[ilvl]*(iprLvlErg**2/float(pqn[ilvl]))*gf*expf[ilvl,itemp]/(temperature[itemp]**1.5*(wvl)**2)
-            fbrma = np.ma.array(fbrate)
-            fbrma.mask =  mask
-            fbrma.fill_value = 0.
-            fbIntensity = fbrma.sum(axis=0)
-#            for itemp in range(nTemp):
-#                fbRate += em[itemp]*abund*gIoneq[itemp]*fbrma[itemp]
-#            fbRate = fbrma.sum(axis=0)
-#            fbRate.fill_value = 0.
-            self.FreeBound = {'intensity':fbIntensity, 'temperature':temperature,'wvl':wvl,'em':em}
-            #
-        elif (nTemp == 1) and (nWvl > 1):
-            mask = np.zeros((nlvls,nWvl),np.bool_)
-            fbrate = np.zeros((nlvls,nWvl),np.float64)
-            expf = np.zeros((nlvls,nWvl),np.float64)
-            ratg = np.zeros((nlvls),np.float64)
-            # mask is true for bad values
-            ratg[0] = float(multr[0])/float(mult[0])
-            iprLvlEv = self.Ipr - const.invCm2Ev*ecm[0]
-            iprLvlErg = const.ev2Erg*iprLvlEv
-            iprLvlCm = (iprcm - ecm[0])
-            #
-            mask[0] = 1.e+8/wvl < iprcm
-            expf[0] = np.exp((iprLvlErg - hnu)/(const.boltzmann*temperature))
-            # both expressions for fbrate[0] match the IDL output
-            fbrate[0] = (const.planck*const.light/(1.e-8*wvl))**5*const.verner*ratg[0]*expf[0]*vCross/temperature**1.5
-            # factor of 1.e-8 converts to Angstrom^-1, otherwise it would be cm^-1
-#            fbrate[0] = 1.e-8*const.freeBounde*hnu**5*ratg[0]*expf[0]*vCross/temperature**1.5
-            #
-            for ilvl in range(lvl1,nlvls):
-                iprLvlEv = self.Ipr - const.invCm2Ev*ecm[ilvl]
-                iprLvlErg = const.ev2Erg*iprLvlEv
-                iprLvlCm = (iprcm - ecm[ilvl])
-                # scaled energy is relative to the ionization potential of each individual level
-                scaledE = np.log(const.ev2Ang/(iprLvlEv*wvl))
-                thisGf = klgfb['klgfb'][pqn[ilvl]-1, l[ilvl]]
-                spl = splrep(klgfb['pe'], thisGf)
-                gf = np.exp(splev(scaledE, spl))
-                mask[ilvl] = 1.e+8/wvl < iprLvlCm
-                ratg[ilvl] = float(multr[ilvl])/float(mult[0]) # ratio of statistical weights
-                expf[ilvl] = np.exp((iprLvlErg - hnu)/(const.boltzmann*temperature))
-                fbrate[ilvl] = const.freeBound*ratg[ilvl]*(iprLvlErg**2/float(pqn[ilvl]))*expf[ilvl]*gf/(temperature**1.5*(wvl)**2)
-            fbrma = np.ma.array(fbrate)
-            fbrma.mask =  mask
-            fbrma.fill_value = 0.
-            fbRate = em*abund*gIoneq*fbrma.sum(axis=0)
-            fbRate.fill_value = 0.
-            self.FreeBound = {'fbRate':fbRate, 'intensity':fbRate.data, 'temperature':temperature,'wvl':wvl, 'mask':mask, 'expf':expf,'vCross':vCross}
-        #elif (nTemp > 1) and (nWvl == 1):
-        else:
-            self.FreeBound = {'intensity':np.zeros(nTemp,np.float64),'errorMessage':' this is the case of a single wavelength'}
+                expf[ilvl] = np.exp((iprLvlErg - 1.e+8*const.planck*const.light/wvl)/(const.boltzmann*temperature[itemp]))
+                expf[ilvl,itemp] = np.exp((iprLvlErg - 1.e+8*const.planck*const.light/wvl)/(const.boltzmann*temperature[itemp]))
+                mask[ilvl,itemp] = 1.e+8/wvl < (iprcm - ecm[ilvl])
+                fbrate[ilvl,itemp] = em[itemp]*abund*gIoneq[itemp]*const.freeBound*ratg[ilvl]*(iprLvlErg**2/float(pqn[ilvl]))*gf*expf[ilvl,itemp]/(temperature[itemp]**1.5*(wvl)**2)
+        fbrma = np.ma.array(fbrate)
+        fbrma.mask =  mask
+        fbrma.fill_value = 0.
+        fbIntensity = fbrma.sum(axis=0).squeeze()
+        self.FreeBound = {'intensity':fbIntensity, 'temperature':temperature,'wvl':wvl,'em':em}
+        #
 
     def freeBoundEmiss(self, wvl, verner=1):
 

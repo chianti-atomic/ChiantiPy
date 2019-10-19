@@ -1127,121 +1127,10 @@ class maker(ionTrails):
         #
     def fitNt(self, initialValue, maxfev=0):
         '''
-        calls leastsq to fit the 2t model
+        calls leastsq to fit the 2d model
         '''
         out = optimize.leastsq(self.fitFuncNt, np.asarray(initialValue, 'float64'), full_output=1, maxfev=maxfev)
         self.Leastsq = {'em':out[0], 'cov':out[1], 'info':out[2], 'message':out[3], 'ier':out[4]}
-        #
-        # -------------------------------------------------------------
-        #
-    def fitNt(self, initialValue, maxfev=0):
-        '''
-        calls leastsq to fit the 2t model
-        '''
-        out = optimize.leastsq(self.fitFuncNt, np.asarray(initialValue, 'float64'), full_output=1, maxfev=maxfev)
-        self.Leastsq = {'em':out[0], 'cov':out[1], 'info':out[2], 'message':out[3], 'ier':out[4]}
-        #
-        # -----------------------------------------------------------
-        #
-    def search1tSpace(self, initialEm, indxlimits=None, verbose=0, log=0, maxfev=0):
-        '''
-        to conduct a brute force search of an isothermal-space and find the
-        best fit
-        indxlimits give the range of indices to fit over
-            can use self.MinIndex and self.MaxIndex+1
-        initialEm = log value of the emission measure to begin the searching
-        '''
-        t1 = datetime.now()
-        if self.Nobs <= 2.:
-            print(' the number of observables %10.2 is less than the number of parameters'%(self.Nobs, 2.*2.))
-            return
-        if indxlimits == None:
-            if not hasattr(self, 'MinIndex'):
-                self.findMinMaxIndices()
-            indxlimits = [self.MinIndex, self.MaxIndex]
-        self.Nfree = 2
-        nTemp = 1
-        emfit = []
-        idx = []
-        chisq = []
-        info = []
-        searchDx = []
-        maskedValues = []
-
-
-        tempSearched = np.asarray(self.Temperature[indxlimits[0]:indxlimits[1] + 1], 'float64')
-        msk = np.ma.make_mask(np.ones((self.NTempDens)))
-        chisq1d = np.ma.array(np.zeros((self.NTempDens), 'float64'), mask=msk)
-        em1d = np.ma.array(np.zeros((self.NTempDens), 'float64'), mask=msk)
-        if log:
-            logname = 'search1t.raw'
-            logfile = open(logname, 'w')
-            logfile.write('%s \n'%(self.SpecData['filename']))
-        logformat = '%5i %4i %10.2e %10.2e %10.2e  %10i\n'
-        counter = 0
-        pstring1 = '%5i %5i %10.2e %12.3e %10.2e %10.2e %10.2e '
-        for idx1 in range(indxlimits[0], indxlimits[1] + 1, 1):
-            searchDx1 = idx1 - indxlimits[0]
-            searchDx.append(searchDx1)
-            # kpd update
-            self.emSetIndices(idx1)
-            self.fit1t(initialEm, maxfev=maxfev)
-            chisq1,  msk1 = self.getChisq()
-            if not msk1:
-                emfit.append(self.Leastsq['em'][0])
-                chisq.append(chisq1)
-                idx.append(idx1)
-                info.append(self.Leastsq['info'])
-                chisq1d.data[idx1] = chisq1
-                chisq1d.mask[idx1] = False
-                em1d.data[idx1] = self.Leastsq['em'][0]
-                em1d.mask[idx1] = False
-                if verbose:
-                    em1 = 10.**(self.Leastsq['em'][0])
-                    print(pstring1%(counter, idx1, self.Temperature[idx1], self.Leastsq['em'][0], em1, chisq[-1], self.Leastsq['info']['nfev']))
-                elif log:
-                    logfile.write(logformat%(counter, idx1, self.Temperature[idx1], self.Leastsq['em'][0], chisq[-1], self.Leastsq['info']['nfev']))
-            else:
-                maskedValues.append(idx1)
-                if log:
-                    logfile.write('msk at %5i %4i %10.2e \n'%(counter, idx1, chisq[-1]))
-                # these values are already masked
-                chisq1d.data[idx1] = self.getChisq()
-                em1d.data[idx1] = self.Leastsq['em'][0]
-            counter += 1
-        if log:
-            logfile.close()
-    #
-        self.SearchData = {'temperature':self.Temperature, 'tempSearched':tempSearched, 'emfit':emfit, 'idx':idx, 'chisq':chisq, 'minchisq':min(chisq), 'searchDx':searchDx, 'maskedValues':maskedValues, 'message':'this contains all the data for the 1tExpSpace'}
-        #
-        print('min chisq = %10.3e '%(min(chisq)))
-        # set things to best fit
-        #
-        gdx=[i for i,ch in enumerate(chisq) if ch == min(chisq)]
-#        print(' gdx = ', gdx)
-#        print(' len, min of chisq %5i %10.e'%(len(chisq), min(chisq)))
-#        print(' emfit', emfit[gdx[0]])
-#        print(' chisq', chisq[gdx[0]])
-#        print(' idx ', idx12[gdx[0]])
-#        print(' temperature', self.Temperature[idx12[gdx[0]]])
-#        print(' density %10.2e'%(self.Density))
-        #  kpd
-        self.emSetIndices(idx[gdx[0]])
-        self.emSet(emfit[gdx[0]])
-        self.predict()
-        em = 10.**emfit[gdx[0]]
-        minChisq = min(chisq)
-        reducedChisq = minChisq/float(self.Nobs - 2.*nTemp)
-        # gives 90% confidence for 2 parameters
-#        chisq1sig = min(chisq)*np.ones_like(temperatureSearched, 'float64') + 4.605
-#        good1sig = chisq < min(chisq) + 4.605
-#        temp1sig = [temperatureSearched[good1sig].min(), temperatureSearched[good1sig].max()]
-        #
-        # key 'emfit' is the log value, 'em' is actual value
-        self.SearchData['best'] = {'em':em, 'emfit':emfit[gdx[0]], 'chisq':chisq[gdx[0]], 'reducedChisq':reducedChisq, 'idx':idx[gdx[0]], 'temperature':self.Temperature[idx[gdx[0]]], 'density':self.EDensity}
-        t2 = datetime.now()
-        dt = t2 - t1
-        print(' elapsed seconds = %12.3f'%(dt.seconds))
         #
         # -----------------------------------------------------------
         #
@@ -1250,7 +1139,7 @@ class maker(ionTrails):
         to conduct a brute force search over electron density for an isothermal-space and find the
         best fit to the em and density
         indxlimits give the range of indices to fit over
-            can use self.MinIndex and self.MaxIndex+1
+        can use self.MinIndex and self.MaxIndex+1
         initialEm = log value of the emission measure to begin the searching
         '''
         t1 = datetime.now()
@@ -1302,7 +1191,7 @@ class maker(ionTrails):
                     em1 = 10.**(self.Leastsq['em'][0])
                     print(pstring1%(counter, idx1, self.EDensity[idx1], self.Leastsq['em'][0], em1, chisq[-1], self.Leastsq['info']['nfev']))
                 elif log:
-                    logfile.write(logformat%(counter, idx1, self.Temperature[idx1], self.Leastsq['em'][0], chisq[-1], self.Leastsq['info']['nfev']))
+                    logfile.write(logformat%(counter, idx1, self.EDensity[idx1], self.Leastsq['em'][0], chisq[-1], self.Leastsq['info']['nfev']))
             else:
                 maskedValues.append(idx1)
                 if log:
@@ -1321,13 +1210,6 @@ class maker(ionTrails):
         # set things to best fit
         #
         gdx=[i for i,ch in enumerate(chisq) if ch == min(chisq)]
-#        print(' gdx = ', gdx)
-#        print(' len, min of chisq %5i %10.e'%(len(chisq), min(chisq)))
-#        print(' emfit', emfit[gdx[0]])
-#        print(' chisq', chisq[gdx[0]])
-#        print(' idx ', idx12[gdx[0]])
-#        print(' temperature', self.Temperature[idx12[gdx[0]]])
-#        print(' density %10.2e'%(self.Density))
         #  kpd
         self.emSetIndices(idx[gdx[0]])
         self.emSet(emfit[gdx[0]])
@@ -1335,10 +1217,6 @@ class maker(ionTrails):
         em = 10.**emfit[gdx[0]]
         minChisq = min(chisq)
         reducedChisq = minChisq/float(self.Nobs - self.Nfree)
-        # gives 90% confidence for 2 parameters
-#        chisq1sig = min(chisq)*np.ones_like(temperatureSearched, 'float64') + 4.605
-#        good1sig = chisq < min(chisq) + 4.605
-#        temp1sig = [temperatureSearched[good1sig].min(), temperatureSearched[good1sig].max()]
         #
         # key 'emfit' is the log value, 'em' is actual value
         self.SearchData['best'] = {'em':em, 'emfit':emfit[gdx[0]], 'chisq':chisq[gdx[0]], 'reducedChisq':reducedChisq, 'idx':idx[gdx[0]], 'density':self.EDensity[idx[gdx[0]]], 'temperature':self.Temperature[idx[gdx[0]]]}

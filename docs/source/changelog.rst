@@ -2,6 +2,19 @@
 Changelog
 ===========
 
+Changes from 0.8.7 to 0.9.0
+===========================
+
+a new module model.maker has been added
+
+::
+
+  import ChiantiPy.model as mdl
+  mymodel = mdl.maker(...)
+
+
+a serious bug in ch.freeBound was fixed - the use of a single temperature was problematic
+
 Changes from 0.8.6 to 0.8.7
 ===========================
 

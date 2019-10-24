@@ -2,6 +2,16 @@
 Changelog
 ===========
 
+Changes from 0.9.0 to 0.9.1
+===========================
+
+this is a bug-fix release.
+
+in cases when it is not possible to calculate the free-bound continuum for some ion, mspectrum did not handle this correctly and crashed
+
+also, the ion zn_31 (Zn XXXI) is a bare ion and has no ionization potential (IP) and looking it up caused indexing errors.
+
+
 Changes from 0.8.7 to 0.9.0
 ===========================
 

@@ -193,7 +193,8 @@ class mspectrum(ionTrails, specTrails):
             #
             for ifb in range(fbWorkerQSize):
                 thisFreeBound = fbDoneQ.get()
-                freeBound += thisFreeBound['intensity'].squeeze()
+                if 'errorMessage' not in thisFreeBound.keys():
+                    freeBound += thisFreeBound['intensity'].squeeze()
 
             for p in fbProcesses:
                 if not isinstance(p, str):

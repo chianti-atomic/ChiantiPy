@@ -160,13 +160,14 @@ class specTrails(object):
                         if doLines:
                             self.Todo[one] = 'line'
                 for stage in range(2, z+2):
-                    name = util.zion2name(z, stage)
-                    if doContinuum and not nameDict['Dielectronic']:
-                        if name not in self.Todo.keys():
-                            self.Todo[name] = 'ff'
-                        else:
-                            self.Todo[name] += '_ff'
-                        self.Todo[name] += '_fb'
+                    if stage < 31:
+                        name = util.zion2name(z, stage)
+                        if doContinuum and not nameDict['Dielectronic']:
+                            if name not in self.Todo.keys():
+                                self.Todo[name] = 'ff'
+                            else:
+                                self.Todo[name] += '_ff'
+                            self.Todo[name] += '_fb'
         if ionList:
             for one in ionList:
                 nameDict = util.convertName(one)
@@ -177,7 +178,7 @@ class specTrails(object):
                     if verbose:
                         pstring = ' %s not in CHIANTI database'%(one)
                         print(pstring)
-                if doContinuum and not nameDict['Dielectronic']:
+                if doContinuum and not nameDict['Dielectronic'] and nameDict['Ion'] < 31:
                     if one not in self.Todo.keys():
                         self.Todo[one] = 'ff'
                     else:
@@ -247,12 +248,13 @@ class specTrails(object):
                             # ionS is the target ion, cannot be the neutral for the continuum
 #                            if verbose:
 #                                print(' setting up continuum calculation for %s  '%(ionS))
-                            if ionS in sorted(self.Todo.keys()):
-                                self.Todo[ionS] += '_ff_fb'
-                            else:
-                                self.Todo[ionS] = 'ff_fb'
-                            if verbose:
-                                print(' for ion %s do : %s'%(ionS, self.Todo[ionS]))
+                            if ionstage < 31:
+                                if ionS in sorted(self.Todo.keys()):
+                                    self.Todo[ionS] += '_ff_fb'
+                                else:
+                                    self.Todo[ionS] = 'ff_fb'
+                                if verbose:
+                                    print(' for ion %s do : %s'%(ionS, self.Todo[ionS]))
         if len(self.Todo.keys()) == 0:
             print(' no elements have been selected')
             print(' it is necessary to provide an elementList, an ionList, or set minAbund > 0.')

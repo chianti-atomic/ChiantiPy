@@ -1304,7 +1304,7 @@ def rrRead(ions, filename=None):
         lines = input.readlines()
         input.close()
         rrtype = int(lines[0])
-        ref = lines[3:-2]
+        ref = lines[3:-1]
         #
         if rrtype == 1:
             # a Badnell type

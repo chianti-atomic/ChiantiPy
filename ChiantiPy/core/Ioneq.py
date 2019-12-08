@@ -213,13 +213,13 @@ class ioneq(object):
                         plt.plot(result['ioneqTemperature'], result['ioneqAll'][self.Z-1, iz-1],linestyle[1], lw=lw)
             elif type(oplot) == type('string'):
                 atitle += '  & ' + oplot
-                result = io.ioneqRead(ioneqname=oplot)
+                result = io.ioneqRead(ioneqName=oplot)
                 if result != False:
                     for iz in stages:
                         plt.plot(result['ioneqTemperature'], result['ioneqAll'][self.Z-1, iz-1],linestyle[1], lw=lw)
             elif type(oplot) == type([]):
                 for iplot in range(len(oplot)):
-                    result = io.ioneqRead(ioneqname=oplot[iplot])
+                    result = io.ioneqRead(ioneqName=oplot[iplot])
 #                    print 'keys = ', result.keys()
                     if result != False:
                         atitle += '  & '+oplot[iplot]+' '+linestyle[iplot%3]

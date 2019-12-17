@@ -296,7 +296,7 @@ class bunch(ionTrails, specTrails):
         self.Defaults=chdata.Defaults
         #
         #
-        if abundance != None:
+        if abundance is not None:
             if abundance in list(chdata.Abundance.keys()):
                 self.AbundanceName = abundance
             else:

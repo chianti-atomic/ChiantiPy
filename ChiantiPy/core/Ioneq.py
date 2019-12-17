@@ -98,7 +98,7 @@ class ioneq(object):
             for it in range(ntemp):
                 factor = []
                 for anIon in chIons:
-                    if type(anIon.IonizRate) != type(None) and type(anIon.RecombRate) != type(None):
+                    if type(anIon.IonizRate) is not type(None) and type(anIon.RecombRate) is not type(None):
                         ioniz = anIon.IonizRate['rate'][it]
                         recomb = anIon.RecombRate['rate'][it]
                         if ioniz == 0. or recomb == 0.:

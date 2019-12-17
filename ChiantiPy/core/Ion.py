@@ -336,7 +336,7 @@ class ion(ioneqOne, ionTrails, specTrails):
                 keys:  energy, cross
         """
         iso = self.Z - self.Ion + 1
-        if type(energy) == type(None):
+        if type(energy) is type(None):
             energy = self.Ip*10.**(0.025*np.arange(101))
         else:
             energy = np.asarray(energy, np.float64)
@@ -539,7 +539,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             if verbose:
                 print(' there is no EA cross section for this ion')
             self.EaCross = {'errorMessage':'there is no EA cross-section'}
-            if type(energy) != type(None):
+            if type(energy) is not type(None):
                 self.EaCross['energy'] = energy
                 self.EaCross['cross'] = np.zeros_like(energy)
             return
@@ -548,7 +548,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             if verbose:
                 print(' there is no EA cross section for this ion')
             self.EaCross = {'errorMessage':'there is no EA cross-section'}
-            if type(energy) != type(None):
+            if type(energy) is not type(None):
                 self.EaCross['energy'] = energy
                 self.EaCross['cross'] = np.zeros_like(energy)
             return
@@ -559,7 +559,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             else:
                 self.Easplom = io.splomRead(self.IonStr, ea=1)
                 easplom = self.Easplom
-            if type(energy) == type(None):
+            if type(energy) is type(None):
                 energy = self.Easplom['deryd'][0]*const.ryd2Ev*1.01*10.**(0.025*np.arange(101))
             # multiplicity of ground level already included
             #  splomDescale takes care of when energy < threshold
@@ -637,7 +637,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         -----
         uses `diCross`  and `eaCross`.
         """
-        if type(energy) == type(None):
+        if type(energy) is type(None):
             energy = self.Ip*1.01*10.**(0.025*np.arange(101))
         else:
             energy = np.asarray(energy, np.float64)
@@ -888,7 +888,7 @@ class ion(ioneqOne, ionTrails, specTrails):
                 nscups = len(self.Psplups["lvl1"])
             else:
                 self.Psplups = io.splupsRead(self.IonStr,filetype='psplups')
-                if type(self.Psplups) == type(None):
+                if type(self.Psplups) is type(None):
                     self.PUpsilon = None
                     return
                 else:
@@ -1086,15 +1086,15 @@ class ion(ioneqOne, ionTrails, specTrails):
         if type(label) == type(''):
             if hasattr(self, 'Spectrum'):
                 self.Spectrum[label] = {'intensity':aspectrum.squeeze(),  'wvl':wavelength, 'filter':useFilter.__name__, 'filterWidth':useFactor, 'allLines':allLines, 'em':em, 'xlabel':xlabel, 'ylabel':ylabel}
-                if errorMessage != None:
+                if errorMessage is not None:
                     self.Spectrum[label]['errorMessage'] = errorMessage
             else:
                 self.Spectrum = {label:{'intensity':aspectrum.squeeze(),  'wvl':wavelength, 'filter':useFilter.__name__, 'filterWidth':useFactor, 'allLines':allLines, 'em':em, 'xlabel':xlabel, 'ylabel':ylabel}}
-                if errorMessage != None:
+                if errorMessage is not None:
                     self.Spectrum[label]['errorMessage'] = errorMessage
         else:
             self.Spectrum = {'intensity':aspectrum.squeeze(),  'wvl':wavelength, 'filter':useFilter.__name__, 'filterWidth':useFactor, 'allLines':allLines, 'em':em, 'xlabel':xlabel, 'ylabel':ylabel}
-            if errorMessage != None:
+            if errorMessage is not None:
                 self.Spectrum['errorMessage'] = errorMessage
 
 
@@ -1927,7 +1927,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             xlabel = 'Temperature (K)'
             plt.xlabel(xlabel,fontsize=fontsize)
             plt.ylabel(ylabel,fontsize=fontsize)
-            if addTitle == None:
+            if addTitle is None:
                 dstr = ' -  Density = %10.2e (cm$^{-3}$)' % eDensity[0]
             else:
                 dstr = ' -  Density = %10.2e (cm$^{-3}$) %s' %(eDensity[0], addTitle)
@@ -1983,7 +1983,7 @@ class ion(ioneqOne, ionTrails, specTrails):
                         plt.text(eDensity[idens],pop[idens, lvl-1],str(lvl))
             plt.xlabel(xlabel,fontsize=fontsize)
             plt.ylabel(ylabel,fontsize=fontsize)
-            if addTitle == None:
+            if addTitle is None:
                 tstr = ' -  T = %10.2e (K)' % temperature[0]
             else:
                 tstr = ' -  T = %10.2e (K) %s' % (temperature[0] , addTitle)
@@ -2343,7 +2343,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             emiss = emiss[:, index]
             dstr = ' -  Density  =  %10.2e (cm$^{-3}$)' % eDensity[index]
             tstr=' -  T = %10.2e (K)' % temperature[index]
-        if type(wvlRange) != type(None):
+        if type(wvlRange) is not type(None):
             wvlIndex = util.between(wvl, wvlRange)
         else:
             wvlIndex = range(wvl.size)
@@ -2660,7 +2660,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         else:
             integrated = intensity.sum(axis=0)
         Intensity = {'intensity':intensity, 'integrated':integrated,'ionS':ionS, 'wvl':wvl, 'lvl1':lvl1, 'lvl2':lvl2, 'pretty1':pretty1, 'pretty2':pretty2,  'obs':obs, 'avalue':avalue, 'em':self.Em}
-        if errorMessage != None:
+        if errorMessage is not None:
             Intensity['errorMessage'] = errorMessage
         self.Intensity = Intensity
 

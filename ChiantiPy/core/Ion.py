@@ -336,7 +336,7 @@ class ion(ioneqOne, ionTrails, specTrails):
                 keys:  energy, cross
         """
         iso = self.Z - self.Ion + 1
-        if type(energy) is type(None):
+        if energy is None:
             energy = self.Ip*10.**(0.025*np.arange(101))
         else:
             energy = np.asarray(energy, np.float64)
@@ -539,7 +539,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             if verbose:
                 print(' there is no EA cross section for this ion')
             self.EaCross = {'errorMessage':'there is no EA cross-section'}
-            if type(energy) is not type(None):
+            if energy is not None:
                 self.EaCross['energy'] = energy
                 self.EaCross['cross'] = np.zeros_like(energy)
             return
@@ -548,7 +548,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             if verbose:
                 print(' there is no EA cross section for this ion')
             self.EaCross = {'errorMessage':'there is no EA cross-section'}
-            if type(energy) is not type(None):
+            if energy is not None:
                 self.EaCross['energy'] = energy
                 self.EaCross['cross'] = np.zeros_like(energy)
             return
@@ -559,7 +559,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             else:
                 self.Easplom = io.splomRead(self.IonStr, ea=1)
                 easplom = self.Easplom
-            if type(energy) is type(None):
+            if energy is None:
                 energy = self.Easplom['deryd'][0]*const.ryd2Ev*1.01*10.**(0.025*np.arange(101))
             # multiplicity of ground level already included
             #  splomDescale takes care of when energy < threshold
@@ -637,7 +637,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         -----
         uses `diCross`  and `eaCross`.
         """
-        if type(energy) is type(None):
+        if energy is None:
             energy = self.Ip*1.01*10.**(0.025*np.arange(101))
         else:
             energy = np.asarray(energy, np.float64)
@@ -888,7 +888,7 @@ class ion(ioneqOne, ionTrails, specTrails):
                 nscups = len(self.Psplups["lvl1"])
             else:
                 self.Psplups = io.splupsRead(self.IonStr,filetype='psplups')
-                if type(self.Psplups) is type(None):
+                if self.Psplups is None:
                     self.PUpsilon = None
                     return
                 else:
@@ -2343,7 +2343,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             emiss = emiss[:, index]
             dstr = ' -  Density  =  %10.2e (cm$^{-3}$)' % eDensity[index]
             tstr=' -  T = %10.2e (K)' % temperature[index]
-        if type(wvlRange) is not type(None):
+        if wvlRange is not None:
             wvlIndex = util.between(wvl, wvlRange)
         else:
             wvlIndex = range(wvl.size)

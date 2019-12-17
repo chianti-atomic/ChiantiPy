@@ -13,7 +13,7 @@ def chpicker(path,  filter='*.*', label=None):
     the label keyword is included for consistency but does nothing'''
     if not os.path.isdir(path):
         path=os.curdir
-#        if type(pattern) == NoneType:
+#        if type(pattern) is NoneType:
 #            pattern="All files (*.*)"
     allNames=os.listdir(path)
     names = fnmatch.filter(allNames, filter)

@@ -1145,7 +1145,7 @@ class maker(ionTrails):
         t1 = datetime.now()
         if self.Nobs <= 2.:
             print(' the number of observables %i is less than the number of parameters'%(self.Nobs))
-        if indxlimits == None:
+        if indxlimits is None:
             if not hasattr(self, 'MinIndex'):
                 self.findMinMaxIndices()
             indxlimits = [self.MinIndex, self.MaxIndex]

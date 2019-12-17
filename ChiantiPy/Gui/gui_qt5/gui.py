@@ -96,7 +96,7 @@ class selectorDialog(QtWidgets.QDialog):
             self.ui.listWidget.setSelectionMode(QtWidgets.QListWidget.MultiSelection)
         else:
             self.ui.listWidget.setSelectionMode(QtWidgets.QListWidget.SingleSelection)
-        if label == None:
+        if label is None:
             self.setWindowTitle('ChiantiPy')
         else:
             self.setWindowTitle('ChiantiPy - '+label)
@@ -144,7 +144,7 @@ class choice2Dialog(QtWidgets.QDialog):
 #        app=QtGui.QApplication(sys.argv)
         self.ui = Ui_choice2DialogForm()
         self.ui.setupUi(self)
-        if label == None:
+        if label is None:
             self.setWindowTitle('ChiantiPy')
         else:
             self.setWindowTitle('ChiantiPy - '+label)

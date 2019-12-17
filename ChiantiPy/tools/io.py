@@ -239,7 +239,7 @@ def autoWrite(info, outfile = None, minBranch = None):
         print(' output filename not specified, no file will be created')
         return
     print((' auto file name = ', autoname))
-    if minBranch == None:
+    if minBranch is None:
         minBranch = 0.
     else:
         info['ref'].append(' minimum branching ratio = %10.2e'%(minBranch))
@@ -1002,7 +1002,7 @@ def ioneqRead(ioneqName='', minIoneq=1.e-20, verbose=False):
 #        fname1 = choice.baseName
 #        fname1 = chgui.gui.chpicker(ioneqdir,filter='*.ioneq',label = 'Select an Ionization Equilibrium file')
 #        fname = os.path.join(ioneqdir, fname1)
-        if fname == None:
+        if fname is None:
             print(' no ioneq file selected')
             return False
         else:

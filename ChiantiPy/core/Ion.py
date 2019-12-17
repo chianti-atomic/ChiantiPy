@@ -1086,15 +1086,15 @@ class ion(ioneqOne, ionTrails, specTrails):
         if type(label) == type(''):
             if hasattr(self, 'Spectrum'):
                 self.Spectrum[label] = {'intensity':aspectrum.squeeze(),  'wvl':wavelength, 'filter':useFilter.__name__, 'filterWidth':useFactor, 'allLines':allLines, 'em':em, 'xlabel':xlabel, 'ylabel':ylabel}
-                if errorMessage != None:
+                if errorMessage is not None:
                     self.Spectrum[label]['errorMessage'] = errorMessage
             else:
                 self.Spectrum = {label:{'intensity':aspectrum.squeeze(),  'wvl':wavelength, 'filter':useFilter.__name__, 'filterWidth':useFactor, 'allLines':allLines, 'em':em, 'xlabel':xlabel, 'ylabel':ylabel}}
-                if errorMessage != None:
+                if errorMessage is not None:
                     self.Spectrum[label]['errorMessage'] = errorMessage
         else:
             self.Spectrum = {'intensity':aspectrum.squeeze(),  'wvl':wavelength, 'filter':useFilter.__name__, 'filterWidth':useFactor, 'allLines':allLines, 'em':em, 'xlabel':xlabel, 'ylabel':ylabel}
-            if errorMessage != None:
+            if errorMessage is not None:
                 self.Spectrum['errorMessage'] = errorMessage
 
 
@@ -1927,7 +1927,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             xlabel = 'Temperature (K)'
             plt.xlabel(xlabel,fontsize=fontsize)
             plt.ylabel(ylabel,fontsize=fontsize)
-            if addTitle == None:
+            if addTitle is None:
                 dstr = ' -  Density = %10.2e (cm$^{-3}$)' % eDensity[0]
             else:
                 dstr = ' -  Density = %10.2e (cm$^{-3}$) %s' %(eDensity[0], addTitle)
@@ -1983,7 +1983,7 @@ class ion(ioneqOne, ionTrails, specTrails):
                         plt.text(eDensity[idens],pop[idens, lvl-1],str(lvl))
             plt.xlabel(xlabel,fontsize=fontsize)
             plt.ylabel(ylabel,fontsize=fontsize)
-            if addTitle == None:
+            if addTitle is None:
                 tstr = ' -  T = %10.2e (K)' % temperature[0]
             else:
                 tstr = ' -  T = %10.2e (K) %s' % (temperature[0] , addTitle)
@@ -2660,7 +2660,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         else:
             integrated = intensity.sum(axis=0)
         Intensity = {'intensity':intensity, 'integrated':integrated,'ionS':ionS, 'wvl':wvl, 'lvl1':lvl1, 'lvl2':lvl2, 'pretty1':pretty1, 'pretty2':pretty2,  'obs':obs, 'avalue':avalue, 'em':self.Em}
-        if errorMessage != None:
+        if errorMessage is not None:
             Intensity['errorMessage'] = errorMessage
         self.Intensity = Intensity
 

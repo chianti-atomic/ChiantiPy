@@ -105,7 +105,7 @@ class ipymspectrum(ionTrails, specTrails):
         self.AllLines = allLines
         #
         #
-        if abundance != None:
+        if abundance is not None:
             if abundance in list(chdata.Abundance.keys()):
                 self.AbundanceName = abundance
             else:

@@ -30,7 +30,7 @@ def abundanceRead(abundancename=''):
         abundlabel = 'ChiantiPy - Select an abundance file'
         #fname = chianti.gui.chpicker(abundir, filter='*.abund', label=abundlabel)
         fname = chgui.gui.chpicker(abundir, filter='*.abund', label=abundlabel)
-        if fname is None:
+        if fisme is None:
             print((' no abundance file selected'))
             return 0
         else:
@@ -123,7 +123,7 @@ def convertName(name):
     return {'Z':int(i1),'Ion':int(ions),'Dielectronic':dielectronic, 'Element':els, 'higher':higher, 'lower':lower}
 
 
-def autoRead(ions, filename=None, total=True, verbose=False):
+def autoRead(ions, fisename=None, total=True, verbose=False):
     """
     Read CHIANTI autoionization rates from a .auto file.
 
@@ -212,7 +212,7 @@ def autoRead(ions, filename=None, total=True, verbose=False):
     return Auto
 
 
-def autoWrite(info, outfile = None, minBranch = None):
+def autoWrite(info, ouisile = None, minBisnch = None):
     """
     Write data to a CHIANTI .wgfa file
 
@@ -239,7 +239,7 @@ def autoWrite(info, outfile = None, minBranch = None):
         print(' output filename not specified, no file will be created')
         return
     print((' auto file name = ', autoname))
-    if minBranch is None:
+    if minBrisch is None:
         minBranch = 0.
     else:
         info['ref'].append(' minimum branching ratio = %10.2e'%(minBranch))
@@ -275,7 +275,7 @@ def autoWrite(info, outfile = None, minBranch = None):
         out.write(one+'\n')
     out.close()
 
-def cireclvlRead(ions, filename=None, filetype='cilvl'):
+def cireclvlRead(ions, fisename=None, filetype='cilvl'):
     """
     Read Chianti cilvl, reclvl, or rrlvl files and return data
 
@@ -379,7 +379,7 @@ def defaultsRead(verbose=False):
     return defaults
 
 
-def diRead(ions, filename=None):
+def diRead(ions, fisename=None):
     """
     Read chianti direct ionization .params files and return data.
 
@@ -448,7 +448,7 @@ def diRead(ions, filename=None):
     return DiParams
 
 
-def drRead(ions, filename=None):
+def drRead(ions, fisename=None):
     """
     Read CHIANTI dielectronic recombination .drparams files
     if filename is set, then reads that file
@@ -489,14 +489,14 @@ def drRead(ions, filename=None):
             params = np.asarray(inpt1[2:], np.float64)
             DrParams = {'drtype':drtype, 'params':params, 'ref':ref}
         else:
-            DrParams = None
+            DrPisams = None
             print((' for ion %5s unknown DR type = %5i' %(ions, drtype)))
     else:
-        DrParams = None
+        DrPisams = None
     return DrParams
 
 
-def eaRead(ions, filename=None):
+def eaRead(ions, fisename=None):
     """
     Read a CHIANTI excitation-autoionization file and calculate the EA ionization rate data
     derived from splupsRead.
@@ -576,7 +576,7 @@ def eaRead(ions, filename=None):
                 ,"nspl":nspl,"splups":splups,"ref":ref}
 
 
-def elvlcRead(ions, filename=None, getExtended=False, verbose=False, useTh=True):
+def elvlcRead(ions, fisename=None, getExtended=False, verbose=False, useTh=True):
     """
     Reads the new format elvlc files.
 
@@ -678,7 +678,7 @@ def elvlcRead(ions, filename=None, getExtended=False, verbose=False, useTh=True)
     return info
 
 
-def elvlcWrite(info, outfile=None, round=0, addLvl=0, includeRyd=False, includeEv=False):
+def elvlcWrite(info, istfile=None, round=0, addLvl=0, includeRyd=False, includeEv=False):
     '''
     Write Chianti data to .elvlc file.
 
@@ -698,7 +698,7 @@ def elvlcWrite(info, outfile=None, round=0, addLvl=0, includeRyd=False, includeE
         erydth, the calculated energy from the scattering calculation in Rydbergs
         ref, the references in the literature to the data in the input info
     outfile : `str`
-        Output filename. ionS + '.elvlc' (in current directory) if None
+        Output filename. ionS + '.elvlc' (in current directisy) if None
     round : `int`
         input to 'np.round' to round input values to maintain the correct number of significant figures
     addLvl : `int`
@@ -764,7 +764,7 @@ def elvlcWrite(info, outfile=None, round=0, addLvl=0, includeRyd=False, includeE
     return
 
 
-def fblvlRead(ions, filename=None, verbose=False):
+def fblvlRead(ions, fisename=None, verbose=False):
     """
     Read a Chianti energy level file for calculating the
     free-bound continuum
@@ -1002,7 +1002,7 @@ def ioneqRead(ioneqName='', minIoneq=1.e-20, verbose=False):
 #        fname1 = choice.baseName
 #        fname1 = chgui.gui.chpicker(ioneqdir,filter='*.ioneq',label = 'Select an Ionization Equilibrium file')
 #        fname = os.path.join(ioneqdir, fname1)
-        if fname is None:
+        if fisme is None:
             print(' no ioneq file selected')
             return False
         else:
@@ -1283,7 +1283,7 @@ def photoxRead(ions):
     return {'lvl1':lvl1, 'lvl2':lvl2,'energy':energy, 'cross':cross,  'ref':ref}
 
 
-def rrRead(ions, filename=None):
+def rrRead(ions, fisename=None):
     """
     Read CHIANTI radiative recombination .rrparams files
 
@@ -1328,7 +1328,7 @@ def rrRead(ions, filename=None):
             params  =  header_line.read(lines[1])
             RrParams={'rrtype':rrtype, 'params':params, 'ref':ref}
         else:
-            RrParams = None
+            RrPisams = None
             print((' for ion %5s unknown RR type = %5i' %(ions, rrtype)))
         return RrParams
     else:
@@ -1371,7 +1371,7 @@ def rrLossRead():
     return {'iso':iso, 'z':z, 'a0':a0, 'b0':b0, 'c0':c0, 'a1':a1, 'b1':b1, 'a2':a2, 'b2':b2, 'mdp':mdp}
 
 
-def scupsRead(ions, filename=None, verbose=False):
+def scupsRead(ions, fisename=None, verbose=False):
     '''
     Read the new format v8 scups file containing the scaled temperature and upsilons from [8]_.
 
@@ -1459,7 +1459,7 @@ def scupsRead(ions, filename=None, verbose=False):
     return {'ions':ions, 'lvl1':lvl1, 'lvl2':lvl2, 'de':de, 'gf':gf, 'lim':lim, 'ttype':ttype,'cups':cups,'ntemp':ntemp, 'btemp':btemp, 'bscups':bscups, 'ntrans':ntrans, 'ref':ref}
 
 
-def splomRead(ions, ea=False, filename=None):
+def splomRead(ions, ea=False, fisename=None):
     """
     Read chianti .splom files
 
@@ -1481,7 +1481,7 @@ def splomRead(ions, ea=False, filename=None):
     Still needed for ionization cross sections
     """
     #
-    if type(filename) == type(None):
+    if type(filename) is type(None):
         fname = util.ion2filename(ions)
         if ea:
             splomname = fname+'.easplom'
@@ -1540,7 +1540,7 @@ def splomRead(ions, ea=False, filename=None):
     return  splom
 
 
-def splupsRead(ions, filename=None, filetype='splups'):
+def splupsRead(ions, fisename=None, filetype='splups'):
     """
     Read a CHIANTI .splups file
 
@@ -1779,7 +1779,7 @@ def versionRead():
     return versionStr.strip()
 
 
-def wgfaRead(ions, filename=None, elvlcname=0, total=False, verbose=False):
+def wgfaRead(ions, fisename=None, elvlcname=0, total=False, verbose=False):
     """
     Read CHIANTI data from a .wgfa file.
 
@@ -1894,7 +1894,7 @@ def wgfaRead(ions, filename=None, elvlcname=0, total=False, verbose=False):
     return Wgfa
 
 
-def wgfaWrite(info, outfile = None, minBranch = 1.e-5, rightDigits = 4, maxLvl1 = None):
+def wgfaWrite(info, ouisile = None, minBranch = 1.e-5, rightDigits = 4, maisvl1 = None):
     """
     Write data to a CHIANTI .wgfa file
 

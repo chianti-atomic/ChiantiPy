@@ -1481,7 +1481,7 @@ def splomRead(ions, ea=False, filename=None):
     Still needed for ionization cross sections
     """
     #
-    if type(filename) is type(None):
+    if filename is None:
         fname = util.ion2filename(ions)
         if ea:
             splomname = fname+'.easplom'

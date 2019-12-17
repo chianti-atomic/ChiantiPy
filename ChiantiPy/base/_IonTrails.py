@@ -368,7 +368,7 @@ class ionTrails(object):
             dstr=' -  Density = %10.2e (cm$^{-3}$)' % eDensity[index]
             tstr=' -  T = %10.2e (K)' % temperature[index]
 
-        if type(wvlRange) is not type(None):
+        if wvlRange is not None:
             wvlIndex = util.between(wvl, wvlRange)
         else:
             wvlIndex = range(wvl.size)

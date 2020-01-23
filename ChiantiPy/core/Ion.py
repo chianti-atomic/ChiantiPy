@@ -156,13 +156,13 @@ class ion(ioneqOne, ionTrails, specTrails):
                 self.ioneqOne()
 
                 self.setup()
-        else:
-            if verbose:
-                print(' ion %s not in masterlist, just various attributes, ionization, recombination rates'%(self.IonStr))
-            if np.any(temperature) is not None:
-                self.Temperature = np.atleast_1d(temperature)
-                self.Ntemp = self.Temperature.size
-            self.setupIonrec()
+            else:
+                if verbose:
+                    print(' ion %s not in masterlist, just various attributes, ionization, recombination rates'%(self.IonStr))
+                if np.any(temperature) is not None:
+                    self.Temperature = np.atleast_1d(temperature)
+                    self.Ntemp = self.Temperature.size
+                self.setupIonrec()
 
 
         self.GrndLevels = chdata.GrndLevels[self.Iso]

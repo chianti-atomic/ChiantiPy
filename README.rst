@@ -1,9 +1,7 @@
-ChiantiPy - Version 0.8.5
-====================================================================================
+ChiantiPy - Version 0.9.2
+=========================
 
-| |Documentation Status|
-| |Coverage Status|
-| |ascl:1308.017|
+|Documentation Status| |Coverage Status| |ascl:1308.017|
 
 ChiantiPy is the Python interface to the `CHIANTI atomic
 database <http://www.chiantidatabase.org>`__ for astrophysical
@@ -33,12 +31,10 @@ The following dependencies are required to run ChiantiPy,
 -  `Matplotlib <http://matplotlib.org/>`__
 -  `ipyparallel <https://github.com/ipython/ipyparallel>`__
 
-The following two are extremely useful for running Python programs
+The following two are extremely useful for running Python programs \*
+`IPython <http://ipython.org>`__ \* `Jupyter <http://jupyter.org/>`__
 
--  `IPython <http://ipython.org>`__
--  `Jupyter <http://jupyter.org/>`__
-
-Optionally, if you'd like to use the GUI dialogs,
+Optionally, if you’d like to use the GUI dialogs,
 
 -  `PyQt5 <https://riverbankcomputing.com/software/pyqt/intro>`__
 
@@ -47,20 +43,20 @@ dependencies, we recommend the `Anaconda
 platform <https://www.continuum.io/downloads>`__. Next, download the
 `CHIANTI
 database <http://www.chiantidatabase.org/chianti_download.html>`__,
-version 9.0 or later. Assuming you've placed the CHIANTI tree in
+version 9.0 or later. Assuming you’ve placed the CHIANTI tree in
 ``$HOME``, set the environment variable in your ``.bashrc`` file,
 
 .. code:: shell
 
-    export XUVTOP=$HOME/chianti/dbase
+   export XUVTOP=$HOME/chianti/dbase
 
 Finally, clone and install the source from GitHub,
 
 .. code:: shell
 
-    $ git clone --recursive https://github.com/chianti-atomic/ChiantiPy.git
-    $ cd ChiantiPy
-    $ python setup.py install
+   $ git clone --recursive https://github.com/chianti-atomic/ChiantiPy.git
+   $ cd ChiantiPy
+   $ python setup.py install
 
 The release is also available on
 `PyPI <https://pypi.org/project/ChiantiPy/>`__
@@ -68,19 +64,19 @@ The release is also available on
 Usage
 -----
 
-As a quick example, we'll calculate the populations of the top 10 levels
+As a quick example, we’ll calculate the populations of the top 10 levels
 of Fe XIV as a function of temperature at constant density and plot
 them:
 
 .. code:: python
 
-    >>> import ChiantiPy.core as ch
-    >>> import numpy as np
-    >>> import matplotlib.pyplot as plt
-    >>> temperature = np.logspace(5.8,6.8,21)
-    >>> fe14 = ch.ion('fe_14',temperature=temperature,eDensity=1.e+9,em=1.e+27)
-    >>> fe14.popPlot()
-    >>> plt.show()
+   >>> import ChiantiPy.core as ch
+   >>> import numpy as np
+   >>> import matplotlib.pyplot as plt
+   >>> temperature = np.logspace(5.8,6.8,21)
+   >>> fe14 = ch.ion('fe_14',temperature=temperature,eDensity=1.e+9,em=1.e+27)
+   >>> fe14.popPlot()
+   >>> plt.show()
 
 Help
 ----

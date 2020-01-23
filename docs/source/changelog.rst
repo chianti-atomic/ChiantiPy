@@ -2,6 +2,14 @@
 Changelog
 ===========
 
+Changes from 0.9.1 to 0.9.2
+===========================
+
+this is a bug-fix release.
+
+changes in version 0.9.1 lead to an error where a bare ion has not recombination rate.  This has been fixed
+
+
 Changes from 0.9.0 to 0.9.1
 ===========================
 

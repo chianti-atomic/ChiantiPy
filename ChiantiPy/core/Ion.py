@@ -868,8 +868,9 @@ class ion(ioneqOne, ionTrails, specTrails):
             return
         self.rrRate()
         self.drRate()
+        rate = np.zeros_like(temperature)
         if hasattr(self, 'DrRate'):
-            rate = self.DrRate['rate']
+            rate += self.DrRate['rate']
         if hasattr(self, 'RrRate'):
             rate += self.RrRate['rate']
         self.RecombRate = {'rate':rate, 'temperature':temperature}
@@ -1153,10 +1154,9 @@ class ion(ioneqOne, ionTrails, specTrails):
             self.recombRate()
             #  get the higher ionization stage and its recombination rates to this ion
             highers = util.zion2name(self.Z, self.Ion+1)
-            higher = ion(highers, temperature, setup=0)
+            higher = ion(highers, temperature, eDensity)
             higher.setupIonrec()
             higher.recombRate()
-
         #  the populating matrix for radiative transitions and autoionization transitions
         rad = np.zeros((nlvls+ci+rec,nlvls+ci+rec),np.float64)
 

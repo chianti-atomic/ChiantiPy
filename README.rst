@@ -1,4 +1,4 @@
-ChiantiPy - Version 0.9.2
+ChiantiPy - Version 0.9.3
 =========================
 
 |Documentation Status| |Coverage Status| |ascl:1308.017|

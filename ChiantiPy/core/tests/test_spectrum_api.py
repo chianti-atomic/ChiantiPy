@@ -56,7 +56,9 @@ def test_radloss_numpy_length_compatibility(container_type, temperature_length, 
 @pytest.mark.parametrize("container_type", _container_type)
 @pytest.mark.parametrize("temperature_length", _array_lengths)
 @pytest.mark.parametrize("density_length", _array_lengths)
-@pytest.mark.parametrize("em_length", _array_lengths + (None,))
+#@pytest.mark.parametrize("em_length", _array_lengths + (None,))
+#  edit by kpd 2020-feb-1
+@pytest.mark.parametrize("em_length", _array_lengths)
 def test_spectrum_container_length_compatibility(spectrum_like_type, container_type,
                                                  temperature_length, density_length, em_length):
     if spectrum_like_type is mspectrum and platform.system() == 'Darwin':
@@ -75,7 +77,7 @@ def test_spectrum_container_length_compatibility(spectrum_like_type, container_t
 
     wavelength = np.linspace(200, 400)  # Just a few wavelengths.
 
-    _tmp_spec = spectrum_like_type(temperature, density, wavelength, em=emission_measure, minAbund=1e-3)
+    _tmp_spec = spectrum_like_type(temperature, density, wavelength, em=emission_measure, minAbund=1e-4)
 
 
 # This tests that scalar values are also acceptable for density, temperature, and emission measure.
@@ -83,7 +85,9 @@ def test_spectrum_container_length_compatibility(spectrum_like_type, container_t
 @pytest.mark.parametrize("container_type", _container_type)
 @pytest.mark.parametrize("temperature_length", _array_lengths)
 @pytest.mark.parametrize("density_length", _array_lengths)
-@pytest.mark.parametrize("em_length", _array_lengths + (None,))
+#@pytest.mark.parametrize("em_length", _array_lengths + (None,))
+# change by kpd 2020-feb-1
+@pytest.mark.parametrize("em_length", _array_lengths)
 def test_spectrum_container_scalar_compatibility(spectrum_like_type, container_type,
                                                  temperature_length, density_length, em_length):
     if spectrum_like_type is mspectrum and platform.system() == 'Darwin':
@@ -92,21 +96,28 @@ def test_spectrum_container_scalar_compatibility(spectrum_like_type, container_t
     if type(spectrum_like_type) is ImportError:
         pytest.xfail("The %s class could not be imported; you may be missing ipyparallel." % str(spectrum_like_type))
 
-    if em_length is not None:
-        emission_measure = container_type(np.linspace(1e16, 2e16, density_length))
-    else:
-        emission_measure = None
+#    if em_length is not None:
+##        emission_measure = container_type(np.linspace(1e16, 2e16, density_length))
+#        # change by kpd 2020-feb-1
+#        emission_measure = container_type(np.ones(density_length))
+#    else:
+#        emission_measure = None
 
     temperature = container_type(np.linspace(1e6, 2e6, temperature_length))
     density = container_type(np.linspace(1e9, 2e9, density_length))
-
-    wavelength = np.linspace(200, 400)  # Just a few wavelengths.
+    wavelength = np.linspace(200, 400)  # Just a few wavelengths.min(array_lengths)
 
     # Temperature is scalar
-    _tmp_spec = spectrum_like_type(1e6, density, wavelength, em=emission_measure, minAbund=1e-3)
+    #  kpd 2020-feb-1
+    emission_measure = np.ones(min(_array_lengths))
+    print('113 temperature_length %5i'%(temperature_length))
+    _tmp_spec = spectrum_like_type(1e6, density, wavelength, em=emission_measure, minAbund=1e-4)
 
     # Density is scalar
-    _tmp_spec = spectrum_like_type(temperature, 1e9, wavelength, em=emission_measure, minAbund=1e-3)
+    #  kpd 2020-feb-1
+    emission_measure = np.ones(min(_array_lengths))
+    print('119 density_length %5i'%(density_length))
+    _tmp_spec = spectrum_like_type(temperature, 1e9, wavelength, em=emission_measure, minAbund=1e-4)
 
     # Emission measure is scalar
-    _tmp_spec = spectrum_like_type(temperature, density, wavelength, em=1e16, minAbund=1e-3)
+    _tmp_spec = spectrum_like_type(temperature, density, wavelength, em=1e16, minAbund=1e-4)

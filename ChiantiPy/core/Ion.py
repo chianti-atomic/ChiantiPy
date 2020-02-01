@@ -1154,7 +1154,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             self.recombRate()
             #  get the higher ionization stage and its recombination rates to this ion
             highers = util.zion2name(self.Z, self.Ion+1)
-            higher = ion(highers, temperature, eDensity)
+            higher = ion(highers, temperature, setup=0)
             higher.setupIonrec()
             higher.recombRate()
         #  the populating matrix for radiative transitions and autoionization transitions

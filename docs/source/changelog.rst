@@ -2,12 +2,21 @@
 Changelog
 ===========
 
+Changes from 0.9.3 to 0.9.3
+===========================
+
+this is a bug-fix release.
+
+changes in version 0.9.2 gave problems with ions that included autoionization rates
+
+
+
 Changes from 0.9.2 to 0.9.3
 ===========================
 
 this is a bug-fix release.
 
-changes in version 0.9.2 lead to an error where ion.recombRate did not work.  This has been fixed
+changes in version 0.9.2 led to an error where ion.recombRate did not work.  This has been fixed
 
 
 Changes from 0.9.1 to 0.9.2

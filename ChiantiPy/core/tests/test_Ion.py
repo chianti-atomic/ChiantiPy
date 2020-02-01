@@ -9,7 +9,9 @@ from ChiantiPy.core import ion
 import ChiantiPy.tools as ch_tools
 
 # use an ion with relatively small chianti files
-test_ion = 'fe_15'
+#test_ion = 'fe_15'
+# want an ion with auto-ionization rates
+test_ion = 'o_6'
 # TODO: probably should check a few different ions, i.e. dielectronic, some without certain kinds
 # files, etc.
 # set a few temperature and density arrays

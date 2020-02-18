@@ -500,10 +500,6 @@ class ionTrails(object):
         intensity[bad] = intensMin
 
         ylabel='Intensity relative to '+maxWvl
-        if ionNum == 1:
-            title=self.Spectroscopic
-        else:
-            title = ''
 
         if ndens==1 and ntemp==1:
             print(' only a single temperature and eDensity')

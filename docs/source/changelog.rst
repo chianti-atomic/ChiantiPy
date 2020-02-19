@@ -2,6 +2,23 @@
 Changelog
 ===========
 
+
+Changes from 0.9.4 to 0.9.5
+===========================
+
+this is a bug-fix release.
+
+a bug in the inherited method base._IntensityRatio() had a problem if lines were selected from different ions
+
+
+Changes from 0.9.3 to 0.9.4
+===========================
+
+this is a bug-fix release.
+
+changes in version 0.9.2 continued to give problems with ions that included autoionization rates
+
+
 Changes from 0.9.3 to 0.9.3
 ===========================
 

@@ -735,13 +735,13 @@ def elvlcWrite(info, outfile=None, round=0, addLvl=0, includeRyd=False, includeE
         nlvl = len(info['ecm'])
         info['label'] = [' ']*nlvl
     if 'eryd' not in info:
-        info['eryd'] = [x*const.invCm2ryd  if x > 0. else  -1. for x in info['ecm']]
+        info['eryd'] = [x*const.invCm2ryd  if x >= 0. else  -1. for x in info['ecm']]
     if 'erydth' not in info:
-        info['erydth'] = [x*const.invCm2ryd  if x > 0. else  -1. for x in info['ecmth']]
+        info['erydth'] = [x*const.invCm2ryd  if x >= 0. else  -1. for x in info['ecmth']]
     if 'eV' not in info:
-        info['eV'] = [x*const.invCm2Ev if x > 0. else  -1. for x in info['ecm']]
-    if 'eVth 'not in info:
-        info['eVth'] = [x*const.invCm2Ev if x > 0. else  -1. for x in info['ecmth']]
+        info['eV'] = [x*const.invCm2Ev if x >= 0. else  -1. for x in info['ecm']]
+    if 'eVth' not in info:
+        info['eVth'] = [x*const.invCm2Ev if x >= 0. else  -1. for x in info['ecmth']]
    #
     out = open(elvlcName, 'w')
     pformat = '%7i%30s%5s%5i%5s%5.1f%15.3f%15.3f'

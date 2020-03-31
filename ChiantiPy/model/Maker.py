@@ -19,7 +19,7 @@ import ChiantiPy.tools.util as util
 import ChiantiPy.tools.constants as const
 import ChiantiPy.tools.data as chdata
 import ChiantiPy.Gui as chGui
-from ChiantiPy.base import ionTrails    #
+from ChiantiPy.base import ionTrails, specTrails    #
     # --------------------------------------------------------------------------
     #
 def doDemGofntQ(inQueue, outQueue):
@@ -147,8 +147,8 @@ class maker(ionTrails):
                 self.WghtFactor = self.SpecData['intStd'][iwvl]/self.SpecData['intensity'][iwvl]
         #
         self.AllLines = allLines
-        if 'intensity' in specData.keys():
-            self.Intensity = specData['intensity']
+        if 'intensity' in self.SpecData.keys():
+            self.Intensity = self.SpecData['intensity']
         masterlist = io.masterListRead()
 #        matches = [{'ion':[], 'wvl':[]}]*len(wvl) - it won't work this way
         matches = []

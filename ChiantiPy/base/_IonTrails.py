@@ -552,7 +552,6 @@ class ionTrails(object):
             plt.xlabel(xlbl,fontsize=fontsize)
             plt.ylabel(ylabel,fontsize=fontsize)
         elif ntemp == 1:
-            plt.text(0.07, 0.5,title, horizontalalignment='left', verticalalignment='center', fontsize=fontsize,  transform = ax.transAxes)
             ax2 = plt.twiny()
             xlblDen=r'Electron Density (cm$^{-3}$)'
             plt.xlabel(xlblDen, fontsize=fontsize)
@@ -561,7 +560,6 @@ class ionTrails(object):
             plt.ylim(ymin/1.2, 1.2*ymax)
         else:
             plt.ylim(ymin/1.2, 1.2*ymax)
-            plt.title(title+desc_str,fontsize=fontsize)
         plt.tight_layout()
         plt.draw()
         #  need time to let matplotlib finish plotting

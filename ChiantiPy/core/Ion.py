@@ -20,7 +20,7 @@ from ChiantiPy.base import ionTrails
 from ChiantiPy.base import specTrails
 from ChiantiPy.base import ioneqOne
 
-heseqLvl2 = [-1,3,-1,-1,-1,5,6,6,-1,6,6,6,5,5,3,5,3,5,3,5,-1,-1,-1,-1,-1,4,-1,4,-1,4]
+heseqLvl2 = [-1,3,-1,-1,-1,6,6,6,-1,6,6,6,5,5,3,5,3,5,3,5,-1,-1,-1,-1,-1,4,-1,4,-1,4]
 # for populate and drPopulate to include populated lower levels for ionization
 
 
@@ -1940,7 +1940,8 @@ class ion(ioneqOne, ionTrails, specTrails):
                 ymin = 2.
                 ymax = 0.
                 for ilvl in levels:
-                    print(' ilvl %5i min max %12.2e %12.2e'%(ilvl, pop[:, ilvl-1].min(), pop[:, ilvl-1].max()))
+                    pretty = self.Elvlc['pretty'][ilvl-1]
+                    print(' ilvl %5i %s min max %12.2e %12.2e'%(ilvl, pretty, pop[:, ilvl-1].min(), pop[:, ilvl-1].max()))
                     if pop[:, ilvl-1].max() > ymax:
                         ymax = pop[:, ilvl-1].max()
                     if pop[:, ilvl-1].min() < ymin:
@@ -1995,14 +1996,15 @@ class ion(ioneqOne, ionTrails, specTrails):
                 ymin = 2.
                 ymax = 0.
                 for ilvl in levels:
+                    pretty = self.Elvlc['pretty'][ilvl-1]
                     if scale:
-                        print(' ilvl %5i min max %12.2e %12.2e'%(ilvl, pop[:, ilvl-1].min(), pop[:, lvl-1].max()))
+                        print(' ilvl %5i %s min max %12.2e %12.2e'%(ilvl, pretty, pop[:, ilvl-1].min(), pop[:, lvl-1].max()))
                         if (pop[:, ilvl-1]/eDensity).max() > ymax:
                             ymax = (pop[:, ilvl-1]/eDensity).max()
                         if (pop[:, ilvl-1]/eDensity).min() < ymin:
                             ymin =  (pop[:, ilvl-1]/eDensity).min()
                     else:
-                        print(' ilvl %5i min max %12.2e %12.2e'%(ilvl, pop[:, ilvl-1].min(), pop[:, lvl-1].max()))
+                        print(' ilvl %5i %s min max %12.2e %12.2e'%(ilvl, pretty, pop[:, ilvl-1].min(), pop[:, lvl-1].max()))
                         if pop[:, ilvl-1].max() > ymax:
                             ymax = pop[:, ilvl-1].max()
                         if pop[:, ilvl-1].min() < ymin:
@@ -3126,6 +3128,8 @@ class ion(ioneqOne, ionTrails, specTrails):
                 # He seq
                 l1 = 1-1
                 l2 = heseqLvl2[self.Z -1] - 1
+                if verbose:
+                    print('two photon l2:  %5i %s  for Z = %5i'%(l2, self.Elvlc['pretty'][l2],  self.Z))
                 wvl0 = 1.e+8/(self.Elvlc['ecm'][l2] - self.Elvlc['ecm'][l1])
                 goodWvl = wvl > wvl0
                 if goodWvl.sum() > 0:

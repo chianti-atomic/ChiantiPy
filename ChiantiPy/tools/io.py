@@ -3,7 +3,6 @@ Reading and writing functions
 """
 import os
 from datetime import date
-import fnmatch
 import pickle
 import configparser
 
@@ -195,8 +194,9 @@ def autoRead(ions, filename=None, total=True, verbose=False):
     Auto = {"lvl1":lvl1, "lvl2":lvl2, "avalue":avalue, "ref":ref, 'ionS':ions, 'filename':autoname, 'pretty1':pretty1, 'pretty2':pretty2}
     if total:
         avalueLvl = [0.]*max(lvl2)
-        for iwvl in range(nwvl):
-            avalueLvl[lvl2[iwvl] -1] += avalue[iwvl]
+        for lvl,  av in enumerate(avalue):
+            l2 = lvl2[lvl] - 1
+            avalueLvl[l2] += av
         Auto['avalueLvl'] = np.asarray(avalueLvl)
 
     if verbose:

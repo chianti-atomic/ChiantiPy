@@ -1135,8 +1135,10 @@ class ion(ioneqOne, ionTrails, specTrails):
         ci = 0
         if self.Nrrlvl or self.Nauto:
             rec = 1
-        else:
+        elif not popCorrect:
             rec = 0
+        if verbose:
+            print('rec = %5i'%(rec))
         if self.Nrrlvl:
             rrlvl = self.Rrlvl
             if hasattr(self, 'RrlvlRate'):
@@ -1204,15 +1206,6 @@ class ion(ioneqOne, ionTrails, specTrails):
             pexRate = self.PUpsilon['exRate']
             pdexRate = self.PUpsilon['dexRate']
 
-        if self.Nauto:
-            branch = np.zeros_like(self.Auto['avalueLvl'])
-            # first get branching ratio
-            for i, lvl in enumerate(self.Elvlc['lvl'][1:]):
-                if self.Wgfa['avalueLvl'][lvl-1] > 0.:
-                    branch[lvl-1] = self.Wgfa['avalueLvl'][lvl-1]/(self.Wgfa['avalueLvl'][lvl-1] + self.Auto['avalueLvl'][lvl-1])
-                else:
-                   branch[lvl-1] = 0.
-            self.Branch = branch
 
         temp = self.Temperature
         ntemp = self.Ntemp
@@ -1245,7 +1238,6 @@ class ion(ioneqOne, ionTrails, specTrails):
         pop = np.zeros((self.NTempDens,nlvls),np.float64)
 #            drPop = np.zeros((ntemp,nlvls),np.float64)
         fullPop = np.zeros((self.NTempDens, ci + nlvls + rec), np.float64)
-        drTot = np.zeros(self.NTempDens, np.float64)
         if self.Nrrlvl:
             rrTot = np.zeros(self.NTempDens, np.float64)
 #            recRate = np.zeros((ntemp,nlvls),np.float64)
@@ -1254,6 +1246,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         recTot = np.zeros(self.NTempDens, np.float64)
 #
 #
+        higherPop = []
         for itemp in range(self.NTempDens):
             popmat = np.copy(rad)
             temp = self.Temperature[itemp]
@@ -1285,11 +1278,8 @@ class ion(ioneqOne, ionTrails, specTrails):
 #                    rrlvl = self.Rrlvl
 #                    if hasattr(self, 'RrlvlRate'):
 #                        rrlvl = self.Rrlvl
-                    if hasattr(self, 'RrlvlRate'):
-                        rrlvlRate = self.RrlvlRate
-                    else:
+                    if not hasattr(self, 'RrlvlRate'):
                         self.rrlvlDescale()
-                        rrlvlRate = self.RrlvlRate
                         # only include rr from ground level
                     for itrans in rrLvlIdx:
                         lvl1 = rrlvl['lvl1'][itrans]-1
@@ -1322,27 +1312,16 @@ class ion(ioneqOne, ionTrails, specTrails):
                             popmat[ci + l2, -1] += self.EDensity[itemp]*dielRate
                             popmat[-1, -1] -= self.EDensity[itemp]*dielRate
 
-                            # already included
-                            #popmat[-1, ci + l2] += avalue
-
-                            #popmat[ci + l2, ci + l2] -= avalue
-    #                            drTot += dielRate*branch[elvl2idx]
-                            # seems to give the correct DR Rate
-                            drTot[itemp] += dielRate*branch[l2]
-                        if verbose:
-                            print('itemp rrTot dielRateTot %5i %10.2e %10.2e'%(itemp, rrTot[itemp], drTot[itemp]))
-                            print('itemp, recTot RecombRate %5i %10.2e %10.2e'%(itemp, recTot[itemp], higher.RecombRate['rate'][itemp]))
-                    else:
-                        drTot[itemp] = 0.
 
 
-                recTot[itemp] = rrTot[itemp] + drTot[itemp]
+
+                recTot[itemp] = rrTot[itemp]
                 if recTot[itemp] < higher.RecombRate['rate'][itemp]:
                     popmat[ci, -1] += self.EDensity[itemp]*(higher.RecombRate['rate'][itemp] - recTot[itemp])
                     popmat[-1, -1] -= self.EDensity[itemp]*(higher.RecombRate['rate'][itemp] - recTot[itemp])
                 if verbose:
-                    print('itemp rrTot dielRateTot %5i %10.2e %10.2e'%(itemp, rrTot[itemp], drTot[itemp]))
-                    print('itemp, recTot RecombRate %5i %10.2e %10.2e'%(itemp, recTot[itemp], higher.RecombRate['rate'][itemp]))
+                    print('itemp  rrTot         %5i %10.2e '%(itemp, rrTot[itemp]))
+                    print('itemp, recTot RecombRate  %5i %10.2e %10.2e'%(itemp, recTot[itemp], higher.RecombRate['rate'][itemp]))
             else:
                 recTot[itemp] = 0.
 
@@ -1363,6 +1342,10 @@ class ion(ioneqOne, ionTrails, specTrails):
             b[nlvls+ci+rec-1] = 1.
             try:
                 thispop = np.linalg.solve(popmat,b)
+                if rec:
+                    higherPop.append(thispop[ci+nlvls])
+                else:
+                    higherPop.append(-1)
                 pop[itemp] = thispop[ci:ci+nlvls]
                 fullPop[itemp] = thispop
             except np.linalg.LinAlgError:
@@ -1370,7 +1353,7 @@ class ion(ioneqOne, ionTrails, specTrails):
                 errorMessage.append('linealgError for T index %5i'%(itemp))
         #
             pop = np.where(pop > 0., pop, 0.)
-        self.Population = {"temperature":temperature,"eDensity":eDensity,"population":pop, "protonDensity":protonDensity, "ci":ci, "rec":rec, 'popmat':popmat, 'fullPop':fullPop, 'method':'populate'}
+        self.Population = {"temperature":temperature,"eDensity":eDensity,"population":pop, "protonDensity":protonDensity, "ci":ci, "rec":rec, 'popmat':popmat, 'fullPop':fullPop, 'method':'populate',  'higherPop':higherPop, 'rrTot':rrTot}
         if len(errorMessage) > 0:
             self.Population['errorMessage'] = errorMessage
 

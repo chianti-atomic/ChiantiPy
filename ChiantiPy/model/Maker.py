@@ -38,11 +38,110 @@ def doDemGofntQ(inQueue, outQueue):
         outQueue.put(outList)
     return
     #
+    # ---------------------------------------------------------
+    #
+def emPlot(matchDict, vs='T', loc='upper right', fs=10,  adjust=None, position='both'):
+    '''
+    to plot line intensities divided by gofnt
+    adjust is to provide an adjustment to the position of the labels
+    position : one of 'both', 'right', 'left', or 'none'
+    '''
+    match = matchDict['match']
+    temp = matchDict['Temperature']
+    dens = matchDict['EDensity']
+    nInt = len(match)
+    if position == 'both':
+        hpos = ['b']*nInt
+    elif position == 'right':
+        hpos = ['r']*nInt
+    elif position == 'left':
+        hpos = ['l']*nInt
+    elif type(position) is list:
+        if len(position) == nInt:
+            hpos = position
+            print(' position is the right length')
+        else:
+            print(' position is not the right length')
+            return
+    else:
+        print(' position not understood')
+        return
+
+    if adjust is None:
+        adjust = np.ones(nInt, np.float64)
+#        print(' nInt = %5i'%(nInt))
+    if not 'intensity' in match[0]:
+        print(' must run mgofnt or gofnt first')
+        return
+    elif vs is 'T':
+        if temp[0] == temp[-1]:
+            ntemp = 1
+        else:
+            ntemp = match[0]['intensity'].shape[0]
+        if ntemp > 1:
+            em = np.zeros((nInt, ntemp), 'float64')
+            xvar = temp
+        for idx in range(nInt):
+            nonzed = match[idx]['intensitySum'] > 0.
+            large = match[idx]['intensitySum'] >  match[idx]['intensitySum'].max()*0.01
+            realgood = np.logical_and(nonzed, large)
+            if realgood.sum() > 0 and match[idx]['obsIntensity'] > 0.:
+                wvlstr = ' %5.1f'%(match[idx]['wvl'])
+                em[idx][realgood] = match[idx]['obsIntensity']/match[idx]['intensitySum'][realgood]
+                plt.loglog(xvar[realgood], em[idx][realgood], lw=2, label = wvlstr)
+                if ntemp > 1:
+                    lblx = match[idx]['tmax']
+                else:
+                    lblx = match[idx]['dmax']
+                lbly = np.min(em[idx][realgood])*1.05
+                plt.text(lblx, lbly, wvlstr.strip())
+            else:
+                print('no values for idx = %5i wvl = %8.2f'%(idx, match[idx]['wvl']))
+                print(' nonzed = %i'%(nonzed.sum()))
+                print('intensity = %10.2e'%(match[idx]['intensity']))
+        plt.legend(loc=loc, fontsize=fs)
+        plt.ylabel('Emission Measure (cm$^{-5}$)', fontsize=14)
+        plt.xlabel('Temperature (K)',  fontsize=14)
+    elif vs is not 'T':
+        if dens[0] == dens[-1]:
+            ndens = 1
+        else:
+            ndens = len(dens)
+        if ndens > 1:
+            em = np.zeros((nInt, ndens), 'float64')
+            xvar = dens
+        for idx in range(nInt):
+            nonzed = match[idx]['intensitySum'] > 0.
+            large = match[idx]['intensitySum'] >  match[idx]['intensitySum'].max()*0.01
+            realgood = np.logical_and(nonzed, large)
+            if realgood.sum() > 0 and match[idx]['obsIntensity'] > 0.:
+                wvlstr = ' %5.1f'%(match[idx]['obsWvl'])
+                em[idx][realgood] = match[idx]['obsIntensity']/match[idx]['intensitySum'][realgood]
+                plt.loglog(xvar[realgood], em[idx][realgood], lw=2, label=wvlstr)
+                print(' %i  %5.1f'%(idx, match[idx]['obsWvl']))
+                lblx = dens
+                lbly = em[idx][realgood]*1.05
+                if hpos[idx] =='b':
+                    plt.text(lblx[0], lbly[0]*adjust[idx], wvlstr.strip())
+                    plt.text(lblx[-1], lbly[-1]*adjust[idx], wvlstr.strip(), horizontalalignment='right')
+                elif hpos[idx] == 'r':
+                    plt.text(lblx[-1], lbly[-1]*adjust[idx], wvlstr.strip(), horizontalalignment='right')
+                elif hpos[idx] == 'l':
+                    plt.text(lblx[0], lbly[0]*adjust[idx], wvlstr.strip())
+
+            else:
+                print('no values for idx = %5i wvl = %8.2f'%(idx, match[idx]['wvl']))
+                print(' nonzed = %i'%(nonzed.sum()))
+                print('intensity = %10.2e'%(match[idx]['obsIntensity']))
+        plt.legend(loc=loc, fontsize=fs)
+        plt.ylabel('Emission Measure (cm$^{-5}$)', fontsize=14)
+        plt.xlabel('Electron Density (cm$^{-3}$)',  fontsize=14)
+     #
     #-----------------------------------------------------
     #
 def makeMatchPkl(specData, temp, dens, wghtFactor = 0.25,  abundanceName = None, minAbund=1.e-6, useMgofnt=1, verbose=0):
     '''
-    input a data dictionary and instantiate a dem class,
+    input a data dictionary and instantiate a maker class,
     and run mgofnt and then make a pickle file
     to use multiprocessing, this needs to be run in an ipython console
 
@@ -53,18 +152,19 @@ def makeMatchPkl(specData, temp, dens, wghtFactor = 0.25,  abundanceName = None,
     '''
 
     mydem = maker(specData, wghtFactor = wghtFactor, abundanceName =  abundanceName, minAbund=minAbund, verbose=verbose)
+    mydem.makeMatch()
     if useMgofnt:
         mydem.mgofnt(temp, dens, verbose=1)
     else:
         mydem.gofnt(temp, dens)
 #    mydem.predictor()
     filename = specData['filename']
-    outname = os.path.splitext(filename)[0] + '-' + mydem.AbundanceName +'.pkl'
+    outname = os.path.splitext(filename)[0] + '-match-' + mydem.AbundanceName +'.pkl'
     mydem.PklName = outname
     print(' pickle name = %s'%(outname))
-    outpt = open(outname, 'wb')
-    pickle.dump(mydem, outpt)
-    outpt.close()
+    mydem.dump(outname)
+#    with open(outname, 'wb') as outpt:
+#        pickle.dump(mydem.match, outpt)
     print(' should now move this to the working dir where it will be used')
     #
     #-----------------------------------------------------
@@ -122,9 +222,11 @@ class maker(ionTrails):
         print(' abundanceName = %s'%(self.AbundanceName))
 
         self.SpecData = specData
+        self.IonList = ionList
+        self.AllLines = allLines
         self.MinAbund = minAbund
         print(' minimum abundance = %10.2e'%(minAbund))
-        mlInfo = io.masterListInfo()
+        self.MlInfo = io.masterListInfo()
         self.Intensity = specData['intensity']
         self.IonS = specData['ions']
         self.IonSet = set(specData['ions'])
@@ -146,7 +248,10 @@ class maker(ionTrails):
             for iwvl in range(self.Nobs):
                 self.WghtFactor = self.SpecData['intStd'][iwvl]/self.SpecData['intensity'][iwvl]
         #
-        self.AllLines = allLines
+    def makeMatch(self,  verbose=False):
+        """ to match the CHIANTI lines with the iput specdata
+        """
+
         if 'intensity' in self.SpecData.keys():
             self.Intensity = self.SpecData['intensity']
         masterlist = io.masterListRead()
@@ -155,6 +260,7 @@ class maker(ionTrails):
         for iwvl in range(len(self.Wvl)):
             matches.append({'ion':[], 'wvl':[], 'lineIdx':[], 'wvldiff':[], 'lvl1':[], 'lvl2':[], 'pretty1':[], 'pretty2':[], 'predictedLine':[],'iPredictedLine':0, 'obsIntensity':self.Intensity[iwvl], 'exptIon':self.IonS[iwvl], 'obsWvl':self.Wvl[iwvl]})
         # use the ionList but make sure the ions are in the database
+        ionList = self.IonList
         if ionList:
             alist=[]
             for one in ionList:
@@ -167,6 +273,7 @@ class maker(ionTrails):
                         print('')
             masterlist = alist
         #
+        minAbund = self.MinAbund
         if minAbund:
             self.MinAbund = minAbund
             abundanceName = chdata.Defaults['abundfile']
@@ -178,6 +285,8 @@ class maker(ionTrails):
                 if abundanceAll['abundance'][z-1] > minAbund:
                     revList.append(one)
             masterlist = revList
+        allLines = self.AllLines
+        mlInfo = self.MlInfo
         for thision in masterlist:
             if verbose:
                 print(' - - - - - - - - - - - ')
@@ -246,7 +355,6 @@ class maker(ionTrails):
             amatch['predictedLine'] = [0]*nions
         self.match = matches
 
-        #em = None,
     def argCheck(self, temperature=None, eDensity=None, pDensity='default', verbose=0):
         ''' to check the compatibility of the three arguments
         and put them into numpy arrays of atleast_1d
@@ -590,77 +698,109 @@ class maker(ionTrails):
         #
         # ---------------------------------------------------------
         #
-    def emPlot(self, vs='T'):
+    def emPlot(self, vs='T', loc='upper right', fs=10,  adjust=None, position='both', label=True):
         '''
         to plot line intensities divided by gofnt
+        adjust is to provide an adjustment to the position of the labels
+        position : one of 'both', 'right', 'left', or 'none'
         '''
-        nInt = len(self.Intensity)
-#        print(' nInt = %5i'%(nInt))
-        if not hasattr(self, 'Temperature'):
+        match = self.match
+        temp = self.Temperature
+        dens = self.EDensity
+        nInt = len(match)
+        if position == 'both':
+            hpos = ['b']*nInt
+        elif position == 'right':
+            hpos = ['r']*nInt
+        elif position == 'left':
+            hpos = ['l']*nInt
+        elif type(position) is list:
+            if len(position) == nInt:
+                hpos = position
+                print(' position is the right length')
+            else:
+                print(' position is not the right length')
+                return
+        else:
+            print(' position not understood')
+            return
+
+        if adjust is None:
+            adjust = np.ones(nInt, np.float64)
+    #        print(' nInt = %5i'%(nInt))
+        if not 'intensity' in match[0]:
             print(' must run mgofnt or gofnt first')
             return
         elif vs is 'T':
-            if self.Ntemp > 1:
-                em = np.zeros((nInt, self.Ntemp), 'float64')
-                xvar = self.Temperature
+            if temp[0] == temp[-1]:
+                ntemp = 1
+            else:
+                ntemp = match[0]['intensity'].shape[0]
+            if ntemp > 1:
+                em = np.zeros((nInt, ntemp), 'float64')
+                xvar = temp
             for idx in range(nInt):
-                nonzed = self.match[idx]['intensitySum'] > 0.
-                large = self.match[idx]['intensitySum'] >  self.match[idx]['intensitySum'].max()*0.01
+                nonzed = match[idx]['intensitySum'] > 0.
+                large = match[idx]['intensitySum'] >  match[idx]['intensitySum'].max()*0.01
                 realgood = np.logical_and(nonzed, large)
-    #            print(' for idx= %5i size of realgood = %5i'%(idx, realgood.size))
-                if realgood.sum() > 0 and self.Intensity[idx] > 0.:
-                    em[idx][realgood] = self.Intensity[idx]/self.match[idx]['intensitySum'][realgood]
-                    plt.loglog(xvar[realgood], em[idx][realgood], lw=2)
-        #            minv = em[idx][nonzed] == em[idx][nonzed].min()
-                    if len(self.Temperature) > 1:
-                        lblx = self.match[idx]['tmax']
+                if realgood.sum() > 0 and match[idx]['obsIntensity'] > 0.:
+                    wvlstr = ' %5.1f'%(match[idx]['wvl'])
+                    em[idx][realgood] = match[idx]['obsIntensity']/match[idx]['intensitySum'][realgood]
+                    if label:
+                        plt.loglog(xvar[realgood], em[idx][realgood], lw=2, label = wvlstr)
                     else:
-                        lblx = self.match[idx]['dmax']
-        #            lbly = em[idx][nonzed][minv[0]]
+                        plt.loglog(xvar[realgood], em[idx][realgood], lw=2)
+                    if ntemp > 1:
+                        lblx = match[idx]['tmax']
+                    else:
+                        lblx = match[idx]['dmax']
                     lbly = np.min(em[idx][realgood])*1.05
-                    wvlstr = ' %8.3f'%(self.Wvl[idx])
-        ##            lbl = self.match[idx]['ion'] + wvlstr
-    #                print ' lblx,lbly,wvlstr, minv = ', lblx, lbly, wvlstr
-                    plt.text(lblx, lbly, wvlstr.strip())
+                    plt.text(lblx, lbly, wvlstr.strip(), fontsize=14)
                 else:
-                    print('no values for idx = %5i wvl = %8.2f'%(idx, self.Wvl[idx]))
+                    print('no values for idx = %5i wvl = %8.2f'%(idx, match[idx]['wvl']))
                     print(' nonzed = %i'%(nonzed.sum()))
-                    print('intensity = %10.2e'%(self.Intensity[idx]))
+                    print('intensity = %10.2e'%(match[idx]['intensity']))
+            plt.legend(loc=loc, fontsize=fs)
             plt.ylabel('Emission Measure (cm$^{-5}$)', fontsize=14)
             plt.xlabel('Temperature (K)',  fontsize=14)
-            if 'file' in self.SpecData.keys():
-                plt.title(self.SpecData['file'])
         elif vs is not 'T':
-            if self.Ndens > 1:
-                em = np.zeros((nInt, self.Ndens), 'float64')
-                xvar = self.EDensity
+            if dens[0] == dens[-1]:
+                ndens = 1
+            else:
+                ndens = len(dens)
+            if ndens > 1:
+                em = np.zeros((nInt, ndens), 'float64')
+                xvar = dens
             for idx in range(nInt):
-                nonzed = self.match[idx]['intensitySum'] > 0.
-                large = self.match[idx]['intensitySum'] >  self.match[idx]['intensitySum'].max()*0.01
+                nonzed = match[idx]['intensitySum'] > 0.
+                large = match[idx]['intensitySum'] >  match[idx]['intensitySum'].max()*0.01
                 realgood = np.logical_and(nonzed, large)
-    #            print(' for idx= %5i size of realgood = %5i'%(idx, realgood.size))
-                if realgood.sum() > 0 and self.Intensity[idx] > 0.:
-                    em[idx][realgood] = self.Intensity[idx]/self.match[idx]['intensitySum'][realgood]
-                    plt.loglog(xvar[realgood], em[idx][realgood], lw=2)
-        #            minv = em[idx][nonzed] == em[idx][nonzed].min()
-#                    lblx = self.match[idx]['dmax']
-                    lblx = self.EDensity
-        #            lbly = em[idx][nonzed][minv[0]]
-#                    lbly = np.min(em[idx][realgood])
+                if realgood.sum() > 0 and match[idx]['obsIntensity'] > 0.:
+                    wvlstr = ' %5.1f'%(match[idx]['obsWvl'])
+                    em[idx][realgood] = match[idx]['obsIntensity']/match[idx]['intensitySum'][realgood]
+                    if label:
+                        plt.loglog(xvar[realgood], em[idx][realgood], lw=2, label=wvlstr)
+                    else:
+                        plt.loglog(xvar[realgood], em[idx][realgood], lw=2)
+                    print(' %i  %5.1f'%(idx, match[idx]['obsWvl']))
+                    lblx = dens
                     lbly = em[idx][realgood]*1.05
-                    wvlstr = ' %8.3f'%(self.Wvl[idx])
-        ##            lbl = self.match[idx]['ion'] + wvlstr
-    #                print ' lblx,lbly,wvlstr, minv = ', lblx, lbly, wvlstr
-                    plt.text(lblx[0], lbly[0], wvlstr.strip())
-                    plt.text(lblx[-1], lbly[-1], wvlstr.strip(), horizontalalignment='right')
+                    if hpos[idx] =='b':
+                        plt.text(lblx[0], lbly[0]*adjust[idx], wvlstr.strip(), fontsize=14)
+                        plt.text(lblx[-1], lbly[-1]*adjust[idx], wvlstr.strip(), horizontalalignment='right', fontsize=14)
+                    elif hpos[idx] == 'r':
+                        plt.text(lblx[-1], lbly[-1]*adjust[idx], wvlstr.strip(), horizontalalignment='right', fontsize=14)
+                    elif hpos[idx] == 'l':
+                        plt.text(lblx[0], lbly[0]*adjust[idx], wvlstr.strip(), fontsize=14)
+
                 else:
-                    print('no values for idx = %5i wvl = %8.2f'%(idx, self.Wvl[idx]))
+                    print('no values for idx = %5i wvl = %8.2f'%(idx, match[idx]['wvl']))
                     print(' nonzed = %i'%(nonzed.sum()))
-                    print('intensity = %10.2e'%(self.Intensity[idx]))
+                    print('intensity = %10.2e'%(match[idx]['obsIntensity']))
+            if label:
+                plt.legend(loc=loc, fontsize=fs)
             plt.ylabel('Emission Measure (cm$^{-5}$)', fontsize=14)
             plt.xlabel('Electron Density (cm$^{-3}$)',  fontsize=14)
-            if 'file' in self.SpecData.keys():
-                plt.title(self.SpecData['file'])
         #
         # --------------------------------------------------------------------------
         #
@@ -1263,4 +1403,27 @@ class maker(ionTrails):
 #        em1sig = [emSpace[good1sig].min(), emSpace[good1sig].max()]
         #  will take care of confidence limits outside
         self.SearchData['EmError'] = {'em':emSpace, 'emfit':emfitSpace, 'chisq':emChisq, 'idx':self.SearchData['best']['idx'], 'temperature':self.Temperature[self.SearchData['best']['idx']]}
-
+        #
+        #-----------------------------------------------------
+        #
+    def load(self, filename):
+        """ to open a pickle file, return the match data and make it an attribute
+        """
+        with open(filename, 'rb') as inpt:
+            matchDict = pickle.load(inpt)
+        self.match = matchDict['match']
+        self.Temperature = matchDict['Temperature']
+        self.EDensity = matchDict['EDensity']
+        self.Ndens = matchDict['Ndens']
+        self.Ntemp = matchDict['Ntemp']
+        self.NTempDens = matchDict['NTempDens']
+        #
+        #-----------------------------------------------------
+        #
+    def dump(self, filename):
+        """to save the attribute match to a pickle file
+        """
+        matchDict={'match':self.match, 'Temperature':self.Temperature, 'EDensity':self.EDensity, 'Ndens':self.Ndens,
+            'Ntemp':self.Ntemp, 'NTempDens':self.NTempDens}
+        with open(filename, 'wb') as outpt:
+            pickle.dump(matchDict, outpt)

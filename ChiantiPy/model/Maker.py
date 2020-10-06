@@ -40,7 +40,7 @@ def doDemGofntQ(inQueue, outQueue):
     #
     # ---------------------------------------------------------
     #
-def emPlot(matchDict, vs='T', loc='upper right', fs=10,  adjust=None, position='both'):
+def emPlot(matchDict, vs='T', loc='upper right', fs=10,  adjust=None, position='both', legend = True,  verbose=0):
     '''
     to plot line intensities divided by gofnt
     adjust is to provide an adjustment to the position of the labels
@@ -77,7 +77,7 @@ def emPlot(matchDict, vs='T', loc='upper right', fs=10,  adjust=None, position='
         if temp[0] == temp[-1]:
             ntemp = 1
         else:
-            ntemp = match[0]['intensity'].shape[0]
+            ntemp = temp.size
         if ntemp > 1:
             em = np.zeros((nInt, ntemp), 'float64')
             xvar = temp
@@ -86,20 +86,25 @@ def emPlot(matchDict, vs='T', loc='upper right', fs=10,  adjust=None, position='
             large = match[idx]['intensitySum'] >  match[idx]['intensitySum'].max()*0.01
             realgood = np.logical_and(nonzed, large)
             if realgood.sum() > 0 and match[idx]['obsIntensity'] > 0.:
-                wvlstr = ' %5.1f'%(match[idx]['wvl'])
+                wvlstr = ' %6.2f'%(match[idx]['obsWvl'])
                 em[idx][realgood] = match[idx]['obsIntensity']/match[idx]['intensitySum'][realgood]
                 plt.loglog(xvar[realgood], em[idx][realgood], lw=2, label = wvlstr)
                 if ntemp > 1:
-                    lblx = match[idx]['tmax']
+#                    lblx = match[idx]['tmax']
+                    lblx1 = temp[realgood][0]
+                    lblx2 = temp[realgood][-1]
                 else:
-                    lblx = match[idx]['dmax']
-                lbly = np.min(em[idx][realgood])*1.05
-                plt.text(lblx, lbly, wvlstr.strip())
+                    lblx2 = match[idx]['dmax']
+                lbly1 = em[idx][realgood][0]
+                lbly2 = em[idx][realgood][-1]
+                plt.text(lblx1, lbly1, wvlstr.strip())
+                plt.text(lblx2, lbly2, wvlstr.strip())
             else:
                 print('no values for idx = %5i wvl = %8.2f'%(idx, match[idx]['wvl']))
                 print(' nonzed = %i'%(nonzed.sum()))
                 print('intensity = %10.2e'%(match[idx]['intensity']))
-        plt.legend(loc=loc, fontsize=fs)
+        if legend:
+            plt.legend(loc=loc, fontsize=fs)
         plt.ylabel('Emission Measure (cm$^{-5}$)', fontsize=14)
         plt.xlabel('Temperature (K)',  fontsize=14)
     elif vs is not 'T':
@@ -133,9 +138,101 @@ def emPlot(matchDict, vs='T', loc='upper right', fs=10,  adjust=None, position='
                 print('no values for idx = %5i wvl = %8.2f'%(idx, match[idx]['wvl']))
                 print(' nonzed = %i'%(nonzed.sum()))
                 print('intensity = %10.2e'%(match[idx]['obsIntensity']))
-        plt.legend(loc=loc, fontsize=fs)
+        if legend:
+            plt.legend(loc=loc, fontsize=fs)
         plt.ylabel('Emission Measure (cm$^{-5}$)', fontsize=14)
         plt.xlabel('Electron Density (cm$^{-3}$)',  fontsize=14)
+    #
+    # --------------------------------------------------------------------------
+    #
+def diffPrintMcF(specData,  matchDict, filename='diffPrintMcF.txt',  sort=None):
+    '''
+    calculates the weighted and straight differences between observed and predicted
+    prints the values saves to a file from a PyMC run
+    '''
+    match = matchDict['match']
+    temp = matchDict['Temperature']
+    dens = matchDict['EDensity']
+    if 'Emindices' in matchDict.keys():
+        emIndices = matchDict['EmIndices']
+    else:
+        emIndices = None
+        print('EmIndices missing from matchDict')
+    if 'Em' in matchDict.keys():
+        em = matchDict['Em']
+    else:
+        Em = None
+        print('Em missing from matchDict')
+
+    nMatch = len(match)
+    if sort is None:
+        sorter = range(nMatch)
+    elif sort == 'ion':
+        indexer = []
+        for amatch in self.match:
+            ionStr = amatch['exptIon']
+            ionDict = util.convertName(ionStr)
+            Z = ionDict['Z']
+            stage = ionDict['Ion']
+            number = Z*1000 + stage
+            indexer.append(number)
+        sorter = np.argsort(indexer)
+
+    wDiff = []
+    relDevList = []
+    stdDevList = []
+    intOverPred = []
+    dash = ' -------------------------------------------------'
+    pformat1 = ' %5i %7s %10.3f %10.2e %10.2e %10.3f %10.3f %10.3f %10.3f'
+    pformat1a = ' %5i %7s %10.3f %10.2e %10.2e *****NID******'
+    sformat  = ' %5s %7s %10s %10s %10s %10s %10s %10s %10s'
+    fsformat  = ' %5s %7s %10s %10s %10s %10s %10s %10s %10s\n'
+    with open(filename, 'w') as outpt:
+        print(' %5s %12s %12s %12s'%('index',  'density',  'temperature',  'Em'''))
+        outpt.write(' %5s %12s %12s %12s \n'%('index',  'density',  'temperature',  'Em'''))
+        if emIndices is not None:
+            for emidx in emIndices:
+                print(' %5i %12.2e %12.2e %12.2e'%(emidx, dens[emidx],  temp[emidx], em[emidx]))
+                outpt.write(' %5i %12.2e %12.2e %12.2e \n'%(emidx, dens[emidx],  temp[emidx], em[emidx]))
+        print(dash)
+        outpt.write(dash+'\n')
+        print(' chi = abs(int/(wght*pred))  strDiff = (int - pred)/pred')
+        outpt.write(' chi = abs(int/(2*wght*pred))  strDiff = (int - pred)/pred \n')
+        print(sformat%('iwvl', 'ionS', 'wvl', 'intensity', 'predicted', 'int/pred', 'chi', 'relDev', 'stdDev'))
+        outpt.write(fsformat%('iwvl', 'ionS', 'wvl', 'intensity', 'predicted', 'int/pred', 'chi', 'relDev',  'stdDev'))
+        for iwvl in sorter:
+            amatch = match[iwvl]
+            if amatch['predicted'] > 0. :
+                chi = np.abs(self.Intensity[iwvl]-amatch['predicted'])/(self.WghtFactor*self.Intensity[iwvl])
+                wDiff.append(chi)
+                intOverPred.append(np.abs(self.Intensity[iwvl]/amatch['predicted'] - 1.))
+                relDevList.append(np.abs(self.Intensity[iwvl]-amatch['predicted'])/self.Intensity[iwvl])
+                stdDevList.append(relDevList[-1])
+                pstring = pformat1%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'], self.Intensity[iwvl]/amatch['predicted'], chi, relDevList[-1],  stdDevList[-1] )
+            else:
+                pstring = pformat1a%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'])
+            print(pstring)
+            outpt.write(pstring+'\n')
+        diff = np.asarray(relDevList, np.float64)
+        stdDev = np.asarray(stdDevList, np.float64)
+        print(' mean of relative Deviation = %10.3f 3*relDev = %10.3f stdDev = %10.3f\n'%(diff.mean(), 3.*diff.mean(), stdDev.mean()))
+        outpt.write(' mean of rel Dev = %10.3f 3*rel Dev  = %10.3f stdDiff:  %10.3f \n'%(diff.mean(), 3.*diff.mean(), stdDev.mean()))
+        print(' mean of intOverPred = abs(int/pred -1.) %10.3f'%(np.mean(intOverPred)))
+        outpt.write(' mean of intOverPred = abs(int/pred -1.) %10.3f \n'%(np.mean(intOverPred)))
+        threeSig = 3.*diff.mean()
+        print(' 3*std = %10.3f'%(threeSig))
+        outpt.write(' 3*std = %10.3f \n'%(threeSig))
+        normChisq = self.getNormalizedChisq()
+        print('Normalized Chisq = %10.3f'%(normChisq))
+        outpt.write('Normalized Chisq = %10.3f \n'%(normChisq))
+        poor = diff > threeSig
+        idx = np.arange(diff.size)
+        pdx = idx[poor]
+        for i in pdx:
+            print('%5i %s %10.3f %10.3f'%(i, self.IonS[i],  self.Wvl[i], diff[i]))
+            outpt.write('%5i %s %10.3f %10.3f \n'%(i, self.IonS[i],  self.Wvl[i], diff[i]))
+    self.diffDict = {'diff':diff, 'wvl':self.Wvl, 'ionS':self.IonS, '3sig':threeSig, 'poor':poor}
+#        self.SearchData['diff'] = diffDict
      #
     #-----------------------------------------------------
     #
@@ -173,7 +270,7 @@ class maker(ionTrails):
     '''
     a class matching observed lines to lines in the CHIANTI database
     '''
-    def __init__(self, specData, wghtFactor = 0., ionList=False, allLines=True, abundanceName = None, minAbund=1.e-6, verbose=False):
+    def __init__(self, specData, wghtFactor = 0.2, ionList=False, allLines=False, abundanceName = None, minAbund=1.e-6, verbose=False):
         '''
         input a list of wavelengths and a wavelength difference
         find a list of predicted spectral lines for each wavelength
@@ -240,16 +337,17 @@ class maker(ionTrails):
         print(' # of observables / reduce # = %i  %10.2f'%(self.Nobs,self.ReduceNobs))
         self.Wvl = specData['wvl0']
         #
-        self.SpecData['wghtFactor'] = []
-        if wghtFactor > 0.:
-            for iwvl in range(self.Nobs):
-                self.WghtFactor = self.SpecData['intStd'][iwvl]/self.SpecData['intensity'][iwvl] + wghtFactor
-        else:
-            for iwvl in range(self.Nobs):
-                self.WghtFactor = self.SpecData['intStd'][iwvl]/self.SpecData['intensity'][iwvl]
+        self.WghtFactor = wghtFactor
+#        self.SpecData['wghtFactor'] = []
+#        if wghtFactor > 0.:
+#            for iwvl in range(self.Nobs):
+#                self.WghtFactor = self.SpecData['intStd'][iwvl]/self.SpecData['intensity'][iwvl] + wghtFactor
+#        else:
+#            for iwvl in range(self.Nobs):
+#                self.WghtFactor = self.SpecData['intStd'][iwvl]/self.SpecData['intensity'][iwvl]
         #
     def makeMatch(self,  verbose=False):
-        """ to match the CHIANTI lines with the iput specdata
+        """ to match the CHIANTI lines with the input specdata
         """
 
         if 'intensity' in self.SpecData.keys():
@@ -453,6 +551,8 @@ class maker(ionTrails):
             # already know this ion is needed
             #if verbose:
                 #print(' someIon = %s'%(someIon))
+            if verbose:
+                print(' using %s'%(someIon))
             thisIon = ch.ion(someIon, temperature, density, abundance = self.AbundanceName)
             if hasattr(thisIon, 'IoneqOne'):
                 thisIon.intensity()
@@ -468,8 +568,6 @@ class maker(ionTrails):
                     #  this is data for each line
                     if someIon in amatch['ion']:
                         kon = amatch['ion'].index(someIon)
-                        if verbose:
-                            print(' using %s'%(someIon))
     #                for kon, anIon in enumerate(amatch['ion']):
     #
         #                print ' linIdx = ', amatch['lineIdx'], amatch
@@ -653,6 +751,7 @@ class maker(ionTrails):
         '''
         if hasattr(self, 'Temperature'):
             self.EmIndices = np.atleast_1d(indices)
+            self.Nfree = 2*len(indices)
             if verbose:
                 for adx in self.EmIndices:
                     print('index %5i temperature %12.2e'%(adx, self.Temperature[adx]))
@@ -698,7 +797,7 @@ class maker(ionTrails):
         #
         # ---------------------------------------------------------
         #
-    def emPlot(self, vs='T', loc='upper right', fs=10,  adjust=None, position='both', label=True):
+    def emPlot(self, vs='T', loc='upper right', fs=10,  adjust=None, position='both', label=True, legend = True, verbose=1):
         '''
         to plot line intensities divided by gofnt
         adjust is to provide an adjustment to the position of the labels
@@ -735,7 +834,8 @@ class maker(ionTrails):
             if temp[0] == temp[-1]:
                 ntemp = 1
             else:
-                ntemp = match[0]['intensity'].shape[0]
+                ntemp = temp.size
+#                ntemp = match[0]['intensity'].shape[0]
             if ntemp > 1:
                 em = np.zeros((nInt, ntemp), 'float64')
                 xvar = temp
@@ -744,23 +844,28 @@ class maker(ionTrails):
                 large = match[idx]['intensitySum'] >  match[idx]['intensitySum'].max()*0.01
                 realgood = np.logical_and(nonzed, large)
                 if realgood.sum() > 0 and match[idx]['obsIntensity'] > 0.:
-                    wvlstr = ' %5.1f'%(match[idx]['wvl'])
+                    wvlstr = ' %5.1f'%(match[idx]['obsWvl'])
                     em[idx][realgood] = match[idx]['obsIntensity']/match[idx]['intensitySum'][realgood]
                     if label:
                         plt.loglog(xvar[realgood], em[idx][realgood], lw=2, label = wvlstr)
                     else:
                         plt.loglog(xvar[realgood], em[idx][realgood], lw=2)
                     if ntemp > 1:
-                        lblx = match[idx]['tmax']
+                        lblx1 = temp[realgood][0]
+                        lblx2 = temp[realgood][-1]
                     else:
-                        lblx = match[idx]['dmax']
-                    lbly = np.min(em[idx][realgood])*1.05
-                    plt.text(lblx, lbly, wvlstr.strip(), fontsize=14)
+                        lblx1 = self.Temperature[realgood].min()
+                        lbly1 = em[idx][0]
+                    lbly1 = em[idx][realgood][0]
+                    lbly2 = em[idx][realgood][-1]
+                    plt.text(lblx1, lbly1, wvlstr.strip())
+                    plt.text(lblx2, lbly2, wvlstr.strip())
                 else:
                     print('no values for idx = %5i wvl = %8.2f'%(idx, match[idx]['wvl']))
                     print(' nonzed = %i'%(nonzed.sum()))
                     print('intensity = %10.2e'%(match[idx]['intensity']))
-            plt.legend(loc=loc, fontsize=fs)
+            if legend:
+                plt.legend(loc=loc, fontsize=fs)
             plt.ylabel('Emission Measure (cm$^{-5}$)', fontsize=14)
             plt.xlabel('Temperature (K)',  fontsize=14)
         elif vs is not 'T':
@@ -797,7 +902,7 @@ class maker(ionTrails):
                     print('no values for idx = %5i wvl = %8.2f'%(idx, match[idx]['wvl']))
                     print(' nonzed = %i'%(nonzed.sum()))
                     print('intensity = %10.2e'%(match[idx]['obsIntensity']))
-            if label:
+            if legend:
                 plt.legend(loc=loc, fontsize=fs)
             plt.ylabel('Emission Measure (cm$^{-5}$)', fontsize=14)
             plt.xlabel('Electron Density (cm$^{-3}$)',  fontsize=14)
@@ -837,6 +942,10 @@ class maker(ionTrails):
                 pass
             print(dash)
             outpt.write(dash +'\n')
+            print(' match filename = %s \n'%(self.MatchName))
+            outpt.write(' match filename = %s \n'%(self.MatchName))
+            print(' wghtFactor %10.3f'%(self.WghtFactor))
+            outpt.write(' wghtFactor %10.3f'%(self.WghtFactor))
             print(' chi = abs(int/(2*wght*pred))  relDiff = (int - pred)/pred')
             outpt.write(' chi = abs(int/(2*wght*pred))  relDiff = (int - pred)/pred \n')
             sprint = sformat%('iwvl', 'ionS', 'wvl', 'intensity', 'predicted', 'int/pred', 'chi', 'relDiff', 'stdDev')
@@ -844,7 +953,7 @@ class maker(ionTrails):
             outpt.write(sprint +'\n')
             for iwvl,  amatch in enumerate(self.match):
                 if amatch['predicted'] > 0. :
-                    chi = np.abs(self.Intensity[iwvl]/(2.*self.WghtFactor*amatch['predicted']))
+                    chi = np.abs(self.Intensity[iwvl]-amatch['predicted'])/(self.WghtFactor*amatch['predicted'])
                     wDiff.append(chi)
                     intOverPred.append(np.abs(self.Intensity[iwvl]/amatch['predicted'] - 1.))
                     relDevList.append(np.abs(self.Intensity[iwvl]-amatch['predicted'])/amatch['predicted'])
@@ -862,6 +971,9 @@ class maker(ionTrails):
             outpt.write(' mean of intOverPred = abs(int/pred -1.) %10.3f \n'%(np.mean(intOverPred)))
             threeSig = 3.*relDev.std()
             print(' 3*std = %10.3f'%(threeSig))
+            normChisq = self.getNormalizedChisq()
+            print('Normalized Chisq = %10.3f'%(normChisq))
+            outpt.write('Normalized Chisq = %10.3f \n'%(normChisq))
             poor = relDev > threeSig
             idx = np.arange(relDev.size)
             pdx = idx[poor]
@@ -873,11 +985,25 @@ class maker(ionTrails):
         #
         # --------------------------------------------------------------------------
         #
-    def diffPrintMc(self, dir = '.', filename='diffPrintMc.txt'):
+    def diffPrintMc(self, dir = '.', filename='diffPrintMc.txt',  sort=None):
         '''
         calculates the weighted and straight differences between observed and predicted
         prints the values saves to a file from a PyMC run
         '''
+        nMatch = len(self.match)
+        if sort is None:
+            sorter = range(nMatch)
+        elif sort == 'ion':
+            indexer = []
+            for amatch in self.match:
+                ionStr = amatch['exptIon']
+                ionDict = util.convertName(ionStr)
+                Z = ionDict['Z']
+                stage = ionDict['Ion']
+                number = Z*1000 + stage
+                indexer.append(number)
+            sorter = np.argsort(indexer)
+
         wDiff = []
         relDevList = []
         stdDevList = []
@@ -888,6 +1014,8 @@ class maker(ionTrails):
         sformat  = ' %5s %7s %10s %10s %10s %10s %10s %10s %10s'
         fsformat  = ' %5s %7s %10s %10s %10s %10s %10s %10s %10s\n'
         with open(filename, 'w') as outpt:
+            print(' WghtFactor = %10.3f'%(self.WghtFactor))
+            outpt.write(' WghtFactor = %10.3f \n'%(self.WghtFactor))
             emIndices = self.EmIndices
             print(' %5s %12s %12s %12s'%('index',  'density',  'temperature',  'Em'''))
             outpt.write(' %5s %12s %12s %12s \n'%('index',  'density',  'temperature',  'Em'''))
@@ -896,13 +1024,14 @@ class maker(ionTrails):
                 outpt.write(' %5i %12.2e %12.2e %12.2e \n'%(emidx, self.EDensity[emidx],  self.Temperature[emidx], self.Em[emidx]))
             print(dash)
             outpt.write(dash+'\n')
-            print(' chi = abs(int/(2*wght*pred))  strDiff = (int - pred)/pred')
-            outpt.write(' chi = abs(int/(2*wght*pred))  strDiff = (int - pred)/pred \n')
+            print(' chi = abs(int/(wght*pred))  strDiff = (int - pred)/pred')
+            outpt.write(' chi = abs(int-pred)/(wght*pred))  strDiff = (int - pred)/pred \n')
             print(sformat%('iwvl', 'ionS', 'wvl', 'intensity', 'predicted', 'int/pred', 'chi', 'relDev', 'stdDev'))
             outpt.write(fsformat%('iwvl', 'ionS', 'wvl', 'intensity', 'predicted', 'int/pred', 'chi', 'relDev',  'stdDev'))
-            for iwvl,  amatch in enumerate(self.match):
+            for iwvl in sorter:
+                amatch = self.match[iwvl]
                 if amatch['predicted'] > 0. :
-                    chi = np.abs(self.Intensity[iwvl]/(2.*self.WghtFactor*amatch['predicted']))
+                    chi = np.abs(self.Intensity[iwvl]-amatch['predicted'])/(self.WghtFactor*amatch['predicted'])
                     wDiff.append(chi)
                     intOverPred.append(np.abs(self.Intensity[iwvl]/amatch['predicted'] - 1.))
                     relDevList.append(np.abs(self.Intensity[iwvl]-amatch['predicted'])/self.Intensity[iwvl])
@@ -921,6 +1050,9 @@ class maker(ionTrails):
             threeSig = 3.*diff.mean()
             print(' 3*std = %10.3f'%(threeSig))
             outpt.write(' 3*std = %10.3f \n'%(threeSig))
+            normChisq = self.getNormalizedChisq()
+            print('Normalized Chisq = %10.3f'%(normChisq))
+            outpt.write('Normalized Chisq = %10.3f \n'%(normChisq))
             poor = diff > threeSig
             idx = np.arange(diff.size)
             pdx = idx[poor]
@@ -948,67 +1080,86 @@ class maker(ionTrails):
         #
         # --------------------------------------------------------------------------
         #
-    def predictPrint(self, minContribution=0.1, outfile=0, verbose=0):
+    def predictPrint(self, minContribution=0.1, outfile='predictPrint.txt', sort=None, verbose=0):
         '''
         to predict the intensities of the observed lines from an emission measure
         the emission measure is already specified as self.Em which is an np array
         '''
+        nMatch = len(self.match)
+        if sort is None:
+            sorter = range(nMatch)
+        elif sort == 'ion':
+            indexer = []
+            for amatch in self.match:
+                ionStr = amatch['exptIon']
+                ionDict = util.convertName(ionStr)
+                Z = ionDict['Z']
+                stage = ionDict['Ion']
+                number = Z*1000 + stage
+                indexer.append(number)
+            sorter = np.argsort(indexer)
+
         dash = ' -------------------------------------------------'
         pformat1 = ' %5i %7s %10.3f %10.2e %10.2e %10.3f %10.3f'
         pformat1s = ' %5s %7s %10s %10s %10s %10s %10s'
         pformat2 = '         %s'
         pformat3 = '        %10.3f %4i %4i %20s - %20s %5i %5i %7.3f'
         pformat3s = '        %10s %4s %4s %20s - %20s %5s %5s %s'
-        try:
-            emIndices = self.EmIndices
-            for emidx in emIndices:
-                print(' %5i %12.2e %12.2e %12.2e'%(emidx, self.EDensity[emidx],  self.Temperature[emidx], self.Em[emidx]))
-        except:
-            print(' attribute EmIndices has not been created')
-            return
-        print(dash)
-        pstring1 = pformat1s%('iwvl', 'IonS', 'wvl', 'Int',  'Pred', 'Int/Pred', 'chi')
-        print(pstring1)
-        pstring3 = pformat3s%('wvl', 'lvl1', 'lvl2', 'lower', 'upper', 'lineIdx',  'predLine', 'contribution')
-        print(pstring3)
-        print(dash)
-        for iwvl,  amatch in enumerate(self.match):
-            if amatch['predicted'] > 0. :
-                chi = np.abs(self.Intensity[iwvl]/(2.*self.WghtFactor*amatch['predicted']))
-                pstring = pformat1%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'], self.Intensity[iwvl]/amatch['predicted'], chi  )
-            else:
-
-                pstring = pformat1%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'], -1.)
-            print(pstring)
-            #
-            # now check line contributions
-            #
-            for jon,  anion in enumerate(amatch['ion']):
-                ionPrint = 0
-                for iline, awvl in enumerate(amatch['wvl'][jon]):
-                    contrib = (amatch['intensity'][amatch['predictedLine'][jon][iline]]*self.Em).sum()/amatch['predicted']
-                    if contrib > minContribution:
-                        if ionPrint == 0:
-                            print(pformat2%(anion))
-                            ionPrint = 1
-                        print(pformat3%(awvl, amatch['lvl1'][jon][iline], amatch['lvl2'][jon][iline], amatch['pretty1'][jon][iline], amatch['pretty2'][jon][iline].ljust(20), amatch['lineIdx'][jon][iline], amatch['predictedLine'][jon][iline], contrib))
-                        print(dash)
-            print(dash)
         if outfile:
             with open(outfile, 'w') as outpt:
                 try:
-                    idx = self.SearchData['best']['idx']
-                    dens = self.SearchData['best']['density']
-                    temp = self.SearchData['best']['temperature']
-                    emfit = self.SearchData['best']['emfit']
-                    em = self.SearchData['best']['em']
-                    print(' %5i %10.2e %10.2e %10.3f %10.2e'%(idx, dens, temp, emfit, em))
+                    emIndices = self.EmIndices
+                    for emidx in emIndices:
+                        print(' %5i %12.2e %12.2e %12.2e'%(emidx, self.EDensity[emidx],  self.Temperature[emidx], self.Em[emidx]))
+                        outpt.write(' %5i %12.2e %12.2e %12.2e\n'%(emidx, self.EDensity[emidx],  self.Temperature[emidx], self.Em[emidx]))
                 except:
-                    for emidx in self.EmIndices:
-                        outpt.write(' %5i%12.2e %12.2e \n'%(emidx, self.Temperature[emidx], self.Em[emidx]))
-                finally:
-                    pass
+                    print(' attribute EmIndices has not been created')
+                    outpt.write(' attribute EmIndices has not been created \n')
+                    return
+                print('matchPkl %s '%(self.MatchName))
+                outpt.write('matchPkl %s \n'%(self.MatchName))
+                print('wghtFactor %10.3f'%(self.WghtFactor))
+                outpt.write('wghtFactor %10.3f \n'%(self.WghtFactor))
+                print(dash)
+                outpt.write(dash + '\n')
+                pstring1 = pformat1s%('iwvl', 'IonS', 'wvl', 'Int',  'Pred', 'Int/Pred', 'chi')
+                print(pstring1)
+                outpt.write(pstring1 +'\n')
+                pstring3 = pformat3s%('wvl', 'lvl1', 'lvl2', 'lower', 'upper', 'lineIdx',  'predLine', 'contribution')
+                print(pstring3)
+                outpt.write(pstring3+'\n')
+                print(dash)
                 outpt.write(dash +'\n')
+                for iwvl in sorter:
+                    amatch = self.match[iwvl]
+                    if amatch['predicted'] > 0. :
+                        chi = np.abs(self.Intensity[iwvl]/(2.*self.WghtFactor*amatch['predicted']))
+                        pstring = pformat1%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'], self.Intensity[iwvl]/amatch['predicted'], chi  )
+                    else:
+
+                        pstring = pformat1%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'], -1.)
+                    print(pstring)
+                    outpt.write(pstring +'\n')
+                    #
+                    # now check line contributions
+                    #
+                    for jon,  anion in enumerate(amatch['ion']):
+                        ionPrint = 0
+                        for iline, awvl in enumerate(amatch['wvl'][jon]):
+                            contrib = (amatch['intensity'][amatch['predictedLine'][jon][iline]]*self.Em).sum()/amatch['predicted']
+                            if contrib > minContribution:
+                                if ionPrint == 0:
+                                    print(pformat2%(anion))
+                                    outpt.write(pformat2%(anion)+'\n')
+                                    ionPrint = 1
+                                print(pformat3%(awvl, amatch['lvl1'][jon][iline], amatch['lvl2'][jon][iline], amatch['pretty1'][jon][iline], amatch['pretty2'][jon][iline].ljust(20), amatch['lineIdx'][jon][iline], amatch['predictedLine'][jon][iline], contrib))
+                                outpt.write(pformat3%(awvl, amatch['lvl1'][jon][iline], amatch['lvl2'][jon][iline], amatch['pretty1'][jon][iline], amatch['pretty2'][jon][iline].ljust(20), amatch['lineIdx'][jon][iline], amatch['predictedLine'][jon][iline], contrib)+'\n')
+                                print(dash)
+                                outpt.write(dash +'\n')
+                    print(dash)
+                outpt.write(dash +'\n')
+                print('matchPkl %s \n'%(self.MatchName))
+                print('wghtFactor %10.3f \n'%(self.WghtFactor))
                 pstring1 = pformat1s%('iwvl', 'IonS', 'wvl', 'Int',  'Pred', 'Int/Pred', 'chi')
                 outpt.write(pstring1 +'\n')
                 outpt.write(pstring3 + '\n')
@@ -1369,7 +1520,7 @@ class maker(ionTrails):
     def search1tEmSpace(self, verbose=0):
         ''' to find the value of chisq as a function of Em with T = best-fit
         '''
-
+        self.Nfree = 2
         if not hasattr(self, 'SearchData'):
             print(' dem has not been searched yet')
             return
@@ -1402,11 +1553,446 @@ class maker(ionTrails):
         print('min Em chisq = %10.3e'%(emChisq.min()))
 #        em1sig = [emSpace[good1sig].min(), emSpace[good1sig].max()]
         #  will take care of confidence limits outside
-        self.SearchData['EmError'] = {'em':emSpace, 'emfit':emfitSpace, 'chisq':emChisq, 'idx':self.SearchData['best']['idx'], 'temperature':self.Temperature[self.SearchData['best']['idx']]}
+        self.SearchData['EmError'] = {'em':emSpace, 'emfit':emfitSpace, 'chisq':emChisq, 'idx':self.SearchData['best']['idx'], 'temperature':self.Temperature[self.SearchData['best']['idx']], 'nfree':self.Nfree}
         #
         #-----------------------------------------------------
         #
-    def load(self, filename):
+    def search2tSpace(self, initial, indxlimits=None, verbose=0, log=0, maxfev=0):
+        '''
+        to conduct a brute force search of 2 temperature space and find the
+        best fit
+        indxlimits give the range of indices to fit over
+        '''
+        self.Nfree = 4
+        t1 = datetime.now()
+        if self.Nobs <= 2.*2.:
+            print(' the number of observables %10.2 is less than the number of parameters'%(self.Nobs, 2.*2.))
+            return
+        if indxlimits == None:
+            if not hasattr(self, 'MinIndex'):
+                self.findMinMaxIndices()
+            indxlimits = [self.MinIndex, self.MaxIndex]
+        print('indxlimits = %5i %5i '%(indxlimits[0], indxlimits[1]))
+        nTemp = len(self.EmIndices)
+        if log:
+            logname = 'search2t.raw'
+            logfile = open(logname, 'w')
+            logfile.write('%s \n'%(self.SpecData['filename']))
+#        pformat = '%5i %4i %4i %4i %10.2e %10.2e %10.2e %10.2e %10.2e %10.2e %10.2e'
+        logformat = '%5i %4i %4i %4i %4i %10.2e %10.2e %10.2e %10.2e %10.2e \n'
+
+        temp1Searched = self.Temperature[indxlimits[0]:indxlimits[1]]
+        temp2Searched = self.Temperature[indxlimits[0]+1:indxlimits[1]+1]
+
+        print('temp1Searched.size, temp2Searched.size %5i %5i'%(temp1Searched.size, temp2Searched.size))
+
+        emfit = []
+        idx12 = []
+        searchDx12 = []
+        chisq = []
+        info = []
+        maskedValues = []
+#        msk = np.ma.make_mask(np.ones((temp1Searched.size, temp2Searched.size)))
+#        msk2 = np.ma.make_mask(np.ones((temp1Searched.size, temp2Searched.size, 2)))
+
+        chisq2d = np.ma.array(np.zeros((temp1Searched.size, temp2Searched.size), 'float64'), mask=True)
+        temp2d = np.zeros((nTemp, temp1Searched.size, temp2Searched.size), 'float64')
+        em2d = np.ma.array(np.zeros((nTemp, temp1Searched.size, temp2Searched.size), 'float64'), mask=True)
+#        emNd = np.ma.array(np.zeros((nTemp, temp1Searched.size, temp2Searched.size, temp3Searched.size), 'float64'), mask=True)
+
+        counter = 0
+        for idx1 in range(indxlimits[0], indxlimits[1], 1):
+            for idx2 in range(idx1+1, indxlimits[1]+1, 1):
+                idx12.append([idx1, idx2])
+                searchDx1 = idx1 - indxlimits[0]
+                searchDx2 = idx2 - indxlimits[0] - 1
+                self.emSetIndices([idx1, idx2])
+                self.fitNt(initial, maxfev=maxfev)
+                self.emSetIndices([idx1, idx2])
+                self.fitNt(initial, maxfev=maxfev)
+                # if there is no solution for one of the em values, it is set to a negative no.
+#                gtz = self.Leastsq['em'] > 0.
+                chisq1,  msk1 = self.getChisq()
+                chisq.append(chisq1)
+                temp2d[0, searchDx1, searchDx2] = temp1Searched[searchDx1]
+                temp2d[1, searchDx1, searchDx2] = temp2Searched[searchDx2]
+                searchDx12.append([searchDx1, searchDx2])
+                if not msk1:
+                    emfit.append(self.Leastsq['em'])
+                    chisq2d.data[searchDx1, searchDx2] = chisq1
+                    chisq2d.mask[searchDx1, searchDx2] = False
+                    for it in range(nTemp):
+                        em2d.data[it, searchDx1, searchDx2] = self.Leastsq['em'][it]
+                        em2d.mask[it, searchDx1, searchDx2] = False
+                    info.append(self.Leastsq['info'])
+                    if verbose:
+                        print(' %5i %5i %5i %5i %5i %12.2e %10.3f %12.2e %10.3f %12.2e %10i'%(counter, idx1, idx2, searchDx1, searchDx2, self.Temperature[idx1], self.Leastsq['em'][0], self.Temperature[idx2], self.Leastsq['em'][1], chisq[-1], self.Leastsq['info']['nfev']))
+                    elif log:
+                        logfile.write(logformat%(counter, idx1, idx2, searchDx1, searchDx2, self.Temperature[idx1], self.Leastsq['em'][0], self.Temperature[idx2], self.Leastsq['em'][1], chisq[-1]))
+                else:
+                    maskedValues.append([idx1, idx2])
+                    if verbose:
+                        print(' %5i %5i %5i bad em values %10.2f %10.2f'%(counter, idx1, idx2, self.Leastsq['em'][0], self.Leastsq['em'][1]))
+                    elif log:
+                        logfile.write('msk at %5i %4i %4i %10.2e \n'%(counter, idx1, idx2, chisq[-1]))
+                    counter += 1
+                    # these values already are masked
+                    emfit.append(self.Leastsq['em'])
+                    chisq2d.data[searchDx1, searchDx2] = chisq1
+                    chisq2d.mask[searchDx1, searchDx2] = True
+                    for it in range(nTemp):
+                        em2d.data[it, searchDx1, searchDx2] = self.Leastsq['em'][it]
+                        em2d.mask[it, searchDx1, searchDx2] = True
+                counter += 1
+        logfile.close()
+        #
+        self.SearchData = {'temperature':self.Temperature,'temp1Searched':temp1Searched, 'temp2Searched':temp2Searched, 'emfit':emfit, 'em2d':em2d, 'idx12':idx12, 'searchDx12':searchDx12, 'chisq':chisq, 'minchisq':min(chisq), 'chisq2d':chisq2d, 'maskedValues':maskedValues, 'temp2d':temp2d,  'message':'this contains all the data for the 2tExpSpace', 'nfree':self.Nfree}
+        #
+        print('min chisq = %10.3e at %5i '%(min(chisq), np.argmin(chisq)))
+        print(' # of masked values %i'%(len(maskedValues)))
+        #
+        #  set things to best fit
+        #
+        gdx=[i for i,ch in enumerate(chisq) if ch == min(chisq)]
+        if verbose:
+#        print(' gdx = ', gdx)
+            print(' len, min of chisq %5i %10.3e'%(len(chisq), min(chisq)))
+            if len(gdx) == 1:
+                print('single value gdx = %i '%(gdx[0]))  #, idx12[gdx[0]][0], idx12[gdx[0]][1])
+#                temperature1 = eis.SearchData['temp1Searched']
+            else:
+                pstring = 'mult values of gdx = '
+                for one in gdx:
+                    pstring += '  %10i'%(one)
+#        print(' emfit', emfit[gdx[0]])
+#        print(' chisq', chisq[gdx[0]])
+#        print(' idx ', idx12[gdx[0]])
+#        print(' temperature', self.Temperature[idx12[gdx[0]]])
+#        print(' density %10.2e'%(self.Density))
+#        self.em2tSetIndices(idx12[gdx[0]])
+#        self.em2texp(emfit[gdx[0]])
+        print('indices of minimum after search =  %i %i'%(idx12[gdx[0]][0], idx12[gdx[0]][1] ))
+        # gives 90% confidence for 4 parameters
+#        chisq1sig = min(chisq)*np.ones_like(chisq2d, 'float64') + 7.779
+#        good1sig = chisq2d < min(chisq) + 7.779
+#        temp1sig1 = temp2d[good1sig, 0]
+#        temp2sig1 = temp2d[good1sig, 1]
+#        temp1sig = [temperatureSearched[good1sig].min(), temperatureSearched[good1sig].max()]
+        self.emSetIndices(idx12[gdx[0]])
+        self.emSet(emfit[gdx[0]])
+        self.predict()
+        em = 10.**emfit[gdx[0]]
+        #
+
+        # next line is needed for predict and predict print
+        self.emSetIndices(idx12[gdx[0]])
+        temperature1 = self.Temperature[idx12[gdx[0]][0]]
+        temperature2 = self.Temperature[idx12[gdx[0]][1]]
+
+        emfit1 = emfit[gdx[0]]
+        adx = idx12[gdx[0]]
+        minChisq = chisq[gdx[0]]
+        reducedChisq = minChisq/float(self.Nobs - 2.*nTemp)
+
+
+        print(' idx1 %5i idx2 %5i  '%(adx[0], adx[1]))
+        print(' Temp =  %10.2e %10.2e '%(self.Temperature[adx[0]], self.Temperature[adx[1]]))
+        print(' EM =    %10.2e %10.2e '%(em[0], em[1]))
+        print(' EmFit = %10.3f %10.3f  '%(emfit1[0], emfit1[1]))
+
+        t2 = datetime.now()
+        dt = t2 - t1
+        print(' elapsed seconds = %12.3f'%(dt.seconds))
+
+        self.SearchData['best'] = {'em':em, 'emfit':emfit[gdx[0]], 'chisq':chisq[gdx[0]], 'idx12':idx12[gdx[0]],
+        'reducedChisq':reducedChisq, 'temperature1':temperature1, 'temperature2':temperature2,
+        'density':self.Density[idx12[gdx[0]]], 'gdx':gdx, 'searchDx12':searchDx12[gdx[0]]}
+        #
+        # -----------------------------------------------------------
+        #
+    def search3tSpace(self, initial, indxlimits=None, verbose=0, log=0):
+        '''
+        to conduct a brute force search of 3 temperature space and find the
+        best fit
+        indxlimits give the range of indices to fit over
+        set log to create a log file of the iterations rather that outputting to
+        the jupyter/ipython session
+        '''
+        self.Nfree = 6
+        t1=datetime.now()
+
+        if indxlimits == None:
+            if not hasattr(self, 'MinIndex'):
+                self.findMinMaxIndices()
+            indxlimits = [self.MinIndex, self.MaxIndex]
+        print('indxlimits = %5i %5i '%(indxlimits[0], indxlimits[1]))
+        nTemp = len(self.EmIndices)
+        emfit = []
+        idx123 = []
+        searchDx123 = []
+        chisq = []
+        maskedValues = []
+        temp1Searched = self.Temperature[indxlimits[0]:indxlimits[1]-1]
+        temp2Searched = self.Temperature[indxlimits[0]+1:indxlimits[1]]
+        temp3Searched = self.Temperature[indxlimits[0]+2:indxlimits[1]+1]
+
+#        msk  = np.ma.make_mask(np.ones((temp1Searched.size, temp2Searched.size, temp3Searched.size)))
+#        msk2 = np.ma.make_mask(np.ones((temp1Searched.size, temp2Searched.size, temp3Searched.size, 3)))
+        chisqNd = np.ma.array(np.zeros((temp1Searched.size, temp2Searched.size, temp3Searched.size), 'float64'), mask=True)
+        tempNd = np.array(np.zeros((nTemp, temp1Searched.size, temp2Searched.size, temp3Searched.size), 'float64'))
+        emNd = np.ma.array(np.zeros((nTemp, temp1Searched.size, temp2Searched.size, temp3Searched.size), 'float64'), mask=True)
+
+        if log:
+            logname = 'search3t.raw'
+            logfile = open(logname, 'w')
+            logfile.write('%s \n'%(self.SpecData['filename']))
+        # need to make this look like search2t
+        pformat = '%5i %4i %4i %4i %10.2e %10.2e %10.2e %10.2e %10.2e %10.2e %10.2e'
+        logformat = '%5i %4i %4i %4i %4i %4i %4i %10.2e %10.2e %10.2e %10.2e %10.2e %10.2e %10.2e \n'
+        counter = 0
+        for idx1 in range(indxlimits[0], indxlimits[1] - 1, 1):
+            for idx2 in range(idx1+1, indxlimits[1], 1):
+                for idx3 in range(idx2+1, indxlimits[1] + 1, 1):
+                    self.emSetIndices([idx1, idx2, idx3])
+                    self.fitNt(initial)
+        # need to make this look like search 2t
+                    chisq1,  msk1 = self.getChisq()
+                    searchDx1 = idx1 - indxlimits[0]
+                    searchDx2 = idx2 - indxlimits[0] - 1
+                    searchDx3 = idx3 - indxlimits[0] - 2
+                    searchDx123.append([searchDx1, searchDx2, searchDx3])
+                    tempNd[0, searchDx1, searchDx2, searchDx3] = temp1Searched[searchDx1]
+                    tempNd[1, searchDx1, searchDx2, searchDx3] = temp2Searched[searchDx2]
+                    tempNd[2, searchDx1, searchDx2, searchDx3] = temp3Searched[searchDx3]
+                    if not msk1:
+                        emfit.append(self.Leastsq['em'])
+                        chisq.append(chisq1)
+                        idx123.append([idx1, idx2, idx3])
+                        chisqNd.data[searchDx1, searchDx2, searchDx3] = chisq1
+                        chisqNd.mask[searchDx1, searchDx2, searchDx3] = False
+                        for it in range(nTemp):
+                            emNd.data[it, searchDx1, searchDx2, searchDx3] = self.Leastsq['em'][it]
+                            emNd.data[it, searchDx1, searchDx2, searchDx3] = self.Leastsq['em'][it]
+                            emNd.data[it, searchDx1, searchDx2, searchDx3] = self.Leastsq['em'][it]
+                            emNd.mask[it, searchDx1, searchDx2, searchDx3] = False
+
+                        if verbose:
+                            print(pformat%(counter, idx1, idx2, idx3,  self.Temperature[idx1], self.Leastsq['em'][0], self.Temperature[idx2], self.Leastsq['em'][1], self.Temperature[idx3], self.Leastsq['em'][2], chisq[-1]))
+                        elif log:
+                            logfile.write(logformat%(counter, idx1, idx2, idx3,  searchDx1, searchDx2, searchDx3, self.Temperature[idx1], self.Leastsq['em'][0], self.Temperature[idx2], self.Leastsq['em'][1], self.Temperature[idx3], self.Leastsq['em'][2], chisq[-1]))
+
+                    else:
+                        emfit.append(self.Leastsq['em'])
+                        idx123.append([idx1, idx2, idx3])
+                        chisq.append(chisq1)
+                        maskedValues.append([idx1, idx2, idx3])
+                        chisqNd.data[searchDx1, searchDx2, searchDx3] = chisq1
+#                        chisq3d.mask[searchDx1, searchDx2, searchDx3] = False
+                        for it in range(nTemp):
+                            emNd.data[it, searchDx1, searchDx2, searchDx3] = self.Leastsq['em'][it]
+                            emNd.data[it, searchDx1, searchDx2, searchDx3] = self.Leastsq['em'][it]
+                            emNd.data[it, searchDx1, searchDx2, searchDx3] = self.Leastsq['em'][it]
+                            emNd.mask[it, searchDx1, searchDx2, searchDx3] = True
+
+                        if verbose:
+                            print('msk at %5i %4i %4i %4i %10.2e'%(counter, idx1, idx2, idx3, chisq[-1]))
+                        elif log:
+                            logfile.write('msk at %5i %4i %4i %4i %10.2e \n'%(counter, idx1, idx2, idx3, chisq[-1]))
+                    counter += 1
+        if log:
+            logfile.close()
+        #
+        self.SearchData = {'temperature':self.Temperature,'temp1Searched':temp1Searched, 'temp2Searched':temp2Searched,
+        'temp3Searched':temp3Searched, 'emfit':emfit, 'idx':idx123, 'searchDx123':searchDx123, 'chisq':chisq, 'chisqNd':chisqNd,
+        'minchiseq':min(chisq), 'tempNd':tempNd, 'emNd':emNd, 'message':'this contains all the data for the 3tExpSpace', 'nfree':self.Nfree}
+        #
+        #
+        #  set things to best fit
+        #
+        print('min chisq = %10.3e at %i'%(min(chisq), np.argmin(chisq)))
+
+        gdx=[i for i,ch in enumerate(chisq) if ch == min(chisq)]
+        if verbose:
+#        print(' gdx = ', gdx)
+            print(' len, min of chisq %5i %10.3e'%(len(chisq), min(chisq)))
+            if len(gdx) == 1:
+                print('single value gdx = %i '%(gdx[0]))  #, idx12[gdx[0]][0], idx12[gdx[0]][1])
+#                temperature1 = eis.SearchData['temp1Searched']
+            else:
+                pstring = 'mult values of gdx = '
+                for one in gdx:
+                    pstring += '  %10i'%(one)
+        # 90% confidence for 6 parameters
+#        chisq1sig = min(chisq)*np.ones_like(chisqNd, 'float64') + 10.645
+#        good1sig = chisqNd < min(chisq) + 10.645
+
+        self.emSetIndices(idx123[gdx[0]])
+        self.emSet(emfit[gdx[0]])
+        self.predict()
+        em = 10.**emfit[gdx[0]]
+        emfit1 = emfit[gdx[0]]
+        adx = idx123[gdx[0]]
+        minChisq = chisq[gdx[0]]
+        reducedChisq = minChisq/float(self.Nobs - 2.*nTemp)
+
+        print(' idx1 %5i idx2 %5i idx3 %5i '%(adx[0], adx[1], adx[2]))
+        print(' Temp =  %10.2e %10.2e %10.2e '%(self.Temperature[adx[0]], self.Temperature[adx[1]], self.Temperature[adx[2]]))
+        print(' EM =    %10.2e %10.2e %10.2e '%(em[0], em[1], em[2]))
+        print(' EmFit = %10.3f %10.3f %10.3f '%(emfit1[0], emfit1[1], emfit1[2]))
+        #
+        t2 = datetime.now()
+        dt = t2 - t1
+        print(' elapsed seconds = %12.3f'%(dt.seconds))
+
+        self.SearchData['best'] = {'em':em,'emfit':emfit[gdx[0]], 'chisq':chisq[gdx[0]], 'reducedChisq':reducedChisq,
+            'idx':idx123[gdx[0]], 'gdx':gdx[0], 'temperature':self.Temperature[idx123[gdx[0]]], 'density':self.Density}
+        #
+        # -----------------------------------------------------------
+        #
+    def search4tSpace(self, initial, indxlimits=None, verbose=0, log=0):
+        '''
+        to conduct a brute force search of 4 temperature space and find the
+        best fit
+        indxlimits give the range of indices to fit over
+        set log to create a log file of the iterations rather that outputting to
+        the jupyter/ipython session
+        derived from Aug 2018 3t method
+        '''
+        self.Nfree = 8
+        t1 = datetime.now()
+        if indxlimits == None:
+            if not hasattr(self, 'MinIndex'):
+                self.findMinMaxIndices()
+            indxlimits = [self.MinIndex, self.MaxIndex]
+        print('indxlimits = %5i %5i '%(indxlimits[0], indxlimits[1]))
+        nTemp = len(self.EmIndices)
+        emfit = []
+        idx123 = []
+        searchDx123 = []
+        chisq = []
+        maskedValues = []
+        temp1Searched = self.Temperature[indxlimits[0]:indxlimits[1]-2]
+        temp2Searched = self.Temperature[indxlimits[0]+1:indxlimits[1]-1]
+        temp3Searched = self.Temperature[indxlimits[0]+2:indxlimits[1]]
+        temp4Searched = self.Temperature[indxlimits[0]+3:indxlimits[1]+1]
+
+        temp1Size = temp1Searched.size
+        temp2Size = temp2Searched.size
+        temp3Size = temp3Searched.size
+        temp4Size = temp4Searched.size
+
+#        msk  = np.ma.make_mask(np.ones((temp1Searched.size, temp2Searched.size, temp3Searched.size)))
+#        msk2 = np.ma.make_mask(np.ones((temp1Searched.size, temp2Searched.size, temp3Searched.size, 3)))
+        chisqNd = np.ma.array(np.zeros((temp1Size, temp2Size, temp3Size, temp4Size), 'float64'), mask=True)
+        tempNd = np.array(np.zeros((4, temp1Size, temp2Size, temp3Size, temp4Size), 'float64'))
+        emNd = np.ma.array(np.zeros((4, temp1Size, temp2Size, temp3Size, temp4Size), 'float64'), mask=True)
+
+        if log:
+            logname = 'search4t.raw'
+            logfile = open(logname, 'w')
+            logfile.write('%s \n'%(self.SpecData['filename']))
+        # need to make this look like search2t
+        pformat = '%5i %4i %4i %4i %4i %10.2e %10.2e %10.2e %10.2e %10.2e %10.2e %10.2e %10.2e %10.2e'
+        logformat = '%5i %4i %4i %4i %4i %4i %4i %4i %4i %10.2e %10.2e %10.2e %10.2e %10.2e %10.2e %10.2e %10.2e %10.2e\n'
+        counter = 0
+        for idx1 in range(indxlimits[0], indxlimits[1] - 2, 1):
+            for idx2 in range(idx1+1, indxlimits[1] - 1, 1):
+                for idx3 in range(idx2+2, indxlimits[1], 1):
+                    for idx4 in range(idx3+3, indxlimits[1] + 1, 1):
+                        self.emSetIndices([idx1, idx2, idx3, idx4])
+                        self.fitNt(initial)
+            # need to make this look like search 2t
+                        chisq1,  msk1 = self.getChisq()
+                        searchDx1 = idx1 - indxlimits[0]
+                        searchDx2 = idx2 - indxlimits[0] - 1
+                        searchDx3 = idx3 - indxlimits[0] - 2
+                        searchDx4 = idx4 - indxlimits[0] - 3
+                        searchDx123.append([searchDx1, searchDx2, searchDx3, searchDx4])
+                        tempNd[0, searchDx1, searchDx2, searchDx3, searchDx4] = temp1Searched[searchDx1]
+                        tempNd[1, searchDx1, searchDx2, searchDx3, searchDx4] = temp2Searched[searchDx2]
+                        tempNd[2, searchDx1, searchDx2, searchDx3, searchDx4] = temp3Searched[searchDx3]
+                        tempNd[3, searchDx1, searchDx2, searchDx3, searchDx4] = temp4Searched[searchDx4]
+                        if not msk1:
+                            emfit.append(self.Leastsq['em'])
+                            chisq.append(chisq1)
+                            idx123.append([idx1, idx2, idx3, idx4])
+                            chisqNd.data[searchDx1, searchDx2, searchDx3, searchDx4] = chisq1
+                            chisqNd.mask[searchDx1, searchDx2, searchDx3, searchDx4] = False
+                            for it in range(nTemp):
+                                emNd.data[it, searchDx1, searchDx2, searchDx3, searchDx4] = self.Leastsq['em'][it]
+                                emNd.mask[it, searchDx1, searchDx2, searchDx3, searchDx4] = False
+
+                            if verbose:
+                                print(pformat%(counter, idx1, idx2, idx3, idx4, self.Temperature[idx1], self.Leastsq['em'][0], self.Temperature[idx2], self.Leastsq['em'][1], self.Temperature[idx3], self.Leastsq['em'][2], self.Temperature[idx4], self.Leastsq['em'][3], chisq[-1]))
+                            elif log:
+                                logfile.write(logformat%(counter, idx1, idx2, idx3, idx4, searchDx1, searchDx2, searchDx3, searchDx4, self.Temperature[idx1], self.Leastsq['em'][0], self.Temperature[idx2], self.Leastsq['em'][1], self.Temperature[idx3], self.Leastsq['em'][2], self.Temperature[idx4], self.Leastsq['em'][3], chisq[-1]))
+
+                        else:
+                            emfit.append(self.Leastsq['em'])
+                            idx123.append([idx1, idx2, idx3, idx4])
+                            chisq.append(chisq1)
+                            maskedValues.append([idx1, idx2, idx3, idx4])
+                            chisqNd.data[searchDx1, searchDx2, searchDx3, searchDx4] = chisq1
+                            chisqNd.mask[searchDx1, searchDx2, searchDx3, searchDx4] = True
+                            for it in range(nTemp):
+                                emNd.data[it, searchDx1, searchDx2, searchDx3, searchDx4] = self.Leastsq['em'][it]
+                                emNd.mask[it, searchDx1, searchDx2, searchDx3, searchDx4] = True
+
+                            if verbose:
+                                print('msk at %5i %4i %4i %4i %4i %10.2e'%(counter, idx1, idx2, idx3, idx4, chisq[-1]))
+                            elif log:
+                                logfile.write('msk at %5i %4i %4i %4i %4i %10.2e \n'%(counter, idx1, idx2, idx3, idx4, chisq[-1]))
+                        counter += 1
+        if log:
+            logfile.close()
+        #
+        self.SearchData = {'temperature':self.Temperature,'temp1Searched':temp1Searched, 'temp2Searched':temp2Searched,
+        'temp3Searched':temp3Searched, 'temp4Searched':temp4Searched, 'emfit':emfit, 'idx':idx123, 'searchDx123':searchDx123, 'chisq':chisq, 'chisqNd':chisqNd,
+        'minchiseq':min(chisq), 'tempNd':tempNd, 'emNd':emNd, 'message':'this contains all the data for the 3tExpSpace', 'nfree':self.Nfree}
+        #
+        #
+        #  set things to best fit
+        #
+        print('min chisq = %10.3e at %i'%(min(chisq), np.argmin(chisq)))
+
+        gdx=[i for i,ch in enumerate(chisq) if ch == min(chisq)]
+        if verbose:
+#        print(' gdx = ', gdx)
+            print(' len, min of chisq %5i %10.3e'%(len(chisq), min(chisq)))
+            if len(gdx) == 1:
+                print('single value gdx = %i '%(gdx[0]))  #, idx12[gdx[0]][0], idx12[gdx[0]][1])
+#                temperature1 = eis.SearchData['temp1Searched']
+            else:
+                pstring = 'mult values of gdx = '
+                for one in gdx:
+                    pstring += '  %10i'%(one)
+        # 90% confidence for 6 parameters
+#        chisq1sig = min(chisq)*np.ones_like(chisqNd, 'float64') + 13.36
+#        good1sig = chisqNd < min(chisq) + 13.36
+
+        self.emSetIndices(idx123[gdx[0]])
+        self.emSet(emfit[gdx[0]])
+        self.predict()
+        em = 10.**emfit[gdx[0]]
+        emfit1 = emfit[gdx[0]]
+        adx = idx123[gdx[0]]
+        minChisq = chisq[gdx[0]]
+        reducedChisq = minChisq/float(self.Nobs - 2*nTemp)
+        print('reduced Chisq = %12.4e'%(reducedChisq))
+        print(' idx1 %5i idx2 %5i idx3 %5i idx4 %5i '%(adx[0], adx[1], adx[2], adx[3]))
+        print(' Temp =  %10.2e %10.2e %10.2e %10.2e'%(self.Temperature[adx[0]], self.Temperature[adx[1]], self.Temperature[adx[2]], self.Temperature[adx[3]]))
+        print(' EM =    %10.2e %10.2e %10.2e %10.2e'%(em[0], em[1], em[2], em[3]))
+        print(' EmFit = %10.3f %10.3f %10.3f %10.3f'%(emfit1[0], emfit1[1], emfit1[2], emfit1[3]))
+        #
+        t2 = datetime.now()
+        dt = t2 - t1
+        print(' elapsed seconds = %12.3f'%(dt.seconds))
+
+        self.SearchData['best'] = {'em':em,'emfit':emfit[gdx[0]], 'chisq':minChisq, 'reducedChisq': reducedChisq, 'idx':idx123[gdx[0]], 'gdx':gdx[0],
+        'temperature':self.Temperature[idx123[gdx[0]]], 'density':self.Density}
+
+
+    def loadMatch(self, filename):
         """ to open a pickle file, return the match data and make it an attribute
         """
         with open(filename, 'rb') as inpt:
@@ -1414,16 +2000,52 @@ class maker(ionTrails):
         self.match = matchDict['match']
         self.Temperature = matchDict['Temperature']
         self.EDensity = matchDict['EDensity']
+        self.Density = matchDict['EDensity']
         self.Ndens = matchDict['Ndens']
         self.Ntemp = matchDict['Ntemp']
         self.NTempDens = matchDict['NTempDens']
+        if 'EmIndices' in matchDict.keys():
+            self.EmIndices = matchDict['EmIndices']
+        else:
+            print(' EmIndices not in matchDict')
+        if 'Em' in matchDict.keys():
+            self.Em = matchDict['Em']
+        else:
+            print('Em not in matchDict')
+        if 'WghtFactor' in matchDict.keys():
+            self.WghtFactor = matchDict['WghtFactor']
+        else:
+            print('WghtFactor not in matchDict')
+        self.MatchName = filename
         #
         #-----------------------------------------------------
         #
-    def dump(self, filename):
+    def dumpMatch(self, filename):
         """to save the attribute match to a pickle file
         """
         matchDict={'match':self.match, 'Temperature':self.Temperature, 'EDensity':self.EDensity, 'Ndens':self.Ndens,
-            'Ntemp':self.Ntemp, 'NTempDens':self.NTempDens}
+            'Ntemp':self.Ntemp, 'NTempDens':self.NTempDens, 'MinAbund':self.MinAbund}
+        if hasattr(self, 'EmIndices'):
+            matchDict['EmIndices'] = self.EmIndices
+        if hasattr(self, 'Em'):
+            matchDict['Em'] = self.Em
+        if hasattr(self, 'Nfree'):
+            matchDict['Nfree'] = self.Nfree
+        if hasattr(self, 'WghtFactor'):
+            matchDict['WghtFactor'] = self.WghtFactor
+        else:
+            print('wghtfactor not available')
         with open(filename, 'wb') as outpt:
             pickle.dump(matchDict, outpt)
+
+    def loadSearchData(self, filename):
+        """ to load the pickled search data as an attribute self.SearchData
+        """
+        with open(filename, 'rb') as inpt:
+            self.SearchData = pickle.load(inpt)
+
+    def dumpSearchData(self, filename):
+        """to save the attribute match to a pickle file
+        """
+        with open(filename, 'wb') as outpt:
+            pickle.dump(self.SearchData, outpt)

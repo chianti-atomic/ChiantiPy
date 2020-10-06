@@ -101,7 +101,7 @@ class continuum(ionTrails):
             self.Abundance = chdata.Abundance[self.AbundanceName]['abundance'][self.Z-1]
         self.ioneqOne()
 
-    def free_free_loss(self, **kwargs):
+    def free_free_loss(self,  includeAbund=True, includeIoneq=True, **kwargs):
         """
         Calculate the free-free energy loss rate of an ion. The result is returned to the
         `free_free_loss` attribute.
@@ -130,7 +130,10 @@ class continuum(ionTrails):
         prefactor = (4.*(const.fine**3)*(const.planck**2)/3./(np.pi**2)/const.emass
                      * np.sqrt(2.*np.pi*const.boltzmann/3./const.emass))
         # include abundance and ionization equilibrium
-        prefactor *= self.Abundance*self.ioneq_one(self.Stage, **kwargs)
+        if includeAbund:
+            prefactor *= self.Abundance
+        if includeIoneq:
+            prefactor *= self.ioneq_one(self.Stage, **kwargs)
 
         self.free_free_loss = prefactor*(self.Z**2)*np.sqrt(self.Temperature)*gaunt_factor
 
@@ -195,7 +198,7 @@ class continuum(ionTrails):
         free_free_emission = (prefactor[:,np.newaxis]*exp_factor*gf/energy_factor).squeeze()
         self.FreeFree = {'intensity':free_free_emission, 'temperature':self.Temperature, 'wvl':wavelength, 'em':self.Em, 'ions':self.IonStr}
 
-    def freeFreeLoss(self, **kwargs):
+    def freeFreeLoss(self, includeAbund=True, includeIoneq=True,  **kwargs):
         """
         Calculate the free-free energy loss rate of an ion. The result is returned to the
         `FreeFreeLoss` attribute.
@@ -224,7 +227,11 @@ class continuum(ionTrails):
         prefactor = (4.*(const.fine**3)*(const.planck**2)/3./(np.pi**2)/const.emass
                      * np.sqrt(2.*np.pi*const.boltzmann/3./const.emass))
         # include abundance and ionization equilibrium
-        prefactor *= self.Abundance*self.IoneqOne
+        if includeAbund:
+            prefactor *= self.Abundance
+        if includeIoneq:
+            prefactor *= self.IoneqOne
+
 
         self.FreeFreeLoss = {'rate':prefactor*(self.Z**2)*np.sqrt(self.Temperature)*gaunt_factor}
 
@@ -416,7 +423,7 @@ class continuum(ionTrails):
         return scaled_energy*f_2*self.Abundance*self.IoneqOne
             #
 
-    def freeBoundLoss(self):
+    def freeBoundLoss(self,  includeAbund=True, includeIoneq=True):
         '''
         to calculate the free-bound (radiative recombination) energy loss rate coefficient of an ion,
         the ion is taken to be the target ion,
@@ -505,7 +512,12 @@ class continuum(ionTrails):
                 ratg[ilvl] = float(multr[ilvl])/float(mult[0]) # ratio of statistical weights
                 iprLvlErg = const.ev2Erg*iprLvlEv
                 fbrate[ilvl] = ratg[ilvl]*(iprLvlErg**2/float(pqn[ilvl]))*gf/np.sqrt(temperature)
-            fbRate = abund*gIoneq*const.freeBoundLoss*(fbrate.sum(axis=0))
+                fbRateConst = const.freeBoundLoss
+                if includeAbund:
+                    fbRateConst *= abund
+                if includeIoneq:
+                    fbRateConst *= gIoneq
+                fbRate = fbRateConst*(fbrate.sum(axis=0))
         else:
             fbRate = np.zeros((nTemp),np.float64)
         self.FreeBoundLoss = {'rate':fbRate, 'temperature':temperature}

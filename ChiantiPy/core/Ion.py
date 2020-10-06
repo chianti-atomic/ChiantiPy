@@ -146,18 +146,17 @@ class ion(ioneqOne, ionTrails, specTrails):
 
 
 
-        if setup:
-            if self.IonStr in chdata.MasterList:
-                self.IoneqAll = chdata.IoneqAll
-                #  this needs to go after setting temperature and reading ionization
-                #  equilibria
-                #  needs to know self.NTempDens first
-                self.argCheck(temperature, eDensity, pDensity, em)
-                self.ioneqOne()
+        if setup and self.IonStr in chdata.MasterList:
+            self.IoneqAll = chdata.IoneqAll
+            #  this needs to go after setting temperature and reading ionization
+            #  equilibria
+            #  needs to know self.NTempDens first
+            self.argCheck(temperature, eDensity, pDensity, em)
+            self.ioneqOne()
 
-                self.setup()
+            self.setup()
         else:
-            if verbose:
+            if verbose and (self.IonStr not in chdata.MasterList):
                 print(' ion %s not in masterlist, just various attributes, ionization, recombination rates'%(self.IonStr))
             if np.any(temperature) is not None:
                 self.Temperature = np.atleast_1d(temperature)

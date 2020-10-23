@@ -483,11 +483,7 @@ class continuum(ionTrails):
 #        iprcm = self.Ipr/const.invCm2Ev
         #
         # get karzas-latter Gaunt factors
-        if hasattr(self, 'Klgfb'):
-            klgfb = self.Klgfb
-        else:
-            self.Klgfb = io.klgfbRead()
-            klgfb = self.Klgfb
+        klgfb = chdata.Klgfb
         #
         nTemp = temperature.size
         # statistical weigths/multiplicities
@@ -506,9 +502,11 @@ class continuum(ionTrails):
                 hnuEv = 1.5*const.boltzmann*temperature/const.ev2Erg
                 iprLvlEv = self.Ipr - const.invCm2Ev*ecm[ilvl]
                 scaledE = np.log(hnuEv/iprLvlEv)
+                bad = scaledE < 0.
                 thisGf = klgfb['klgfb'][pqn[ilvl]-1, l[ilvl]]
                 spl = splrep(klgfb['pe'], thisGf)
                 gf = np.exp(splev(scaledE, spl))
+                gf[bad] = 0.
                 ratg[ilvl] = float(multr[ilvl])/float(mult[0]) # ratio of statistical weights
                 iprLvlErg = const.ev2Erg*iprLvlEv
                 fbrate[ilvl] = ratg[ilvl]*(iprLvlErg**2/float(pqn[ilvl]))*gf/np.sqrt(temperature)

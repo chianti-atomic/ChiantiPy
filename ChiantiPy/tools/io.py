@@ -980,7 +980,6 @@ def klgfbRead():
         gfb[n-1, l] = np.array(data[2:], np.float64)
     return {'pe':pe, 'klgfb':gfb}
 
-
 def ioneqRead(ioneqName='', minIoneq=1.e-20, verbose=False):
     """
     Reads an ioneq file
@@ -992,30 +991,28 @@ def ioneqRead(ioneqName='', minIoneq=1.e-20, verbose=False):
     """
     dir = os.environ["XUVTOP"]
     ioneqdir = os.path.join(dir,'ioneq')
-    ioneqNames = util.listRootNames(ioneqdir)
-    if ioneqName not in ioneqNames:
+    ioneqInfo = util.findFileTypes(ioneqdir, type = '*.ioneq')
+    ioneqNames = ioneqInfo['fileName']
+    shortNames = []
+    for aname in ioneqNames:
+        shortNames.append(os.path.splitext(aname)[0])
+
+    ioneqFullNames = ioneqInfo['fullName']
+    if ioneqName not in shortNames:
         # the user will select an ioneq file
-        choice = chgui.gui.chpicker(ioneqdir, label='Select a single ioneq file')
-        if choice.rootName in ioneqNames:
-            fname = choice.fileName
-            ioneqName = choice.rootName
-#        fname1 = choice.baseName
-#        fname1 = chgui.gui.chpicker(ioneqdir,filter='*.ioneq',label = 'Select an Ionization Equilibrium file')
-#        fname = os.path.join(ioneqdir, fname1)
-        if fname is None:
-            print(' no ioneq file selected')
-            return False
+        gIoneq = chgui.gui.selectorDialog(ioneqNames,label='Select one',  multiChoice=False)
+        gIoneq_idx = gIoneq.selectedIndex
+        if len(gIoneq_idx) > 0:
+            ioneqFileName = ioneqFullNames[gIoneq_idx[0]]
         else:
-            ioneqfilename = os.path.basename(fname)
-            ioneqname,ext = os.path.splitext(ioneqfilename)
+            print(' no file chosen')
+            return
     else:
-        filelist = util.listFiles(ioneqdir)
-        idx = ioneqNames.index(ioneqName)
-        fname = filelist[idx]
+        index = shortNames.index(ioneqName)
+        ioneqFileName = ioneqFullNames[index]
     #
-    input = open(fname,'r')
-    s1 = input.readlines()
-    input.close()
+    with open(ioneqFileName,'r') as input:
+        s1 = input.readlines()
     ntemp,nele = s1[0].split()
     if verbose:
         print((' ntemp, nele = %5i %5i'%(ntemp, nele)))

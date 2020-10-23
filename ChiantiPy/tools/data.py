@@ -57,6 +57,7 @@ try:
     Abundance = {abundance: chio.abundanceRead(abundancename=abundance)
                  for abundance in AbundanceList}
     GrndLevels = chio.grndLevelsRead()
+    Klgfb = chio.klgfbRead()
 except (KeyError, IOError) as e:
     print(traceback.format_exc())
     if isinstance(e, KeyError):

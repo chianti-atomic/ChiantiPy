@@ -7,6 +7,7 @@ Some of these functions can be replaced by roman numeral and periodic table look
 some functions using os.walk can be replaced by os.path
 """
 import os
+import fnmatch
 import numpy as np
 from scipy import interpolate
 from scipy.special import expn
@@ -527,6 +528,37 @@ def listRootNames(dir):
                 if os.path.isfile(file):
                     rootNames.append(os.path.splitext(f)[0])
     return rootNames
+
+def findFileTypes(wpath, type ='*.txt',  verbose=False):
+    """ to find all the files in wpath and below with file names matching fname
+    """
+    alist=sorted(os.walk(wpath))
+    if verbose:
+        print(' getting file list')
+    listPath = []
+    listFile = []
+    fileName = []
+    for (dirpath,dirnames,filenames) in alist:
+        if len(dirnames) == 0:
+            for f in filenames:
+                if fnmatch.fnmatch(f, type):
+                    file=os.path.join(dirpath,f)
+                    if os.path.isfile(file):
+                        listFile.append(file)
+                        listPath.append(dirpath)
+                        fileName.append(f)
+        else:
+            for f in filenames:
+                if fnmatch.fnmatch(f, type):
+                    file=os.path.join(dirpath,f)
+                    if os.path.isfile(file):
+                        listFile.append(file)
+                        listPath.append(dirpath)
+                        fileName.append(f)
+    if verbose:
+        nfiles=len(listFile)
+        print((' nfiles = %i'%(nfiles)))
+    return {'fullName':listFile, 'fileName':fileName}
 
 def scale_bti(evin,crossin,f,ev1):
     """

@@ -398,6 +398,9 @@ class continuum(ionTrails):
         # thermal energy scaled by H ionization potential
         scaled_energy = const.ryd2erg/const.boltzmann/self.Temperature
         # set variables used in Eq. 16 of Mewe et al.(1986)
+        nameDict = util.convertName(self.IonStr)
+        if not hasattr(self, 'Recombined_fblvl'):
+            self.Recombined_fblvl = io.fblvlRead(nameDict['lower'])
         n_0 = self.Recombined_fblvl['pqn'][0]
 #        z_0 = np.sqrt(self.ionization_potential/const.ryd2erg)*n_0
         z_0 = np.sqrt(self.Ipr/const.ryd2erg)*n_0
@@ -444,7 +447,7 @@ class continuum(ionTrails):
                 self.Fblvl = io.fblvlRead(self.IonStr)
                 fblvl = self.Fblvl
             elif self.Stage == self.Z+1:
-                fblvl = {'mult':[1., 1.]}
+                fblvl = {'mult':[2., 2.]}
             else:
                 self.FreeBoundLoss = {'errorMessage':' file does not exist %s .fblvl'%(fblvlname)}
                 return
@@ -655,7 +658,7 @@ class continuum(ionTrails):
 #        self.free_bound_emission = fb_emiss.squeeze()
         self.FreeBound = {'intensity':fb_emiss.squeeze(), 'temperature':self.Temperature,'wvl':wavelength,'em':self.Em, 'ions':self.IonStr,  'abundance':includeAbundance, 'ioneq':includeIoneq}
 
-    def freeBound(self, wvl, verner=1):
+    def freeBound(self, wvl, includeAbund=True, includeIoneq=True, verner=True):
         '''
         to calculate the free-bound (radiative recombination) continuum rate coefficient of an ion, where
         the ion is taken to be the target ion,
@@ -670,12 +673,17 @@ class continuum(ionTrails):
         wvl = np.asarray(wvl, np.float64)
         temperature = self.Temperature
         hnu = 1.e+8*const.planck*const.light/wvl
+
+        nameDict = util.convertName(self.IonStr)
         #
-        if hasattr(self, 'IoneqOne'):
-            gIoneq = self.IoneqOne
+        if includeAbund:
+            if hasattr(self, 'IoneqOne'):
+                gIoneq = self.IoneqOne
+            else:
+                self.ioneqOne()
+                gIoneq = self.IoneqOne
         else:
-            self.ioneqOne()
-            gIoneq = self.IoneqOne
+            gIoneq = np.ones_like(temperature)
         #
         # put in freefree to go through ipymspectrum
         if not np.any(gIoneq) > 0:
@@ -721,7 +729,10 @@ class continuum(ionTrails):
                 return
         #
         #
-        abund = self.Abundance
+        if includeAbund:
+            abund = self.Abundance
+        else:
+            abund = 1.
         #
         #
         nlvls = len(rfblvl['lvl'])
@@ -740,6 +751,7 @@ class continuum(ionTrails):
         #
         iprcm = self.Ipr/const.invCm2Ev
         #
+        klgbfb = chdata.Klgfb
         # get karzas-latter Gaunt factors
         if hasattr(self,'Klgfb'):
             klgfb = self.Klgfb

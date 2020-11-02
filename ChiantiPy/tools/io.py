@@ -980,6 +980,61 @@ def klgfbRead():
         gfb[n-1, l] = np.array(data[2:], np.float64)
     return {'pe':pe, 'klgfb':gfb}
 
+def maoParsRead(filename = None):
+    ''' to read the mao et al par2.dat file for calculating the
+    ratio of rrloss to rrrecomb
+    The electron energy-loss rate due to radiative recombination.
+    Mao J., Kaastra J., Badnell N.R.
+    <Astron. Astrophys. 599, A10 (2017)>
+    =2017A&A...599A..10M
+    1-  2  I2    ---     s         Isoelectronic sequence number
+    4-  5  I2    ---     z         Atomic number
+    7- 16  E10.4 ---     a0        Primary fitting parameter
+    18- 27  E10.4 ---     b0        Primary fitting parameter
+    29- 38  E10.4 ---     c0        Addiational fitting parameter
+    40- 49  E10.4 ---     a1        Primary fitting parameter
+    51- 60  E10.4 ---     b1        Primary fitting parameter
+    62- 71  E10.4 ---     a2        Addiational fitting parameter
+    73- 82  E10.4 ---     b2        Addiational fitting parameter
+    84- 86  F3.1  ---     mdp       Maximum deviation in percent
+    '''
+    if filename is None:
+        filename = '/data2/svn/chianti/archive/ken/rrloss/pars.dat'
+    else:
+        if not os.path.isfile(filename):
+            print(' filename for maoPars data is incorrect')
+            return
+
+    with open(filename, 'r') as inpt:
+        lines = inpt.readlines()
+    nlines = len(lines)
+    print('len of pars %i'%(nlines))
+    # this number is 255
+    print(lines[0])
+    seq = [0]*nlines
+    z = [0]*nlines
+    a0 = [0]*nlines
+    b0 = [0]*nlines
+    c0 = [0]*nlines
+    a1 = [0]*nlines
+    b1 = [0]*nlines
+    a2 = [0]*nlines
+    b2 = [0]*nlines
+    mdp = [0]*nlines
+    for idx, aline in enumerate(lines):
+        sline = aline.split()
+        seq[idx] = int(sline[0])
+        z[idx] = int(sline[1])
+        a0[idx] = float(sline[2])
+        b0[idx] = float(sline[3])
+        c0[idx] = float(sline[4])
+        a1[idx] = float(sline[5])
+        b1[idx] = float(sline[6])
+        a2[idx] = float(sline[7])
+        b2[idx] = float(sline[8])
+        mdp[idx] = float(sline[9])
+    return {'seq':seq, 'z':z, 'a0':a0, 'b0':b0, 'c0':c0, 'a1':a1, 'b1':b1, 'a2':a2, 'b2':b2, 'mdp':mdp}
+
 def ioneqRead(ioneqName='', minIoneq=1.e-20, verbose=False):
     """
     Reads an ioneq file

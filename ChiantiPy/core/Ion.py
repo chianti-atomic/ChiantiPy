@@ -2902,11 +2902,9 @@ class ion(ioneqOne, ionTrails, specTrails):
         for iline in range(top):
             tline = topLines[iline]
             wvlChoices.append('%12.4f %4i %4i %s - %s'%(wvl[tline], lvl1[tline], lvl2[tline], pretty1[tline], pretty2[tline]))
-        if plot:
-            gline = chGui.gui.selectorDialog(wvlChoices,label='Select line(s)')
-            gline_idx = gline.selectedIndex
-        else:
-            gline_idx = 0 # insert the top line as the first line -TDW
+#        if plot:
+        gline = chGui.gui.selectorDialog(wvlChoices,label='Select line(s)')
+        gline_idx = gline.selectedIndex
         #
         #
         gAbund = self.Abundance
@@ -2928,11 +2926,9 @@ class ion(ioneqOne, ionTrails, specTrails):
             plt.figure()
         g_line = topLines[gline_idx]#  [0]
         gofnt = np.zeros(ngofnt,np.float64)
-        if plot:
-            for aline in g_line:
-                gofnt += gAbund*gIoneq*emiss[aline].squeeze()
-        else:
-            gofnt += gAbund*gIoneq*emiss[g_line].squeeze()
+#        if plot:
+        for aline in g_line:
+            gofnt += gAbund*gIoneq*emiss[aline].squeeze()
         self.Gofnt = {'temperature':outTemperature,'eDensity':outDensity,'gofnt':gofnt, 'index':g_line, 'wvl':wvl[g_line]}
         #
         if plot:

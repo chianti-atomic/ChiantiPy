@@ -2,7 +2,9 @@
 Ionization equilibrium class
 """
 import numpy as np
+import matplotlib as mpl
 import matplotlib.pyplot as plt
+
 
 import ChiantiPy.tools.util as util
 import ChiantiPy.tools.io as io
@@ -148,6 +150,18 @@ class ioneq(object):
         or if oplot=True or oplot=1 and a widget will come up so that a file can be selected.
         bw, if True, the plot is made in black and white
         '''
+        mpl.rcParams['xtick.major.size'] = 7
+        mpl.rcParams['xtick.major.width'] = 2
+
+        mpl.rcParams['xtick.minor.size'] = 5
+        mpl.rcParams['xtick.minor.width'] = 1.5
+
+        mpl.rcParams['ytick.major.size'] = 7
+        mpl.rcParams['ytick.major.width'] = 2
+
+        mpl.rcParams['ytick.minor.size'] = 5
+        mpl.rcParams['ytick.minor.width'] = 1.5
+
         if hasattr(self, 'Ioneq'):
             ioneq = getattr(self, 'Ioneq')
         else:
@@ -160,7 +174,7 @@ class ioneq(object):
             lw = 2
         else:
             linestyle = ['b-','r--', 'g-.', 'm:']
-            plt.rcParams['font.size'] = 14.
+            plt.rcParams['font.size'] = 16
             lw = 2
         #
         if not stages:

@@ -416,7 +416,7 @@ class ionTrails(object):
         if plotFile:
             plt.savefig(plotFile)
 
-    def intensityRatio(self, wvlRange=None, wvlRanges=None, top=10):
+    def intensityRatio(self, wvlRange=None, wvlRanges=None, top=10,  title=True):
         """
         Plot the intensity ratio of 2 lines or sums of lines.
         Shown as a function of density and/or temperature.
@@ -623,7 +623,8 @@ class ionTrails(object):
             plt.loglog(eDensity,numIntens/denIntens, visible=False)
             ax2.xaxis.tick_top()
         else:
-            plt.title(desc,fontsize=fontsize)
+            if title:
+                plt.title(desc,fontsize=fontsize)
         plt.tight_layout()
 
         cnt = desc.count(' ')

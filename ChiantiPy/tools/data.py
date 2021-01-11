@@ -40,6 +40,7 @@ import warnings
 
 import ChiantiPy.tools.io as chio
 
+klnames = ['klgfb_1.dat','klgfb_2.dat', 'klgfb_3.dat', 'klgfb_4.dat', 'klgfb_5.dat', 'klgfb_6.dat']
 try:
     Xuvtop = os.environ['XUVTOP']
     Defaults = chio.defaultsRead()
@@ -58,6 +59,13 @@ try:
                  for abundance in AbundanceList}
     GrndLevels = chio.grndLevelsRead()
     Klgfb = chio.klgfbRead()
+
+    Klgbfn = []
+    for aname in klnames:
+        filename = os.path.join(Xuvtop, 'continuum',  aname)
+        kl = chio.klgbfnRead(filename)
+        Klgbfn.append(kl)
+
 except (KeyError, IOError) as e:
     print(traceback.format_exc())
     if isinstance(e, KeyError):

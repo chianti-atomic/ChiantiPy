@@ -980,6 +980,37 @@ def klgfbRead():
         gfb[n-1, l] = np.array(data[2:], np.float64)
     return {'pe':pe, 'klgfb':gfb}
 
+def klgbfnRead(filename):
+    """
+    Read CHIANTI files containing the free-bound gaunt factors for n=1-6 from [13]_.
+    This reads the corrected KL files in CHIANTI version 10+
+
+    Parameters
+    ----------
+    filename : `str`
+        the filename for the KL data in the continuum directory, such as klgfb_1.dat, n=1,6
+
+
+    Returns
+    -------
+    [{'pe', 'klgfb'}] : `list`
+        Photon energy and the free-bound gaunt factors
+
+    References
+    ----------
+    .. [13] Karzas and Latter, 1961, ApJSS, `6, 167
+        <http://adsabs.harvard.edu/abs/1961ApJS....6..167K>`_
+    """
+    kl = np.loadtxt(filename)
+    klt = kl.transpose()
+    pe = klt[0]
+    pef = np.flip(pe)
+    gf = kl[1:]
+    gft = gf.transpose()
+    gftf = np.fliplr(gft)
+    return {'pe':pef,  'klgbf':gftf, 'filename':filename}
+
+
 def maoParsRead(filename = None):
     ''' to read the mao et al par2.dat file for calculating the
     ratio of rrloss to rrrecomb

@@ -994,7 +994,7 @@ def klgbfnRead(filename):
     Returns
     -------
     [{'pe', 'klgfb'}] : `list`
-        Photon energy and the free-bound gaunt factors
+        Photon energy and the bound-free gaunt factors
 
     References
     ----------
@@ -1005,10 +1005,10 @@ def klgbfnRead(filename):
     klt = kl.transpose()
     pe = klt[0]
     pef = np.flip(pe)
-    gf = kl[1:]
-    gft = gf.transpose()
-    gftf = np.fliplr(gft)
-    return {'pe':pef,  'klgbf':gftf, 'filename':filename}
+    gf = klt[1:]
+#    gft = gf.transpose()
+    gff = np.fliplr(gf)
+    return {'pe':pef,  'klgbf':gff, 'filename':filename}
 
 
 def maoParsRead(filename = None):

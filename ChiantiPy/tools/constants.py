@@ -28,7 +28,7 @@ stefanBoltzmann = 5.670373e-5  # cgs - ergs cm^-2 K^-4 s^-1
 boltzmannEv = 8.617343e-5
 invCm2Ev = 1./8.06554465e+3
 invCm2ryd = 1./109737.32
-ryd2Ev = 13.6056923
+ryd2Ev = 13.6056923   # 1 rydberg = 13.604 eV
 ryd2erg = 2.17987197e-11  #erg
 fine = 7.2973525376e-3  # fine structure constant ~ 1./137  = e^2/(h_bar*c) h_bar = h/(2*pi)
 emass = 9.10938215e-28  #  electron mass in gram

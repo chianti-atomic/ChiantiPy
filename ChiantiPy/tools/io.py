@@ -1030,7 +1030,7 @@ def maoParsRead(filename = None):
     84- 86  F3.1  ---     mdp       Maximum deviation in percent
     '''
     if filename is None:
-        filename = '/data2/svn/chianti/archive/ken/rrloss/pars.dat'
+        filename = os.path.join(os.environ['XUVTOP'], 'continuum', 'rrloss_mao_2017_pars.dat')
     else:
         if not os.path.isfile(filename):
             print(' filename for maoPars data is incorrect')

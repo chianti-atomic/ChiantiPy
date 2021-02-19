@@ -4,7 +4,6 @@ classes. Mostly printing, plotting and saving routines.
 """
 import copy
 import time
-import sys
 import numpy as np
 
 import matplotlib.pyplot as plt
@@ -21,6 +20,7 @@ class ionTrails(object):
     def argCheck(self, temperature=None, eDensity=None, pDensity='default', em = None,  verbose=0):
         ''' to check the compatibility of the three arguments
         and put them into numpy arrays of atleast_1d
+        and create attributes to the object
         '''
         if temperature is not None:
             self.Temperature = np.atleast_1d(temperature)
@@ -32,7 +32,7 @@ class ionTrails(object):
         else:
             raise ValueError('temperature not defined')
 
-        if pDensity is 'default':
+        if pDensity == 'default':
             self.p2eRatio()
 
         if eDensity is not None:
@@ -58,7 +58,7 @@ class ionTrails(object):
         if hasattr(self,'EDensity') and hasattr(self,'Temperature') and self.Temperature.size != self.EDensity.size:
             raise ValueError('Temperature and density must be the same size.')
         if pDensity is not None:
-            if pDensity is 'default' and eDensity is not None:
+            if pDensity == 'default' and eDensity is not None:
                 self.PDensity = self.ProtonDensityRatio*self.EDensity
             else:
                 self.PDensity = np.atleast_1d(pDensity)

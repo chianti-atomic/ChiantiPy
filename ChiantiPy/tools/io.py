@@ -994,7 +994,7 @@ def klgbfnRead(filename):
     Returns
     -------
     [{'pe', 'klgfb'}] : `list`
-        Photon energy and the free-bound gaunt factors
+        Photon energy and the bound-free gaunt factors
 
     References
     ----------
@@ -1005,10 +1005,10 @@ def klgbfnRead(filename):
     klt = kl.transpose()
     pe = klt[0]
     pef = np.flip(pe)
-    gf = kl[1:]
-    gft = gf.transpose()
-    gftf = np.fliplr(gft)
-    return {'pe':pef,  'klgbf':gftf, 'filename':filename}
+    gf = klt[1:]
+#    gft = gf.transpose()
+    gff = np.fliplr(gf)
+    return {'pe':pef,  'klgbf':gff, 'filename':filename}
 
 
 def maoParsRead(filename = None):
@@ -1030,7 +1030,7 @@ def maoParsRead(filename = None):
     84- 86  F3.1  ---     mdp       Maximum deviation in percent
     '''
     if filename is None:
-        filename = '/data2/svn/chianti/archive/ken/rrloss/pars.dat'
+        filename = os.path.join(os.environ['XUVTOP'], 'continuum', 'rrloss_mao_2017_pars.dat')
     else:
         if not os.path.isfile(filename):
             print(' filename for maoPars data is incorrect')

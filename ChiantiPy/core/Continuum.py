@@ -14,6 +14,7 @@ import ChiantiPy.tools.util as util
 import ChiantiPy.tools.io as io
 import ChiantiPy.tools.constants as const
 import ChiantiPy.Gui as chGui
+import matplotlib.pyplot as plt
 
 
 class continuum(ionTrails):
@@ -827,7 +828,7 @@ class continuum(ionTrails):
             <http://adsabs.harvard.edu/abs/1995A%26AS..109..125V>`_
         """
         temperature = self.Temperature
-        tev = const.boltzmannEv*temperature
+#        tev = const.boltzmannEv*temperature
         #
         #
         em = self.Em

@@ -73,7 +73,7 @@ def emPlot(matchDict, vs='T', loc='upper right', fs=10,  adjust=None, position='
     if not 'intensity' in match[0]:
         print(' must run mgofnt or gofnt first')
         return
-    elif vs is 'T':
+    elif vs == 'T':
         if temp[0] == temp[-1]:
             ntemp = 1
         else:
@@ -107,7 +107,7 @@ def emPlot(matchDict, vs='T', loc='upper right', fs=10,  adjust=None, position='
             plt.legend(loc=loc, fontsize=fs)
         plt.ylabel('Emission Measure (cm$^{-5}$)', fontsize=14)
         plt.xlabel('Temperature (K)',  fontsize=14)
-    elif vs is not 'T':
+    elif vs != 'T':
         if dens[0] == dens[-1]:
             ndens = 1
         else:
@@ -266,7 +266,7 @@ def makeMatchPkl(specData, temp, dens, wghtFactor = 0.25,  abundanceName = None,
     #
     #-----------------------------------------------------
     #
-class maker(ionTrails):
+class maker(ionTrails,  specTrails):
     '''
     a class matching observed lines to lines in the CHIANTI database
     '''
@@ -453,6 +453,114 @@ class maker(ionTrails):
             amatch['predictedLine'] = [0]*nions
         self.match = matches
 
+    def makeMatchGate(self,  verbose=False):
+        """ to match the CHIANTI lines with the input specdata
+        uses ionTrails.ionGate to sort through ions
+        """
+
+        if 'intensity' in self.SpecData.keys():
+            self.Intensity = self.SpecData['intensity']
+        masterlist = io.masterListRead()
+#        matches = [{'ion':[], 'wvl':[]}]*len(wvl) - it won't work this way
+        matches = []
+        for iwvl in range(len(self.Wvl)):
+            matches.append({'ion':[], 'wvl':[], 'lineIdx':[], 'wvldiff':[], 'lvl1':[], 'lvl2':[], 'pretty1':[], 'pretty2':[], 'predictedLine':[],'iPredictedLine':0, 'obsIntensity':self.Intensity[iwvl], 'exptIon':self.IonS[iwvl], 'obsWvl':self.Wvl[iwvl]})
+        # use the ionList but make sure the ions are in the database
+        ionList = self.IonList
+        if ionList:
+            alist=[]
+            for one in ionList:
+                if masterlist.count(one):
+                    alist.append(one)
+                else:
+                    if verbose:
+                        pstring = ' %s not in CHIANTI database'%(one)
+                        print(pstring)
+                        print('')
+            masterlist = alist
+        #
+        minAbund = self.MinAbund
+        if minAbund:
+            self.MinAbund = minAbund
+            abundanceName = chdata.Defaults['abundfile']
+            abundanceAll = io.abundanceRead(abundancename = abundanceName)
+            revList = []
+            for one in masterlist:
+                params = util.convertName(one)
+                z = params['Z']
+                if abundanceAll['abundance'][z-1] > minAbund:
+                    revList.append(one)
+            masterlist = revList
+        allLines = self.AllLines
+        mlInfo = self.MlInfo
+        for thision in masterlist:
+            if verbose:
+                print(' - - - - - - - - - - - ')
+                print(' thision = %s'%(thision))
+            btw = util.between(self.Wvl, [mlInfo[thision]['wmin'], mlInfo[thision]['wmax']])
+            if len(btw):
+                wgfa = io.wgfaRead(thision)
+                cnt = wgfa['wvl'].count(0.)
+                # in order to match with emiss
+                for icnt in range(cnt):
+                    idx = wgfa['wvl'].index(0.)
+                    wgfa['wvl'].pop(idx)
+                    wgfa['lvl1'].pop(idx)
+                    wgfa['lvl2'].pop(idx)
+                    wgfa['pretty1'].pop(idx)
+                    wgfa['pretty2'].pop(idx)
+                thesewvl = np.asarray(wgfa['wvl'])
+                nonzed = thesewvl != 0.
+                thesewvl =thesewvl[nonzed]
+                if allLines:
+                    thesewvl = np.abs(thesewvl)
+    #            matches[iwvl]['lvl1'] = []
+    #            matches[iwvl]['lvl2'] = []
+    #            matches[iwvl]['pretty1'] = []
+    #            matches[iwvl]['pretty2'] = []
+                for iwvl, awvl in enumerate(self.Wvl):
+#                    if verbose:
+#                        print(' iwvl,awvl = %5i  %10.3f'%(iwvl, awvl))
+#                        print('  in matches[iwvl][ion] = %s'%(matches[iwvl]['ion']))
+#                        print('  in matches[iwvl][wvl] = %10.3f'%(matches[iwvl]['wvl']))
+                    diff = np.abs(thesewvl - awvl)
+                    good = diff < self.Dwvl[iwvl]
+                    ngood = good.sum()
+                    if ngood:
+    #                    print '    ion = ', thision
+    #                    print '    wvl = ', thesewvl[good].tolist()
+                        matches[iwvl]['ion'].append(thision)
+                        matches[iwvl]['wvl'].append(thesewvl[good].tolist())
+                        matches[iwvl]['lineIdx'].append(np.arange(len(thesewvl))[good].tolist())
+                        matches[iwvl]['wvldiff'].append(diff[good])
+                        alvl1 = []
+                        alvl2 = []
+                        ap1 = []
+                        ap2 = []
+                        for adx in matches[iwvl]['lineIdx'][-1]:
+    #                        print(' iwvl = %5i adx = %5i'%(iwvl, adx))
+                            alvl1.append(wgfa['lvl1'][adx])
+                            alvl2.append(wgfa['lvl2'][adx])
+                            ap1.append(wgfa['pretty1'][adx])
+                            ap2.append(wgfa['pretty2'][adx])
+                        matches[iwvl]['lvl1'].append(alvl1)
+                        matches[iwvl]['lvl2'].append(alvl2)
+                        matches[iwvl]['pretty1'].append(ap1)
+                        matches[iwvl]['pretty2'].append(ap2)
+#                        if verbose:
+#                            print('     out matches[iwvl][ion] = %s'%(matches[iwvl]['ion']))
+    #                    print '     out matches[iwvl][wvl] = ', matches[iwvl]['wvl']
+    #                    print ' good ion lines = ', thesewvl[good]
+    #                print ' thisMatch = ',  thisMatch
+    #                matches[iwvl].append(thisMatch)
+            else:
+                if verbose:
+                    print(' no lines in this wavelength range')
+        for amatch in matches:
+            nions = len(amatch['ion'])
+            amatch['predictedLine'] = [0]*nions
+        self.match = matches
+
     def argCheck(self, temperature=None, eDensity=None, pDensity='default', verbose=0):
         ''' to check the compatibility of the three arguments
         and put them into numpy arrays of atleast_1d
@@ -467,7 +575,7 @@ class maker(ionTrails):
         else:
             raise ValueError('temperature not defined')
 
-        if pDensity is 'default':
+        if pDensity == 'default':
             self.p2eRatio()
 
         if eDensity is not None:
@@ -493,7 +601,7 @@ class maker(ionTrails):
         if hasattr(self,'EDensity') and hasattr(self,'Temperature') and self.Temperature.size != self.EDensity.size:
             raise ValueError('Temperature and density must be the same size.')
         if pDensity is not None:
-            if pDensity is 'default' and eDensity is not None:
+            if pDensity == 'default' and eDensity != None:
                 self.PDensity = self.ProtonDensityRatio*self.EDensity
             else:
                 self.PDensity = np.atleast_1d(pDensity)
@@ -830,7 +938,7 @@ class maker(ionTrails):
         if not 'intensity' in match[0]:
             print(' must run mgofnt or gofnt first')
             return
-        elif vs is 'T':
+        elif vs == 'T':
             if temp[0] == temp[-1]:
                 ntemp = 1
             else:
@@ -868,7 +976,7 @@ class maker(ionTrails):
                 plt.legend(loc=loc, fontsize=fs)
             plt.ylabel('Emission Measure (cm$^{-5}$)', fontsize=14)
             plt.xlabel('Temperature (K)',  fontsize=14)
-        elif vs is not 'T':
+        elif vs != 'T':
             if dens[0] == dens[-1]:
                 ndens = 1
             else:
@@ -1525,7 +1633,7 @@ class maker(ionTrails):
             print(' dem has not been searched yet')
             return
         if self.Nobs <= 2.:
-            print(' the number of observables %10.2 is less than the number of parameters'%(self.Nobs, 2.*2.))
+            print(' the number of observables %10.1f is less than the number of parameters %10.1f'%(self.Nobs, 2.*2.))
             return
         emChisq = []
         emfitSpace = self.SearchData['best']['emfit'] + np.linspace(-0.1,0.1,400) #*np.logspace(-3.,1.,21)   #n
@@ -1566,7 +1674,7 @@ class maker(ionTrails):
         self.Nfree = 4
         t1 = datetime.now()
         if self.Nobs <= 2.*2.:
-            print(' the number of observables %10.2 is less than the number of parameters'%(self.Nobs, 2.*2.))
+            print(' the number of observables %10.2e is less than the number of parameters %10.1f'%(self.Nobs, 2.*2.))
             return
         if indxlimits == None:
             if not hasattr(self, 'MinIndex'):

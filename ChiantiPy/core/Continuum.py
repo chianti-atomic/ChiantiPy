@@ -912,7 +912,7 @@ class continuum(ionTrails):
 
 
 
-    def freeBoundKL(self, wvl, includeAbund=False,  includeIoneq=False):
+    def freeBound(self, wvl, includeAbund=False,  includeIoneq=False):
         """
         Calculates the free-bound (radiative recombination) continuum emissivity of an ion.
         Provides emissivity in units of ergs :math:`\mathrm{cm}^{-2}` :math:`\mathrm{s}^{-1}` :math:`\mathrm{str}^{-1}` :math:`\mathrm{\AA}^{-1}` for an individual ion.  If includeAbund is set,
@@ -928,7 +928,6 @@ class continuum(ionTrails):
         - uses the corrected version of the K-L bf gaunt factors available in CHIANTI V10
         - revised to calculate the bf cross, fb cross section and the maxwell energy distribution
         - the Verner cross sections are not included for now
-        - using the RESTART formulation
 
         References
         ----------

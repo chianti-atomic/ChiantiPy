@@ -783,13 +783,7 @@ class continuum(ionTrails):
             <http://adsabs.harvard.edu/abs/1995A%26AS..109..125V>`_
          '''
         temperature = self.Temperature
-<<<<<<< HEAD
 #        tev = const.boltzmannEv*temperature
-        #
-        #
-=======
-
->>>>>>> 2cf2cbabbe48aedb1945ae5029d740a26b3828a7
         em = self.Em
 
         if includeAbund:

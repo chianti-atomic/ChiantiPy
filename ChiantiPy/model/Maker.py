@@ -4,12 +4,18 @@ classes and methods to analyze observations of astrophysical spectra
 import os
 from datetime import datetime
 import pickle
+import warnings
 
 try:
     import multiprocessing as mp
 except:
     print(' your version of Python does not support multiprocessing \n you will not be able to use mgofnt')
 #
+try:
+    from ipyparallel import Client
+except ImportError:
+    warnings.warn("ipyparallel not found. You won't be able to use the ipymgofnt module")
+
 import numpy as np
 import scipy.optimize as optimize
 import matplotlib.pyplot as plt
@@ -270,7 +276,7 @@ class maker(ionTrails,  specTrails):
     '''
     a class matching observed lines to lines in the CHIANTI database
     '''
-    def __init__(self, specData, wghtFactor = 0.2, ionList=False, allLines=False, abundanceName = None, minAbund=1.e-6, verbose=False):
+    def __init__(self, temperature, specData, wghtFactor = 0.2, elementList=[], ionList=[], allLines=False, abundanceName = None, minAbund=10., verbose=False):
         '''
         input a list of wavelengths and a wavelength difference
         find a list of predicted spectral lines for each wavelength
@@ -288,6 +294,8 @@ class maker(ionTrails,  specTrails):
             identities, dwvl
         wghtFactor : float
             the factor used in calculating the weight chi-squared
+        elementList :  list
+            a list of elements, such as fe, to be searched
         ionList :  list
             a list of ions, such as fe_14, to be searched
         allLines : bool
@@ -303,6 +311,7 @@ class maker(ionTrails,  specTrails):
         #
         # --------------------------------------------------------------------------------
         #
+        self.Temperature = temperature
         self.Defaults = chdata.Defaults
         self.XUVTOP = os.environ['XUVTOP']
         print(' XUVTOP = %s'%(self.XUVTOP))
@@ -317,8 +326,11 @@ class maker(ionTrails,  specTrails):
         else:
             self.AbundanceName = self.Defaults['abundfile']
         print(' abundanceName = %s'%(self.AbundanceName))
+        abundAll = chdata.Abundance[self.AbundanceName]['abundance']
+        self.AbundAll = abundAll
 
         self.SpecData = specData
+        self.ElementList = elementList
         self.IonList = ionList
         self.AllLines = allLines
         self.MinAbund = minAbund
@@ -328,6 +340,8 @@ class maker(ionTrails,  specTrails):
         self.IonS = specData['ions']
         self.IonSet = set(specData['ions'])
         self.Dwvl = specData['dwvl']
+        wvl = specData['wvl0']
+        self.WvlRange = [min(wvl)-max(self.Dwvl), max(wvl)+max(self.Dwvl)]
         reduceNobs = 0.
         for anion in self.IonSet:
             same = specData['ions'].count(anion)
@@ -346,157 +360,29 @@ class maker(ionTrails,  specTrails):
 #            for iwvl in range(self.Nobs):
 #                self.WghtFactor = self.SpecData['intStd'][iwvl]/self.SpecData['intensity'][iwvl]
         #
+
     def makeMatch(self,  verbose=False):
-        """ to match the CHIANTI lines with the input specdata
-        """
-
-        if 'intensity' in self.SpecData.keys():
-            self.Intensity = self.SpecData['intensity']
-        masterlist = io.masterListRead()
-#        matches = [{'ion':[], 'wvl':[]}]*len(wvl) - it won't work this way
-        matches = []
-        for iwvl in range(len(self.Wvl)):
-            matches.append({'ion':[], 'wvl':[], 'lineIdx':[], 'wvldiff':[], 'lvl1':[], 'lvl2':[], 'pretty1':[], 'pretty2':[], 'predictedLine':[],'iPredictedLine':0, 'obsIntensity':self.Intensity[iwvl], 'exptIon':self.IonS[iwvl], 'obsWvl':self.Wvl[iwvl]})
-        # use the ionList but make sure the ions are in the database
-        ionList = self.IonList
-        if ionList:
-            alist=[]
-            for one in ionList:
-                if masterlist.count(one):
-                    alist.append(one)
-                else:
-                    if verbose:
-                        pstring = ' %s not in CHIANTI database'%(one)
-                        print(pstring)
-                        print('')
-            masterlist = alist
-        #
-        minAbund = self.MinAbund
-        if minAbund:
-            self.MinAbund = minAbund
-            abundanceName = chdata.Defaults['abundfile']
-            abundanceAll = io.abundanceRead(abundancename = abundanceName)
-            revList = []
-            for one in masterlist:
-                params = util.convertName(one)
-                z = params['Z']
-                if abundanceAll['abundance'][z-1] > minAbund:
-                    revList.append(one)
-            masterlist = revList
-        allLines = self.AllLines
-        mlInfo = self.MlInfo
-        for thision in masterlist:
-            if verbose:
-                print(' - - - - - - - - - - - ')
-                print(' thision = %s'%(thision))
-            btw = util.between(self.Wvl, [mlInfo[thision]['wmin'], mlInfo[thision]['wmax']])
-            if len(btw):
-                wgfa = io.wgfaRead(thision)
-                cnt = wgfa['wvl'].count(0.)
-                # in order to match with emiss
-                for icnt in range(cnt):
-                    idx = wgfa['wvl'].index(0.)
-                    wgfa['wvl'].pop(idx)
-                    wgfa['lvl1'].pop(idx)
-                    wgfa['lvl2'].pop(idx)
-                    wgfa['pretty1'].pop(idx)
-                    wgfa['pretty2'].pop(idx)
-                thesewvl = np.asarray(wgfa['wvl'])
-                nonzed = thesewvl != 0.
-                thesewvl =thesewvl[nonzed]
-                if allLines:
-                    thesewvl = np.abs(thesewvl)
-    #            matches[iwvl]['lvl1'] = []
-    #            matches[iwvl]['lvl2'] = []
-    #            matches[iwvl]['pretty1'] = []
-    #            matches[iwvl]['pretty2'] = []
-                for iwvl, awvl in enumerate(self.Wvl):
-#                    if verbose:
-#                        print(' iwvl,awvl = %5i  %10.3f'%(iwvl, awvl))
-#                        print('  in matches[iwvl][ion] = %s'%(matches[iwvl]['ion']))
-#                        print('  in matches[iwvl][wvl] = %10.3f'%(matches[iwvl]['wvl']))
-                    diff = np.abs(thesewvl - awvl)
-                    good = diff < self.Dwvl[iwvl]
-                    ngood = good.sum()
-                    if ngood:
-    #                    print '    ion = ', thision
-    #                    print '    wvl = ', thesewvl[good].tolist()
-                        matches[iwvl]['ion'].append(thision)
-                        matches[iwvl]['wvl'].append(thesewvl[good].tolist())
-                        matches[iwvl]['lineIdx'].append(np.arange(len(thesewvl))[good].tolist())
-                        matches[iwvl]['wvldiff'].append(diff[good])
-                        alvl1 = []
-                        alvl2 = []
-                        ap1 = []
-                        ap2 = []
-                        for adx in matches[iwvl]['lineIdx'][-1]:
-    #                        print(' iwvl = %5i adx = %5i'%(iwvl, adx))
-                            alvl1.append(wgfa['lvl1'][adx])
-                            alvl2.append(wgfa['lvl2'][adx])
-                            ap1.append(wgfa['pretty1'][adx])
-                            ap2.append(wgfa['pretty2'][adx])
-                        matches[iwvl]['lvl1'].append(alvl1)
-                        matches[iwvl]['lvl2'].append(alvl2)
-                        matches[iwvl]['pretty1'].append(ap1)
-                        matches[iwvl]['pretty2'].append(ap2)
-#                        if verbose:
-#                            print('     out matches[iwvl][ion] = %s'%(matches[iwvl]['ion']))
-    #                    print '     out matches[iwvl][wvl] = ', matches[iwvl]['wvl']
-    #                    print ' good ion lines = ', thesewvl[good]
-    #                print ' thisMatch = ',  thisMatch
-    #                matches[iwvl].append(thisMatch)
-            else:
-                if verbose:
-                    print(' no lines in this wavelength range')
-        for amatch in matches:
-            nions = len(amatch['ion'])
-            amatch['predictedLine'] = [0]*nions
-        self.match = matches
-
-    def makeMatchGate(self,  verbose=False):
         """ to match the CHIANTI lines with the input specdata
         uses ionTrails.ionGate to sort through ions
         """
 
         if 'intensity' in self.SpecData.keys():
             self.Intensity = self.SpecData['intensity']
-        masterlist = io.masterListRead()
+#        masterlist = io.masterListRead()
 #        matches = [{'ion':[], 'wvl':[]}]*len(wvl) - it won't work this way
         matches = []
         for iwvl in range(len(self.Wvl)):
             matches.append({'ion':[], 'wvl':[], 'lineIdx':[], 'wvldiff':[], 'lvl1':[], 'lvl2':[], 'pretty1':[], 'pretty2':[], 'predictedLine':[],'iPredictedLine':0, 'obsIntensity':self.Intensity[iwvl], 'exptIon':self.IonS[iwvl], 'obsWvl':self.Wvl[iwvl]})
         # use the ionList but make sure the ions are in the database
-        ionList = self.IonList
-        if ionList:
-            alist=[]
-            for one in ionList:
-                if masterlist.count(one):
-                    alist.append(one)
-                else:
-                    if verbose:
-                        pstring = ' %s not in CHIANTI database'%(one)
-                        print(pstring)
-                        print('')
-            masterlist = alist
-        #
-        minAbund = self.MinAbund
-        if minAbund:
-            self.MinAbund = minAbund
-            abundanceName = chdata.Defaults['abundfile']
-            abundanceAll = io.abundanceRead(abundancename = abundanceName)
-            revList = []
-            for one in masterlist:
-                params = util.convertName(one)
-                z = params['Z']
-                if abundanceAll['abundance'][z-1] > minAbund:
-                    revList.append(one)
-            masterlist = revList
+
+        self.ionGate(elementList = self.ElementList, ionList = self.IonList, minAbund=self.MinAbund, doLines=True, doContinuum=False, verbose = verbose)
+
         allLines = self.AllLines
         mlInfo = self.MlInfo
-        for thision in masterlist:
+        for thision in self.Todo:
             if verbose:
-                print(' - - - - - - - - - - - ')
-                print(' thision = %s'%(thision))
+#                print(' - - - - - - - - - - - ')
+                print(' in makeMatchGate thision = %s'%(thision))
             btw = util.between(self.Wvl, [mlInfo[thision]['wmin'], mlInfo[thision]['wmax']])
             if len(btw):
                 wgfa = io.wgfaRead(thision)
@@ -749,12 +635,12 @@ class maker(ionTrails,  specTrails):
         proc = min([proc, mp.cpu_count()])
         #
         #
-        self.Todo = []
+        self.ToProcess = []
         for someIon in ionList:
             # already know this ion is needed
             print(' someIon = %s'%(someIon))
             ionWorkerQ.put((someIon, temperature, density, self.AllLines))
-            self.Todo.append(someIon)
+            self.ToProcess.append(someIon)
         #
         ionWorkerQSize = ionWorkerQ.qsize()
         ionProcesses = []
@@ -969,9 +855,11 @@ class maker(ionTrails,  specTrails):
                     plt.text(lblx1, lbly1, wvlstr.strip())
                     plt.text(lblx2, lbly2, wvlstr.strip())
                 else:
-                    print('no values for idx = %5i wvl = %8.2f'%(idx, match[idx]['wvl']))
-                    print(' nonzed = %i'%(nonzed.sum()))
-                    print('intensity = %10.2e'%(match[idx]['intensity']))
+                    print(' len of match[idx]wvl   %i'%(len(match[idx]['wvl'])))
+                    if len(match[idx]['wvl']) != 0:
+                        print('no values for idx = %5i wvl = %8.2f'%(idx, match[idx]['wvl']))
+                        print(' nonzed = %i'%(nonzed.sum()))
+                        print('intensity = %10.2e'%(match[idx]['intensity']))
             if legend:
                 plt.legend(loc=loc, fontsize=fs)
             plt.ylabel('Emission Measure (cm$^{-5}$)', fontsize=14)
@@ -1014,6 +902,7 @@ class maker(ionTrails,  specTrails):
                 plt.legend(loc=loc, fontsize=fs)
             plt.ylabel('Emission Measure (cm$^{-5}$)', fontsize=14)
             plt.xlabel('Electron Density (cm$^{-3}$)',  fontsize=14)
+            plt.tight_layout()
         #
         # --------------------------------------------------------------------------
         #

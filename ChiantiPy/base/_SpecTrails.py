@@ -116,7 +116,7 @@ class specTrails(object):
         #
         # ---------------------------------------------------------------------------
         #
-    def ionGate(self, elementList = None, ionList = None, minAbund=None, doLines=1, doContinuum=1, doWvlTest=1, verbose=0):
+    def ionGate(self, elementList = None, ionList = None, minAbund=None, doLines=1, doContinuum=1, doWvlTest=1, doIoneqTest=1,  verbose=0):
         '''
         creates a list of ions for free-free, free-bound, and line intensity calculations
         if doing the radiative losses, accept all wavelength -> doWvlTest=0
@@ -142,8 +142,8 @@ class specTrails(object):
         #
         temperature = self.Temperature
         #
-        # use the ionList but make sure the ions are in the database
-        self.Todo = {}
+        #
+        todo = {}
         #
         #
         if elementList:
@@ -155,39 +155,75 @@ class specTrails(object):
                 for one in masterlist:
                     nameDict = util.convertName(one)
                     if nameDict['Element'].lower() in elementList:
-                        if verbose:
-                            print(' ion = %s'%(one))
+#                        if verbose:
+#                            print(' ion = %s'%(one))
                         if doLines:
-                            self.Todo[one] = 'line'
+                            todo[one] = 'line'
                 for stage in range(2, z+2):
                     if stage < 31:
                         name = util.zion2name(z, stage)
                         if doContinuum and not nameDict['Dielectronic']:
-                            if name not in self.Todo.keys():
-                                self.Todo[name] = 'ff'
+                            if name not in todo.keys():
+                                todo[name] = 'ff'
                             else:
-                                self.Todo[name] += '_ff'
-                            self.Todo[name] += '_fb'
+                                todo[name] += '_ff'
+                            todo[name] += '_fb'
         if ionList:
             for one in ionList:
                 nameDict = util.convertName(one)
                 if masterlist.count(one):
                     if doLines:
-                        self.Todo[one] = 'line'
+                        todo[one] = 'line'
+                    if verbose:
+                        print(' %s in the CHIANTI database'%(one))
                 else:
                     if verbose:
                         pstring = ' %s not in CHIANTI database'%(one)
                         print(pstring)
                 if doContinuum and not nameDict['Dielectronic'] and nameDict['Ion'] < 31:
-                    if one not in self.Todo.keys():
-                        self.Todo[one] = 'ff'
+                    if one not in todo.keys():
+                        todo[one] = 'ff'
                     else:
-                        self.Todo[one] += '_ff'
-                    self.Todo[one] += '_fb'
+                        todo[one] += '_ff'
+                    todo[one] += '_fb'
+        if doIoneqTest:
+            toPop = []
+            for ionS in todo:
+                ioneqTest = (temperature.max() >= ionInfo[ionS]['tmin']) and (temperature.min() <= ionInfo[ionS]['tmax'])
+                if not ioneqTest:
+                    toPop.append(ionS)
+#                else:
+#                    if verbose:
+#                        print('passes ioneqtest %s  %s'%(ioneqTest, ionS))
+            for badion in toPop:
+#                if verbose:
+#                    print('fails ioneqtest %s'%(ionS))
+                todo.pop(badion)
+
+        if doWvlTest:
+            toPop = []
+            for ionS in todo:
+#                if verbose:
+#                    print(' doing wvltest on %s'%(ionS))
+                if doWvlTest:
+                    wvlTestMin = wvlRange[0] <= ionInfo[ionS]['wmax']
+                    wvlTestMax = wvlRange[1] >= ionInfo[ionS]['wmin']
+                else:
+                    wvlTestMin = 1
+                    wvlTestMax = 1
+#                if verbose:
+#                    print(' %s  %8.2f  %8.2f %8.2f %8.2f'%(ionS, ionInfo[ionS]['wmin'], ionInfo[ionS]['wmax'], wvlRange[0], wvlRange[1]))
+#                    print(' %s wvlTestMin  %s  wvlTestMax %s'%(ionS, wvlTestMin, wvlTestMax))
+                if wvlTestMin and wvlTestMax:
+                    pass
+                else:
+                    toPop.append(ionS)
+            for badion in toPop:
+                todo.pop(badion)
         #
         #
-        #
-        if minAbund:
+        #  the relative H abundance is 1.0, the rest are all smaller
+        if minAbund < 2.:
             for iz in range(1, 31):
                 abundance = chdata.Abundance[self.AbundanceName]['abundance'][iz-1]
                 if abundance >= minAbund:
@@ -221,20 +257,22 @@ class specTrails(object):
                             ioneqTestD = (temperature.max() >= ionInfo[ionSd]['tmin']) and (temperature.min() <=ionInfo[ionSd]['tmax'])
                             #
                         if masterListTest and wvlTestMin and wvlTestMax and ioneqTest and doLines:
-                            if ionS in sorted(self.Todo.keys()):
-                                self.Todo[ionS] += '_line'
+#                            if verbose:
+#                                print(' %s passed mList, wvlTest, ioneqTest'%(ionS))
+                            if ionS in sorted(todo.keys()):
+                                todo[ionS] += '_line'
                             else:
-                                self.Todo[ionS] = 'line'
+                                todo[ionS] = 'line'
                         # get dielectronic lines
-                            if verbose:
-                                print(' for ion %s do : %s'%(ionS, self.Todo[ionS]))
+#                            if verbose:
+#                                print(' for ion %s do : %s'%(ionS, todo[ionS]))
                         if masterListTestD and wvlTestMinD and wvlTestMaxD and ioneqTestD and doLines:
-                            if ionSd in sorted(self.Todo.keys()):
-                                self.Todo[ionSd] += '_line'
+                            if ionSd in sorted(todo.keys()):
+                                todo[ionSd] += '_line'
                             else:
-                                self.Todo[ionSd] = 'line'
-                            if verbose:
-                                print(' for ion %s do : %s'%(ionSd, self.Todo[ionSd]))
+                                todo[ionSd] = 'line'
+#                            if verbose:
+#                                print(' for ion %s do : %s'%(ionSd, todo[ionSd]))
         #
                     #
                     for ionstage in range(2, iz+2):
@@ -249,12 +287,17 @@ class specTrails(object):
 #                            if verbose:
 #                                print(' setting up continuum calculation for %s  '%(ionS))
                             if ionstage < 31:
-                                if ionS in sorted(self.Todo.keys()):
-                                    self.Todo[ionS] += '_ff_fb'
+                                if ionS in sorted(todo.keys()):
+                                    todo[ionS] += '_ff_fb'
                                 else:
-                                    self.Todo[ionS] = 'ff_fb'
-                                if verbose:
-                                    print(' for ion %s do : %s'%(ionS, self.Todo[ionS]))
+                                    todo[ionS] = 'ff_fb'
+#                                if verbose:
+#                                    print(' for ion %s do : %s'%(ionS, todo[ionS]))
+
+        #  remove dupicates
+#        todoSet = set(todo)
+#        self.Todo = list(todoSet)
+        self.Todo = todo
         if len(self.Todo.keys()) == 0:
             print(' no elements have been selected')
             print(' it is necessary to provide an elementList, an ionList, or set minAbund > 0.')

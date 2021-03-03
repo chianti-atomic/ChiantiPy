@@ -3,6 +3,21 @@ Changelog
 ===========
 
 
+Changes from 0.9.5 to 0.10.0
+============================
+
+The Karzas and Latter (1965) bound-free gaunt factors in the CHIANTI database have been corrected as of CHIANTI version 10.  This effects the calculation of the free-bound continuum.  The continuum.freeBound method has been updated to uses these new data.
+
+The freeBound and the freeFree methods now have 2 new keyword variables:  **includeAbund** and **includeIoneq**.  Their initial values are True so that elemental abundance and the ionization equilibrium appropriate to the ion is included the the output spectrum.
+
+The freeBoundEmiss is removed as it has become redundant
+
+A new continuum method, freeBoundLossMao includes the radiative-recombination (free-bound) loss rate as calculatd by Mao et al. (2017)
+
+a bug in the inherited method base._IntensityRatio() was corrected.
+
+
+
 Changes from 0.9.4 to 0.9.5
 ===========================
 

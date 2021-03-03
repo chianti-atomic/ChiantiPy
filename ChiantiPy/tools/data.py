@@ -60,11 +60,17 @@ try:
     GrndLevels = chio.grndLevelsRead()
     Klgfb = chio.klgfbRead()
 
-    Klgbfn = []
-    for aname in klnames:
-        filename = os.path.join(Xuvtop, 'continuum',  aname)
-        kl = chio.klgbfnRead(filename)
-        Klgbfn.append(kl)
+#    klfileName = os.path.join(Xuvtop, 'continuum',  klnames[0])
+    try:
+#        if os.path.isfile(klfileName):
+            Klgbfn = []
+            for aname in klnames:
+                filename = os.path.join(Xuvtop, 'continuum',  aname)
+                kl = chio.klgbfnRead(filename)
+                Klgbfn.append(kl)
+    except(IOError):
+        warnings.warn('klgfb files are not present: \n  it will not be possible to use the freeBound continuum method')
+
 
 except (KeyError, IOError) as e:
     print(traceback.format_exc())

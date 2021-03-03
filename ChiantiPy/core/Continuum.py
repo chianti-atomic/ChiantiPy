@@ -140,7 +140,7 @@ class continuum(ionTrails):
 
         self.free_free_loss = prefactor*(self.Z**2)*np.sqrt(self.Temperature)*gaunt_factor
 
-    def freeFree(self, wavelength, include_abundance=True, include_ioneq=True, **kwargs):
+    def freeFree(self, wavelength, includeAbund=True, includeIoneq=True, **kwargs):
         """
         Calculates the free-free emission for a single ion. The result is returned as a dict to
         the `FreeFree` attribute.  The dict has the keywords `intensity`, `wvl`, `temperature`, `em`.
@@ -167,9 +167,9 @@ class continuum(ionTrails):
         ----------
         wavelength : array-like
             In units of angstroms
-        include_abundance : `bool`, optional
+        includeAbund : `bool`, optional
             If True, include the ion abundance in the final output.
-        include_ioneq : `bool`, optional
+        includeIoneq : `bool`, optional
             If True, include the ionization equilibrium in the final output
 
         """
@@ -180,9 +180,9 @@ class continuum(ionTrails):
                      * np.sqrt(2.*np.pi/3./const.emass/const.boltzmann))
         # include temperature dependence
         prefactor *= self.Z**2/np.sqrt(self.Temperature)
-        if include_abundance:
+        if includeAbund:
             prefactor *= self.Abundance
-        if include_ioneq:
+        if includeIoneq:
             prefactor *= self.IoneqOne
         if self.Em is not None:
             prefactor *= self.Em
@@ -912,7 +912,7 @@ class continuum(ionTrails):
 
 
 
-    def freeBound(self, wvl, includeAbund=False,  includeIoneq=False):
+    def freeBound(self, wvl, includeAbund = True,  includeIoneq = True):
         """
         Calculates the free-bound (radiative recombination) continuum emissivity of an ion.
         Provides emissivity in units of ergs :math:`\mathrm{cm}^{-2}` :math:`\mathrm{s}^{-1}` :math:`\mathrm{str}^{-1}` :math:`\mathrm{\AA}^{-1}` for an individual ion.  If includeAbund is set,

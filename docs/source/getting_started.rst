@@ -5,23 +5,23 @@ Getting started with ChiantiPy
 Prerequisites
 -------------
 
-* CHIANTI_, the atomic database for astrophysical spectroscopy (Version 8)
+* CHIANTI_, the atomic database for astrophysical spectroscopy (Version 10 or later)
 
 .. _CHIANTI: http://www.chiantidatabase.org/
 
-* Python3_ (3.6)
+* Python3_ (3.8 is the current development version)
 
 .. _PYTHON3:  http://www.python.org
 
-* Numpy_ (currently developed with 1.14)
+* Numpy_ (currently developed with 1.20)
 
 .. _Numpy:  http://www.scipy.org/
 
-* Scipy_ (currently developed with 1.00)
+* Scipy_ (currently developed with 1.6)
 
 .. _Scipy:  http://www.scipy.org/
 
-* Matplotlib_ (currently developed with 2.2.2)
+* Matplotlib_ (currently developed with 3.3.4)
 
 .. _Matplotlib:  http://matplotlib.sourceforge.net/
 
@@ -36,7 +36,7 @@ Prerequisites
 
 * ipyparallel (required for multiprocessing with ipymspectrum)
 
-* (not really a prerequisite but **extremely** useful) IPython_ version 6 and Jupyter_
+* (not really a prerequisite but **extremely** useful) IPython_ version 7.2 and Jupyter_
 
 .. _IPython:  http://ipython.org
 
@@ -91,7 +91,7 @@ All of these packages are free, at least for noncommercial use (I believe) and h
 Install the ChiantiPy package
 -----------------------------
 
-In order to be compatible with the latest version (8.0) of the CHIANTI atomic database, it is necessary to install the latest version (0.6.0) of ChiantiPy
+In order to be compatible with the latest version (10) of the CHIANTI atomic database, it is necessary to install the latest version (0.10.0) of ChiantiPy
 
 ::
 

@@ -2,6 +2,7 @@
 classes and methods to analyze observations of astrophysical spectra
 '''
 import os
+from datetime import date
 from datetime import datetime
 import pickle
 import warnings
@@ -276,12 +277,10 @@ class maker(ionTrails,  specTrails):
     '''
     a class matching observed lines to lines in the CHIANTI database
     '''
-    def __init__(self, temperature, specData, wghtFactor = 0.2, elementList=[], ionList=[], allLines=False, abundanceName = None, minAbund=10., verbose=False):
+    def __init__(self, temperature, specData, elementList=[], ionList=[], allLines=False, abundanceName = None, minAbund=10., wghtFactor=None,  verbose=False):
         '''
         input a list of wavelengths and a wavelength difference
         find a list of predicted spectral lines for each wavelength
-        wgtFactor:  multiply this by the predicted to get the weight of the intensity difference
-            applied in getWeighted()
         all = 0 -> only previously observed wavelengths are used
         dwvl = wavelength difference between CHIANTI and the observed lines
             if == 0 then use use that in the observed data
@@ -292,8 +291,6 @@ class maker(ionTrails,  specTrails):
             intensity - a list of observed line intensities
             wvlObs - a list of observed wavelengths
             identities, dwvl
-        wghtFactor : float
-            the factor used in calculating the weight chi-squared
         elementList :  list
             a list of elements, such as fe, to be searched
         ionList :  list
@@ -328,6 +325,8 @@ class maker(ionTrails,  specTrails):
         print(' abundanceName = %s'%(self.AbundanceName))
         abundAll = chdata.Abundance[self.AbundanceName]['abundance']
         self.AbundAll = abundAll
+        if wghtFactor is not None:
+            self.WghtFactor = wghtFactor
 
         self.SpecData = specData
         self.ElementList = elementList
@@ -351,8 +350,9 @@ class maker(ionTrails,  specTrails):
         print(' # of observables / reduce # = %i  %10.2f'%(self.Nobs,self.ReduceNobs))
         self.Wvl = specData['wvl0']
         #
-        self.WghtFactor = wghtFactor
-#        self.SpecData['wghtFactor'] = []
+#        self.WghtFactor = wghtFactor
+#        print('wghtFactor = %8.3f'%(self.WghtFactor))
+        #        self.SpecData['wghtFactor'] = []
 #        if wghtFactor > 0.:
 #            for iwvl in range(self.Nobs):
 #                self.WghtFactor = self.SpecData['intStd'][iwvl]/self.SpecData['intensity'][iwvl] + wghtFactor
@@ -724,21 +724,6 @@ class maker(ionTrails,  specTrails):
         #
         # --------------------------------------------------------
         #
-    def emNtSetIndices(self, indices, verbose=0):
-        '''
-        to set the indices of the N temperature EM distribution
-        '''
-        print(' should use emSetIndices')
-        if hasattr(self, 'Temperature'):
-            self.EmIndices = indices
-            if verbose:
-                for adx in indices:
-                    print('index %5i temperature %12.2e'%(adx, self.Temperature[adx]))
-        else:
-            print(' need to call gofnt/mgofnt first')
-        #
-        # --------------------------------------------------------
-        #
     def emSetIndices(self, indices, verbose=0):
         '''
         to set the indices of the N temperature/density EM distribution
@@ -788,6 +773,33 @@ class maker(ionTrails,  specTrails):
 #                plt.loglog([temp[it], temp[it]], [em1/1000., em1], '-k', linewidth=2)
             plt.loglog([temp, temp], [em/1000., em], '-k', linewidth=2)
             plt.loglog([float(self.Temperature.min()), float(self.Temperature.max())], [em, em], '-k', linewidth=2 )
+        #
+        # ---------------------------------------------------------
+        #
+    def emMake(self, outName,  reference):
+        """ to make an emission measure file
+        outName does not need the suffix .em
+        reference should be a list of references
+        """
+        if '.em' not in outName:
+            outName += '.em'
+#        print('writing file %s'%(outName))
+        try:
+            indices = self.EmIndices
+        except:
+            print(' the indices of for the prediction have not been set')
+            return
+#        for idx in indices:
+#            print('T %10.3e  eD  %10.3e  EM  %10.3e'%(self.Temperature[idx], self.EDensity[idx], self.Em[idx]))
+
+        with open(outName, 'w') as output:
+            pformat = '%15.3e%15.3e%15.3e \n'
+            for idx in indices:
+                output.write(pformat%(self.Temperature[idx], self.EDensity[idx], self.Em[idx]))
+            output.write(' -1\n')
+            output.write('filename: %s\n'%(outName))
+            for one in reference:
+                output.write(one+'\n')
         #
         # ---------------------------------------------------------
         #
@@ -906,12 +918,13 @@ class maker(ionTrails,  specTrails):
         #
         # --------------------------------------------------------------------------
         #
-    def diffPrintChi(self, dir = '.', filename='diffPrintChi.txt'):
+    def diffPrintChi(self, dir = '.', filename='diffPrintChi.txt',  wghtFactor=0.3):
         '''
         calculates the weighted and straight differences between observed and predicted
         prints the values saves the as a dictionary self.Diff
         to be used together with a prior brute-force chi-squared minimization approach
         '''
+        self.WghtFactor = wghtFactor
         wDiff = []
         relDevList = []
         stdDevList = []
@@ -985,8 +998,15 @@ class maker(ionTrails,  specTrails):
     def diffPrintMc(self, dir = '.', filename='diffPrintMc.txt',  sort=None):
         '''
         calculates the weighted and straight differences between observed and predicted
-        prints the values saves to a file from a PyMC run
+        prints the values saves to a file from a PyMC3 run
+        also created a attribute self.Dict, a dict with the following keys:
+        'wvl' = observed wavelength (A)
+        'relDiff' = (I_obs - I_pred)/(I_obs)
+        'ionS' the CHIANTI type name for an ion
         '''
+        wghtFactor = self.WghtFactor
+        today = date.today()
+        thisday =today.strftime('%Y_%B_%d')
         nMatch = len(self.match)
         if sort is None:
             sorter = range(nMatch)
@@ -1002,17 +1022,18 @@ class maker(ionTrails,  specTrails):
             sorter = np.argsort(indexer)
 
         wDiff = []
-        relDevList = []
-        stdDevList = []
         intOverPred = []
+        diffOverInt = []
         dash = ' -------------------------------------------------'
         pformat1 = ' %5i %7s %10.3f %10.2e %10.2e %10.3f %10.3f %10.3f %10.3f'
         pformat1a = ' %5i %7s %10.3f %10.2e %10.2e *****NID******'
         sformat  = ' %5s %7s %10s %10s %10s %10s %10s %10s %10s'
         fsformat  = ' %5s %7s %10s %10s %10s %10s %10s %10s %10s\n'
         with open(filename, 'w') as outpt:
-            print(' WghtFactor = %10.3f'%(self.WghtFactor))
-            outpt.write(' WghtFactor = %10.3f \n'%(self.WghtFactor))
+            print(' today is %s'%(thisday))
+            outpt.write(' today is %s \n'%(thisday))
+            print(' WghtFactor = %10.3f'%(wghtFactor))
+            outpt.write(' WghtFactor = %10.3f \n'%(wghtFactor))
             emIndices = self.EmIndices
             print(' %5s %12s %12s %12s'%('index',  'density',  'temperature',  'Em'''))
             outpt.write(' %5s %12s %12s %12s \n'%('index',  'density',  'temperature',  'Em'''))
@@ -1023,41 +1044,47 @@ class maker(ionTrails,  specTrails):
             outpt.write(dash+'\n')
             print(' chi = abs(int/(wght*pred))  strDiff = (int - pred)/pred')
             outpt.write(' chi = abs(int-pred)/(wght*pred))  strDiff = (int - pred)/pred \n')
+            print(sformat%('', '', 'A', '', '', '', '', 'abs', 'abs' ))
             print(sformat%('iwvl', 'ionS', 'wvl', 'intensity', 'predicted', 'int/pred', 'chi', 'relDev', 'stdDev'))
+            outpt.write(fsformat%('', '', 'A', '', '', '', '', 'abs', 'abs' ))
             outpt.write(fsformat%('iwvl', 'ionS', 'wvl', 'intensity', 'predicted', 'int/pred', 'chi', 'relDev',  'stdDev'))
             for iwvl in sorter:
                 amatch = self.match[iwvl]
                 if amatch['predicted'] > 0. :
-                    chi = np.abs(self.Intensity[iwvl]-amatch['predicted'])/(self.WghtFactor*amatch['predicted'])
+                    chi = np.abs(self.Intensity[iwvl]-amatch['predicted'])/(wghtFactor*self.Intensity[iwvl])
                     wDiff.append(chi)
-                    intOverPred.append(np.abs(self.Intensity[iwvl]/amatch['predicted'] - 1.))
-                    relDevList.append(np.abs(self.Intensity[iwvl]-amatch['predicted'])/self.Intensity[iwvl])
-                    stdDevList.append(relDevList[-1])
-                    pstring = pformat1%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'], self.Intensity[iwvl]/amatch['predicted'], chi, relDevList[-1],  stdDevList[-1] )
+                    intOverPred.append(self.Intensity[iwvl]/amatch['predicted'] - 1.)
+                    diffOverInt.append((self.Intensity[iwvl]-amatch['predicted'])/self.Intensity[iwvl])
+                    pstring = pformat1%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'], self.Intensity[iwvl]/amatch['predicted'], chi, intOverPred[-1],  diffOverInt[-1] )
                 else:
                     pstring = pformat1a%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'])
                 print(pstring)
                 outpt.write(pstring+'\n')
-            diff = np.asarray(relDevList, np.float64)
-            stdDev = np.asarray(stdDevList, np.float64)
-            print(' mean of relative Deviation = %10.3f 3*relDev = %10.3f stdDev = %10.3f\n'%(diff.mean(), 3.*diff.mean(), stdDev.mean()))
-            outpt.write(' mean of rel Dev = %10.3f 3*rel Dev  = %10.3f stdDiff:  %10.3f \n'%(diff.mean(), 3.*diff.mean(), stdDev.mean()))
-            print(' mean of intOverPred = abs(int/pred -1.) %10.3f'%(np.mean(intOverPred)))
-            outpt.write(' mean of intOverPred = abs(int/pred -1.) %10.3f \n'%(np.mean(intOverPred)))
-            threeSig = 3.*diff.mean()
+            intOverPredNp = np.asarray(intOverPred, np.float64)
+            diffOverIntNp = np.asarray(diffOverInt, np.float64)
+            print(' mean of relative Deviation = %10.3f 3*relDev = %10.3f stdDev = %10.3f\n'%(intOverPredNp.mean(), 3.*intOverPredNp.mean(), intOverPredNp.std()))
+            outpt.write(' mean of rel Dev = %10.3f 3*rel Dev  = %10.3f stdDiff:  %10.3f \n'%(intOverPredNp.mean(), 3.*intOverPredNp.mean(), intOverPredNp.std()))
+            print(' mean of intOverPred = abs(int/pred -1.) %10.3f'%(intOverPredNp.mean()))
+            outpt.write(' mean of intOverPred = abs(int/pred -1.) %10.3f \n'%(intOverPredNp.mean()))
+            threeSig = 3.*diffOverIntNp.std()
             print(' 3*std = %10.3f'%(threeSig))
             outpt.write(' 3*std = %10.3f \n'%(threeSig))
+            chisq,  msk = self.getChisq()
             normChisq = self.getNormalizedChisq()
+            print('           Chisq = %10.3f'%(chisq))
             print('Normalized Chisq = %10.3f'%(normChisq))
+            outpt.write('           Chisq = %10.3f \n'%(chisq))
             outpt.write('Normalized Chisq = %10.3f \n'%(normChisq))
-            poor = diff > threeSig
-            idx = np.arange(diff.size)
+            poor = np.abs(diffOverIntNp) > threeSig
+            idx = np.arange(nMatch)
             pdx = idx[poor]
             for i in pdx:
-                print('%5i %s %10.3f %10.3f'%(i, self.IonS[i],  self.Wvl[i], diff[i]))
-                outpt.write('%5i %s %10.3f %10.3f \n'%(i, self.IonS[i],  self.Wvl[i], diff[i]))
-        self.diffDict = {'diff':diff, 'wvl':self.Wvl, 'ionS':self.IonS, '3sig':threeSig, 'poor':poor}
-#        self.SearchData['diff'] = diffDict
+                print('%5i %s %10.3f %10.3f %10.3f'%(i, self.IonS[i],  self.Wvl[i], np.abs(intOverPredNp)[i],  diffOverIntNp[i]))
+                outpt.write('%5i %s %10.3f %10.3f %10.3f\n'%(i, self.IonS[i],  self.Wvl[i], np.abs(intOverPredNp)[i], diffOverIntNp[i]))
+        if sort is None:
+            self.DiffMc = {'intOverPred':intOverPredNp, 'diffOverPred':diffOverIntNp, 'wvl':self.Wvl, 'ionS':self.IonS, '3sig':threeSig, 'poor':poor}
+        else:
+            self.DiffMcSort = {'intOverPred':intOverPredNp, 'diffOverPred':diffOverIntNp, 'wvl':self.Wvl, 'ionS':self.IonS, '3sig':threeSig, 'poor':poor}
         #
         # --------------------------------------------------------------------------
         #
@@ -1082,6 +1109,7 @@ class maker(ionTrails,  specTrails):
         to predict the intensities of the observed lines from an emission measure
         the emission measure is already specified as self.Em which is an np array
         '''
+        wghtFactor = self.WghtFactor
         nMatch = len(self.match)
         if sort is None:
             sorter = range(nMatch)
@@ -1115,8 +1143,8 @@ class maker(ionTrails,  specTrails):
                     return
                 print('matchPkl %s '%(self.MatchName))
                 outpt.write('matchPkl %s \n'%(self.MatchName))
-                print('wghtFactor %10.3f'%(self.WghtFactor))
-                outpt.write('wghtFactor %10.3f \n'%(self.WghtFactor))
+                print('wghtFactor %10.3f'%(wghtFactor))
+                outpt.write('wghtFactor %10.3f \n'%(wghtFactor))
                 print(dash)
                 outpt.write(dash + '\n')
                 pstring1 = pformat1s%('iwvl', 'IonS', 'wvl', 'Int',  'Pred', 'Int/Pred', 'chi')
@@ -1130,7 +1158,7 @@ class maker(ionTrails,  specTrails):
                 for iwvl in sorter:
                     amatch = self.match[iwvl]
                     if amatch['predicted'] > 0. :
-                        chi = np.abs(self.Intensity[iwvl]/(2.*self.WghtFactor*amatch['predicted']))
+                        chi = (np.abs(self.Intensity[iwvl]-amatch['predicted'])/(wghtFactor*self.Intensity[iwvl]))
                         pstring = pformat1%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'], self.Intensity[iwvl]/amatch['predicted'], chi  )
                     else:
 
@@ -1156,12 +1184,12 @@ class maker(ionTrails,  specTrails):
                     print(dash)
                 outpt.write(dash +'\n')
                 print('matchPkl %s \n'%(self.MatchName))
-                print('wghtFactor %10.3f \n'%(self.WghtFactor))
+                print('wghtFactor %10.3f \n'%(wghtFactor))
                 pstring1 = pformat1s%('iwvl', 'IonS', 'wvl', 'Int',  'Pred', 'Int/Pred', 'chi')
                 outpt.write(pstring1 +'\n')
                 outpt.write(pstring3 + '\n')
                 for iwvl,  amatch in enumerate(self.match):
-                    chi = np.abs(self.Intensity[iwvl]/(2.*self.WghtFactor*amatch['predicted']))
+                    chi = (np.abs(self.Intensity[iwvl]-amatch['predicted'])/(2.*wghtFactor*self.Intensity[iwvl]))
                     pstring = pformat1%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'], self.Intensity[iwvl]/amatch['predicted'], chi  )
                     outpt.write(pstring +'\n')
                     #
@@ -1192,7 +1220,7 @@ class maker(ionTrails,  specTrails):
 
                 pformat3L = '        %10.3f & %10.3f & %20s & %20s & %10.2f & %10.2f \n'
                 for iwvl,  amatch in enumerate(self.match):
-                    chi = np.abs(self.Intensity[iwvl]/(2.*self.WghtFactor*amatch['predicted']))
+                    chi = (np.abs(self.Intensity[iwvl]-amatch['predicted'])/(2.*wghtFactor*self.Intensity[iwvl]))
                     pstring = pformat1L%(iwvl, amatch['obsWvl'], self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'], self.Intensity[iwvl]/amatch['predicted'])
                     outpt.write(pstring +'\n')
                     #
@@ -2009,10 +2037,10 @@ class maker(ionTrails,  specTrails):
             self.Em = matchDict['Em']
         else:
             print('Em not in matchDict')
-        if 'WghtFactor' in matchDict.keys():
-            self.WghtFactor = matchDict['WghtFactor']
-        else:
-            print('WghtFactor not in matchDict')
+        if 'XUVTOP' in matchDict.keys():
+            self.XUVTOP = matchDict['XUVTOP']
+        if 'chiantiVersion' in matchDict.keys():
+            self.ChiantiVersion = matchDict['chiantiVersion']
         self.MatchName = filename
         #
         #-----------------------------------------------------
@@ -2032,6 +2060,10 @@ class maker(ionTrails,  specTrails):
             matchDict['WghtFactor'] = self.WghtFactor
         else:
             print('wghtfactor not available')
+        if 'XUVTOP' in self.SpecData.keys():
+            matchDict['XUVTOP'] = self.SpecData['XUVTOP']
+        if 'chiantiVersion' in self.SpecData.keys():
+            matchDict['chiantiVersion'] = self.SpecData['chiantiVersion']
         with open(filename, 'wb') as outpt:
             pickle.dump(matchDict, outpt)
 

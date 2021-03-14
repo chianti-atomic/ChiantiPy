@@ -1230,8 +1230,8 @@ def masterListInfo(force=False, verbose=False):
         masterList = masterListRead()
         masterListInfo = {}
         haveZ = [0]*31
-        haveStage = np.zeros((31, 31), 'Int32')
-        haveDielectronic = np.zeros((31, 31), 'Int32')
+        haveStage = np.zeros((31, 31), np.int64)
+        haveDielectronic = np.zeros((31, 31), np.int64)
         for one in masterList:
             if verbose:
                 print((' ion = %s'%(one)))

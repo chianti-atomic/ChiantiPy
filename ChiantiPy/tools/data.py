@@ -58,7 +58,6 @@ try:
     Abundance = {abundance: chio.abundanceRead(abundancename=abundance)
                  for abundance in AbundanceList}
     GrndLevels = chio.grndLevelsRead()
-    Klgfb = chio.klgfbRead()
 
 #    klfileName = os.path.join(Xuvtop, 'continuum',  klnames[0])
     try:

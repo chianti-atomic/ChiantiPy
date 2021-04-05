@@ -1,5 +1,6 @@
 import numpy as np
 import ChiantiPy.tools.io as io
+import ChiantiPy.tools.data as chdata
 from scipy.interpolate import splev, splrep
 
 class ioneqOne(object):
@@ -21,10 +22,9 @@ class ioneqOne(object):
         if hasattr(self, 'IoneqAll'):
             ioneqAll = self.IoneqAll
         else:
-            ioneqAll = io.ioneqRead(ioneqname = self.Defaults['ioneqfile'])
-            self.ioneqAll = self.IoneqAll
+            self.IoneqAll = chdata.IoneqAll
         #
-        ioneqTemperature = ioneqAll['ioneqTemperature']
+        ioneqTemperature = self.IoneqAll['ioneqTemperature']
         Z = self.Z
         stage = self.Ion
         Dielectronic = self.Dielectronic

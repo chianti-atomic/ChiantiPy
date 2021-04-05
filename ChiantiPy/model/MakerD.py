@@ -276,6 +276,9 @@ def makeMatchPkl(specData, temp, dens, wghtFactor = 0.25,  abundanceName = None,
 class maker(ionTrails,  specTrails):
     '''
     a class matching observed lines to lines in the CHIANTI database
+    this class of MakerD.py is for use with discrete indices such
+    as with brute force chi-squared searches
+
     '''
     def __init__(self, temperature, specData, elementList=[], ionList=[], allLines=False, abundanceName = None, minAbund=10., wghtFactor=None,  verbose=False):
         '''

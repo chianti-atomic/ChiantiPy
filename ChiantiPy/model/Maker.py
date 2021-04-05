@@ -63,6 +63,8 @@ def emPlot(matchDict, vs='T', loc='upper right', fs=10,  adjust=None, position='
         hpos = ['r']*nInt
     elif position == 'left':
         hpos = ['l']*nInt
+    elif position == 'none':
+        hpos = ['n']*nInt
     elif type(position) is list:
         if len(position) == nInt:
             hpos = position
@@ -104,8 +106,15 @@ def emPlot(matchDict, vs='T', loc='upper right', fs=10,  adjust=None, position='
                     lblx2 = match[idx]['dmax']
                 lbly1 = em[idx][realgood][0]
                 lbly2 = em[idx][realgood][-1]
-                plt.text(lblx1, lbly1, wvlstr.strip())
-                plt.text(lblx2, lbly2, wvlstr.strip())
+                if hpos[idx] == 'l':
+                    plt.text(lblx1, lbly1, wvlstr.strip())
+                elif hpos[idx] == 'r':
+                    plt.text(lblx2, lbly2, wvlstr.strip())
+                elif hpos[idx] == 'b':
+                    plt.text(lblx1, lbly1, wvlstr.strip())
+                    plt.text(lblx2, lbly2, wvlstr.strip())
+                elif hpos[idx] == 'n':
+                    pass
             else:
                 print('no values for idx = %5i wvl = %8.2f'%(idx, match[idx]['wvl']))
                 print(' nonzed = %i'%(nonzed.sum()))
@@ -338,6 +347,7 @@ class maker(ionTrails,  specTrails):
         self.Intensity = specData['intensity']
         self.IonS = specData['ions']
         self.IonSet = set(specData['ions'])
+        self.Nions = len(self.IonSet)
         self.Dwvl = specData['dwvl']
         wvl = specData['wvl0']
         self.WvlRange = [min(wvl)-max(self.Dwvl), max(wvl)+max(self.Dwvl)]
@@ -731,6 +741,7 @@ class maker(ionTrails,  specTrails):
         if hasattr(self, 'Temperature'):
             self.EmIndices = np.atleast_1d(indices)
             self.Nfree = 2*len(indices)
+            self.NT = len(indices)
             if verbose:
                 for adx in self.EmIndices:
                     print('index %5i temperature %12.2e'%(adx, self.Temperature[adx]))
@@ -746,9 +757,12 @@ class maker(ionTrails,  specTrails):
         emValue = np.atleast_1d(value)
         if hasattr(self, 'EmIndices') and len(emValue) == len(self.EmIndices):
             em = np.zeros_like(self.Temperature)
+            emLog = np.zeros_like(self.Temperature)
             for i, adx in enumerate(self.EmIndices):
                 em[adx] = 10.**emValue[i]
+                emLog[adx] = emValue[i]
             self.Em = em
+            self.EmLog = emLog
         else:
             print('in emNtexp, either EmIndices not set or no. of values != no. of indices ')
             if hasattr(self, 'EmIndices'):
@@ -819,6 +833,8 @@ class maker(ionTrails,  specTrails):
             hpos = ['r']*nInt
         elif position == 'left':
             hpos = ['l']*nInt
+        elif position =='none':
+            hpos = ['n']*nInt
         elif type(position) is list:
             if len(position) == nInt:
                 hpos = position
@@ -1035,19 +1051,19 @@ class maker(ionTrails,  specTrails):
             print(' WghtFactor = %10.3f'%(wghtFactor))
             outpt.write(' WghtFactor = %10.3f \n'%(wghtFactor))
             emIndices = self.EmIndices
-            print(' %5s %12s %12s %12s'%('index',  'density',  'temperature',  'Em'''))
-            outpt.write(' %5s %12s %12s %12s \n'%('index',  'density',  'temperature',  'Em'''))
+            print(' %5s %12s %12s %12s'%('index',  'density',  'temperature',  'Em'))
+            outpt.write(' %5s %12s %12s %12s \n'%('index',  'density',  'temperature',  'Em'))
             for emidx in emIndices:
-                print(' %5i %12.2e %12.2e %12.2e'%(emidx, self.EDensity[emidx],  self.Temperature[emidx], self.Em[emidx]))
-                outpt.write(' %5i %12.2e %12.2e %12.2e \n'%(emidx, self.EDensity[emidx],  self.Temperature[emidx], self.Em[emidx]))
+                print(' %5i %12.2e %12.2e %12.2e %8.3f'%(emidx, self.EDensity[emidx],  self.Temperature[emidx], self.Em[emidx],  self.EmLog[emidx]))
+                outpt.write(' %5i %12.2e %12.2e %12.2e %8.3f \n'%(emidx, self.EDensity[emidx],  self.Temperature[emidx], self.Em[emidx],  self.EmLog[emidx]))
             print(dash)
             outpt.write(dash+'\n')
-            print(' chi = abs(int/(wght*pred))  strDiff = (int - pred)/pred')
-            outpt.write(' chi = abs(int-pred)/(wght*pred))  strDiff = (int - pred)/pred \n')
+            print(' chi = abs(int - pred)/(wght*int))  strDiff = (int - pred)/pred')
+            outpt.write(' chi = abs(int-pred)/(wght*int))  strDiff = (int - pred)/int \n')
             print(sformat%('', '', 'A', '', '', '', '', 'abs', 'abs' ))
-            print(sformat%('iwvl', 'ionS', 'wvl', 'intensity', 'predicted', 'int/pred', 'chi', 'relDev', 'stdDev'))
+            print(sformat%('iwvl', 'ionS', 'wvl', 'intensity', 'predicted', 'int/pred', 'chi', 'relDev', 'dif/int'))
             outpt.write(fsformat%('', '', 'A', '', '', '', '', 'abs', 'abs' ))
-            outpt.write(fsformat%('iwvl', 'ionS', 'wvl', 'intensity', 'predicted', 'int/pred', 'chi', 'relDev',  'stdDev'))
+            outpt.write(fsformat%('iwvl', 'ionS', 'wvl', 'intensity', 'predicted', 'int/pred', 'chi', 'relDev',  'dif/int'))
             for iwvl in sorter:
                 amatch = self.match[iwvl]
                 if amatch['predicted'] > 0. :
@@ -1066,18 +1082,27 @@ class maker(ionTrails,  specTrails):
             outpt.write(' mean of rel Dev = %10.3f 3*rel Dev  = %10.3f stdDiff:  %10.3f \n'%(intOverPredNp.mean(), 3.*intOverPredNp.mean(), intOverPredNp.std()))
             print(' mean of intOverPred = abs(int/pred -1.) %10.3f'%(intOverPredNp.mean()))
             outpt.write(' mean of intOverPred = abs(int/pred -1.) %10.3f \n'%(intOverPredNp.mean()))
+            std = diffOverIntNp.std()
             threeSig = 3.*diffOverIntNp.std()
-            print(' 3*std = %10.3f'%(threeSig))
-            outpt.write(' 3*std = %10.3f \n'%(threeSig))
+            print(' std = %10.3f 3*std = %10.3f'%(std,  threeSig))
+            outpt.write(' std = %10.3f   3*std = %10.3f \n'%(std,  threeSig))
+            print(' Nobs = %i Nions = %i'%(self.Nobs,  self.Nions))
+            outpt.write(' Nobs = %i  Nions = %i \n'%(self.Nobs,  self.Nions))
             chisq,  msk = self.getChisq()
             normChisq = self.getNormalizedChisq()
             print('           Chisq = %10.3f'%(chisq))
-            print('Normalized Chisq = %10.3f'%(normChisq))
+            print('Normalized Chisq = %10.3f chisq/(nobs)'%(chisq/float(nMatch)))
+            print('Normalized Chisq = %10.3f chisq/(nobs -nfree)'%(normChisq))
+            print('Normalized Chisq = %10.3f chisq/(nions -nfree)'%(chisq/(self.Nions - self.Nfree)))
             outpt.write('           Chisq = %10.3f \n'%(chisq))
-            outpt.write('Normalized Chisq = %10.3f \n'%(normChisq))
+            outpt.write('Normalized Chisq = %10.3f chisq/(nobs) \n'%(chisq/float(nMatch)))
+            outpt.write('Normalized Chisq = %10.3f  chisq/(nobs -nfree)\n'%(normChisq))
+            outpt.write('Normalized Chisq = %10.3f chisq/(nions -nfree)\n'%(chisq/(self.Nions - self.Nfree)))
             poor = np.abs(diffOverIntNp) > threeSig
-            idx = np.arange(nMatch)
-            pdx = idx[poor]
+#            idx = np.arange(nMatch)
+#            pdx = idx[poor]
+            npsorter = np.asarray(sorter)
+            pdx = npsorter[poor]
             for i in pdx:
                 print('%5i %s %10.3f %10.3f %10.3f'%(i, self.IonS[i],  self.Wvl[i], np.abs(intOverPredNp)[i],  diffOverIntNp[i]))
                 outpt.write('%5i %s %10.3f %10.3f %10.3f\n'%(i, self.IonS[i],  self.Wvl[i], np.abs(intOverPredNp)[i], diffOverIntNp[i]))
@@ -2033,10 +2058,22 @@ class maker(ionTrails,  specTrails):
             self.EmIndices = matchDict['EmIndices']
         else:
             print(' EmIndices not in matchDict')
+
         if 'Em' in matchDict.keys():
             self.Em = matchDict['Em']
         else:
             print('Em not in matchDict')
+
+        if 'EmLog' in matchDict.keys():
+            self.EmLog = matchDict['EmLog']
+        else:
+            print('Em not in matchDict')
+
+        if 'NT' in matchDict.keys():
+            self.NT = matchDict['NT']
+        else:
+            print('NT not in matchDict')
+
         if 'XUVTOP' in matchDict.keys():
             self.XUVTOP = matchDict['XUVTOP']
         if 'chiantiVersion' in matchDict.keys():
@@ -2052,14 +2089,26 @@ class maker(ionTrails,  specTrails):
             'Ntemp':self.Ntemp, 'NTempDens':self.NTempDens, 'MinAbund':self.MinAbund}
         if hasattr(self, 'EmIndices'):
             matchDict['EmIndices'] = self.EmIndices
+
         if hasattr(self, 'Em'):
             matchDict['Em'] = self.Em
+
+        if hasattr(self, 'EmLog'):
+            matchDict['EmLog'] = self.EmLog
+
         if hasattr(self, 'Nfree'):
             matchDict['Nfree'] = self.Nfree
+
+        if hasattr(self, 'NT'):
+            matchDict['NT'] = self.NT
+        else:
+            print('NT not available')
+
         if hasattr(self, 'WghtFactor'):
             matchDict['WghtFactor'] = self.WghtFactor
         else:
             print('wghtfactor not available')
+
         if 'XUVTOP' in self.SpecData.keys():
             matchDict['XUVTOP'] = self.SpecData['XUVTOP']
         if 'chiantiVersion' in self.SpecData.keys():

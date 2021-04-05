@@ -1039,9 +1039,7 @@ def maoParsRead(filename = None):
     with open(filename, 'r') as inpt:
         lines = inpt.readlines()
     nlines = len(lines)
-    print('len of pars %i'%(nlines))
     # this number is 255
-    print(lines[0])
     seq = [0]*nlines
     z = [0]*nlines
     a0 = [0]*nlines

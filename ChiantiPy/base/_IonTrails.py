@@ -46,9 +46,6 @@ class ionTrails(object):
         else:
             self.Ndens = 0
 
-        if verbose:
-            print('Temperature size:  %5i  Density size:  %5i'%(self.Ntemp, self.Ndens))
-
         self.NTempDens = max(self.Ndens,self.Ntemp)
         if self.Ndens > 1 and self.Ntemp == 1:
             self.Temperature = np.tile(self.Temperature, self.NTempDens)
@@ -77,8 +74,6 @@ class ionTrails(object):
                 raise ValueError('the size of em must be either 1 or the size of the larger of temperature or density %5i'%(self.NTempDens))
         else:
             self.Em = np.ones_like(self.Temperature, np.float64)
-        if verbose:
-            print('Em size:  %5i'%(self.Em.size))
 
     def intensityList(self, index=-1, wvlRange=None, wvlRanges=None, top=10, relative=0, outFile=0, rightDigits=4 ):
         """

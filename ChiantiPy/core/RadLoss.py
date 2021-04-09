@@ -50,7 +50,7 @@ class radLoss(ionTrails, specTrails):
         without the '.abund' suffix, e.g. 'sun_photospheric_1998_grevesse'
         If set to a blank (''), a gui selection menu will popup and allow the selection of an set of abundances
     '''
-    def __init__(self, temperature, eDensity, elementList=0, ionList = 0, minAbund=0, doContinuum=1, abundance=None, verbose=0, allLines=1, keepIons=0):
+    def __init__(self, temperature, eDensity, elementList=None, ionList = None, minAbund=None, doContinuum=1, abundance=None, verbose=0, allLines=1, keepIons=0):
         t1 = datetime.now()
         masterlist = chdata.MasterList
         # use the ionList but make sure the ions are in the database
@@ -139,7 +139,7 @@ class radLoss(ionTrails, specTrails):
                     if verbose:
                         print(' calculating fb continuum for :  %s'%(akey))
                     cont = continuum(akey, temperature, abundance=abundance)
-                    cont.freeBoundLoss()
+                    cont.freeBoundLoss(verbose=verbose)
                     if 'errorMessage' not in cont.FreeBoundLoss.keys():
                         freeBoundLoss += cont.FreeBoundLoss['rate']
             if 'line' in self.Todo[akey]:

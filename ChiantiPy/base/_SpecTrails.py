@@ -116,7 +116,7 @@ class specTrails(object):
         #
         # ---------------------------------------------------------------------------
         #
-    def ionGate(self, elementList = None, ionList = None, minAbund=None, doLines=1, doContinuum=1, doWvlTest=1, doIoneqTest=1,  verbose=0):
+    def ionGate(self, elementList = None, ionList = None, minAbund=None, doLines=1, doContinuum=1, doWvlTest=1, doIoneqTest=1, includeDiel=False,  verbose=0):
         '''
         creates a list of ions for free-free, free-bound, and line intensity calculations
         if doing the radiative losses, accept all wavelength -> doWvlTest=0
@@ -223,7 +223,7 @@ class specTrails(object):
         #
         #
         #  the relative H abundance is 1.0, the rest are all smaller
-        if minAbund < 2.:
+        if minAbund is not None and type(minAbund) is float:
             for iz in range(1, 31):
                 abundance = chdata.Abundance[self.AbundanceName]['abundance'][iz-1]
                 if abundance >= minAbund:
@@ -297,7 +297,18 @@ class specTrails(object):
         #  remove dupicates
 #        todoSet = set(todo)
 #        self.Todo = list(todoSet)
-        self.Todo = todo
+        dielList = []
+        if not includeDiel:
+            for akey in todo:
+                if 'd' in akey[-1]:
+                    dielList.append(akey)
+#                    if verbose:
+#                        print(' removed dielectronic ion %s for %s', akey,  stuff)
+        newTodo = {}
+        for akey in todo:
+            if akey not in dielList:
+                newTodo[akey] = todo[akey]
+        self.Todo = newTodo
         if len(self.Todo.keys()) == 0:
             print(' no elements have been selected')
             print(' it is necessary to provide an elementList, an ionList, or set minAbund > 0.')

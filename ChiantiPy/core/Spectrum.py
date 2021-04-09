@@ -163,7 +163,7 @@ class spectrum(ionTrails, specTrails):
             if 'ff' in self.Todo[akey]:
                 if verbose:
                     print(' calculating ff continuum for :  %s'%(akey))
-                FF = ChiantiPy.core.continuum(akey, temperature, abundance=abundance, em=em)
+                FF = ChiantiPy.core.continuum(akey, temperature, abundance=abundance, em=em,  verbose=verbose)
                 FF.freeFree(wavelength)
                 freeFree += FF.FreeFree['intensity'].squeeze()
                 if keepIons:
@@ -172,7 +172,7 @@ class spectrum(ionTrails, specTrails):
             if 'fb' in self.Todo[akey]:
                 if verbose:
                     print(' calculating fb continuum for :  %s'%(akey))
-                FB = ChiantiPy.core.continuum(akey, temperature, abundance=abundance, em=em)
+                FB = ChiantiPy.core.continuum(akey, temperature, abundance=abundance, em=em, verbose=verbose)
                 FB.freeBound(wavelength)
                 if 'errorMessage' not in FB.FreeBound.keys():
                     freeBound += FB.FreeBound['intensity'].squeeze()
@@ -184,7 +184,7 @@ class spectrum(ionTrails, specTrails):
             if 'line' in self.Todo[akey]:
                 if verbose:
                     print(' calculating spectrum for  :  %s'%(akey))
-                thisIon = ChiantiPy.core.ion(akey, temperature, eDensity, pDensity='default', abundance=abundance, em=em)
+                thisIon = ChiantiPy.core.ion(akey, temperature, eDensity, pDensity='default', abundance=abundance, em=em, verbose=verbose)
                 thisIon.intensity(allLines=allLines)
                 self.IonsCalculated.append(akey)
                 if 'errorMessage' not in  list(thisIon.Intensity.keys()):

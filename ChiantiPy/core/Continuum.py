@@ -559,6 +559,8 @@ class continuum(ionTrails):
         if hasattr(self,'Fblvl'):
             fblvl = self.Fblvl
             if 'errorMessage' in fblvl.keys():
+                if verbose:
+                    print(fblvl['errorMessage'])
                 self.FreeBound = fblvl
                 return
         elif self.Z == self.Stage-1:
@@ -572,7 +574,9 @@ class continuum(ionTrails):
                 fblvl = self.Fblvl
             # in case there is no fblvl file
             else:
-                self.FreeBound = {'errorMessage':' no fblvl file for ion %s'%(self.IonStr)}
+                self.FreeBoundLoss = {'errorMessage':' no fblvl file for ion %s'%(self.IonStr)}
+                if verbose:
+                    print(' no fblvl file for ion %s'%(self.IonStr))
                 return
         #
         #  need data for the recombined ion
@@ -587,7 +591,9 @@ class continuum(ionTrails):
                 self.rFblvl = io.fblvlRead(lower)
                 rFblvl = self.rFblvl
             else:
-                self.FreeBound = {'errorMessage':' no fblvl file for ion %s'%(self.IonStr)}
+                self.FreeBoundLoss = {'errorMessage':' no fblvl file for ion %s'%(lower)}
+                if verbose:
+                    print(' no fblvl file for ion %s'%(lower))
                 return
         #
         # for the ionization potential, must use that of the recombined ion
@@ -667,11 +673,13 @@ class continuum(ionTrails):
                 gfIntAllSum[itemp] += ratg[ilvl]*iprLvlErg[ilvl]**2*gfIntSum[itemp]/float(pqn[ilvl])
 
         fbloss = em*ioneq*abund*K1*K2*K4*gfIntAllSum/np.sqrt(temperature)
-        self.FreeBoundLoss = {'rate':fbloss, 'gfIntSum':gfIntSum,'gfInt':gfInt,'gfGL':gfGl, 'egl':egl, 'scaledE':scaledE,'peAll':peAll, 'gfAll':gfAll, 'gfIntAllSum':gfIntAllSum}
+        self.FreeBoundLoss = {'rate':fbloss, 'temperature':temperature}
+
+        #{'rate':fbloss, 'gfIntSum':gfIntSum,'gfInt':gfInt,'gfGL':gfGl, 'egl':egl, 'scaledE':scaledE,'peAll':peAll, 'gfAll':gfAll, 'gfIntAllSum':gfIntAllSum}
 
 
 
-    def freeBound(self, wvl, includeAbund = True,  includeIoneq = True):
+    def freeBound(self, wvl, includeAbund = True,  includeIoneq = True,  verbose=False):
         """
         Calculates the free-bound (radiative recombination) continuum emissivity of an ion.
         Provides emissivity in units of ergs :math:`\mathrm{cm}^{-2}` :math:`\mathrm{s}^{-1}` :math:`\mathrm{str}^{-1}` :math:`\mathrm{\AA}^{-1}` for an individual ion.  If includeAbund is set,
@@ -724,7 +732,9 @@ class continuum(ionTrails):
                 fblvl = self.Fblvl
             # in case there is no fblvl file
             else:
-                self.FreeBound = {'errorMessage':' no fblvl file for ion %s'%(self.IonStr)}
+                if verbose:
+                    print(' No fblvl file for ion %s'%(self.IonStr))
+                self.FreeBound = {'errorMessage':' No fblvl file for ion %s'%(self.IonStr)}
                 return
         #
         #  need data for the recombined ion
@@ -739,7 +749,9 @@ class continuum(ionTrails):
                 self.rFblvl = io.fblvlRead(lower)
                 rFblvl = self.rFblvl
             else:
-                self.FreeBound = {'errorMessage':' no fblvl file for ion %s'%(self.IonStr)}
+                if verbose:
+                    print(' No fblvl file for ion %s'%(lower))
+                self.FreeBound = {'errorMessage':' no fblvl file for ion %s'%(lower)}
                 return
         #
         # for the ionization potential, must use that of the recombined ion
@@ -815,25 +827,61 @@ class continuum(ionTrails):
 
             scaledE = hnuEv/self.Ipr
             badLong = hnuEv < iprLvlEv
-            tck = splrep(np.log(pe), np.log(gf),  s=0)
-            gflog = splev(np.log(scaledE), tck,  der=0,  ext=1)
-            mygf[ilvl] = np.exp(gflog)
-            mygf[ilvl][badLong] = 0.
-            ratg[ilvl] = float(multr[ilvl])/float(mult[0]) # ratio of statistical weights
+            if verbose:
+                print(' %i nWvl  %i badlong.sum %i'%(ilvl, nWvl,  badLong.sum()))
+            if badLong.sum() < nWvl:
+                tck = splrep(np.log(pe), np.log(gf),  s=0)
+                gflog = splev(np.log(scaledE), tck,  der=0,  ext=1)
+                mygf[ilvl] = np.exp(gflog)
+                mygf[ilvl][badLong] = 0.
+                if verbose:
+                    print(' ilvl %i   mygf.max() %10.2e'%(ilvl, np.max(mygf[ilvl])))
+                ratg[ilvl] = float(multr[ilvl])/float(mult[0]) # ratio of statistical weights
 
-            for itemp,  atemp in enumerate(temperature):
-                phE = hnu
-                fbn[ilvl] = K0*phE**2*np.exp((iprLvlErg - phE)/(const.boltzmann*atemp))*iprLvlErg**2*ratg[ilvl]*mygf[ilvl]/(atemp**(1.5)*float(pqn[ilvl]))
-                mask[ilvl,itemp] = 1.e+8/wvl < (self.IprCm - ecm[ilvl])
-                fbIntensity[ilvl, itemp] = abund*em[itemp]*ioneq[itemp]*fbn[ilvl, itemp]
+                for itemp,  atemp in enumerate(temperature):
+                    phE = hnu
+                    expfun = np.exp((iprLvlErg - phE)/(const.boltzmann*atemp))
+                    expfunIsnan = np.isnan(expfun)
+                    expfunIsinf = np.isinf(expfun)
+                    if expfunIsnan.sum() > 0:
+                        print('%i some of expfun are nan %i'%(itemp, expfunIsnan.sum()))
+                        expfun[expfunIsnan] = 0.
+                    elif expfunIsinf.sum() > 0:
+                        print('%i some of expfun are inf %i'%(itemp, expfunIsinf.sum()))
+                        expfun[expfunIsinf] = 0.
+                    fbn[ilvl, itemp] = K0*phE**2*expfun*iprLvlErg**2*ratg[ilvl]*mygf[ilvl]/(atemp**(1.5)*float(pqn[ilvl]))
+                    fbnIsNan = np.isnan(fbn[ilvl, itemp])
+                    fbnIsInf = np.isinf(fbn[ilvl, itemp])
 
+                    if fbnIsNan.sum() > 0:
+                        print('%i some fbn are Nan %i'%(itemp,  fbnIsNan.sum()))
+                        fbn[ilvl, itemp,  fbnIsNan] = 0.
+                    elif fbnIsInf.sum() > 0:
+                        print('%i some fbn are Inf %i'%(itemp,  fbnIsInf.sum()))
+                        fbn[ilvl, itemp,  fbnIsInf] = 0.
+                    mask[ilvl,itemp] = 1.e+8/wvl < (self.IprCm - ecm[ilvl])
+#                    if verbose:
+#                        print('iprcm %10.2e ecm %10.2e diff %10.2e'%(self.IprCm, ecm[ilvl], self.IprCm -ecm[ilvl]  ))
+#                        print('ilvl %i sum of mask %i'%(ilvl,  np.sum(mask[ilvl])))
+#                        print(' pqn %i np.sum(fbn[ilvl]) %10.2e'%(pqn[ilvl],   np.sum(fbn[ilvl,  itemp])))
+                    fbIntensity[ilvl, itemp] = abund*em[itemp]*ioneq[itemp]*fbn[ilvl, itemp]
+            else:
+                pass
+        fbTest = fbIntensity.sum(axis=0)
+        fbTestisNan = np.isnan(fbTest)
+        fbTestisInf = np.isinf(fbTest)
+        if fbTestisNan.sum() > 0:
+            print('fb has some Nans %i'%(fbTestisNan.sum()))
+        if fbTestisInf.sum() > 0:
+            print('fb has some Infs %i'%(fbTestisInf.sum()))
         fb = np.ma.array(fbIntensity.sum(axis=0))
-        fb_mask = fb <= 0.
+#        fb_mask = fb <= 0. or fb == np.inf
+        fb_mask = np.where(fb.data is np.nan,  1,  0)
         fb.mask = fb_mask
         fb.fill_value = 0.
         #
         self.FreeBound = {'intensity':fb.squeeze(), 'temperature':temperature,'wvl':wvl, 'em':em, \
-            'abund':abund, 'ioneq':ioneq, 'gf':mygf, 'edgeLvlAng':edgeLvlAng}
+            'abund':abund, 'ioneq':ioneq, 'gf':mygf, 'edgeLvlAng':edgeLvlAng,  'fbn':fbn}
 
     def vernerCross(self, wvl):
         """

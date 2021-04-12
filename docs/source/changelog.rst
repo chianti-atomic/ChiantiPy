@@ -3,6 +3,16 @@ Changelog
 ===========
 
 
+
+
+Changes from 0.10.0 to 0.11.0
+=============================
+
+Calculations of the free-bound/radiative recombination continuum and radiation losses depend on a file that provides and LS description of the bound and singly excited energy levels.  This file is called c_5.fblvl in the case of C V.  Not all ions have an associated .fblvl files and is was necessary to revise ChiantiPy to ignore the free-bound calculation for these ions.
+
+In addition, it was found that under extreme conditions, such as very low temperatures for highly ionized species, that bad values would arise (Nans and infinities).  These are now detected and removed.
+
+
 Changes from 0.9.5 to 0.10.0
 ============================
 

@@ -1,6 +1,8 @@
 """
 Continuum module
+
 """
+
 import os
 
 import numpy as np
@@ -370,10 +372,12 @@ class continuum(ionTrails):
         self.FreeBoundLoss = {'rate':gaunt_factor*np.sqrt(self.Temperature)*prefactor, 'temperature':self.Temperature}
 
     def freeBoundLossMao(self,  includeAbund=False,  includeIoneq=False):
-        """ to calculate the radiative loss rate from the parameters of
-            Mao J., Kaastra J., Badnell N.R.
-        <Astron. Astrophys. 599, A10 (2017)>
-        =2017A&A...599A..10M"""
+        """
+        to calculate the radiative loss rate from the parameters of
+        Mao J., Kaastra J., Badnell N.R.
+        <Astron. Astrophys. 599, A10 (2017)>=2017A&A...599A..10M
+
+        """
         pars = io.maoParsRead()
         nameDict = util.convertName(self.IonStr)
         Z = nameDict['Z']

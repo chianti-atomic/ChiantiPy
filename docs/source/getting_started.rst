@@ -36,7 +36,7 @@ Prerequisites
 
 * ipyparallel (required for multiprocessing with ipymspectrum)
 
-* (not really a prerequisite but **extremely** useful) IPython_ version 7.2 and Jupyter_
+* (not really a prerequisite but **extremely** useful) IPython_ version 7.21 and Jupyter_
 
 .. _IPython:  http://ipython.org
 

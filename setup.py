@@ -9,6 +9,7 @@ with open("README.rst", "r", encoding='utf-8') as fh:
 setup(name = 'ChiantiPy',
     description = 'a Python interface to the CHIANTI atomic database for astrophysical spectroscopy',
     long_description = long_description,
+#    long_description_content_type = text/rst,
     version = '0.11.0',
     author = 'Ken Dere',
     author_email = 'kdere@gmu.edu',

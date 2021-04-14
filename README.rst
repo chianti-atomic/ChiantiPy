@@ -1,5 +1,5 @@
 ChiantiPy - Version 0.11.0
-=========================
+==========================
 
 |Documentation Status| |Coverage Status| |ascl:1308.017|
 

@@ -209,14 +209,15 @@ class ionTrails(object):
             print('using index = %5i specifying temperature = %10.2e, eDensity =  %10.2e em = %10.2e'%(index, temperature[index], eDensity[index], em[index]))
             self.Message = 'using index = %5i specifying temperature = %10.2e, eDensity =  %10.2e = %10.2e'%(index, temperature[index], eDensity[index], em[index])
             intensity=intensity[index]
-
-        if wvlRange:
+        if wvlRange is None and wvlRanges is None:
+            wvlRange = self.WvlRange
+        if wvlRange.any():
             wvlIndex=util.between(wvl,wvlRange)
-        elif wvlRanges:
+        elif wvlRanges.any():
             wvlIndex = []
             for awvlRange in wvlRanges:
                 wvlIndex.extend(util.between(wvl,awvlRange))
-        else:
+        elif wvl.any():
             wvlIndex = range(wvl.size)
 
         #  get lines in the specified wavelength range

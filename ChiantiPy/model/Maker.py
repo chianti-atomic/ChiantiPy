@@ -740,7 +740,7 @@ class maker(ionTrails,  specTrails):
         '''
         if hasattr(self, 'Temperature'):
             self.EmIndices = np.atleast_1d(indices)
-            self.Nfree = 2*len(indices)
+            self.Nfree = 2*len(indices) + 1  # for sigma
             self.NT = len(indices)
             if verbose:
                 for adx in self.EmIndices:
@@ -1021,6 +1021,7 @@ class maker(ionTrails,  specTrails):
         'ionS' the CHIANTI type name for an ion
         '''
         wghtFactor = self.WghtFactor
+        cwd = os.getcwd()
         today = date.today()
         thisday =today.strftime('%Y_%B_%d')
         nMatch = len(self.match)
@@ -1046,6 +1047,8 @@ class maker(ionTrails,  specTrails):
         sformat  = ' %5s %7s %10s %10s %10s %10s %10s %10s %10s'
         fsformat  = ' %5s %7s %10s %10s %10s %10s %10s %10s %10s\n'
         with open(filename, 'w') as outpt:
+            print(' cwd:  %s'%(cwd))
+            outpt.write(' cwd:  %s \n'%(cwd))
             print(' today is %s'%(thisday))
             outpt.write(' today is %s \n'%(thisday))
             print(' WghtFactor = %10.3f'%(wghtFactor))
@@ -1076,18 +1079,35 @@ class maker(ionTrails,  specTrails):
                     pstring = pformat1a%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'])
                 print(pstring)
                 outpt.write(pstring+'\n')
+
+            print(' WghtFactor = %10.3f'%(wghtFactor))
+            outpt.write(' WghtFactor = %10.3f \n'%(wghtFactor))
+
             intOverPredNp = np.asarray(intOverPred, np.float64)
             diffOverIntNp = np.asarray(diffOverInt, np.float64)
+            wghtDiffOverIntNp = diffOverIntNp/wghtFactor
+            chisq2 = (wghtDiffOverIntNp**2).sum()
+
             print(' mean of relative Deviation = %10.3f 3*relDev = %10.3f stdDev = %10.3f\n'%(intOverPredNp.mean(), 3.*intOverPredNp.mean(), intOverPredNp.std()))
             outpt.write(' mean of rel Dev = %10.3f 3*rel Dev  = %10.3f stdDiff:  %10.3f \n'%(intOverPredNp.mean(), 3.*intOverPredNp.mean(), intOverPredNp.std()))
             print(' mean of intOverPred = abs(int/pred -1.) %10.3f'%(intOverPredNp.mean()))
             outpt.write(' mean of intOverPred = abs(int/pred -1.) %10.3f \n'%(intOverPredNp.mean()))
-            std = diffOverIntNp.std()
+
+            onestd = diffOverIntNp.std()
             threeSig = 3.*diffOverIntNp.std()
-            print(' std = %10.3f 3*std = %10.3f'%(std,  threeSig))
-            outpt.write(' std = %10.3f   3*std = %10.3f \n'%(std,  threeSig))
+            print(' std = %10.3f 3*std = %10.3f'%(onestd,  threeSig))
+            outpt.write(' std = %10.3f   3*std = %10.3f \n'%(onestd,  threeSig))
+
+            print(' sum of diffOverInt^2 =  %10.3f weighted %10.3f '%((diffOverIntNp**2).sum(),  (diffOverIntNp**2).sum()/wghtFactor**2))
+            outpt.write(' sum of diffOverInt^2 =  %10.3f  weighted %10.3f\n'%((diffOverIntNp**2).sum(), (diffOverIntNp**2).sum()/wghtFactor**2  ))
+
+            print(' chisq2 = %10.3f'%(chisq2))
+            outpt.write(' chisq2 = %10.3f \n'%(chisq2))
+
             print(' Nobs = %i Nions = %i'%(self.Nobs,  self.Nions))
             outpt.write(' Nobs = %i  Nions = %i \n'%(self.Nobs,  self.Nions))
+            print(' Nfree = %i'%(self.Nfree))
+            outpt.write(' Nfree = %i \n'%(self.Nfree))
             chisq,  msk = self.getChisq()
             normChisq = self.getNormalizedChisq()
             print('           Chisq = %10.3f'%(chisq))
@@ -1107,9 +1127,9 @@ class maker(ionTrails,  specTrails):
                 print('%5i %s %10.3f %10.3f %10.3f'%(i, self.IonS[i],  self.Wvl[i], np.abs(intOverPredNp)[i],  diffOverIntNp[i]))
                 outpt.write('%5i %s %10.3f %10.3f %10.3f\n'%(i, self.IonS[i],  self.Wvl[i], np.abs(intOverPredNp)[i], diffOverIntNp[i]))
         if sort is None:
-            self.DiffMc = {'intOverPred':intOverPredNp, 'diffOverPred':diffOverIntNp, 'wvl':self.Wvl, 'ionS':self.IonS, '3sig':threeSig, 'poor':poor}
+            self.DiffMc = {'intOverPred':intOverPredNp, 'diffOverInt':diffOverIntNp, 'wvl':self.Wvl, 'ionS':self.IonS, '3sig':threeSig, 'poor':poor}
         else:
-            self.DiffMcSort = {'intOverPred':intOverPredNp, 'diffOverPred':diffOverIntNp, 'wvl':self.Wvl, 'ionS':self.IonS, '3sig':threeSig, 'poor':poor}
+            self.DiffMcSort = {'intOverPred':intOverPredNp, 'diffOverInt':diffOverIntNp, 'wvl':self.Wvl, 'ionS':self.IonS, '3sig':threeSig, 'poor':poor}
         #
         # --------------------------------------------------------------------------
         #
@@ -1134,6 +1154,7 @@ class maker(ionTrails,  specTrails):
         to predict the intensities of the observed lines from an emission measure
         the emission measure is already specified as self.Em which is an np array
         '''
+        cwd = os.getcwd()
         wghtFactor = self.WghtFactor
         nMatch = len(self.match)
         if sort is None:
@@ -1157,6 +1178,8 @@ class maker(ionTrails,  specTrails):
         pformat3s = '        %10s %4s %4s %20s - %20s %5s %5s %s'
         if outfile:
             with open(outfile, 'w') as outpt:
+                print(' cwd:  %s'%(cwd))
+                outpt.write(' cwd:  %s \n'%(cwd))
                 try:
                     emIndices = self.EmIndices
                     for emidx in emIndices:

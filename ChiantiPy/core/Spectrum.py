@@ -89,7 +89,8 @@ class spectrum(ionTrails, specTrails):
         setupIntensity = 0
         #
         self.Defaults=chdata.Defaults
-        self.Wavelength = wavelength
+        self.Wavelength = np.asarray(wavelength,  np.float64)
+        self.WvlRange = np.asarray([self.Wavelength.min(),  self.Wavelength.max()],  np.float64)
         #
         self.argCheck(temperature=temperature, eDensity=eDensity, pDensity=None,  em=em,  verbose=verbose)
 

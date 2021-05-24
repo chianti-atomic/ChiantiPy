@@ -22,7 +22,7 @@ The freeBound and the freeFree methods now have 2 new keyword variables:  **incl
 
 The freeBoundEmiss is removed as it has become redundant
 
-A new continuum method, freeBoundLossMao includes the radiative-recombination (free-bound) loss rate as calculatd by Mao et al. (2017)
+A new continuum method, freeBoundLossMao includes the radiative-recombination (free-bound) loss rate as calculated by Mao et al. (2017)
 
 a bug in the inherited method base._IntensityRatio() was corrected.
 
@@ -182,7 +182,7 @@ the method **ioneqOne** is used by both the Ion and Continuum class.  It has bee
 changes from 0.6.5 to 0.7.0
 ===========================
 
-The primary change is that code developement has been moved to Github_.
+The primary change is that code development has been moved to Github_.
 
 .. _Github:  https://github.com/chianti-atomic/ChiantiPy
 
@@ -232,7 +232,7 @@ The **ion** and multi-ion classes now accept the keyword argument **abundanceNam
 
 Additional we have replaced the FortranFormat module of Scientific Python by Konrad Hinsen with the **fortranformat** module of Brendan Arnold at http://bitbucket.org/brendanarnold/py-fortranformat.  I have slightly modified fortranformat to make it Python 3 compliant.
 
-For the future, I plan to make ChiantiPy compliant with both Python 2.7 and the current version of Python 3 (now 3.4), improve the documentation and move the projec to github, in no particular order.
+For the future, I plan to make ChiantiPy compliant with both Python 2.7 and the current version of Python 3 (now 3.4), improve the documentation and move the project to github, in no particular order.
 
 ChiantiPy is now released under a new license, the OSI approved ISCL license.  From Wikipedia_ *The ISCL license is a permissive free software license written by the Internet Software Consortium (ISC). It is functionally equivalent to the simplified BSD and MIT/Expat licenses, ...*
 

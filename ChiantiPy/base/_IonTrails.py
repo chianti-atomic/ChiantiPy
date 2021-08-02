@@ -211,13 +211,13 @@ class ionTrails(object):
             intensity=intensity[index]
         if wvlRange is None and wvlRanges is None:
             wvlRange = self.WvlRange
-        if wvlRange.any():
+        elif wvlRange is not None:
             wvlIndex=util.between(wvl,wvlRange)
-        elif wvlRanges.any():
+        elif wvlRanges is not None:
             wvlIndex = []
             for awvlRange in wvlRanges:
                 wvlIndex.extend(util.between(wvl,awvlRange))
-        elif wvl.any():
+        else:
             wvlIndex = range(wvl.size)
 
         #  get lines in the specified wavelength range

@@ -211,6 +211,7 @@ class ionTrails(object):
             intensity=intensity[index]
         if wvlRange is None and wvlRanges is None:
             wvlRange = self.WvlRange
+            wvlIndex=util.between(wvl,wvlRange)
         elif wvlRange is not None:
             wvlIndex=util.between(wvl,wvlRange)
         elif wvlRanges is not None:

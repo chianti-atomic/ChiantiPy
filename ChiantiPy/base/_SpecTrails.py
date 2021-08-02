@@ -242,7 +242,10 @@ class specTrails(object):
                                 else:
                                     wvlTestMin = 1
                                     wvlTestMax = 1
-                            ioneqTest = (temperature.max() >= ionInfo[ionS]['tmin']) and (temperature.min() <= ionInfo[ionS]['tmax'])
+                            if temperature.size == 1:
+                                ioneqTest = (temperature >= ionInfo[ionS]['tmin']) and (temperature <= ionInfo[ionS]['tmax'])
+                            else:
+                                ioneqTest = (temperature.max() >= ionInfo[ionS]['tmin']) and (temperature.min() <= ionInfo[ionS]['tmax'])
                         # construct similar test for the dielectronic files
                         ionSd = util.zion2name(iz, ionstage, dielectronic=1)
                         masterListTestD = ionSd in masterlist

@@ -280,7 +280,7 @@ class maker(ionTrails,  specTrails):
     as with brute force chi-squared searches
 
     '''
-    def __init__(self, temperature, specData, elementList=[], ionList=[], allLines=False, abundanceName = None, minAbund=10., wghtFactor=None,  verbose=False):
+    def __init__(self, specData, temperature=None, elementList=[], ionList=[], allLines=False, abundanceName = None, minAbund=10., wghtFactor=None,  verbose=False):
         '''
         input a list of wavelengths and a wavelength difference
         find a list of predicted spectral lines for each wavelength
@@ -311,7 +311,8 @@ class maker(ionTrails,  specTrails):
         #
         # --------------------------------------------------------------------------------
         #
-        self.Temperature = temperature
+        if temperature is not None:
+            self.Temperature = temperature
         self.Defaults = chdata.Defaults
         self.XUVTOP = os.environ['XUVTOP']
         print(' XUVTOP = %s'%(self.XUVTOP))
@@ -732,7 +733,7 @@ class maker(ionTrails,  specTrails):
         to set the indices of the N temperature/density EM distribution
         '''
         if hasattr(self, 'Temperature'):
-            self.EmIndices = np.atleast_1d(indices)
+            self.EmIndices = np.atleast_1d([indices])
             self.Nfree = 2*len(indices)
             if verbose:
                 for adx in self.EmIndices:
@@ -1107,7 +1108,7 @@ class maker(ionTrails,  specTrails):
         #
         # --------------------------------------------------------------------------
         #
-    def predictPrint(self, minContribution=0.1, outfile='predictPrint.txt', sort=None, verbose=0):
+    def predictPrint(self, minContribution=0.1, filename='predictPrint.txt', sort=None, verbose=0):
         '''
         to predict the intensities of the observed lines from an emission measure
         the emission measure is already specified as self.Em which is an np array
@@ -1133,8 +1134,8 @@ class maker(ionTrails,  specTrails):
         pformat2 = '         %s'
         pformat3 = '        %10.3f %4i %4i %20s - %20s %5i %5i %7.3f'
         pformat3s = '        %10s %4s %4s %20s - %20s %5s %5s %s'
-        if outfile:
-            with open(outfile, 'w') as outpt:
+        if filename:
+            with open(filename, 'w') as outpt:
                 try:
                     emIndices = self.EmIndices
                     for emidx in emIndices:
@@ -1243,7 +1244,7 @@ class maker(ionTrails,  specTrails):
         #
         # --------------------------------------------------------------------------
         #
-    def predictPrint1d(self, minContribution=0.1, outfile=0, verbose=0):
+    def predictPrint1d(self, minContribution=0.1, filename=0, verbose=0):
         '''
         to predict the intensities of the observed lines from an emission measure
         the emission measure is already specified as self.Em which is an np array
@@ -1494,7 +1495,7 @@ class maker(ionTrails,  specTrails):
             searchDx1 = idx1 - indxlimits[0]
             searchDx.append(searchDx1)
             # kpd update
-            self.emSetIndices(idx1)
+            self.emSetIndices([idx1])
             self.fit1t(initialEm, maxfev=maxfev)
             chisq1,  msk1 = self.getChisq()
             if not msk1:
@@ -1530,12 +1531,15 @@ class maker(ionTrails,  specTrails):
         #
         gdx=[i for i,ch in enumerate(chisq) if ch == min(chisq)]
         #  kpd
-        self.emSetIndices(idx[gdx[0]])
+        self.emSetIndices([idx[gdx[0]]])
         self.emSet(emfit[gdx[0]])
         self.predict()
         em = 10.**emfit[gdx[0]]
         minChisq = min(chisq)
-        reducedChisq = minChisq/float(self.Nobs - self.Nfree)
+        if self.Nobs > self.Nfree:
+            reducedChisq = minChisq/float(self.Nobs - self.Nfree)
+        else:
+            reducedChisq = minChisq/float(self.Nobs)
         #
         # key 'emfit' is the log value, 'em' is actual value
         self.SearchData['best'] = {'em':em, 'emfit':emfit[gdx[0]], 'chisq':chisq[gdx[0]], 'reducedChisq':reducedChisq, 'idx':idx[gdx[0]], 'density':self.EDensity[idx[gdx[0]]], 'temperature':self.Temperature[idx[gdx[0]]]}

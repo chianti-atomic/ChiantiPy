@@ -286,7 +286,7 @@ class maker(ionTrails,  specTrails):
     '''
     a class matching observed lines to lines in the CHIANTI database
     '''
-    def __init__(self, temperature, specData, elementList=[], ionList=[], allLines=False, abundanceName = None, minAbund=10., wghtFactor=None,  verbose=False):
+    def __init__(self, specData, temperature=None, eDensity=None, elementList=[], ionList=[], allLines=False, abundanceName = None, minAbund=10., wghtFactor=None,  verbose=False):
         '''
         input a list of wavelengths and a wavelength difference
         find a list of predicted spectral lines for each wavelength
@@ -317,7 +317,10 @@ class maker(ionTrails,  specTrails):
         #
         # --------------------------------------------------------------------------------
         #
-        self.Temperature = temperature
+        if temperature is not None:
+            self.Temperature = np.asarray(temperature, np.float64)
+        if eDensity is not None:
+            self.EDensity = np.asarray(eDensity, np.float64)
         self.Defaults = chdata.Defaults
         self.XUVTOP = os.environ['XUVTOP']
         print(' XUVTOP = %s'%(self.XUVTOP))
@@ -817,7 +820,7 @@ class maker(ionTrails,  specTrails):
         #
         # ---------------------------------------------------------
         #
-    def emPlot(self, vs='T', loc='upper right', fs=10,  adjust=None, position='both', label=True, legend = True, verbose=1):
+    def emPlot(self, vs='T', loc='upper right', fs=10,  adjust=None, position='both', label=True, legend = True, fontsize=16, tscale=1.,   verbose=1):
         '''
         to plot line intensities divided by gofnt
         adjust is to provide an adjustment to the position of the labels
@@ -833,7 +836,7 @@ class maker(ionTrails,  specTrails):
             hpos = ['r']*nInt
         elif position == 'left':
             hpos = ['l']*nInt
-        elif position =='none':
+        elif position is None:
             hpos = ['n']*nInt
         elif type(position) is list:
             if len(position) == nInt:
@@ -843,7 +846,7 @@ class maker(ionTrails,  specTrails):
                 print(' position is not the right length')
                 return
         else:
-            print(' position not understood')
+            print(' position not understood: should be left, right, both, None')
             return
 
         if adjust is None:
@@ -860,7 +863,7 @@ class maker(ionTrails,  specTrails):
 #                ntemp = match[0]['intensity'].shape[0]
             if ntemp > 1:
                 em = np.zeros((nInt, ntemp), 'float64')
-                xvar = temp
+                xvar = temp/tscale
             for idx in range(nInt):
                 nonzed = match[idx]['intensitySum'] > 0.
                 large = match[idx]['intensitySum'] >  match[idx]['intensitySum'].max()*0.01
@@ -880,8 +883,13 @@ class maker(ionTrails,  specTrails):
                         lbly1 = em[idx][0]
                     lbly1 = em[idx][realgood][0]
                     lbly2 = em[idx][realgood][-1]
-                    plt.text(lblx1, lbly1, wvlstr.strip())
-                    plt.text(lblx2, lbly2, wvlstr.strip())
+                    if hpos[idx] == 'l':
+                        plt.text(lblx1, lbly1, wvlstr.strip())
+                    elif hpos[idx] == 'r':
+                        plt.text(lblx2, lbly2, wvlstr.strip())
+                    elif hpos[idx] == 'b':
+                        plt.text(lblx2, lbly2, wvlstr.strip())
+                        plt.text(lblx1, lbly1, wvlstr.strip())
                 else:
                     print(' len of match[idx]wvl   %i'%(len(match[idx]['wvl'])))
                     if len(match[idx]['wvl']) != 0:
@@ -889,9 +897,9 @@ class maker(ionTrails,  specTrails):
                         print(' nonzed = %i'%(nonzed.sum()))
                         print('intensity = %10.2e'%(match[idx]['intensity']))
             if legend:
-                plt.legend(loc=loc, fontsize=fs)
-            plt.ylabel('Emission Measure (cm$^{-5}$)', fontsize=14)
-            plt.xlabel('Temperature (K)',  fontsize=14)
+                plt.legend(loc=loc, fontsize=fontsize)
+            plt.ylabel('Emission Measure (cm$^{-5}$)', fontsize=fontsize)
+            plt.xlabel('Temperature (K)',  fontsize=fontsize)
         elif vs != 'T':
             if dens[0] == dens[-1]:
                 ndens = 1
@@ -928,9 +936,134 @@ class maker(ionTrails,  specTrails):
                     print('intensity = %10.2e'%(match[idx]['obsIntensity']))
             if legend:
                 plt.legend(loc=loc, fontsize=fs)
-            plt.ylabel('Emission Measure (cm$^{-5}$)', fontsize=14)
-            plt.xlabel('Electron Density (cm$^{-3}$)',  fontsize=14)
+            plt.ylabel('Emission Measure (cm$^{-5}$)', fontsize=fontsize)
+            plt.xlabel('Electron Density (cm$^{-3}$)',  fontsize=fontsize)
             plt.tight_layout()
+        #
+        # ---------------------------------------------------------
+        #
+    def emPlotObj(self, vs='T', loc='upper right', fs=10,  adjust=None, position='both', label=True, legend = True, fontsize=16, figsize=[7., 5.], tscale=1.,  verbose=1):
+        '''
+        to plot line intensities divided by gofnt
+        adjust is to provide an adjustment to the position of the labels
+        position : one of 'both', 'right', 'left', or 'none'
+        this uses the modern object interface fig, ax = plt.subplots(figsize=figsize)
+        '''
+        match = self.match
+        temp = self.Temperature
+        dens = self.EDensity
+        nInt = len(match)
+        if position == 'both':
+            hpos = ['b']*nInt
+        elif position == 'right':
+            hpos = ['r']*nInt
+        elif position == 'left':
+            hpos = ['l']*nInt
+        elif position is None:
+            hpos = ['n']*nInt
+        elif type(position) is list:
+            if len(position) == nInt:
+                hpos = position
+                print(' position is the right length')
+            else:
+                print(' position is not the right length')
+                return
+        else:
+            print(' position not understood: should be left, right, both, None')
+            return
+
+        if adjust is None:
+            adjust = np.ones(nInt, np.float64)
+    #        print(' nInt = %5i'%(nInt))
+        if not 'intensity' in match[0]:
+            print(' must run mgofnt or gofnt first')
+            return
+        elif vs == 'T':
+            fig,  ax = plt.subplots(figsize=figsize)
+            if temp[0] == temp[-1]:
+                ntemp = 1
+            else:
+                ntemp = temp.size
+#                ntemp = match[0]['intensity'].shape[0]
+            if ntemp > 1:
+                em = np.zeros((nInt, ntemp), 'float64')
+                xvar = temp/tscale
+            for idx in range(nInt):
+                nonzed = match[idx]['intensitySum'] > 0.
+                large = match[idx]['intensitySum'] >  match[idx]['intensitySum'].max()*0.01
+                realgood = np.logical_and(nonzed, large)
+                if realgood.sum() > 0 and match[idx]['obsIntensity'] > 0.:
+                    wvlstr = ' %5.1f'%(match[idx]['obsWvl'])
+                    em[idx][realgood] = match[idx]['obsIntensity']/match[idx]['intensitySum'][realgood]
+                    if label:
+                        plt.loglog(xvar[realgood], em[idx][realgood], lw=2, label = wvlstr)
+                    else:
+                        plt.loglog(xvar[realgood], em[idx][realgood], lw=2)
+                    if ntemp > 1:
+                        lblx1 = temp[realgood][0]
+                        lblx2 = temp[realgood][-1]
+                    else:
+                        lblx1 = self.Temperature[realgood].min()
+                        lbly1 = em[idx][0]
+                    lbly1 = em[idx][realgood][0]
+                    lbly2 = em[idx][realgood][-1]
+                    if hpos[idx] == 'l':
+                        plt.text(lblx1, lbly1, wvlstr.strip())
+                    elif hpos[idx] == 'r':
+                        plt.text(lblx2, lbly2, wvlstr.strip())
+                    elif hpos[idx] == 'b':
+                        plt.text(lblx2, lbly2, wvlstr.strip())
+                        plt.text(lblx1, lbly1, wvlstr.strip())
+                else:
+                    print(' len of match[idx]wvl   %i'%(len(match[idx]['wvl'])))
+                    if len(match[idx]['wvl']) != 0:
+                        print('no values for idx = %5i wvl = %8.2f'%(idx, match[idx]['wvl']))
+                        print(' nonzed = %i'%(nonzed.sum()))
+                        print('intensity = %10.2e'%(match[idx]['intensity']))
+            if legend:
+                plt.legend(loc=loc, fontsize=fontsize)
+            plt.ylabel('Emission Measure (cm$^{-5}$)', fontsize=fontsize)
+            plt.xlabel('Temperature (K)',  fontsize=fontsize)
+        elif vs != 'T':
+            if dens[0] == dens[-1]:
+                ndens = 1
+            else:
+                ndens = len(dens)
+            if ndens > 1:
+                em = np.zeros((nInt, ndens), 'float64')
+                xvar = dens
+            for idx in range(nInt):
+                nonzed = match[idx]['intensitySum'] > 0.
+                large = match[idx]['intensitySum'] >  match[idx]['intensitySum'].max()*0.01
+                realgood = np.logical_and(nonzed, large)
+                if realgood.sum() > 0 and match[idx]['obsIntensity'] > 0.:
+                    wvlstr = ' %5.1f'%(match[idx]['obsWvl'])
+                    em[idx][realgood] = match[idx]['obsIntensity']/match[idx]['intensitySum'][realgood]
+                    if label:
+                        plt.loglog(xvar[realgood], em[idx][realgood], lw=2, label=wvlstr)
+                    else:
+                        plt.loglog(xvar[realgood], em[idx][realgood], lw=2)
+                    print(' %i  %5.1f'%(idx, match[idx]['obsWvl']))
+                    lblx = dens
+                    lbly = em[idx][realgood]*1.05
+                    if hpos[idx] =='b':
+                        plt.text(lblx[0], lbly[0]*adjust[idx], wvlstr.strip(), fontsize=14)
+                        plt.text(lblx[-1], lbly[-1]*adjust[idx], wvlstr.strip(), horizontalalignment='right', fontsize=14)
+                    elif hpos[idx] == 'r':
+                        plt.text(lblx[-1], lbly[-1]*adjust[idx], wvlstr.strip(), horizontalalignment='right', fontsize=14)
+                    elif hpos[idx] == 'l':
+                        plt.text(lblx[0], lbly[0]*adjust[idx], wvlstr.strip(), fontsize=14)
+
+                else:
+                    print('no values for idx = %5i wvl = %8.2f'%(idx, match[idx]['wvl']))
+                    print(' nonzed = %i'%(nonzed.sum()))
+                    print('intensity = %10.2e'%(match[idx]['obsIntensity']))
+            if legend:
+                plt.legend(loc=loc, fontsize=fs)
+            plt.ylabel('Emission Measure (cm$^{-5}$)', fontsize=fontsize)
+            plt.xlabel('Electron Density (cm$^{-3}$)',  fontsize=fontsize)
+            plt.tight_layout()
+        return fig,  ax
         #
         # --------------------------------------------------------------------------
         #
@@ -1077,6 +1210,9 @@ class maker(ionTrails,  specTrails):
                     pstring = pformat1%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'], self.Intensity[iwvl]/amatch['predicted'], chi, intOverPred[-1],  diffOverInt[-1] )
                 else:
                     pstring = pformat1a%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'])
+                    wDiff.append(0.)
+                    intOverPred.append(0.)
+                    diffOverInt.append(0.)
                 print(pstring)
                 outpt.write(pstring+'\n')
 
@@ -1121,6 +1257,8 @@ class maker(ionTrails,  specTrails):
             poor = np.abs(diffOverIntNp) > threeSig
 #            idx = np.arange(nMatch)
 #            pdx = idx[poor]
+            if poor.size != len(sorter):
+                print(' poor.size %i  len(sorter) %i'%(poor.size,  len(sorter)))
             npsorter = np.asarray(sorter)
             pdx = npsorter[poor]
             for i in pdx:
@@ -1171,6 +1309,8 @@ class maker(ionTrails,  specTrails):
             sorter = np.argsort(indexer)
 
         dash = ' -------------------------------------------------'
+        # for cases where no predicted intensity
+        pformatNone = ' %5i %7s %10.3f'
         pformat1 = ' %5i %7s %10.3f %10.2e %10.2e %10.3f %10.3f'
         pformat1s = ' %5s %7s %10s %10s %10s %10s %10s'
         pformat2 = '         %s'
@@ -1210,7 +1350,7 @@ class maker(ionTrails,  specTrails):
                         pstring = pformat1%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'], self.Intensity[iwvl]/amatch['predicted'], chi  )
                     else:
 
-                        pstring = pformat1%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'], -1.)
+                        pstring = pformat1%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'], -1.,  -1.)
                     print(pstring)
                     outpt.write(pstring +'\n')
                     #
@@ -1231,61 +1371,70 @@ class maker(ionTrails,  specTrails):
                                 outpt.write(dash +'\n')
                     print(dash)
                 outpt.write(dash +'\n')
-                print('matchPkl %s \n'%(self.MatchName))
-                print('wghtFactor %10.3f \n'%(wghtFactor))
-                pstring1 = pformat1s%('iwvl', 'IonS', 'wvl', 'Int',  'Pred', 'Int/Pred', 'chi')
-                outpt.write(pstring1 +'\n')
-                outpt.write(pstring3 + '\n')
-                for iwvl,  amatch in enumerate(self.match):
-                    chi = (np.abs(self.Intensity[iwvl]-amatch['predicted'])/(2.*wghtFactor*self.Intensity[iwvl]))
-                    pstring = pformat1%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'], self.Intensity[iwvl]/amatch['predicted'], chi  )
-                    outpt.write(pstring +'\n')
-                    #
-                    # now check line contributions
-                    #
-                    for jon,  anion in enumerate(amatch['ion']):
-                        ionPrint = 0
-                        for iline, awvl in enumerate(amatch['wvl'][jon]):
-                            contrib = (amatch['intensity'][amatch['predictedLine'][jon][iline]]*self.Em).sum()/amatch['predicted']
-                            if contrib > minContribution:
-                                if ionPrint == 0:
-                                    outpt.write(pformat2%(anion)+'\n')
-                                    ionPrint = 1
-                                outpt.write(pformat3%(awvl, amatch['lvl1'][jon][iline], amatch['lvl2'][jon][iline], amatch['pretty1'][jon][iline], amatch['pretty2'][jon][iline], amatch['lineIdx'][jon][iline], amatch['predictedLine'][jon][iline], contrib) +'\n')
-                                outpt.write(dash +'\n')
-                    outpt.write(dash +'\n')
+#                print('matchPkl %s \n'%(self.MatchName))
+#                print('wghtFactor %10.3f \n'%(wghtFactor))
+#                pstring1 = pformat1s%('iwvl', 'IonS', 'wvl', 'Int',  'Pred', 'Int/Pred', 'chi')
+#                outpt.write(pstring1 +'\n')
+#                outpt.write(pstring3 + '\n')
+#                for iwvl,  amatch in enumerate(self.match):
+#                    if amatch['predicted'] > 0.:
+#                        chi = (np.abs(self.Intensity[iwvl]-amatch['predicted'])/(2.*wghtFactor*self.Intensity[iwvl]))
+#                        pstring = pformat1%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'], self.Intensity[iwvl]/amatch['predicted'], chi  )
+#                        outpt.write(pstring +'\n')
+#                    else:
+#                        pstring = pformatNone%(iwvl,  self.IonS[iwvl],  self.Intensity[iwvl])
+#                        outpt.write(pstring+'\n')
+#                    #
+#                    # now check line contributions
+#                    #
+#                    for jon,  anion in enumerate(amatch['ion']):
+#                        ionPrint = 0
+#                        for iline, awvl in enumerate(amatch['wvl'][jon]):
+#                            contrib = (amatch['intensity'][amatch['predictedLine'][jon][iline]]*self.Em).sum()/amatch['predicted']
+#                            if contrib > minContribution:
+#                                if ionPrint == 0:
+#                                    outpt.write(pformat2%(anion)+'\n')
+#                                    ionPrint = 1
+#                                outpt.write(pformat3%(awvl, amatch['lvl1'][jon][iline], amatch['lvl2'][jon][iline], amatch['pretty1'][jon][iline], amatch['pretty2'][jon][iline], amatch['lineIdx'][jon][iline], amatch['predictedLine'][jon][iline], contrib) +'\n')
+#                                outpt.write(dash +'\n')
+#                    outpt.write(dash +'\n')
 
-            # now with latex notation
-
-                outpt.write(dash +'\n')
-                outpt.write(' ------------------- LATEX ---------------------\n')
-                outpt.write(dash +'\n')
-                pformat1S = ' %5s %10s & %10s & %10s & %10s & %10s  \n'
-                pstring1 = pformat1S%('iwvl', 'wvl', 'wvl', 'Int',  'Pred', 'Int/Pred' )
-                outpt.write(pstring1 +'\n')
-                outpt.write(dash +'\n')
-                pformat1L = ' %5i %10.3f & %10.3f & %10.2e & %10.2e & %10.3f  \n'
-
-                pformat3L = '        %10.3f & %10.3f & %20s & %20s & %10.2f & %10.2f \n'
-                for iwvl,  amatch in enumerate(self.match):
-                    chi = (np.abs(self.Intensity[iwvl]-amatch['predicted'])/(2.*wghtFactor*self.Intensity[iwvl]))
-                    pstring = pformat1L%(iwvl, amatch['obsWvl'], self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'], self.Intensity[iwvl]/amatch['predicted'])
-                    outpt.write(pstring +'\n')
-                    #
-                    # now check line contributions
-                    #
-                    for jon,  anion in enumerate(amatch['ion']):
-                        ionPrint = 0
-                        for iline, awvl in enumerate(amatch['wvl'][jon]):
-                            contrib = (amatch['intensity'][amatch['predictedLine'][jon][iline]]*self.Em).sum()/amatch['predicted']
-                            if contrib > minContribution:
-                                if ionPrint == 0:
-                                    outpt.write(pformat2%(anion)+'\n')
-                                    ionPrint = 1
-                                outpt.write(pformat3L%(self.Wvl[iwvl], awvl, amatch['pretty1'][jon][iline], amatch['pretty2'][jon][iline],  self.Intensity[iwvl], amatch['predicted']))
-                                outpt.write(dash +'\n')
-                    outpt.write(dash +'\n')
-        #
+#            # now with latex notation
+#
+#                outpt.write(dash +'\n')
+#                outpt.write(' ------------------- LATEX ---------------------\n')
+#                outpt.write(dash +'\n')
+#                pformat1S = ' %5s %10s & %10s & %10s & %10s & %10s  \n'
+#                pstring1 = pformat1S%('iwvl', 'wvl', 'wvl', 'Int',  'Pred', 'Int/Pred' )
+#                outpt.write(pstring1 +'\n')
+#                outpt.write(dash +'\n')
+#                pformat1L = ' %5i %10.3f & %10.3f & %10.2e & %10.2e & %10.3f  \n'
+#
+#                pformat3L = '        %10.3f & %10.3f & %20s & %20s & %10.2f & %10.2f \n'
+#                for iwvl,  amatch in enumerate(self.match):
+#                    if amatch['predicted'] > 0.:
+#                        chi = (np.abs(self.Intensity[iwvl]-amatch['predicted'])/(2.*wghtFactor*self.Intensity[iwvl]))
+#                        pstring = pformat1L%(iwvl, amatch['obsWvl'], self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'], self.Intensity[iwvl]/amatch['predicted'])
+#                        outpt.write(pstring +'\n')
+#                    else:
+#                        pstring = pformatNone%(iwvl,  self.IonS[iwvl],  self.Intensity[iwvl])
+#                        outpt.write(pstring+'\n')
+#
+#                    #
+#                    # now check line contributions
+#                    #
+#                    for jon,  anion in enumerate(amatch['ion']):
+#                        ionPrint = 0
+#                        for iline, awvl in enumerate(amatch['wvl'][jon]):
+#                            contrib = (amatch['intensity'][amatch['predictedLine'][jon][iline]]*self.Em).sum()/amatch['predicted']
+#                            if contrib > minContribution:
+#                                if ionPrint == 0:
+#                                    outpt.write(pformat2%(anion)+'\n')
+#                                    ionPrint = 1
+#                                outpt.write(pformat3L%(self.Wvl[iwvl], awvl, amatch['pretty1'][jon][iline], amatch['pretty2'][jon][iline],  self.Intensity[iwvl], amatch['predicted']))
+#                                outpt.write(dash +'\n')
+#                    outpt.write(dash +'\n')
+#        #
         # --------------------------------------------------------------------------
         #
     def predictPrint1d(self, minContribution=0.1, outfile=0, verbose=0):

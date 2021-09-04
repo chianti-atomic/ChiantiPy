@@ -1,4 +1,4 @@
-ChiantiPy - Version 0.11.0
+ChiantiPy - Version 0.11.1
 ==========================
 
 |Documentation Status| |Coverage Status| |ascl:1308.017|

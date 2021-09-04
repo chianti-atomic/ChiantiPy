@@ -3,7 +3,13 @@ Changelog
 ===========
 
 
+Changes from 0.11.0 to 0.11.1
+=============================
 
+
+A bug in the inherited method base._IntensityRatio() was not properly corrected in v0.10.0.  This is fixed here
+
+Development continues on the model package
 
 Changes from 0.10.0 to 0.11.0
 =============================

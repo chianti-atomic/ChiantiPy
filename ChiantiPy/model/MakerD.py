@@ -277,7 +277,8 @@ class maker(ionTrails,  specTrails):
     '''
     a class matching observed lines to lines in the CHIANTI database
     this class of MakerD.py is for use with discrete indices such
-    as with brute force chi-squared searches
+    as with brute force chi-squared searches, in particular, 1D searches
+    for a best electron density
 
     '''
     def __init__(self, specData, temperature=None, elementList=[], ionList=[], allLines=False, abundanceName = None, minAbund=10., wghtFactor=None,  verbose=False):
@@ -1187,60 +1188,30 @@ class maker(ionTrails,  specTrails):
                                 outpt.write(dash +'\n')
                     print(dash)
                 outpt.write(dash +'\n')
-                print('matchPkl %s \n'%(self.MatchName))
-                print('wghtFactor %10.3f \n'%(wghtFactor))
-                pstring1 = pformat1s%('iwvl', 'IonS', 'wvl', 'Int',  'Pred', 'Int/Pred', 'chi')
-                outpt.write(pstring1 +'\n')
-                outpt.write(pstring3 + '\n')
-                for iwvl,  amatch in enumerate(self.match):
-                    chi = (np.abs(self.Intensity[iwvl]-amatch['predicted'])/(2.*wghtFactor*self.Intensity[iwvl]))
-                    pstring = pformat1%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'], self.Intensity[iwvl]/amatch['predicted'], chi  )
-                    outpt.write(pstring +'\n')
-                    #
-                    # now check line contributions
-                    #
-                    for jon,  anion in enumerate(amatch['ion']):
-                        ionPrint = 0
-                        for iline, awvl in enumerate(amatch['wvl'][jon]):
-                            contrib = (amatch['intensity'][amatch['predictedLine'][jon][iline]]*self.Em).sum()/amatch['predicted']
-                            if contrib > minContribution:
-                                if ionPrint == 0:
-                                    outpt.write(pformat2%(anion)+'\n')
-                                    ionPrint = 1
-                                outpt.write(pformat3%(awvl, amatch['lvl1'][jon][iline], amatch['lvl2'][jon][iline], amatch['pretty1'][jon][iline], amatch['pretty2'][jon][iline], amatch['lineIdx'][jon][iline], amatch['predictedLine'][jon][iline], contrib) +'\n')
-                                outpt.write(dash +'\n')
-                    outpt.write(dash +'\n')
+#                print('matchPkl %s \n'%(self.MatchName))
+#                print('wghtFactor %10.3f \n'%(wghtFactor))
+#                pstring1 = pformat1s%('iwvl', 'IonS', 'wvl', 'Int',  'Pred', 'Int/Pred', 'chi')
+#                outpt.write(pstring1 +'\n')
+#                outpt.write(pstring3 + '\n')
+#                for iwvl,  amatch in enumerate(self.match):
+#                    chi = (np.abs(self.Intensity[iwvl]-amatch['predicted'])/(2.*wghtFactor*self.Intensity[iwvl]))
+#                    pstring = pformat1%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'], self.Intensity[iwvl]/amatch['predicted'], chi  )
+#                    outpt.write(pstring +'\n')
+#                    #
+#                    # now check line contributions
+#                    #
+#                    for jon,  anion in enumerate(amatch['ion']):
+#                        ionPrint = 0
+#                        for iline, awvl in enumerate(amatch['wvl'][jon]):
+#                            contrib = (amatch['intensity'][amatch['predictedLine'][jon][iline]]*self.Em).sum()/amatch['predicted']
+#                            if contrib > minContribution:
+#                                if ionPrint == 0:
+#                                    outpt.write(pformat2%(anion)+'\n')
+#                                    ionPrint = 1
+#                                outpt.write(pformat3%(awvl, amatch['lvl1'][jon][iline], amatch['lvl2'][jon][iline], amatch['pretty1'][jon][iline], amatch['pretty2'][jon][iline], amatch['lineIdx'][jon][iline], amatch['predictedLine'][jon][iline], contrib) +'\n')
+#                                outpt.write(dash +'\n')
+#                    outpt.write(dash +'\n')
 
-            # now with latex notation
-
-                outpt.write(dash +'\n')
-                outpt.write(' ------------------- LATEX ---------------------\n')
-                outpt.write(dash +'\n')
-                pformat1S = ' %5s %10s & %10s & %10s & %10s & %10s  \n'
-                pstring1 = pformat1S%('iwvl', 'wvl', 'wvl', 'Int',  'Pred', 'Int/Pred' )
-                outpt.write(pstring1 +'\n')
-                outpt.write(dash +'\n')
-                pformat1L = ' %5i %10.3f & %10.3f & %10.2e & %10.2e & %10.3f  \n'
-
-                pformat3L = '        %10.3f & %10.3f & %20s & %20s & %10.2f & %10.2f \n'
-                for iwvl,  amatch in enumerate(self.match):
-                    chi = (np.abs(self.Intensity[iwvl]-amatch['predicted'])/(2.*wghtFactor*self.Intensity[iwvl]))
-                    pstring = pformat1L%(iwvl, amatch['obsWvl'], self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'], self.Intensity[iwvl]/amatch['predicted'])
-                    outpt.write(pstring +'\n')
-                    #
-                    # now check line contributions
-                    #
-                    for jon,  anion in enumerate(amatch['ion']):
-                        ionPrint = 0
-                        for iline, awvl in enumerate(amatch['wvl'][jon]):
-                            contrib = (amatch['intensity'][amatch['predictedLine'][jon][iline]]*self.Em).sum()/amatch['predicted']
-                            if contrib > minContribution:
-                                if ionPrint == 0:
-                                    outpt.write(pformat2%(anion)+'\n')
-                                    ionPrint = 1
-                                outpt.write(pformat3L%(self.Wvl[iwvl], awvl, amatch['pretty1'][jon][iline], amatch['pretty2'][jon][iline],  self.Intensity[iwvl], amatch['predicted']))
-                                outpt.write(dash +'\n')
-                    outpt.write(dash +'\n')
         #
         # --------------------------------------------------------------------------
         #
@@ -1248,6 +1219,7 @@ class maker(ionTrails,  specTrails):
         '''
         to predict the intensities of the observed lines from an emission measure
         the emission measure is already specified as self.Em which is an np array
+        not sure this is still needed
         '''
         dash = ' -------------------------------------------------'
         pformat1 = ' %5i %7s %10.3f %10.2e %10.2e %10.3f %10.3f'
@@ -1291,8 +1263,8 @@ class maker(ionTrails,  specTrails):
                         print(pformat3%(awvl, amatch['lvl1'][jon][iline], amatch['lvl2'][jon][iline], amatch['pretty1'][jon][iline], amatch['pretty2'][jon][iline].ljust(20), amatch['lineIdx'][jon][iline], amatch['predictedLine'][jon][iline], contrib))
                         print(dash)
             print(dash)
-        if outfile:
-            with open(outfile, 'w') as outpt:
+        if filename:
+            with open(filename, 'w') as outpt:
                 try:
                     idx = self.SearchData['best']['idx']
                     dens = self.SearchData['best']['density']

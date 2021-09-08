@@ -19,7 +19,7 @@ class chpicker(QtWidgets.QWidget):
         self.title = 'PyQt5 file dialogs - pythonspot.com'
         self.left = 10
         self.top = 10
-        self.width = 640
+        self.width = 740  # was 640
         self.height = 480
         self.dir = dir
         self.label = label

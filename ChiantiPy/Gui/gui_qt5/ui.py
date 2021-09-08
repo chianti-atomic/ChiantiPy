@@ -20,7 +20,7 @@ class Ui_selectorDialogForm(object):
         self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel|QtWidgets.QDialogButtonBox.Ok)
         self.buttonBox.setObjectName("buttonBox")
         self.listWidget = QtWidgets.QListWidget(selectorDialogForm)
-        self.listWidget.setGeometry(QtCore.QRect(70,20,360,200))
+        self.listWidget.setGeometry(QtCore.QRect(70,20,400,200))
         font = QtGui.QFont()
         font.setPointSize(14)
         self.listWidget.setFont(font)

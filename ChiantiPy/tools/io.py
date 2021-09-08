@@ -14,33 +14,36 @@ import ChiantiPy.Gui as chgui
 from  ChiantiPy.fortranformat import FortranRecordReader
 
 today = date.today()
+
 def abundanceRead(abundancename=''):
     """
     Read abundance file `abundancename` and return the abundance values relative to hydrogen
     """
     abundance = np.zeros((50),np.float64)
     xuvtop = os.environ["XUVTOP"]
+    abundDir = os.path.join(xuvtop,'abundance')
+    abundList = os.listdir(abundDir)
     if abundancename:
         # a specific abundance file name has been specified
-        abundancefile = os.path.join(xuvtop,'abundance',abundancename+'.abund')
+        cnt = abundancename.count('.abund')
+        if cnt == 0:
+            abundancename += '.abund'
+    if abundancename in abundList:
+        abundanceFileName = os.path.join(abundDir,abundancename)
+        print('abundanceFileName: %s'%(abundanceFileName))
+
     else:
         # the user will select an abundance file
-        abundir = os.path.join(xuvtop,'abundance')
-        abundlabel = 'ChiantiPy - Select an abundance file'
-        #fname = chianti.gui.chpicker(abundir, filter='*.abund', label=abundlabel)
-        fname = chgui.gui.chpicker(abundir, filter='*.abund', label=abundlabel)
-        if fname is None:
+        abundLabel = 'ChiantiPy - Select an abundance file'
+        mypick = chgui.gui.selectorDialog(abundList, label=abundLabel)
+        abundName = mypick.selectedText[0]
+        if abundName is None:
             print((' no abundance file selected'))
             return 0
         else:
-            abundancefile = os.path.join(abundir, fname)
-            abundancefilename = os.path.basename(fname)
-            abundancename,ext = os.path.splitext(abundancefilename)
-#    else:
-#        # the default abundance file will be used
-#        abundancename=self.Defaults['abundfile']
-#        fname=os.path.join(xuvtop,'abundance',abundancename+'.abund')
-    input = open(abundancefile,'r')
+            abundanceFileName = os.path.join(abundDir,abundName)
+
+    input = open(abundanceFileName,'r')
     s1 = input.readlines()
     input.close()
     nlines = 0
@@ -58,7 +61,7 @@ def abundanceRead(abundancename=''):
     abs = 10.**(abundance[gz]-abundance[0])
     abundance.put(gz,abs)
     abundanceRef = s1[nlines+1:]
-    return {'abundancename':abundancename,'abundance':abundance,'abundanceRef':abundanceRef}
+    return {'abundancename':abundanceFileName,'abundance':abundance,'abundanceRef':abundanceRef}
 
 
 def zion2name(z,ion, dielectronic=False):
@@ -762,6 +765,57 @@ def elvlcWrite(info, outfile=None, round=0, addLvl=0, includeRyd=False, includeE
         out.write(aref + '\n')
     out.close()
     return
+
+def emRead(emName=''):
+    """
+    Read emission measure file `emName` and return the temperatures, densities and emission measures
+    """
+    xuvtop = os.environ["XUVTOP"]
+    emdir = os.path.join(xuvtop,'em')
+    emList = os.listdir(emdir)
+    temp = []
+    dens = []
+    em = []
+    if emName:
+        # a specific abundance file name has been specified
+        cnt = emName.count('.em')
+        if cnt == 0:
+            emName += '.em'
+    if emName in emList:
+        emFileName = os.path.join(xuvtop,'em',emName)
+    else:
+        # the user will select an emission measure file
+        emlabel = 'ChiantiPy - Select an emission measure file'
+        #fname = chianti.gui.chpicker(abundir, filter='*.abund', label=abundlabel)
+#        mypick = chgui.gui.chpicker(emdir, label=emlabel)
+        mypick = chgui.gui.selectorDialog(emList, label=emlabel)
+        emName = mypick.selectedText[0]
+        if emName is None:
+            print((' no EM file selected'))
+            return 0
+        else:
+            emName = mypick.selectedText[0]
+            emFileName = os.path.join(xuvtop,'em',emName)
+#            emFileName = mypick.baseName
+#            emRootName = mypick.rootName
+    input = open(emFileName,'r')
+    s1 = input.readlines()
+    input.close()
+    nlines = 0
+    idx = -1
+    while idx <= 0:
+        minChar = min([5, len(s1[nlines])])
+        aline = s1[nlines][0:minChar]
+        idx = aline.find('-1')
+        nlines += 1
+    nlines -= 1
+    for line in range(nlines):
+        a, b, c = s1[line].split()
+        temp.append(float(a))
+        dens.append(float(b))
+        em.append(float(c))
+    ref = s1[nlines+1:]
+    return{'temperature':np.asarray(temp), 'density':np.asarray(dens), 'em':np.asarray(em), 'ref':ref, 'filename':emFileName}
 
 
 def fblvlRead(ions, filename=None, verbose=False):

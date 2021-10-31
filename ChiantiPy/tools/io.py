@@ -15,7 +15,7 @@ from  ChiantiPy.fortranformat import FortranRecordReader
 
 today = date.today()
 
-def abundanceRead(abundancename=''):
+def abundanceRead(abundancename='', verbose=False):
     """
     Read abundance file `abundancename` and return the abundance values relative to hydrogen
     """
@@ -30,7 +30,8 @@ def abundanceRead(abundancename=''):
             abundancename += '.abund'
     if abundancename in abundList:
         abundanceFileName = os.path.join(abundDir,abundancename)
-        print('abundanceFileName: %s'%(abundanceFileName))
+        if verbose:
+            print('abundanceFileName: %s'%(abundanceFileName))
 
     else:
         # the user will select an abundance file
@@ -786,8 +787,6 @@ def emRead(emName=''):
     else:
         # the user will select an emission measure file
         emlabel = 'ChiantiPy - Select an emission measure file'
-        #fname = chianti.gui.chpicker(abundir, filter='*.abund', label=abundlabel)
-#        mypick = chgui.gui.chpicker(emdir, label=emlabel)
         mypick = chgui.gui.selectorDialog(emList, label=emlabel)
         emName = mypick.selectedText[0]
         if emName is None:
@@ -796,8 +795,6 @@ def emRead(emName=''):
         else:
             emName = mypick.selectedText[0]
             emFileName = os.path.join(xuvtop,'em',emName)
-#            emFileName = mypick.baseName
-#            emRootName = mypick.rootName
     input = open(emFileName,'r')
     s1 = input.readlines()
     input.close()

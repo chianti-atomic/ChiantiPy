@@ -63,6 +63,8 @@ def emPlot(matchDict, vs='T', loc='upper right', fs=10,  adjust=None, position='
         hpos = ['r']*nInt
     elif position == 'left':
         hpos = ['l']*nInt
+    elif position == 'none':
+        hpos = ['n']*nInt
     elif type(position) is list:
         if len(position) == nInt:
             hpos = position
@@ -104,8 +106,15 @@ def emPlot(matchDict, vs='T', loc='upper right', fs=10,  adjust=None, position='
                     lblx2 = match[idx]['dmax']
                 lbly1 = em[idx][realgood][0]
                 lbly2 = em[idx][realgood][-1]
-                plt.text(lblx1, lbly1, wvlstr.strip())
-                plt.text(lblx2, lbly2, wvlstr.strip())
+                if hpos[idx] == 'l':
+                    plt.text(lblx1, lbly1, wvlstr.strip())
+                elif hpos[idx] == 'r':
+                    plt.text(lblx2, lbly2, wvlstr.strip())
+                elif hpos[idx] == 'b':
+                    plt.text(lblx1, lbly1, wvlstr.strip())
+                    plt.text(lblx2, lbly2, wvlstr.strip())
+                elif hpos[idx] == 'n':
+                    pass
             else:
                 print('no values for idx = %5i wvl = %8.2f'%(idx, match[idx]['wvl']))
                 print(' nonzed = %i'%(nonzed.sum()))
@@ -176,7 +185,7 @@ def diffPrintMcF(specData,  matchDict, filename='diffPrintMcF.txt',  sort=None):
         sorter = range(nMatch)
     elif sort == 'ion':
         indexer = []
-        for amatch in self.match:
+        for amatch in match:
             ionStr = amatch['exptIon']
             ionDict = util.convertName(ionStr)
             Z = ionDict['Z']
@@ -276,12 +285,8 @@ def makeMatchPkl(specData, temp, dens, wghtFactor = 0.25,  abundanceName = None,
 class maker(ionTrails,  specTrails):
     '''
     a class matching observed lines to lines in the CHIANTI database
-    this class of MakerD.py is for use with discrete indices such
-    as with brute force chi-squared searches, in particular, 1D searches
-    for a best electron density
-
     '''
-    def __init__(self, specData, temperature=None, elementList=[], ionList=[], allLines=False, abundanceName = None, minAbund=10., wghtFactor=None,  verbose=False):
+    def __init__(self, specData, temperature=None, eDensity=None, elementList=[], ionList=[], allLines=False, abundanceName = None, minAbund=10., wghtFactor=None,  verbose=False):
         '''
         input a list of wavelengths and a wavelength difference
         find a list of predicted spectral lines for each wavelength
@@ -313,7 +318,9 @@ class maker(ionTrails,  specTrails):
         # --------------------------------------------------------------------------------
         #
         if temperature is not None:
-            self.Temperature = temperature
+            self.Temperature = np.asarray(temperature, np.float64)
+        if eDensity is not None:
+            self.EDensity = np.asarray(eDensity, np.float64)
         self.Defaults = chdata.Defaults
         self.XUVTOP = os.environ['XUVTOP']
         print(' XUVTOP = %s'%(self.XUVTOP))
@@ -343,6 +350,7 @@ class maker(ionTrails,  specTrails):
         self.Intensity = specData['intensity']
         self.IonS = specData['ions']
         self.IonSet = set(specData['ions'])
+        self.Nions = len(self.IonSet)
         self.Dwvl = specData['dwvl']
         wvl = specData['wvl0']
         self.WvlRange = [min(wvl)-max(self.Dwvl), max(wvl)+max(self.Dwvl)]
@@ -734,8 +742,9 @@ class maker(ionTrails,  specTrails):
         to set the indices of the N temperature/density EM distribution
         '''
         if hasattr(self, 'Temperature'):
-            self.EmIndices = np.atleast_1d([indices])
-            self.Nfree = 2*len(indices)
+            self.EmIndices = np.atleast_1d(indices)
+            self.Nfree = 2*len(indices) + 1  # for sigma
+            self.NT = len(indices)
             if verbose:
                 for adx in self.EmIndices:
                     print('index %5i temperature %12.2e'%(adx, self.Temperature[adx]))
@@ -751,9 +760,12 @@ class maker(ionTrails,  specTrails):
         emValue = np.atleast_1d(value)
         if hasattr(self, 'EmIndices') and len(emValue) == len(self.EmIndices):
             em = np.zeros_like(self.Temperature)
+            emLog = np.zeros_like(self.Temperature)
             for i, adx in enumerate(self.EmIndices):
                 em[adx] = 10.**emValue[i]
+                emLog[adx] = emValue[i]
             self.Em = em
+            self.EmLog = emLog
         else:
             print('in emNtexp, either EmIndices not set or no. of values != no. of indices ')
             if hasattr(self, 'EmIndices'):
@@ -808,7 +820,7 @@ class maker(ionTrails,  specTrails):
         #
         # ---------------------------------------------------------
         #
-    def emPlot(self, vs='T', loc='upper right', fs=10,  adjust=None, position='both', label=True, legend = True, verbose=1):
+    def emPlot(self, vs='T', loc='upper right', fs=10,  adjust=None, position='both', label=True, legend = True, fontsize=16, tscale=1.,   verbose=1):
         '''
         to plot line intensities divided by gofnt
         adjust is to provide an adjustment to the position of the labels
@@ -824,6 +836,8 @@ class maker(ionTrails,  specTrails):
             hpos = ['r']*nInt
         elif position == 'left':
             hpos = ['l']*nInt
+        elif position is None:
+            hpos = ['n']*nInt
         elif type(position) is list:
             if len(position) == nInt:
                 hpos = position
@@ -832,7 +846,7 @@ class maker(ionTrails,  specTrails):
                 print(' position is not the right length')
                 return
         else:
-            print(' position not understood')
+            print(' position not understood: should be left, right, both, None')
             return
 
         if adjust is None:
@@ -849,7 +863,7 @@ class maker(ionTrails,  specTrails):
 #                ntemp = match[0]['intensity'].shape[0]
             if ntemp > 1:
                 em = np.zeros((nInt, ntemp), 'float64')
-                xvar = temp
+                xvar = temp/tscale
             for idx in range(nInt):
                 nonzed = match[idx]['intensitySum'] > 0.
                 large = match[idx]['intensitySum'] >  match[idx]['intensitySum'].max()*0.01
@@ -869,8 +883,13 @@ class maker(ionTrails,  specTrails):
                         lbly1 = em[idx][0]
                     lbly1 = em[idx][realgood][0]
                     lbly2 = em[idx][realgood][-1]
-                    plt.text(lblx1, lbly1, wvlstr.strip())
-                    plt.text(lblx2, lbly2, wvlstr.strip())
+                    if hpos[idx] == 'l':
+                        plt.text(lblx1, lbly1, wvlstr.strip())
+                    elif hpos[idx] == 'r':
+                        plt.text(lblx2, lbly2, wvlstr.strip())
+                    elif hpos[idx] == 'b':
+                        plt.text(lblx2, lbly2, wvlstr.strip())
+                        plt.text(lblx1, lbly1, wvlstr.strip())
                 else:
                     print(' len of match[idx]wvl   %i'%(len(match[idx]['wvl'])))
                     if len(match[idx]['wvl']) != 0:
@@ -878,9 +897,9 @@ class maker(ionTrails,  specTrails):
                         print(' nonzed = %i'%(nonzed.sum()))
                         print('intensity = %10.2e'%(match[idx]['intensity']))
             if legend:
-                plt.legend(loc=loc, fontsize=fs)
-            plt.ylabel('Emission Measure (cm$^{-5}$)', fontsize=14)
-            plt.xlabel('Temperature (K)',  fontsize=14)
+                plt.legend(loc=loc, fontsize=fontsize)
+            plt.ylabel('Emission Measure (cm$^{-5}$)', fontsize=fontsize)
+            plt.xlabel('Temperature (K)',  fontsize=fontsize)
         elif vs != 'T':
             if dens[0] == dens[-1]:
                 ndens = 1
@@ -917,9 +936,134 @@ class maker(ionTrails,  specTrails):
                     print('intensity = %10.2e'%(match[idx]['obsIntensity']))
             if legend:
                 plt.legend(loc=loc, fontsize=fs)
-            plt.ylabel('Emission Measure (cm$^{-5}$)', fontsize=14)
-            plt.xlabel('Electron Density (cm$^{-3}$)',  fontsize=14)
+            plt.ylabel('Emission Measure (cm$^{-5}$)', fontsize=fontsize)
+            plt.xlabel('Electron Density (cm$^{-3}$)',  fontsize=fontsize)
             plt.tight_layout()
+        #
+        # ---------------------------------------------------------
+        #
+    def emPlotObj(self, vs='T', loc='upper right', fs=10,  adjust=None, position='both', label=True, legend = True, fontsize=16, figsize=[7., 5.], tscale=1.,  verbose=1):
+        '''
+        to plot line intensities divided by gofnt
+        adjust is to provide an adjustment to the position of the labels
+        position : one of 'both', 'right', 'left', or 'none'
+        this uses the modern object interface fig, ax = plt.subplots(figsize=figsize)
+        '''
+        match = self.match
+        temp = self.Temperature
+        dens = self.EDensity
+        nInt = len(match)
+        if position == 'both':
+            hpos = ['b']*nInt
+        elif position == 'right':
+            hpos = ['r']*nInt
+        elif position == 'left':
+            hpos = ['l']*nInt
+        elif position is None:
+            hpos = ['n']*nInt
+        elif type(position) is list:
+            if len(position) == nInt:
+                hpos = position
+                print(' position is the right length')
+            else:
+                print(' position is not the right length')
+                return
+        else:
+            print(' position not understood: should be left, right, both, None')
+            return
+
+        if adjust is None:
+            adjust = np.ones(nInt, np.float64)
+    #        print(' nInt = %5i'%(nInt))
+        if not 'intensity' in match[0]:
+            print(' must run mgofnt or gofnt first')
+            return
+        elif vs == 'T':
+            fig,  ax = plt.subplots(figsize=figsize)
+            if temp[0] == temp[-1]:
+                ntemp = 1
+            else:
+                ntemp = temp.size
+#                ntemp = match[0]['intensity'].shape[0]
+            if ntemp > 1:
+                em = np.zeros((nInt, ntemp), 'float64')
+                xvar = temp/tscale
+            for idx in range(nInt):
+                nonzed = match[idx]['intensitySum'] > 0.
+                large = match[idx]['intensitySum'] >  match[idx]['intensitySum'].max()*0.01
+                realgood = np.logical_and(nonzed, large)
+                if realgood.sum() > 0 and match[idx]['obsIntensity'] > 0.:
+                    wvlstr = ' %5.1f'%(match[idx]['obsWvl'])
+                    em[idx][realgood] = match[idx]['obsIntensity']/match[idx]['intensitySum'][realgood]
+                    if label:
+                        plt.loglog(xvar[realgood], em[idx][realgood], lw=2, label = wvlstr)
+                    else:
+                        plt.loglog(xvar[realgood], em[idx][realgood], lw=2)
+                    if ntemp > 1:
+                        lblx1 = temp[realgood][0]
+                        lblx2 = temp[realgood][-1]
+                    else:
+                        lblx1 = self.Temperature[realgood].min()
+                        lbly1 = em[idx][0]
+                    lbly1 = em[idx][realgood][0]
+                    lbly2 = em[idx][realgood][-1]
+                    if hpos[idx] == 'l':
+                        plt.text(lblx1, lbly1, wvlstr.strip())
+                    elif hpos[idx] == 'r':
+                        plt.text(lblx2, lbly2, wvlstr.strip())
+                    elif hpos[idx] == 'b':
+                        plt.text(lblx2, lbly2, wvlstr.strip())
+                        plt.text(lblx1, lbly1, wvlstr.strip())
+                else:
+                    print(' len of match[idx]wvl   %i'%(len(match[idx]['wvl'])))
+                    if len(match[idx]['wvl']) != 0:
+                        print('no values for idx = %5i wvl = %8.2f'%(idx, match[idx]['wvl']))
+                        print(' nonzed = %i'%(nonzed.sum()))
+                        print('intensity = %10.2e'%(match[idx]['intensity']))
+            if legend:
+                plt.legend(loc=loc, fontsize=fontsize)
+            plt.ylabel('Emission Measure (cm$^{-5}$)', fontsize=fontsize)
+            plt.xlabel('Temperature (K)',  fontsize=fontsize)
+        elif vs != 'T':
+            if dens[0] == dens[-1]:
+                ndens = 1
+            else:
+                ndens = len(dens)
+            if ndens > 1:
+                em = np.zeros((nInt, ndens), 'float64')
+                xvar = dens
+            for idx in range(nInt):
+                nonzed = match[idx]['intensitySum'] > 0.
+                large = match[idx]['intensitySum'] >  match[idx]['intensitySum'].max()*0.01
+                realgood = np.logical_and(nonzed, large)
+                if realgood.sum() > 0 and match[idx]['obsIntensity'] > 0.:
+                    wvlstr = ' %5.1f'%(match[idx]['obsWvl'])
+                    em[idx][realgood] = match[idx]['obsIntensity']/match[idx]['intensitySum'][realgood]
+                    if label:
+                        plt.loglog(xvar[realgood], em[idx][realgood], lw=2, label=wvlstr)
+                    else:
+                        plt.loglog(xvar[realgood], em[idx][realgood], lw=2)
+                    print(' %i  %5.1f'%(idx, match[idx]['obsWvl']))
+                    lblx = dens
+                    lbly = em[idx][realgood]*1.05
+                    if hpos[idx] =='b':
+                        plt.text(lblx[0], lbly[0]*adjust[idx], wvlstr.strip(), fontsize=14)
+                        plt.text(lblx[-1], lbly[-1]*adjust[idx], wvlstr.strip(), horizontalalignment='right', fontsize=14)
+                    elif hpos[idx] == 'r':
+                        plt.text(lblx[-1], lbly[-1]*adjust[idx], wvlstr.strip(), horizontalalignment='right', fontsize=14)
+                    elif hpos[idx] == 'l':
+                        plt.text(lblx[0], lbly[0]*adjust[idx], wvlstr.strip(), fontsize=14)
+
+                else:
+                    print('no values for idx = %5i wvl = %8.2f'%(idx, match[idx]['wvl']))
+                    print(' nonzed = %i'%(nonzed.sum()))
+                    print('intensity = %10.2e'%(match[idx]['obsIntensity']))
+            if legend:
+                plt.legend(loc=loc, fontsize=fs)
+            plt.ylabel('Emission Measure (cm$^{-5}$)', fontsize=fontsize)
+            plt.xlabel('Electron Density (cm$^{-3}$)',  fontsize=fontsize)
+            plt.tight_layout()
+        return fig,  ax
         #
         # --------------------------------------------------------------------------
         #
@@ -1010,6 +1154,7 @@ class maker(ionTrails,  specTrails):
         'ionS' the CHIANTI type name for an ion
         '''
         wghtFactor = self.WghtFactor
+        cwd = os.getcwd()
         today = date.today()
         thisday =today.strftime('%Y_%B_%d')
         nMatch = len(self.match)
@@ -1025,6 +1170,12 @@ class maker(ionTrails,  specTrails):
                 number = Z*1000 + stage
                 indexer.append(number)
             sorter = np.argsort(indexer)
+        elif sort == 'wvl':
+            indexer = []
+            for amatch in self.match:
+                wvlObs = amatch['obsWvl']
+                indexer.append(wvlObs)
+            sorter = np.argsort(indexer)
 
         wDiff = []
         intOverPred = []
@@ -1035,24 +1186,26 @@ class maker(ionTrails,  specTrails):
         sformat  = ' %5s %7s %10s %10s %10s %10s %10s %10s %10s'
         fsformat  = ' %5s %7s %10s %10s %10s %10s %10s %10s %10s\n'
         with open(filename, 'w') as outpt:
+            print(' cwd:  %s'%(cwd))
+            outpt.write(' cwd:  %s \n'%(cwd))
             print(' today is %s'%(thisday))
             outpt.write(' today is %s \n'%(thisday))
             print(' WghtFactor = %10.3f'%(wghtFactor))
             outpt.write(' WghtFactor = %10.3f \n'%(wghtFactor))
             emIndices = self.EmIndices
-            print(' %5s %12s %12s %12s'%('index',  'density',  'temperature',  'Em'''))
-            outpt.write(' %5s %12s %12s %12s \n'%('index',  'density',  'temperature',  'Em'''))
+            print(' %5s %12s %12s %12s'%('index',  'density',  'temperature',  'Em'))
+            outpt.write(' %5s %12s %12s %12s \n'%('index',  'density',  'temperature',  'Em'))
             for emidx in emIndices:
-                print(' %5i %12.2e %12.2e %12.2e'%(emidx, self.EDensity[emidx],  self.Temperature[emidx], self.Em[emidx]))
-                outpt.write(' %5i %12.2e %12.2e %12.2e \n'%(emidx, self.EDensity[emidx],  self.Temperature[emidx], self.Em[emidx]))
+                print(' %5i %12.2e %12.2e %12.2e %8.3f'%(emidx, self.EDensity[emidx],  self.Temperature[emidx], self.Em[emidx],  self.EmLog[emidx]))
+                outpt.write(' %5i %12.2e %12.2e %12.2e %8.3f \n'%(emidx, self.EDensity[emidx],  self.Temperature[emidx], self.Em[emidx],  self.EmLog[emidx]))
             print(dash)
             outpt.write(dash+'\n')
-            print(' chi = abs(int/(wght*pred))  strDiff = (int - pred)/pred')
-            outpt.write(' chi = abs(int-pred)/(wght*pred))  strDiff = (int - pred)/pred \n')
+            print(' chi = abs(int - pred)/(wght*int))  strDiff = (int - pred)/pred')
+            outpt.write(' chi = abs(int-pred)/(wght*int))  strDiff = (int - pred)/int \n')
             print(sformat%('', '', 'A', '', '', '', '', 'abs', 'abs' ))
-            print(sformat%('iwvl', 'ionS', 'wvl', 'intensity', 'predicted', 'int/pred', 'chi', 'relDev', 'stdDev'))
-            outpt.write(fsformat%('', '', 'A', '', '', '', '', 'abs', 'abs' ))
-            outpt.write(fsformat%('iwvl', 'ionS', 'wvl', 'intensity', 'predicted', 'int/pred', 'chi', 'relDev',  'stdDev'))
+            print(sformat%('iwvl', 'ionS', 'wvl', 'intensity', 'predicted', 'int/pred', 'chi', 'relDev', 'dif/int'))
+            outpt.write(fsformat%('', '', 'A', '', '', '', '', ' ', ' ' ))
+            outpt.write(fsformat%('iwvl', 'ionS', 'wvl', 'intensity', 'predicted', 'int/pred', 'chi', 'relDev',  'dif/int'))
             for iwvl in sorter:
                 amatch = self.match[iwvl]
                 if amatch['predicted'] > 0. :
@@ -1063,33 +1216,64 @@ class maker(ionTrails,  specTrails):
                     pstring = pformat1%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'], self.Intensity[iwvl]/amatch['predicted'], chi, intOverPred[-1],  diffOverInt[-1] )
                 else:
                     pstring = pformat1a%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'])
+                    wDiff.append(0.)
+                    intOverPred.append(0.)
+                    diffOverInt.append(0.)
                 print(pstring)
                 outpt.write(pstring+'\n')
+
+            print(' WghtFactor = %10.3f'%(wghtFactor))
+            outpt.write(' WghtFactor = %10.3f \n'%(wghtFactor))
+
             intOverPredNp = np.asarray(intOverPred, np.float64)
             diffOverIntNp = np.asarray(diffOverInt, np.float64)
+            wghtDiffOverIntNp = diffOverIntNp/wghtFactor
+            chisq2 = (wghtDiffOverIntNp**2).sum()
+
             print(' mean of relative Deviation = %10.3f 3*relDev = %10.3f stdDev = %10.3f\n'%(intOverPredNp.mean(), 3.*intOverPredNp.mean(), intOverPredNp.std()))
             outpt.write(' mean of rel Dev = %10.3f 3*rel Dev  = %10.3f stdDiff:  %10.3f \n'%(intOverPredNp.mean(), 3.*intOverPredNp.mean(), intOverPredNp.std()))
             print(' mean of intOverPred = abs(int/pred -1.) %10.3f'%(intOverPredNp.mean()))
             outpt.write(' mean of intOverPred = abs(int/pred -1.) %10.3f \n'%(intOverPredNp.mean()))
+
+            onestd = diffOverIntNp.std()
             threeSig = 3.*diffOverIntNp.std()
-            print(' 3*std = %10.3f'%(threeSig))
-            outpt.write(' 3*std = %10.3f \n'%(threeSig))
+            print(' std = %10.3f 3*std = %10.3f'%(onestd,  threeSig))
+            outpt.write(' std = %10.3f   3*std = %10.3f \n'%(onestd,  threeSig))
+
+            print(' sum of diffOverInt^2 =  %10.3f weighted %10.3f '%((diffOverIntNp**2).sum(),  (diffOverIntNp**2).sum()/wghtFactor**2))
+            outpt.write(' sum of diffOverInt^2 =  %10.3f  weighted %10.3f\n'%((diffOverIntNp**2).sum(), (diffOverIntNp**2).sum()/wghtFactor**2  ))
+
+            print(' chisq2 = %10.3f'%(chisq2))
+            outpt.write(' chisq2 = %10.3f \n'%(chisq2))
+
+            print(' Nobs = %i Nions = %i'%(self.Nobs,  self.Nions))
+            outpt.write(' Nobs = %i  Nions = %i \n'%(self.Nobs,  self.Nions))
+            print(' Nfree = %i'%(self.Nfree))
+            outpt.write(' Nfree = %i \n'%(self.Nfree))
             chisq,  msk = self.getChisq()
             normChisq = self.getNormalizedChisq()
             print('           Chisq = %10.3f'%(chisq))
-            print('Normalized Chisq = %10.3f'%(normChisq))
+            print('Normalized Chisq = %10.3f chisq/(nobs)'%(chisq/float(nMatch)))
+            print('Normalized Chisq = %10.3f chisq/(nobs -nfree)'%(normChisq))
+            print('Normalized Chisq = %10.3f chisq/(nions -nfree)'%(chisq/(self.Nions - self.Nfree)))
             outpt.write('           Chisq = %10.3f \n'%(chisq))
-            outpt.write('Normalized Chisq = %10.3f \n'%(normChisq))
+            outpt.write('Normalized Chisq = %10.3f chisq/(nobs) \n'%(chisq/float(nMatch)))
+            outpt.write('Normalized Chisq = %10.3f  chisq/(nobs -nfree)\n'%(normChisq))
+            outpt.write('Normalized Chisq = %10.3f chisq/(nions -nfree)\n'%(chisq/(self.Nions - self.Nfree)))
             poor = np.abs(diffOverIntNp) > threeSig
-            idx = np.arange(nMatch)
-            pdx = idx[poor]
+#            idx = np.arange(nMatch)
+#            pdx = idx[poor]
+            if poor.size != len(sorter):
+                print(' poor.size %i  len(sorter) %i'%(poor.size,  len(sorter)))
+            npsorter = np.asarray(sorter)
+            pdx = npsorter[poor]
             for i in pdx:
                 print('%5i %s %10.3f %10.3f %10.3f'%(i, self.IonS[i],  self.Wvl[i], np.abs(intOverPredNp)[i],  diffOverIntNp[i]))
                 outpt.write('%5i %s %10.3f %10.3f %10.3f\n'%(i, self.IonS[i],  self.Wvl[i], np.abs(intOverPredNp)[i], diffOverIntNp[i]))
         if sort is None:
-            self.DiffMc = {'intOverPred':intOverPredNp, 'diffOverPred':diffOverIntNp, 'wvl':self.Wvl, 'ionS':self.IonS, '3sig':threeSig, 'poor':poor}
+            self.DiffMc = {'intOverPred':intOverPredNp, 'diffOverInt':diffOverIntNp, 'wvl':self.Wvl, 'ionS':self.IonS, '3sig':threeSig, 'poor':poor}
         else:
-            self.DiffMcSort = {'intOverPred':intOverPredNp, 'diffOverPred':diffOverIntNp, 'wvl':self.Wvl, 'ionS':self.IonS, '3sig':threeSig, 'poor':poor}
+            self.DiffMcSort = {'intOverPred':intOverPredNp, 'diffOverInt':diffOverIntNp, 'wvl':self.Wvl, 'ionS':self.IonS, '3sig':threeSig, 'poor':poor}
         #
         # --------------------------------------------------------------------------
         #
@@ -1109,13 +1293,17 @@ class maker(ionTrails,  specTrails):
         #
         # --------------------------------------------------------------------------
         #
-    def predictPrint(self, minContribution=0.1, filename='predictPrint.txt', sort=None, verbose=0):
+    def predictPrint(self, minContribution=0.1, outfile='predictPrint.txt', sort=None, verbose=0):
         '''
         to predict the intensities of the observed lines from an emission measure
         the emission measure is already specified as self.Em which is an np array
+        sort can be 'wvl' or 'ion', otherwise, there is no sorting done
         '''
+        cwd = os.getcwd()
         wghtFactor = self.WghtFactor
         nMatch = len(self.match)
+        if verbose:
+            print('nMatch:  %i'%(nMatch))
         if sort is None:
             sorter = range(nMatch)
         elif sort == 'ion':
@@ -1128,15 +1316,25 @@ class maker(ionTrails,  specTrails):
                 number = Z*1000 + stage
                 indexer.append(number)
             sorter = np.argsort(indexer)
+        elif sort == 'wvl':
+            indexer = []
+            for amatch in self.match:
+                wvlObs = amatch['obsWvl']
+                indexer.append(wvlObs)
+            sorter = np.argsort(indexer)
 
         dash = ' -------------------------------------------------'
+        # for cases where no predicted intensity
+        pformatNone = ' %5i %7s %10.3f'
         pformat1 = ' %5i %7s %10.3f %10.2e %10.2e %10.3f %10.3f'
         pformat1s = ' %5s %7s %10s %10s %10s %10s %10s'
         pformat2 = '         %s'
         pformat3 = '        %10.3f %4i %4i %20s - %20s %5i %5i %7.3f'
         pformat3s = '        %10s %4s %4s %20s - %20s %5s %5s %s'
-        if filename:
-            with open(filename, 'w') as outpt:
+        if outfile:
+            with open(outfile, 'w') as outpt:
+                print(' cwd:  %s'%(cwd))
+                outpt.write(' cwd:  %s \n'%(cwd))
                 try:
                     emIndices = self.EmIndices
                     for emidx in emIndices:
@@ -1167,7 +1365,7 @@ class maker(ionTrails,  specTrails):
                         pstring = pformat1%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'], self.Intensity[iwvl]/amatch['predicted'], chi  )
                     else:
 
-                        pstring = pformat1%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'], -1.)
+                        pstring = pformat1%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'], -1.,  -1.)
                     print(pstring)
                     outpt.write(pstring +'\n')
                     #
@@ -1188,38 +1386,13 @@ class maker(ionTrails,  specTrails):
                                 outpt.write(dash +'\n')
                     print(dash)
                 outpt.write(dash +'\n')
-#                print('matchPkl %s \n'%(self.MatchName))
-#                print('wghtFactor %10.3f \n'%(wghtFactor))
-#                pstring1 = pformat1s%('iwvl', 'IonS', 'wvl', 'Int',  'Pred', 'Int/Pred', 'chi')
-#                outpt.write(pstring1 +'\n')
-#                outpt.write(pstring3 + '\n')
-#                for iwvl,  amatch in enumerate(self.match):
-#                    chi = (np.abs(self.Intensity[iwvl]-amatch['predicted'])/(2.*wghtFactor*self.Intensity[iwvl]))
-#                    pstring = pformat1%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'], self.Intensity[iwvl]/amatch['predicted'], chi  )
-#                    outpt.write(pstring +'\n')
-#                    #
-#                    # now check line contributions
-#                    #
-#                    for jon,  anion in enumerate(amatch['ion']):
-#                        ionPrint = 0
-#                        for iline, awvl in enumerate(amatch['wvl'][jon]):
-#                            contrib = (amatch['intensity'][amatch['predictedLine'][jon][iline]]*self.Em).sum()/amatch['predicted']
-#                            if contrib > minContribution:
-#                                if ionPrint == 0:
-#                                    outpt.write(pformat2%(anion)+'\n')
-#                                    ionPrint = 1
-#                                outpt.write(pformat3%(awvl, amatch['lvl1'][jon][iline], amatch['lvl2'][jon][iline], amatch['pretty1'][jon][iline], amatch['pretty2'][jon][iline], amatch['lineIdx'][jon][iline], amatch['predictedLine'][jon][iline], contrib) +'\n')
-#                                outpt.write(dash +'\n')
-#                    outpt.write(dash +'\n')
-
         #
         # --------------------------------------------------------------------------
         #
-    def predictPrint1d(self, minContribution=0.1, filename=0, verbose=0):
+    def predictPrint1d(self, minContribution=0.1, outfile=0, verbose=0):
         '''
         to predict the intensities of the observed lines from an emission measure
         the emission measure is already specified as self.Em which is an np array
-        not sure this is still needed
         '''
         dash = ' -------------------------------------------------'
         pformat1 = ' %5i %7s %10.3f %10.2e %10.2e %10.3f %10.3f'
@@ -1263,8 +1436,8 @@ class maker(ionTrails,  specTrails):
                         print(pformat3%(awvl, amatch['lvl1'][jon][iline], amatch['lvl2'][jon][iline], amatch['pretty1'][jon][iline], amatch['pretty2'][jon][iline].ljust(20), amatch['lineIdx'][jon][iline], amatch['predictedLine'][jon][iline], contrib))
                         print(dash)
             print(dash)
-        if filename:
-            with open(filename, 'w') as outpt:
+        if outfile:
+            with open(outfile, 'w') as outpt:
                 try:
                     idx = self.SearchData['best']['idx']
                     dens = self.SearchData['best']['density']
@@ -1467,7 +1640,7 @@ class maker(ionTrails,  specTrails):
             searchDx1 = idx1 - indxlimits[0]
             searchDx.append(searchDx1)
             # kpd update
-            self.emSetIndices([idx1])
+            self.emSetIndices(idx1)
             self.fit1t(initialEm, maxfev=maxfev)
             chisq1,  msk1 = self.getChisq()
             if not msk1:
@@ -1503,15 +1676,12 @@ class maker(ionTrails,  specTrails):
         #
         gdx=[i for i,ch in enumerate(chisq) if ch == min(chisq)]
         #  kpd
-        self.emSetIndices([idx[gdx[0]]])
+        self.emSetIndices(idx[gdx[0]])
         self.emSet(emfit[gdx[0]])
         self.predict()
         em = 10.**emfit[gdx[0]]
         minChisq = min(chisq)
-        if self.Nobs > self.Nfree:
-            reducedChisq = minChisq/float(self.Nobs - self.Nfree)
-        else:
-            reducedChisq = minChisq/float(self.Nobs)
+        reducedChisq = minChisq/float(self.Nobs - self.Nfree)
         #
         # key 'emfit' is the log value, 'em' is actual value
         self.SearchData['best'] = {'em':em, 'emfit':emfit[gdx[0]], 'chisq':chisq[gdx[0]], 'reducedChisq':reducedChisq, 'idx':idx[gdx[0]], 'density':self.EDensity[idx[gdx[0]]], 'temperature':self.Temperature[idx[gdx[0]]]}
@@ -2012,10 +2182,22 @@ class maker(ionTrails,  specTrails):
             self.EmIndices = matchDict['EmIndices']
         else:
             print(' EmIndices not in matchDict')
+
         if 'Em' in matchDict.keys():
             self.Em = matchDict['Em']
         else:
             print('Em not in matchDict')
+
+        if 'EmLog' in matchDict.keys():
+            self.EmLog = matchDict['EmLog']
+        else:
+            print('Em not in matchDict')
+
+        if 'NT' in matchDict.keys():
+            self.NT = matchDict['NT']
+        else:
+            print('NT not in matchDict')
+
         if 'XUVTOP' in matchDict.keys():
             self.XUVTOP = matchDict['XUVTOP']
         if 'chiantiVersion' in matchDict.keys():
@@ -2031,14 +2213,26 @@ class maker(ionTrails,  specTrails):
             'Ntemp':self.Ntemp, 'NTempDens':self.NTempDens, 'MinAbund':self.MinAbund}
         if hasattr(self, 'EmIndices'):
             matchDict['EmIndices'] = self.EmIndices
+
         if hasattr(self, 'Em'):
             matchDict['Em'] = self.Em
+
+        if hasattr(self, 'EmLog'):
+            matchDict['EmLog'] = self.EmLog
+
         if hasattr(self, 'Nfree'):
             matchDict['Nfree'] = self.Nfree
+
+        if hasattr(self, 'NT'):
+            matchDict['NT'] = self.NT
+        else:
+            print('NT not available')
+
         if hasattr(self, 'WghtFactor'):
             matchDict['WghtFactor'] = self.WghtFactor
         else:
             print('wghtfactor not available')
+
         if 'XUVTOP' in self.SpecData.keys():
             matchDict['XUVTOP'] = self.SpecData['XUVTOP']
         if 'chiantiVersion' in self.SpecData.keys():

@@ -1170,6 +1170,12 @@ class maker(ionTrails,  specTrails):
                 number = Z*1000 + stage
                 indexer.append(number)
             sorter = np.argsort(indexer)
+        elif sort == 'wvl':
+            indexer = []
+            for amatch in self.match:
+                wvlObs = amatch['obsWvl']
+                indexer.append(wvlObs)
+            sorter = np.argsort(indexer)
 
         wDiff = []
         intOverPred = []
@@ -1198,7 +1204,7 @@ class maker(ionTrails,  specTrails):
             outpt.write(' chi = abs(int-pred)/(wght*int))  strDiff = (int - pred)/int \n')
             print(sformat%('', '', 'A', '', '', '', '', 'abs', 'abs' ))
             print(sformat%('iwvl', 'ionS', 'wvl', 'intensity', 'predicted', 'int/pred', 'chi', 'relDev', 'dif/int'))
-            outpt.write(fsformat%('', '', 'A', '', '', '', '', 'abs', 'abs' ))
+            outpt.write(fsformat%('', '', 'A', '', '', '', '', ' ', ' ' ))
             outpt.write(fsformat%('iwvl', 'ionS', 'wvl', 'intensity', 'predicted', 'int/pred', 'chi', 'relDev',  'dif/int'))
             for iwvl in sorter:
                 amatch = self.match[iwvl]
@@ -1291,10 +1297,13 @@ class maker(ionTrails,  specTrails):
         '''
         to predict the intensities of the observed lines from an emission measure
         the emission measure is already specified as self.Em which is an np array
+        sort can be 'wvl' or 'ion', otherwise, there is no sorting done
         '''
         cwd = os.getcwd()
         wghtFactor = self.WghtFactor
         nMatch = len(self.match)
+        if verbose:
+            print('nMatch:  %i'%(nMatch))
         if sort is None:
             sorter = range(nMatch)
         elif sort == 'ion':
@@ -1306,6 +1315,12 @@ class maker(ionTrails,  specTrails):
                 stage = ionDict['Ion']
                 number = Z*1000 + stage
                 indexer.append(number)
+            sorter = np.argsort(indexer)
+        elif sort == 'wvl':
+            indexer = []
+            for amatch in self.match:
+                wvlObs = amatch['obsWvl']
+                indexer.append(wvlObs)
             sorter = np.argsort(indexer)
 
         dash = ' -------------------------------------------------'

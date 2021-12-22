@@ -1,5 +1,8 @@
 '''
 classes and methods to analyze observations of astrophysical spectra
+this version uses a spline interpolation of the contribution functions
+to calculate the predicted intensities
+originally copied from model.Maker
 '''
 import os
 from datetime import date
@@ -19,6 +22,7 @@ except ImportError:
 
 import numpy as np
 import scipy.optimize as optimize
+import scipy.interpolate as interpolate
 import matplotlib.pyplot as plt
 import ChiantiPy.core as ch
 import ChiantiPy.tools.io as io
@@ -737,10 +741,27 @@ class maker(ionTrails,  specTrails):
         #
         # --------------------------------------------------------
         #
+    def setLogT(self, logT, verbose=0):
+        '''
+        to set the log10 temperatures of the N temperature/density EM distribution
+        '''
+        self.LogT = np.atleast_1d(logT)
+        self.Nfree = 2*len(logT) + 1  # for sigma
+        self.NT = len(logT)
+        if verbose:
+            for it, alogT in enumerate(self.LogT):
+                print('index %5i logT %12.2e'%(it, self.LogT[it]))
+#        else:
+#            print(' need to call gofnt/mgofnt first')
+        #
+        # --------------------------------------------------------
+        #
     def emSetIndices(self, indices, verbose=0):
         '''
+        this is obsolete in this class - should use setLogT
         to set the indices of the N temperature/density EM distribution
         '''
+        print(' use setLogT')
         if hasattr(self, 'Temperature'):
             self.EmIndices = np.atleast_1d(indices)
             self.Nfree = 2*len(indices) + 1  # for sigma
@@ -753,10 +774,33 @@ class maker(ionTrails,  specTrails):
         #
         #------------------------------------------
         #
+    def setLogEm(self, value):
+        '''
+        sets the log10 EM values for a N temperature EM distribution
+        '''
+        emLog = np.atleast_1d(value)
+        if hasattr(self, 'LogT'):
+            if len(emLog) == len(self.LogT):
+#                em = np.zeros_like(self.Temperature)
+#                emLog = np.zeros_like(self.Temperature)
+#                for i, adx in enumerate(self.EmIndices):
+#                    em[adx] = 10.**emValue[i]
+#                    emLog[adx] = emValue[i]
+                self.LogEm = emLog
+                self.Em = 10.**emLog
+            else:
+                print(' number of temperatures (self.LogT) not equal to number of emission measures (self.LogEm) ')
+        else:
+            print(' need to self.setLogT()  first')
+        #
+        #------------------------------------------
+        #
     def emSet(self, value):
         '''
         sets the EM values for a N temperature EM distribution
+        obsolete in this class - use setLogEm
         '''
+        print(' use .setLogEm')
         emValue = np.atleast_1d(value)
         if hasattr(self, 'EmIndices') and len(emValue) == len(self.EmIndices):
             em = np.zeros_like(self.Temperature)
@@ -779,7 +823,10 @@ class maker(ionTrails,  specTrails):
     def emFitPlot(self):
         '''
         to plot the emission measures derived from search over temperature
+        used for brute-force chisq min. searches
+        perhaps obsolete here
         '''
+        print(' used for Brute searches')
         if not hasattr(self, 'SearchData'):
             print(' must run search*t... first')
             return
@@ -1192,12 +1239,11 @@ class maker(ionTrails,  specTrails):
             outpt.write(' today is %s \n'%(thisday))
             print(' WghtFactor = %10.3f'%(wghtFactor))
             outpt.write(' WghtFactor = %10.3f \n'%(wghtFactor))
-            emIndices = self.EmIndices
             print(' %5s %12s %12s %12s'%('index',  'density',  'temperature',  'Em'))
             outpt.write(' %5s %12s %12s %12s \n'%('index',  'density',  'temperature',  'Em'))
-            for emidx in emIndices:
-                print(' %5i %12.2e %12.2e %12.2e %8.3f'%(emidx, self.EDensity[emidx],  self.Temperature[emidx], self.Em[emidx],  self.EmLog[emidx]))
-                outpt.write(' %5i %12.2e %12.2e %12.2e %8.3f \n'%(emidx, self.EDensity[emidx],  self.Temperature[emidx], self.Em[emidx],  self.EmLog[emidx]))
+            for it, alogT in enumerate(self.LogT):
+                print(' %5i %12.2e %12.3f %12.3f'%(it, self.EDensity[0], alogT, self.LogEm[it]))
+                outpt.write(' %5i %12.2e %12.3f %12.3f \n'%(it, self.EDensity[0], alogT, self.LogEm[it]))
             print(dash)
             outpt.write(dash+'\n')
             print(' chi = abs(int - pred)/(wght*int))  strDiff = (int - pred)/pred')
@@ -1281,6 +1327,7 @@ class maker(ionTrails,  specTrails):
         '''
         to predict the intensities of the observed lines from an emission measure
         the emission measure is already specified as self.Em which is an np array
+        in the class makerI, this is obsolete
         '''
         #
         for iwvl, amatch in enumerate(self.match):
@@ -1293,7 +1340,34 @@ class maker(ionTrails,  specTrails):
         #
         # --------------------------------------------------------------------------
         #
-    def predictPrint(self, minContribution=0.1, outfile='predictPrint.txt', sort=None, verbose=0):
+    def predictI(self, force=False):
+        '''
+        to predict the intensities of the observed lines from an emission measure
+        the emission measure is already specified as self.Em which is an np array
+        '''
+        #
+        nMatch = len(self.match)
+#        pred = np.zeros(nMatch, np.float64)
+        if 'tckSum' not in self.match[0] or force == True:
+            logTemp = np.log10(self.Temperature)
+            for iwvl, amatch in enumerate(self.match):
+                contrib = amatch['intensitySum']
+                logContrib = np.log10(contrib)
+                tck = interpolate.splrep(logTemp, logContrib,s=0)
+                amatch['tckSum'] = tck
+        for iwvl, amatch in enumerate(self.match):
+            tckSum = amatch['tckSum']
+            intContrib = 10.**(interpolate.splev(self.LogT,tckSum,der=0))
+            pred = np.sum(intContrib*np.power(10.,self.LogEm))
+            try:
+                self.match[iwvl]['predicted'] = pred
+            except:
+                self.match[iwvl]['predicted'] = 0.
+                print(' error in predict, iwvl = %5i'%(iwvl))
+        #
+        # --------------------------------------------------------------------------
+        #
+    def predictPrintI(self, minContribution=0.1, outfile='predictPrintI.txt', sort=None, verbose=0):
         '''
         to predict the intensities of the observed lines from an emission measure
         the emission measure is already specified as self.Em which is an np array
@@ -1302,6 +1376,15 @@ class maker(ionTrails,  specTrails):
         cwd = os.getcwd()
         wghtFactor = self.WghtFactor
         nMatch = len(self.match)
+        #
+        # get approximate values for logT index
+        nT = len(self.LogT)
+        logTindex = []
+        for it, alogT in enumerate(self.LogT):
+            thisT = np.power(10., alogT)
+            deltaT = abs(thisT - self.Temperature)
+            logTindex.append(np.argmin(deltaT))
+            print(' %3i %4i %10.3f %10.2e'%(it, logTindex[-1], alogT, self.Temperature[logTindex[-1]]))
         if verbose:
             print('nMatch:  %i'%(nMatch))
         if sort is None:
@@ -1329,17 +1412,16 @@ class maker(ionTrails,  specTrails):
         pformat1 = ' %5i %7s %10.3f %10.2e %10.2e %10.3f %10.3f'
         pformat1s = ' %5s %7s %10s %10s %10s %10s %10s'
         pformat2 = '         %s'
-        pformat3 = '        %10.3f %4i %4i %20s - %20s %5i %5i %7.3f'
+        pformat3 = '        %10.3f %4i %4i %20s - %20s %5i %5i %10.2e'
         pformat3s = '        %10s %4s %4s %20s - %20s %5s %5s %s'
         if outfile:
             with open(outfile, 'w') as outpt:
                 print(' cwd:  %s'%(cwd))
                 outpt.write(' cwd:  %s \n'%(cwd))
                 try:
-                    emIndices = self.EmIndices
-                    for emidx in emIndices:
-                        print(' %5i %12.2e %12.2e %12.2e'%(emidx, self.EDensity[emidx],  self.Temperature[emidx], self.Em[emidx]))
-                        outpt.write(' %5i %12.2e %12.2e %12.2e\n'%(emidx, self.EDensity[emidx],  self.Temperature[emidx], self.Em[emidx]))
+                    for it, alogT in enumerate(self.LogT):
+                        print(' %5i %12.2e %12.2e %12.2e'%(it, self.EDensity[0],  alogT, self.LogEm[it]))
+                        outpt.write(' %5i %12.2e %12.2e %12.2e\n'%(it, self.EDensity[0],  alogT, self.LogEm[it]))
                 except:
                     print(' attribute EmIndices has not been created')
                     outpt.write(' attribute EmIndices has not been created \n')
@@ -1374,7 +1456,21 @@ class maker(ionTrails,  specTrails):
                     for jon,  anion in enumerate(amatch['ion']):
                         ionPrint = 0
                         for iline, awvl in enumerate(amatch['wvl'][jon]):
-                            contrib = (amatch['intensity'][amatch['predictedLine'][jon][iline]]*self.Em).sum()/amatch['predicted']
+                            thisIntensity1 = amatch['intensity'][amatch['predictedLine'][jon][iline]]
+                            bad = thisIntensity1 <= 0.
+                            print(' sum of bad %i'%(bad.sum()))
+                            if bad.sum() == 0:
+                                thismatch = np.ma.MaskedArray(thisIntensity1,  dtype=np.float64, mask= bad)
+                                tck = interpolate.splrep(np.log10(self.Temperature), np.log10(thismatch),  s=0)
+                                splpred  = 10.**interpolate.splev(self.LogT, tck,  der=0,  ext=1)
+
+#                            contrib = (amatch['intensity'][amatch['predictedLine'][jon][iline]]*self.Em).sum()/amatch['predicted']
+                                contrib = np.sum(splpred*10.**self.LogEm)/amatch['predicted']
+                            else:
+                                contrib = 0.
+                                for it in range(nT):
+                                    contrib += thisIntensity1[logTindex[it]]*np.power(10.,self.LogEm[it])/amatch['predicted']
+                                    print(' it:  %3i intensity:  %10.2e  em:  %10.2e contrib: %10.2e'%(it, thisIntensity1[logTindex[it]], np.power(10.,self.LogEm[it]), contrib))
                             if contrib > minContribution:
                                 if ionPrint == 0:
                                     print(pformat2%(anion))
@@ -1495,7 +1591,7 @@ class maker(ionTrails,  specTrails):
         to calculated the weighted difference of each of the intensities
         returns a 1D array
         '''
-        self.predict()
+        self.predictI()
         nwvl = len(self.match)
         weightedDiff = np.zeros(nwvl, 'float64')
         for iwvl, amatch in enumerate(self.match):
@@ -1512,7 +1608,8 @@ class maker(ionTrails,  specTrails):
         #
     def findMinMaxIndices(self, verbose=0):
         ''' to find the minimum and maximum indices where all match['intensitySum'] are
-        greater than 0'''
+        greater than 0
+        '''
         nT = len(self.Temperature)
         nlines = len(self.match)
         print(' n lines = %5i '%(nlines))
@@ -2247,7 +2344,7 @@ class maker(ionTrails,  specTrails):
             self.SearchData = pickle.load(inpt)
 
     def dumpSearchData(self, filename):
-        """to save the attribute match to a pickle file
+        """to save the attribute SearchData to a pickle file
         """
         with open(filename, 'wb') as outpt:
             pickle.dump(self.SearchData, outpt)

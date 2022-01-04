@@ -194,6 +194,8 @@ class ion(ioneqOne, ionTrails, specTrails):
             elvlcFileName = None
             wgfaFileName = None
         if alternate_dir:
+            if verbose:
+                print(' using elvlcfile in alternate dir:  %s'%(elvlcFileName))
             self.Elvlc = io.elvlcRead('',filename=elvlcFileName)
             self.Wgfa = io.wgfaRead('',filename=wgfaFileName, elvlcname = elvlcFileName, total=True)
         else:
@@ -307,11 +309,23 @@ class ion(ioneqOne, ionTrails, specTrails):
 
         drparamsFile = fileName +'.drparams'
         if os.path.isfile(drparamsFile):
-            self.DrParams = io.drRead(self.IonStr)
+            self.DrParams = io.drRead('', filename=drparamsFile)
 
         rrparamsFile = fileName +'.rrparams'
         if os.path.isfile(rrparamsFile):
-            self.RrParams = io.rrRead(self.IonStr)
+            self.RrParams = io.rrRead('',  filename=rrparamsFile)
+
+        diparamsFile = fileName +'.diparams'
+        if os.path.isfile(diparamsFile):
+            self.DiParams = io.diRead('', filename=diparamsFile)
+
+        easplomFile = fileName +'.easplom'
+        if os.path.isfile(easplomFile):
+            self.Easplom = io.splomRead('',  filename=easplomFile)
+
+        easplupsFile = fileName +'.easplups'
+        if os.path.isfile(easplupsFile):
+            self.Eaparams = io.splupsRead('',  filename=easplupsFile)
 
     def diCross(self, energy=None, verbose=False):
         """
@@ -566,12 +580,13 @@ class ion(ioneqOne, ionTrails, specTrails):
             #  need to replicate neaev
             ntrans = len(easplom['deryd'])
             eaev = self.DiParams['eaev']
-            if len(eaev) == 1:
-                for itrans in range(ntrans):
-                    eaev.append(eaev[0])
+#            eaev = easplom['deryd']
+#            if len(eaev) == 1:
+#                for itrans in range(ntrans):
+#                    eaev.append(eaev[0])
 
             totalCross = np.zeros_like(energy)
-            ntrans = omega.shape[0]
+#            ntrans = omega.shape[0]
             partialCross = np.zeros((ntrans, energy.size), np.float64)
             for itrans in range(ntrans):
                 #  the collision strengths have already by divided by the

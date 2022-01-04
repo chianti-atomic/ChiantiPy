@@ -1621,18 +1621,22 @@ def splomRead(ions, ea=False, filename=None):
             splomname = fname+'.splom'
     else:
         splomname = filename
-    input = open(splomname,'r')
+    with open(splomname,'r') as inpt:
+        lines = inpt.readlines()
     #  need to read first line and see how many elements
-    line1 = input.readline()
     #indices=line1[0:15]
-    remainder = line1[16:]
+    remainder = lines[1][16:]
     nom = remainder.split(' ')
 #    format = FortranFormat('5i3,'+str(len(nom))+'E10.2')
     header_line = FortranRecordReader('5i3,'+str(len(nom))+'E10.2')
     #  go back to the beginning
-    input.seek(0)
-    lines = input.readlines()
-    data = 5
+    #  find the -1
+    marker = []
+    for iline,  aline in enumerate(lines):
+        if len(aline.split()) == 1:
+            marker.append(iline)
+        else:
+            pass
     iline = 0
     lvl1 = []
     lvl2 = []
@@ -1641,8 +1645,7 @@ def splomRead(ions, ea=False, filename=None):
     de = []
     f = []
     splom = []
-    #ntrans = 0
-    while data > 1:
+    for iline in range(marker[0]):
 #        splomdat = FortranLine(lines[iline],format)
         splomdat = header_line.read(lines[iline])
         l1 = splomdat[2]
@@ -1660,12 +1663,10 @@ def splomRead(ions, ea=False, filename=None):
         f.append(float(f1))
         splom.append(splom1)
         iline = iline+1
-        data = len(lines[iline].split(' ',2))
     hdr = lines[iline+1:-1]
     de = np.asarray(de,np.float64)
     splomout = np.asarray(splom,np.float64)
     splomout = np.transpose(splomout)
-    input.close()
     # note:  de is in Rydbergs
     splom = {"lvl1":lvl1,"lvl2":lvl2,"ttype":ttype,"gf":gf,"deryd":de,"c":f
         ,"splom":splomout,"ref":hdr}

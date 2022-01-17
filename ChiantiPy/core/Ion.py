@@ -325,7 +325,8 @@ class ion(ioneqOne, ionTrails, specTrails):
 
         easplupsFile = fileName +'.easplups'
         if os.path.isfile(easplupsFile):
-            self.EaParams = io.splupsRead('',  filename=easplupsFile)
+            self.EaParams = io.eaRead('',  filename=easplupsFile)
+            self.eaDescale()
 
     def diCross(self, energy=None, verbose=False):
         """
@@ -578,12 +579,11 @@ class ion(ioneqOne, ionTrails, specTrails):
             #  splomDescale takes care of when energy < threshold
             omega = util.splomDescale(easplom, energy)
             #  need to replicate neaev
-            ntrans = len(easplom['deryd'])
+            ntrans = len(easplom['de'])
             eaev = self.DiParams['eaev']
-#            eaev = easplom['deryd']
-#            if len(eaev) == 1:
-#                for itrans in range(ntrans):
-#                    eaev.append(eaev[0])
+            if len(eaev) == 1:
+                for itrans in range(ntrans):
+                    eaev.append(eaev[0])
 
             totalCross = np.zeros_like(energy)
 #            ntrans = omega.shape[0]

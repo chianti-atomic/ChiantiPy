@@ -572,11 +572,13 @@ def eaRead(ions, filename=None):
                 nspl[i] = 5
                 splups[i].put(list(range(5)),inpt[6:])
         #
+        de = np.asarray(de,np.float64)
+        deEv = const.ryd2Ev*de
         ref = []
         for i in range(nsplups+1,len(s1)):
             s1a = s1[i][:-1]
             ref.append(s1a.strip())
-    return {"lvl1":lvl1,"lvl2":lvl2,"ttype":ttype,"gf":gf,"de":de,"cups":cups
+    return {"lvl1":lvl1,"lvl2":lvl2,"ttype":ttype,"gf":gf,"de":de, "deryd":de, "deEv":deEv, "cups":cups
                 ,"nspl":nspl,"splups":splups,"ref":ref}
 
 
@@ -1665,10 +1667,11 @@ def splomRead(ions, ea=False, filename=None):
         iline = iline+1
     hdr = lines[iline+1:-1]
     de = np.asarray(de,np.float64)
+    deEv = de*const.ryd2Ev
     splomout = np.asarray(splom,np.float64)
     splomout = np.transpose(splomout)
     # note:  de is in Rydbergs
-    splom = {"lvl1":lvl1,"lvl2":lvl2,"ttype":ttype,"gf":gf,"deryd":de,"c":f
+    splom = {"lvl1":lvl1,"lvl2":lvl2,"ttype":ttype,"gf":gf,"de":de, "deryd":de, "deEv":deEv, "c":f
         ,"splom":splomout,"ref":hdr}
     return  splom
 

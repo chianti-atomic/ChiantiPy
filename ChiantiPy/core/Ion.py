@@ -309,23 +309,23 @@ class ion(ioneqOne, ionTrails, specTrails):
 
         drparamsFile = fileName +'.drparams'
         if os.path.isfile(drparamsFile):
-            self.DrParams = io.drRead('', filename=drparamsFile)
+           self.DrParams = io.drRead('',  filename=drparamsFile)
 
         rrparamsFile = fileName +'.rrparams'
         if os.path.isfile(rrparamsFile):
-            self.RrParams = io.rrRead('',  filename=rrparamsFile)
+            self.RrParams = io.rrRead('', filename=rrparamsFile)
 
         diparamsFile = fileName +'.diparams'
         if os.path.isfile(diparamsFile):
-            self.DiParams = io.diRead('', filename=diparamsFile)
+            self.DiParams = io.diRead('',  filename=diparamsFile)
 
         easplomFile = fileName +'.easplom'
         if os.path.isfile(easplomFile):
-            self.Easplom = io.splomRead('',  filename=easplomFile)
+            self.Easplom = io.splomRead('', ea=True, filename = easplomFile)
 
         easplupsFile = fileName +'.easplups'
         if os.path.isfile(easplupsFile):
-            self.Eaparams = io.splupsRead('',  filename=easplupsFile)
+            self.EaParams = io.splupsRead('',  filename=easplupsFile)
 
     def diCross(self, energy=None, verbose=False):
         """

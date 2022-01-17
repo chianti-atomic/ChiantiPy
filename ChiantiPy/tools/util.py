@@ -628,10 +628,10 @@ def descale_bt(bte,btomega,f,ev1):
     ----------
     .. [3] Burgess, A. and Tully, J. A., 1992, A&A, `254, 436 <http://adsabs.harvard.edu/abs/1992A%26A...254..436B>`_
     """
-    u = 1.-f+np.exp(np.log(f)/(1.-bte))
+    u = 1.- f + np.exp(np.log(f)/(1.-bte))
     energy = u*ev1
-    omega = (np.log(u)-1.+np.exp(1.))*btomega
-    return [energy,omega]
+    omega = (np.log(u) -1. + np.exp(1.))*btomega
+    return [energy, omega]
 
 
 def descale_bti(bte,btx,f,ev1):

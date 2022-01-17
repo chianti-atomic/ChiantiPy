@@ -443,12 +443,15 @@ def diRead(ions, filename=None):
         eaev = [float(avalue) for avalue in eacoef]
     else:
         eaev = 0.
+    ref = []
     hdr = input.readlines()
+    for ahdr in hdr:
+        ref.append(ahdr.strip())
     input.close()
     info = {"iz":iz,"ion":ion,"nspl":nspl,"neaev":neaev, 'nfac':nfac}
     if neaev:
         info['eaev'] = eaev
-    DiParams = {"info":info,"btf":btf,"ev1":ev1,"xsplom":xsplom,"ysplom":ysplom, 'eaev':eaev,"ref":hdr}
+    DiParams = {"info":info,"btf":btf,"ev1":ev1,"xsplom":xsplom,"ysplom":ysplom, 'eaev':eaev,"ref":ref}
     return DiParams
 
 
@@ -1627,7 +1630,7 @@ def splomRead(ions, ea=False, filename=None):
         lines = inpt.readlines()
     #  need to read first line and see how many elements
     #indices=line1[0:15]
-    remainder = lines[1][16:]
+    remainder = lines[0][16:]
     nom = remainder.split(' ')
 #    format = FortranFormat('5i3,'+str(len(nom))+'E10.2')
     header_line = FortranRecordReader('5i3,'+str(len(nom))+'E10.2')
@@ -1640,6 +1643,8 @@ def splomRead(ions, ea=False, filename=None):
         else:
             pass
     iline = 0
+    z = []
+    stage = []
     lvl1 = []
     lvl2 = []
     ttype = []
@@ -1650,6 +1655,8 @@ def splomRead(ions, ea=False, filename=None):
     for iline in range(marker[0]):
 #        splomdat = FortranLine(lines[iline],format)
         splomdat = header_line.read(lines[iline])
+        z.append(int(splomdat[0]))
+        stage.append(int(splomdat[1]))
         l1 = splomdat[2]
         l2 = splomdat[3]
         tt1 = splomdat[4]
@@ -1666,13 +1673,16 @@ def splomRead(ions, ea=False, filename=None):
         splom.append(splom1)
         iline = iline+1
     hdr = lines[iline+1:-1]
+    ref = []
+    for ahdr in hdr:
+        ref.append(ahdr.strip())
     de = np.asarray(de,np.float64)
     deEv = de*const.ryd2Ev
     splomout = np.asarray(splom,np.float64)
     splomout = np.transpose(splomout)
     # note:  de is in Rydbergs
-    splom = {"lvl1":lvl1,"lvl2":lvl2,"ttype":ttype,"gf":gf,"de":de, "deryd":de, "deEv":deEv, "c":f
-        ,"splom":splomout,"ref":hdr}
+    splom = {"z":z, "stage":stage, "lvl1":lvl1,"lvl2":lvl2,"ttype":ttype,"gf":gf,"de":de, "deryd":de, "deEv":deEv, "c":f
+        ,"splom":splomout,"ref":ref}
     return  splom
 
 

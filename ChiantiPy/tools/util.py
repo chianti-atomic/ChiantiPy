@@ -389,19 +389,19 @@ def splomDescale(splom, energy):
     #
     #
     nenergy = energy.size
-    nsplom = len(splom['deryd'])
+    nsplom = len(splom['de'])
     # for these files, there are 5 spline points
-    nspl = 5
+    nspl = [splom['splom'].shape[0]]*splom['splom'].shape[1]
     if nenergy > 1:
         omega = np.zeros((nsplom,nenergy),np.float64)
     else:
         omega = np.zeros(nsplom,np.float64)
     #
-    dx = 1./(float(nspl)-1.)
-    sxint = dx*np.arange(nspl)  # IDL sx
-    for isplom in range(0,nsplom):
+    for isplom in range(nsplom):
         #
-        sx1 = energy/(splom['deryd'][isplom]*const.ryd2Ev)  # IDL x_int
+        dx = 1./(float(nspl[isplom])-1.)
+        sxint = dx*np.arange(nspl[isplom])  # IDL sx
+        sx1 = energy/(splom['de'][isplom]*const.ryd2Ev)  # IDL x_int
         good = sx1 >= 1.
         # make sure there are some valid energies above the threshold
         if good.sum():

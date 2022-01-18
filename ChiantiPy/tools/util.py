@@ -213,6 +213,32 @@ def zion2localFilename(z,ion, dielectronic=False):
         fname = os.path.join(dir,thisel,thisone,thisone)
     return fname
 
+def zion2experimental(z, ion, dielectronic=False):
+    """
+    Convert atomic number and ion number to spectroscopic notation string
+
+    Parameters
+    ----------
+
+    z : `int`
+        The atomic number/nuclear charge
+    ion : `int`
+        the ionization stage, 0 for neutrals, 1 for singly ionized
+    dielectronic : `bool`, optional
+
+    Returns
+    -------
+    expt : `str`
+        the experimental/laboratory notation for the ion, such as Fe 13+
+    """
+    if (z-1 < len(const.El)) and (ion <= z+1):
+        expt = const.El[z-1].capitalize()+' ' + '%i'%(ion-1) + '+'
+        if dielectronic:
+            expt += ' d'
+    else:  expt = ''
+    return expt
+
+
 
 def zion2spectroscopic(z,ion, dielectronic=False):
     """
@@ -270,7 +296,8 @@ def convertName(name):
     iso = Z - stage + 1
     isoEl = const.El[iso - 1].capitalize()
     spectro = zion2spectroscopic(Z, stage)
-    return {'Z':Z,'Ion':stage,'Dielectronic':dielectronic, 'Element':els.capitalize(), 'higher':higher, 'lower':lower, 'filename':filename, 'iso':iso, 'isoEl':isoEl, 'spectroscopic':spectro}
+    expt = zion2experimental(Z,  stage)
+    return {'Z':Z,'Ion':stage,'Dielectronic':dielectronic, 'Element':els.capitalize(), 'higher':higher, 'lower':lower, 'filename':filename, 'iso':iso, 'isoEl':isoEl, 'spectroscopic':spectro, 'experimental':expt}
 
 
 def ion2filename(ions):

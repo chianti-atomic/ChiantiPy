@@ -10,8 +10,7 @@ import os
 import fnmatch
 import numpy as np
 from scipy import interpolate
-from scipy.special import expn
-
+from scipy.special import exp1
 import ChiantiPy.tools.constants as const
 
 
@@ -729,9 +728,29 @@ def scale_bt(evin,omega,f,ev1):
     btomega = omega/(np.log(u)-1.+np.exp(1.))
     return [bte,btomega]
 
-def scale_bt_rate(inDict, ip, f=1.7):
+def descale_bti_rate(btTemperature, btRate, ip,  f=2.0):
     """
-    Apply ionization descaling of [7]_, a Burgess-Tully type scaling to ionization rates and
+    Apply ionization descaling of [7]_, a Burgess-Tully type scaling to bt scaled ionization rates and
+    temperatures.  The result is to return a temperature array and a ionization rate array.
+
+    Parameters
+    ----------
+    btTemperature :  `array-like`
+        the bt scaled temperature
+    btRate : `array-like`
+        the bt scaled ionization rate
+    ip :  `float`
+        the ionization potential in eV.
+    f :  `float` (optional)
+        the scaling parameter, 1.7 generally works well
+    """
+    temperature = (ip/const.boltzmannEv)*(np.exp(np.log(f/(1.-btTemperature))) - f)
+    rate = (1./np.sqrt(btTemperature))*ip**(-1.5)*exp1(1./btTemperature)*btRate
+    return {'temperature':temperature, 'rate':rate}
+
+def scale_bt_rate(inDict, ip, f=2.0):
+    """
+    Apply ionization scaling of [7]_, a Burgess-Tully type scaling to ionization rates and
     temperatures. The result of the scaling is to return a scaled temperature between 0 and 1 and a
     slowly varying scaled rate as a function of scaled temperature. In addition, the scaled rates
     vary slowly along an iso-electronic sequence.
@@ -753,7 +772,7 @@ def scale_bt_rate(inDict, ip, f=1.7):
     if ('temperature' and 'rate') in inDict.keys():
         rT = inDict['temperature']*const.boltzmannEv/ip
         btTemperature = 1. - np.log(f)/np.log(rT + f)
-        btRate = np.sqrt(rT)*inDict['rate']*ip**1.5/(expn(1,1./rT))
+        btRate = np.sqrt(rT)*inDict['rate']*ip**1.5/(exp1(1./rT))
         inDict['btTemperature'] = btTemperature
         inDict['btRate'] = btRate
         inDict['ip'] = ip

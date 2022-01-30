@@ -555,6 +555,7 @@ def eaRead(ions, filename=None):
         header_line1 = FortranRecordReader('6x,3i3,8e10.0')
         header_line2 = FortranRecordReader('6x,3i3,12e10.0')
 
+
         for i in range(0,nsplups):
             try:
                 inpt = header_line1.read(s1[i])
@@ -568,7 +569,7 @@ def eaRead(ions, filename=None):
             gf[i] = inpt[3]
             de[i] = inpt[4]
             cups[i] = inpt[5]
-            if len(inpt)  > 13:
+            if len(inpt)  > 11:
                 nspl[i] = 9
                 splups[i].put(list(range(9)),inpt[6:])
             else:
@@ -1681,8 +1682,8 @@ def splomRead(ions, ea=False, filename=None):
     splomout = np.asarray(splom,np.float64)
     splomout = np.transpose(splomout)
     # note:  de is in Rydbergs
-    splom = {"z":z, "stage":stage, "lvl1":lvl1,"lvl2":lvl2,"ttype":ttype,"gf":gf,"de":de, "deryd":de, "deEv":deEv, "c":f
-        ,"splom":splomout,"ref":ref}
+    splom = {"z":z, "stage":stage, "lvl1":lvl1,"lvl2":lvl2,"ttype":ttype,"gf":gf,"de":de, "deryd":de, "deEv":deEv,
+        "c":f,"splom":splomout,"ref":ref}
     return  splom
 
 
@@ -1758,7 +1759,7 @@ def splupsRead(ions, filename=None, filetype='splups'):
             nspl[i] = len(as1)//10
 #            splupsFormat3 = FortranFormat(str(nspl[i])+'E10.2')
 #            splupsFormat3 = '(' + str(nspl[i]) + 'e10.3' + ')'
-            header_line3 = FortranRecordReader(str(nspl[i])+'e10.3' )
+            header_line3 = FortranRecordReader('%i'%(nspl[i])+'e10.3' )
 #            inpt = FortranLine(as1, splupsFormat3)
             inpt = header_line3.read(as1)
             spl1 = np.asarray(inpt[:], np.float64)

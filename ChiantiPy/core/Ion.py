@@ -326,7 +326,8 @@ class ion(ioneqOne, ionTrails, specTrails):
         easplupsFile = fileName +'.easplups'
         if os.path.isfile(easplupsFile):
             self.EaParams = io.eaRead('',  filename=easplupsFile)
-            self.eaDescale()
+            ups = self.eaDescale()
+            self.EaParams['ups'] = ups
 
     def diCross(self, energy=None, verbose=False):
         """

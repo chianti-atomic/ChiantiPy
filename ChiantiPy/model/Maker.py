@@ -1067,13 +1067,33 @@ class maker(ionTrails,  specTrails):
         #
         # --------------------------------------------------------------------------
         #
-    def diffPrintChi(self, dir = '.', filename='diffPrintChi.txt',  wghtFactor=0.3):
+    def diffPrintChi(self, dir = '.', filename='diffPrintChi.txt',  sort=None):
         '''
         calculates the weighted and straight differences between observed and predicted
         prints the values saves the as a dictionary self.Diff
         to be used together with a prior brute-force chi-squared minimization approach
         '''
-        self.WghtFactor = wghtFactor
+        wghtFactor = self.WghtFactor
+        nMatch = len(self.match)
+        if sort is None:
+            sorter = range(nMatch)
+        elif sort == 'ion':
+            indexer = []
+            for amatch in self.match:
+                ionStr = amatch['exptIon']
+                ionDict = util.convertName(ionStr)
+                Z = ionDict['Z']
+                stage = ionDict['Ion']
+                number = Z*1000 + stage
+                indexer.append(number)
+            sorter = np.argsort(indexer)
+        elif sort == 'wvl':
+            indexer = []
+            for amatch in self.match:
+                wvlObs = amatch['obsWvl']
+                indexer.append(wvlObs)
+            sorter = np.argsort(indexer)
+
         wDiff = []
         relDevList = []
         stdDevList = []
@@ -1110,7 +1130,8 @@ class maker(ionTrails,  specTrails):
             sprint = sformat%('iwvl', 'ionS', 'wvl', 'intensity', 'predicted', 'int/pred', 'chi', 'relDiff', 'stdDev')
             print(sprint)
             outpt.write(sprint +'\n')
-            for iwvl,  amatch in enumerate(self.match):
+            for iwvl in sorter:
+                amatch = self.match[iwvl]
                 if amatch['predicted'] > 0. :
                     chi = np.abs(self.Intensity[iwvl]-amatch['predicted'])/(self.WghtFactor*amatch['predicted'])
                     wDiff.append(chi)
@@ -1124,10 +1145,18 @@ class maker(ionTrails,  specTrails):
                 outpt.write(pstring + '\n')
             relDev = np.asarray(relDevList, np.float64)
             stdDev = np.asarray(stdDevList, np.float64)
+            print(' WghtFactor = %10.3f'%(wghtFactor))
+            outpt.write(' WghtFactor = %10.3f \n'%(wghtFactor))
+
             print(' mean of relative difference = %10.3f std = %10.3f stdDev  %10.3f'%(relDev.mean(), relDev.std(), stdDev.mean()))
             outpt.write(' mean of relative difference = %10.3f std = %10.3f stdDev  %10.3f \n'%(relDev.mean(), relDev.std(), stdDev.mean()))
             print(' mean of intOverPred = abs(int/pred -1.) %10.3f'%(np.mean(intOverPred)))
             outpt.write(' mean of intOverPred = abs(int/pred -1.) %10.3f \n'%(np.mean(intOverPred)))
+            onestd = diffOverIntNp.std()
+            threeSig = 3.*diffOverIntNp.std()
+            print(' std = %10.3f 3*std = %10.3f'%(onestd,  threeSig))
+            outpt.write(' std = %10.3f   3*std = %10.3f \n'%(onestd,  threeSig))
+
             threeSig = 3.*relDev.std()
             print(' 3*std = %10.3f'%(threeSig))
             normChisq = self.getNormalizedChisq()
@@ -1140,7 +1169,8 @@ class maker(ionTrails,  specTrails):
                 print('%5i %s %10.3f %10.3f %10.3f'%(i, self.IonS[i],  self.Wvl[i], relDev[i], stdDev[i]))
                 outpt.write('%5i %s %10.3f %10.3f %10.3f \n'%(i, self.IonS[i],  self.Wvl[i], relDev[i], stdDev[i]))
         diffDict = {'diff':relDev, 'wvl':self.Wvl, 'ionS':self.IonS, '3sig':threeSig, 'poor':poor, 'stdDev':stdDev}
-        self.SearchData['diff'] = diffDict
+        if hasattr(self, 'SearchData'):
+            self.SearchData['diff'] = diffDict
         #
         # --------------------------------------------------------------------------
         #
@@ -1224,6 +1254,11 @@ class maker(ionTrails,  specTrails):
 
             print(' WghtFactor = %10.3f'%(wghtFactor))
             outpt.write(' WghtFactor = %10.3f \n'%(wghtFactor))
+
+            intOverPredNp = np.asarray(intOverPred, np.float64)
+            diffOverIntNp = np.asarray(diffOverInt, np.float64)
+            wghtDiffOverIntNp = diffOverIntNp/wghtFactor
+            chisq2 = (wghtDiffOverIntNp**2).sum()
 
             intOverPredNp = np.asarray(intOverPred, np.float64)
             diffOverIntNp = np.asarray(diffOverInt, np.float64)
@@ -1737,7 +1772,7 @@ class maker(ionTrails,  specTrails):
         best fit
         indxlimits give the range of indices to fit over
         '''
-        self.Nfree = 4
+        self.Nfree = 4 + 1
         t1 = datetime.now()
         if self.Nobs <= 2.*2.:
             print(' the number of observables %10.2e is less than the number of parameters %10.1f'%(self.Nobs, 2.*2.))

@@ -361,7 +361,30 @@ def defaultsRead(verbose=False):
     Read in configuration from .chiantirc file or set defaults if one is not found.
     """
     initDefaults = {'abundfile': 'sun_photospheric_2015_scott','ioneqfile': 'chianti', 'wavelength': 'angstrom', 'flux': 'energy','gui':False}
-    rcfile = os.path.join(os.environ['HOME'],'.chianti/chiantirc')
+
+    if "HOME" in os.environ.keys():
+        if os.path.isdir(os.environ["HOME"]):
+            home = os.environ["HOME"]
+            fn1 = os.path.join(home, '.chianti', 'chiantirc')
+            fn2 = os.path.join(home, '.config', 'chiantirc')
+            rcfile = False
+            if os.path.isfile(fn1):
+                rcfile = fn1
+            elif os.path.isfile(fn2):
+                rcfile = fn2
+    elif "PROFILEHOME" in os.environ.keys() and rcfile is False:
+        if os.path.isdir(os.environ["PROFILEHOME"]):
+            home = os.environ["PROFILEHOME"]
+            fn1 = os.path.join(home, '.chianti', 'chiantirc')
+            fn2 = os.path.join(home, '.config', 'chiantirc')
+            rcfile = False
+            if os.path.isfile(fn1):
+                rcfile = fn1
+            elif os.path.isfile(fn2):
+                rcfile = fn2
+    if verbose:
+        print('rcfile:  %s'%(rcfile))
+
     if os.path.isfile(rcfile):
         print((' reading chiantirc file'))
         config = configparser.RawConfigParser(initDefaults)
@@ -373,6 +396,7 @@ def defaultsRead(verbose=False):
             defaults['gui'] = True
         elif defaults['gui'].lower() in ('f', 'n', 'no', 'off', 'false', '0', 0, False):
             defaults['gui'] = False
+        defaults['rcfile'] = rcfile
     else:
         defaults = initDefaults
         if verbose:

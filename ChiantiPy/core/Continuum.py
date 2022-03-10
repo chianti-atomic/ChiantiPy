@@ -8,7 +8,7 @@ import os
 import numpy as np
 from scipy.interpolate import splev, splrep
 from scipy.ndimage import map_coordinates
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 #import ChiantiPy.core as ch
 from .Ioneq import ioneq
 from ChiantiPy.base import ionTrails
@@ -62,7 +62,6 @@ class continuum(ionTrails):
     .. [102] Verner & Yakovlev, 1995, A&AS, `109, 125 <http://adsabs.harvard.edu/abs/1995A%26AS..109..125V>`_
     .. [103] Karzas and Latter, 1961, ApJSS, `6, 167 <http://adsabs.harvard.edu/abs/1961ApJS....6..167K>`_
     .. [104] Itoh, N. et al., 2000, ApJS, `128, 125 <http://adsabs.harvard.edu/abs/2000ApJS..128..125I>`_
-    .. [105] Young et al., 2003, ApJSS, `144, 135  <http://adsabs.harvard.edu/abs/2003ApJS..144..135Y>`_
     .. [106] Mewe, R. et al., 1986, A&AS, `65, 511 <http://adsabs.harvard.edu/abs/1986A%26AS...65..511M>`_
     .. [107] Rybicki and Lightman, 1979, Radiative Processes in Astrophysics,
             `(Wiley-VCH) <http://adsabs.harvard.edu/abs/1986rpa..book.....R>`_
@@ -693,7 +692,7 @@ class continuum(ionTrails):
         Notes
         -----
         - Uses the Gaunt factors of [103]_ for recombination to the ground level
-        - Uses the photoionization cross sections of [2]_ to develop the free-bound cross section
+        - Uses the photoionization cross sections of [3]_ to develop the free-bound cross section
         - Does not include the elemental abundance or ionization fraction
         - The specified ion is the target ion
         - uses the corrected version of the K-L bf gaunt factors available in CHIANTI V10
@@ -702,7 +701,7 @@ class continuum(ionTrails):
 
         References
         ----------
-        .. [2] Verner & Yakovlev, 1995, A&AS, `109, 125
+        .. [3] Verner & Yakovlev, 1995, A&AS, `109, 125
             <http://adsabs.harvard.edu/abs/1995A%26AS..109..125V>`_
         """
         temperature = self.Temperature

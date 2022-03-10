@@ -3050,6 +3050,13 @@ class ion(ioneqOne, ionTrails, specTrails):
         to calculate the two-photon continuum - only for hydrogen- and helium-like ions
         includes the elemental abundance and the ionization equilibrium
         includes the emission measure if specified
+        discussed in [105]_
+
+        References
+        ----------
+
+        .. [105] Young et al., 2003, ApJSS, `144, 135  <http://adsabs.harvard.edu/abs/2003ApJS..144..135Y>`_
+
         '''
         wvl = np.array(wvl, np.float64)
         #

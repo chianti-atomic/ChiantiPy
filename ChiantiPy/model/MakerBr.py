@@ -736,8 +736,8 @@ class maker(ionTrails,  specTrails):
         '''
         if hasattr(self, 'Temperature'):
             self.EmIndices = np.atleast_1d(indices)
-            self.Nfree = 2*len(indices) + 1  # for sigma
-            self.NT = len(indices)
+            self.Nfree = 2*self.EmIndices.size + 1  # for sigma
+            self.NT = self.EmIndices.size
             if verbose:
                 for adx in self.EmIndices:
                     print('index %5i temperature %12.2e'%(adx, self.Temperature[adx]))

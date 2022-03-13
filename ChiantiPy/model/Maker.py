@@ -1354,6 +1354,25 @@ class maker(ionTrails,  specTrails):
         sformat  = ' %5s %7s %10s %10s %10s %10s %10s %10s %10s'
         fsformat  = ' %5s %7s %10s %10s %10s %10s %10s %10s %10s\n'
         with open(filename, 'w') as outpt:
+            if hasattr(self,  'SearchData'):
+                idx = self.SearchData['best']['idx']
+                dens = self.SearchData['best']['density']
+                temp = self.SearchData['best']['temperature']
+                emfit = self.SearchData['best']['emfit']
+                em = self.SearchData['best']['em']
+                print(' results from search')
+                print(' %5s %10s %10s %10s %10s'%('index',  'density', 'temp', 'emfit','em'))
+                print(' %5i %10.2e %10.2e %10.3f %10.2e'%(idx, dens, temp, emfit, em))
+                outpt.write('results from search \n')
+                outpt.write(' %5s %10s %10s %10s %10s \n'%('index',  'density', 'temp', 'emfit','em'))
+                outpt.write(' %5i %10.2e %10.2e %10.3f %10.2e \n'%(idx, dens, temp, emfit, em))
+            else:
+                emIndices = self.EmIndices
+                for emidx in emIndices:
+                    print(' %5i %12.2e %12.2e %12.2e'%(emidx, self.EDensity[emidx],  self.Temperature[emidx], self.Em[emidx]))
+                    outpt.write(' %5i %12.2e %12.2e %12.2e \n'%(emidx, self.EDensity[emidx],  self.Temperature[emidx], self.Em[emidx]))
+            print(dash)
+            outpt.write(dash  + '\n')
             print(' cwd:  %s'%(cwd))
             outpt.write(' cwd:  %s \n'%(cwd))
             print(' today is %s'%(thisday))
@@ -1441,7 +1460,7 @@ class maker(ionTrails,  specTrails):
             for i in pdx:
                 print('%5i %s %10.3f %10.3f %10.3f'%(i, self.IonS[i],  self.Wvl[i], np.abs(intOverPredNp)[i],  diffOverIntNp[i]))
                 outpt.write('%5i %s %10.3f %10.3f %10.3f\n'%(i, self.IonS[i],  self.Wvl[i], np.abs(intOverPredNp)[i], diffOverIntNp[i]))
-        self.Diff     = {'intOverPred':intOverPredNp, 'diffOverInt':diffOverIntNp, 'wvl':self.Wvl, 'ionS':self.IonS, '3sig':threeSig, 'poor':poor}
+        self.Diff = {'intOverPred':intOverPredNp, 'diffOverInt':diffOverIntNp, 'wvl':self.Wvl, 'ionS':self.IonS, '3sig':threeSig, 'poor':poor}
         #
         # --------------------------------------------------------------------------
         #
@@ -2415,7 +2434,7 @@ class maker(ionTrails,  specTrails):
             self.SearchData = pickle.load(inpt)
 
     def dumpSearchData(self, filename):
-        """to save the attribute match to a pickle file
+        """to save the attribute SearchData to a pickle file
         """
         with open(filename, 'wb') as outpt:
             pickle.dump(self.SearchData, outpt)

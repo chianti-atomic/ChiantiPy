@@ -176,7 +176,7 @@ def diffPrintMcF(specData,  matchDict, filename='diffPrintMcF.txt',  sort=None):
         sorter = range(nMatch)
     elif sort == 'ion':
         indexer = []
-        for amatch in self.match:
+        for amatch in self.Match:
             ionStr = amatch['exptIon']
             ionDict = util.convertName(ionStr)
             Z = ionDict['Z']
@@ -451,7 +451,7 @@ class maker(ionTrails,  specTrails):
         for amatch in matches:
             nions = len(amatch['ion'])
             amatch['predictedLine'] = [0]*nions
-        self.match = matches
+        self.Match = matches
 
     def argCheck(self, temperature=None, eDensity=None, pDensity='default', verbose=0):
         ''' to check the compatibility of the three arguments
@@ -533,20 +533,20 @@ class maker(ionTrails,  specTrails):
             print(' temperature size:  %5i'%(self.Temperature.size))
             print(' density     size:  %5i'%(self.EDensity.size))
         ionList = []
-        for iwvl, amatch in enumerate(self.match):
+        for iwvl, amatch in enumerate(self.Match):
             for someIon in amatch['ion']:
 #                print 'someIon = ', someIon
                 if someIon not in ionList:
                     ionList.append(someIon)
-        for iwvl, amatch in enumerate(self.match):
+        for iwvl, amatch in enumerate(self.Match):
             nPredictedLines = 0
             for awvl in amatch['wvl']:
                 nPredictedLines +=  len(awvl)
-            self.match[iwvl]['intensity'] = np.zeros((nPredictedLines,  nTempDens), 'float64')
+            self.Match[iwvl]['intensity'] = np.zeros((nPredictedLines,  nTempDens), 'float64')
 
         self.ionList = ionList
-        for iwvl in range(len(self.match)):
-            self.match[iwvl]['intensitySum'] = np.zeros(nTempDens, 'float64')
+        for iwvl in range(len(self.Match)):
+            self.Match[iwvl]['intensitySum'] = np.zeros(nTempDens, 'float64')
         for someIon in ionList:
             # already know this ion is needed
             #if verbose:
@@ -563,8 +563,8 @@ class maker(ionTrails,  specTrails):
 #                else:
 #                    nTempDens = intensity.shape[0]
     #            print(' nTempDens = ', nTempDens)
-                for iwvl, amatch in enumerate(self.match):
-    #                self.match[iwvl]['intensitySum'] = np.zeros(nTempDens, 'float64')
+                for iwvl, amatch in enumerate(self.Match):
+    #                self.Match[iwvl]['intensitySum'] = np.zeros(nTempDens, 'float64')
                     #  this is data for each line
                     if someIon in amatch['ion']:
                         kon = amatch['ion'].index(someIon)
@@ -574,30 +574,30 @@ class maker(ionTrails,  specTrails):
                         predictedLine = []
                         for aline in amatch['lineIdx'][kon]:
                             #print(' %s   %6i  %12.3f '%( someIon, aline, thisIon.Intensity['wvl'][aline]))
-                            self.match[iwvl]['intensitySum'] += intensity[:, aline]
-                            iPredictedLine = self.match[iwvl]['iPredictedLine']
+                            self.Match[iwvl]['intensitySum'] += intensity[:, aline]
+                            iPredictedLine = self.Match[iwvl]['iPredictedLine']
                             predictedLine.append(iPredictedLine)
-                            self.match[iwvl]['intensity'][iPredictedLine] = intensity[:, aline]
-                            self.match[iwvl]['iPredictedLine'] += 1
-                        self.match[iwvl]['predictedLine'][kon] = predictedLine
+                            self.Match[iwvl]['intensity'][iPredictedLine] = intensity[:, aline]
+                            self.Match[iwvl]['iPredictedLine'] += 1
+                        self.Match[iwvl]['predictedLine'][kon] = predictedLine
                 self.Tmax = np.zeros_like(self.Wvl)
 #                self.Dmax = np.zeros_like(self.Wvl)
-                for iwvl, amatch in enumerate(self.match):
+                for iwvl, amatch in enumerate(self.Match):
                     gfun = amatch['intensitySum']
                     peak = gfun == gfun.max()
 #                    if len(temperature) > 1:
-                    self.match[iwvl]['tmax'] = temperature[peak]
+                    self.Match[iwvl]['tmax'] = temperature[peak]
 #                    elif len(density) >1:
-#                        self.match[iwvl]['dmax'] = density[peak]
+#                        self.Match[iwvl]['dmax'] = density[peak]
             else:
                print(' IoneqOne not available for %s'%(someIon))
         t2 = datetime.now()
         dt = t2 - t1
         print(' elapsed seconds = %12.3f'%(dt.seconds))
-        #for iwvl, amatch in enumerate(self.match):
+        #for iwvl, amatch in enumerate(self.Match):
             #gfun = amatch['intensitySum']
             #peak = gfun == gfun.max()
-            #self.match[iwvl]['tmax'] = temperature[peak]
+            #self.Match[iwvl]['tmax'] = temperature[peak]
         #
         # ---------------------------------------------------------------------
         #
@@ -616,14 +616,14 @@ class maker(ionTrails,  specTrails):
         density = self.EDensity
         nTempDens = self.NTempDens
 
-        for iwvl, amatch in enumerate(self.match):
+        for iwvl, amatch in enumerate(self.Match):
             nPredictedLines = 0
             for awvl in amatch['wvl']:
                 nPredictedLines +=  len(awvl)
-            self.match[iwvl]['intensity'] = np.zeros((nPredictedLines,  nTempDens), 'float64')
+            self.Match[iwvl]['intensity'] = np.zeros((nPredictedLines,  nTempDens), 'float64')
 
         ionList = []
-        for iwvl, amatch in enumerate(self.match):
+        for iwvl, amatch in enumerate(self.Match):
             for someIon in amatch['ion']:
 #                print 'someIon = ', someIon
                 if someIon not in ionList:
@@ -631,8 +631,8 @@ class maker(ionTrails,  specTrails):
 
         self.ionList =ionList
 
-        for iwvl in range(len(self.match)):
-            self.match[iwvl]['intensitySum'] = np.zeros(nTempDens, 'float64')
+        for iwvl in range(len(self.Match)):
+            self.Match[iwvl]['intensitySum'] = np.zeros(nTempDens, 'float64')
         #
         #  ion multiprocessing setup
         #
@@ -674,8 +674,8 @@ class maker(ionTrails,  specTrails):
             self.Finished.append(someIon)
             intensity = out[1]['intensity']
 
-            for iwvl, amatch in enumerate(self.match):
-#                self.match[iwvl]['intensitySum'] = np.zeros(nTempDens, 'float64')
+            for iwvl, amatch in enumerate(self.Match):
+#                self.Match[iwvl]['intensitySum'] = np.zeros(nTempDens, 'float64')
                 #  this is data for each line
                 if someIon in amatch['ion']:
                     kon = amatch['ion'].index(someIon)
@@ -687,25 +687,25 @@ class maker(ionTrails,  specTrails):
                     predictedLine = []
                     for aline in amatch['lineIdx'][kon]:
     #                    print ' ion, lineIdx = ', anIon, aline
-                        self.match[iwvl]['intensitySum'] += intensity[:, aline]
-                        iPredictedLine = self.match[iwvl]['iPredictedLine']
+                        self.Match[iwvl]['intensitySum'] += intensity[:, aline]
+                        iPredictedLine = self.Match[iwvl]['iPredictedLine']
                         predictedLine.append(iPredictedLine)
-                        self.match[iwvl]['intensity'][iPredictedLine] = intensity[:, aline]
-                        self.match[iwvl]['iPredictedLine'] += 1
-                    self.match[iwvl]['predictedLine'][kon]=predictedLine
+                        self.Match[iwvl]['intensity'][iPredictedLine] = intensity[:, aline]
+                        self.Match[iwvl]['iPredictedLine'] += 1
+                    self.Match[iwvl]['predictedLine'][kon]=predictedLine
         #
         self.Tmax = np.zeros_like(self.Wvl)
         nT = self.Temperature.size
         trange = np.arange(nT)
         minIdx = []
         maxIdx = []
-        for iwvl, amatch in enumerate(self.match):
+        for iwvl, amatch in enumerate(self.Match):
             gfun = amatch['intensitySum']
             peak = gfun == gfun.max()
             if len(temperature) > 1:
-                self.match[iwvl]['tmax'] = temperature[peak]
+                self.Match[iwvl]['tmax'] = temperature[peak]
             elif len(density) >1:
-                self.match[iwvl]['dmax'] = density[peak]
+                self.Match[iwvl]['dmax'] = density[peak]
 #            self.Tmax[iwvl] = temperature[peak]
             good = amatch['intensitySum'] > 0.
             if good.sum() > 0.:
@@ -819,7 +819,7 @@ class maker(ionTrails,  specTrails):
         adjust is to provide an adjustment to the position of the labels
         position : one of 'both', 'right', 'left', or 'none'
         '''
-        match = self.match
+        match = self.Match
         temp = self.Temperature
         dens = self.EDensity
         nInt = len(match)
@@ -971,7 +971,7 @@ class maker(ionTrails,  specTrails):
             sprint = sformat%('iwvl', 'ionS', 'wvl', 'intensity', 'predicted', 'int/pred', 'chi', 'relDiff', 'stdDev')
             print(sprint)
             outpt.write(sprint +'\n')
-            for iwvl,  amatch in enumerate(self.match):
+            for iwvl,  amatch in enumerate(self.Match):
                 if amatch['predicted'] > 0. :
                     chi = np.abs(self.Intensity[iwvl]-amatch['predicted'])/(self.WghtFactor*amatch['predicted'])
                     wDiff.append(chi)
@@ -1018,12 +1018,12 @@ class maker(ionTrails,  specTrails):
         cwd = os.getcwd()
         today = date.today()
         thisday =today.strftime('%Y_%B_%d')
-        nMatch = len(self.match)
+        nMatch = len(self.Match)
         if sort is None:
             sorter = range(nMatch)
         elif sort == 'ion':
             indexer = []
-            for amatch in self.match:
+            for amatch in self.Match:
                 ionStr = amatch['exptIon']
                 ionDict = util.convertName(ionStr)
                 Z = ionDict['Z']
@@ -1033,7 +1033,7 @@ class maker(ionTrails,  specTrails):
             sorter = np.argsort(indexer)
         elif sort == 'wvl':
             indexer = []
-            for amatch in self.match:
+            for amatch in self.Match:
                 wvlObs = amatch['obsWvl']
                 indexer.append(wvlObs)
             sorter = np.argsort(indexer)
@@ -1068,7 +1068,7 @@ class maker(ionTrails,  specTrails):
             outpt.write(fsformat%('', '', 'A', '', '', '', '', 'abs', 'abs' ))
             outpt.write(fsformat%('iwvl', 'ionS', 'wvl', 'intensity', 'predicted', 'int/pred', 'chi', 'relDev',  'dif/int'))
             for iwvl in sorter:
-                amatch = self.match[iwvl]
+                amatch = self.Match[iwvl]
                 if amatch['predicted'] > 0. :
                     chi = np.abs(self.Intensity[iwvl]-amatch['predicted'])/(wghtFactor*self.Intensity[iwvl])
                     wDiff.append(chi)
@@ -1150,12 +1150,12 @@ class maker(ionTrails,  specTrails):
 #        wghtFactor = self.WghtFactor
 #        today = date.today()
 #        thisday =today.strftime('%Y_%B_%d')
-#        nMatch = len(self.match)
+#        nMatch = len(self.Match)
 #        if sort is None:
 #            sorter = range(nMatch)
 #        elif sort == 'ion':
 #            indexer = []
-#            for amatch in self.match:
+#            for amatch in self.Match:
 #                ionStr = amatch['exptIon']
 #                ionDict = util.convertName(ionStr)
 #                Z = ionDict['Z']
@@ -1192,7 +1192,7 @@ class maker(ionTrails,  specTrails):
 #            outpt.write(fsformat%('', '', 'A', '', '', '', '', 'abs', 'abs' ))
 #            outpt.write(fsformat%('iwvl', 'ionS', 'wvl', 'intensity', 'predicted', 'int/pred', 'chi', 'relDev',  'stdDev'))
 #            for iwvl in sorter:
-#                amatch = self.match[iwvl]
+#                amatch = self.Match[iwvl]
 #                if amatch['predicted'] > 0. :
 #                    chi = np.abs(self.Intensity[iwvl]-amatch['predicted'])/(wghtFactor*self.Intensity[iwvl])
 #                    wDiff.append(chi)
@@ -1237,12 +1237,12 @@ class maker(ionTrails,  specTrails):
         the emission measure is already specified as self.Em which is an np array
         '''
         #
-        for iwvl, amatch in enumerate(self.match):
+        for iwvl, amatch in enumerate(self.Match):
             pred = np.sum(amatch['intensitySum']*self.Em)
             try:
-                self.match[iwvl]['predicted'] = pred
+                self.Match[iwvl]['predicted'] = pred
             except:
-                self.match[iwvl]['predicted'] = 0.
+                self.Match[iwvl]['predicted'] = 0.
                 print(' error in predict, iwvl = %5i'%(iwvl))
         #
         # --------------------------------------------------------------------------
@@ -1253,14 +1253,14 @@ class maker(ionTrails,  specTrails):
         the emission measure is already specified as self.Em which is an np array
         '''
         wghtFactor = self.WghtFactor
-        nMatch = len(self.match)
+        nMatch = len(self.Match)
         if verbose:
             print('nMatch:  %i'%(nMatch))
         if sort is None:
             sorter = range(nMatch)
         elif sort == 'ion':
             indexer = []
-            for amatch in self.match:
+            for amatch in self.Match:
                 ionStr = amatch['exptIon']
                 ionDict = util.convertName(ionStr)
                 Z = ionDict['Z']
@@ -1270,7 +1270,7 @@ class maker(ionTrails,  specTrails):
             sorter = np.argsort(indexer)
         elif sort == 'wvl':
             indexer = []
-            for amatch in self.match:
+            for amatch in self.Match:
                 wvlObs = amatch['obsWvl']
                 indexer.append(wvlObs)
             sorter = np.argsort(indexer)
@@ -1309,7 +1309,7 @@ class maker(ionTrails,  specTrails):
                 for iwvl in sorter:
                     if verbose:
                         print(' iwvl:  %i'%(iwvl))
-                    amatch = self.match[iwvl]
+                    amatch = self.Match[iwvl]
                     if amatch['predicted'] > 0. :
                         chi = (np.abs(self.Intensity[iwvl]-amatch['predicted'])/(wghtFactor*self.Intensity[iwvl]))
                         pstring = pformat1%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'], self.Intensity[iwvl]/amatch['predicted'], chi  )
@@ -1341,7 +1341,7 @@ class maker(ionTrails,  specTrails):
 #                pstring1 = pformat1s%('iwvl', 'IonS', 'wvl', 'Int',  'Pred', 'Int/Pred', 'chi')
 #                outpt.write(pstring1 +'\n')
 #                outpt.write(pstring3 + '\n')
-#                for iwvl,  amatch in enumerate(self.match):
+#                for iwvl,  amatch in enumerate(self.Match):
 #                    chi = (np.abs(self.Intensity[iwvl]-amatch['predicted'])/(2.*wghtFactor*self.Intensity[iwvl]))
 #                    pstring = pformat1%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'], self.Intensity[iwvl]/amatch['predicted'], chi  )
 #                    outpt.write(pstring +'\n')
@@ -1389,7 +1389,7 @@ class maker(ionTrails,  specTrails):
         pstring1 = pformat1s%('iwvl', 'IonS', 'wvl', 'Int',  'Pred', 'Int/Pred', 'chi')
         print(pstring1)
         print(dash)
-        for iwvl,  amatch in enumerate(self.match):
+        for iwvl,  amatch in enumerate(self.Match):
             if amatch['predicted'] > 0. :
                 chi = np.abs(self.Intensity[iwvl]/(2.*self.WghtFactor*amatch['predicted']))
                 pstring = pformat1%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'], self.Intensity[iwvl]/amatch['predicted'], chi  )
@@ -1426,7 +1426,7 @@ class maker(ionTrails,  specTrails):
                 finally:
                     pass
                 outpt.write(dash +'\n')
-                for iwvl,  amatch in enumerate(self.match):
+                for iwvl,  amatch in enumerate(self.Match):
                     chi = np.abs(self.Intensity[iwvl]/(2.*self.WghtFactor*amatch['predicted']))
                     pstring = pformat1%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'], self.Intensity[iwvl]/amatch['predicted'], chi  )
                     outpt.write(pstring +'\n')
@@ -1471,9 +1471,9 @@ class maker(ionTrails,  specTrails):
         returns a 1D array
         '''
         self.predict()
-        nwvl = len(self.match)
+        nwvl = len(self.Match)
         weightedDiff = np.zeros(nwvl, 'float64')
-        for iwvl, amatch in enumerate(self.match):
+        for iwvl, amatch in enumerate(self.Match):
             if amatch['predicted'] > 0.:
                 msk = False
                 weightedDiff[iwvl] = (self.Intensity[iwvl] - amatch['predicted'])/(self.WghtFactor*self.Intensity[iwvl])
@@ -1489,11 +1489,11 @@ class maker(ionTrails,  specTrails):
         ''' to find the minimum and maximum indices where all match['intensitySum'] are
         greater than 0'''
         nT = len(self.Temperature)
-        nlines = len(self.match)
+        nlines = len(self.Match)
         print(' n lines = %5i '%(nlines))
         minDx = 0
         maxDx = nT
-        for iline, match in enumerate(self.match):
+        for iline, match in enumerate(self.Match):
             if match['intensitySum'].sum() == 0.:
                 print(' intensity Sum = 0 %5i  %10.3f'%(iline,  match['obsWvl']))
 #            print('%5i %12.2e %12.2e'%(iline, match['intensitySum'].min(), match['intensitySum'].max()))
@@ -2149,7 +2149,7 @@ class maker(ionTrails,  specTrails):
         """
         with open(filename, 'rb') as inpt:
             matchDict = pickle.load(inpt)
-        self.match = matchDict['match']
+        self.Match = matchDict['match']
         self.Temperature = matchDict['Temperature']
         self.EDensity = matchDict['EDensity']
         self.Density = matchDict['EDensity']
@@ -2175,7 +2175,7 @@ class maker(ionTrails,  specTrails):
     def dumpMatch(self, filename):
         """to save the attribute match to a pickle file
         """
-        matchDict={'match':self.match, 'Temperature':self.Temperature, 'EDensity':self.EDensity, 'Ndens':self.Ndens,
+        matchDict={'match':self.Match, 'Temperature':self.Temperature, 'EDensity':self.EDensity, 'Ndens':self.Ndens,
             'Ntemp':self.Ntemp, 'NTempDens':self.NTempDens, 'MinAbund':self.MinAbund}
         if hasattr(self, 'EmIndices'):
             matchDict['EmIndices'] = self.EmIndices

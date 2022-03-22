@@ -1312,6 +1312,55 @@ class maker(ionTrails,  specTrails):
         else:
             self.DiffMcSort = {'intOverPred':intOverPredNp, 'diffOverInt':diffOverIntNp, 'wvl':self.Wvl, 'ionS':self.IonS, '3sig':threeSig, 'poor':poor}
         #
+        # -------------------------------------------------------------------------
+        #
+    def diffPlot(self, title=False, fontsize=16, figsize=[7., 5.]):
+        """
+
+        Parameters
+        ----------
+
+        title:  bool
+            whether to plot the title or not
+
+        fontsize:  int
+            fontsize for matplotlib plots
+
+        figsize:  2d list, ndarray
+            the figure size for the plot
+
+        Returns
+        -------
+
+        DiffPlot:  dict
+            contains the fig, ax matplotlib objects
+
+        """
+        if hasattr(self, 'Diff'):
+            wvl = self.Diff['wvl']
+            diff = self.Diff['diffOverInt']
+            diffMean = diff.mean()
+            diffStd = diff.std()
+            fig,  ax = plt.subplots(figsize=figsize)
+            ax.plot(wvl, diff,'o')
+            ax.axhline(diffMean, color='k', lw=2, label='Mean')
+            ax.axhline(diffMean + diffStd, color='r', lw=2, linestyle='--', label='1 std')
+            ax.axhline(diffMean - diffStd, color='r', lw=2, linestyle='--')  #, label='1 std')
+            ax.axhline(diffMean + 2.*diffStd, color='b', lw=2, linestyle='dotted', label='2 std')
+            ax.axhline(diffMean - 2.*diffStd, color='b', lw=2, linestyle='dotted')  #, label='2 std')
+            ax.axhline(diffMean + 3.*diffStd, color='g', lw=2, linestyle='dotted', label='3 std')
+            ax.axhline(diffMean - 3.*diffStd, color='g', lw=2, linestyle='dotted')  #, label='3 std')
+            ax.set_xlabel('Wavelength ($\AA$)', fontsize=14)
+            ax.set_ylabel(r'(Obs - Pred)/(w $\times$ Obs)', fontsize=14)
+            if title:
+                mytitle = 'diff Mean %10.3f  diff Std  %10.3f'%(diffMean, diffStd)
+                ax.set_title(mytitle, fontsize=fontsize)
+            ax.legend(loc='upper right', bbox_to_anchor=(0.99, 1.0), fontsize=12)
+            fig.tight_layout()
+            self.DiffPlot ={'fig':fig, 'ax':ax}
+        else:
+            print(' the Diff attribute does not exist')
+            print(' run method diffPrint to create it')
         # --------------------------------------------------------------------------
         #
     def diffPrint(self, dir = '.', filename='diffPrint.txt',  sort=None):

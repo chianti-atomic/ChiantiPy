@@ -1,6 +1,6 @@
 import copy
 from datetime import datetime
-
+import pickle
 import numpy as np
 
 import ChiantiPy
@@ -97,17 +97,17 @@ class spectrum(ionTrails, specTrails):
         nTempDens = self.NTempDens
 
         if self.Em.max() == 1.:
-            ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
+            self.Ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
         else:
-            ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ $'
+            self.Ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ $'
 
         #
 #        print(' em = %12.2e '%(em[0]))
         #
         if self.Defaults['wavelength'] == 'angstrom':
-            xlabel = 'Wavelength ('+self.Defaults['wavelength'].capitalize() +')'
+            self.Xlabel = r'Wavelength ($\AA$)'
         else:
-            xlabel = 'Wavelength ('+self.Defaults['wavelength'] +')'
+            self.Xlabel = 'Wavelength ('+self.Defaults['wavelength'] +')'
         #
         #
         if abundance is not None:
@@ -227,13 +227,13 @@ class spectrum(ionTrails, specTrails):
         if type(label) == type(''):
             if hasattr(self, 'Spectrum'):
                 self.Spectrum[label] = {'wavelength':wavelength, 'intensity':total.squeeze(), 'filter':filter[0].__name__,   'width':filter[1], 'integrated':integrated, 'em':em, 'ions':self.IonsCalculated,
-                'Abundance':self.AbundanceName, 'xlabel':xlabel, 'ylabel':ylabel, 'minAbund':minAbund}
+                'Abundance':self.AbundanceName, 'xlabel':self.Xlabel, 'ylabel':self.Ylabel, 'minAbund':minAbund}
             else:
                 self.Spectrum = {label:{'wavelength':wavelength, 'intensity':total.squeeze(), 'filter':filter[0].__name__,   'width':filter[1], 'integrated':integrated, 'em':em, 'ions':self.IonsCalculated,
-                'Abundance':self.AbundanceName, 'xlabel':xlabel, 'ylabel':ylabel}, 'minAbund':minAbund}
+                'Abundance':self.AbundanceName, 'xlabel':self.Xlabel, 'ylabel':self.Ylabel}, 'minAbund':minAbund}
         else:
             self.Spectrum ={'wavelength':wavelength, 'intensity':total.squeeze(), 'filter':filter[0].__name__,   'width':filter[1], 'integrated':integrated,  'ions':self.IonsCalculated,
-            'Abundance':self.AbundanceName, 'xlabel':xlabel, 'ylabel':ylabel, 'minAbund':minAbund}
+            'Abundance':self.AbundanceName, 'xlabel':self.Xlabel, 'ylabel':self.Ylabel, 'minAbund':minAbund}
 
 
 class bunch(ionTrails, specTrails):
@@ -287,7 +287,33 @@ class bunch(ionTrails, specTrails):
     #
     # ------------------------------------------------------------------------------------
     #
-    def __init__(self, temperature, eDensity, wvlRange, elementList=None, ionList=None, minAbund=None, keepIons=0, em=None, abundance=None, verbose=0, allLines=1):
+    def __init__(self, temperature, eDensity, wvlRange, elementList=None, ionList=None, minAbund=None, keepIons=0, em=None, abundance=None, verbose=0, allLines=True):
+        """
+
+        :param temperature: temperature in K
+        :type temperature: float, ndarray
+        :param eDensity: electron density in cm^-3
+        :type eDensity: float, ndarray
+        :param wvlRange: DESCRIPTION
+        :type wvlRange: TYPE
+        :param elementList: DESCRIPTION, defaults to None
+        :type elementList: TYPE, optional
+        :param ionList: DESCRIPTION, defaults to None
+        :type ionList: TYPE, optional
+        :param minAbund: DESCRIPTION, defaults to None
+        :type minAbund: TYPE, optional
+        :param keepIons: DESCRIPTION, defaults to 0
+        :type keepIons: TYPE, optional
+        :param em: emission measure, defaults to None
+        :type em: float or array, optional
+        :param abundance: DESCRIPTION, defaults to None
+        :type abundance: TYPE, optional
+        :param verbose: DESCRIPTION, defaults to 0
+        :type verbose: TYPE, optional
+        :param allLines: whether to include unobserved lines, defaults to True
+        :type allLines: bool, optional
+
+        """
         #
         t1 = datetime.now()
         # creates Intensity dict from first ion calculated
@@ -362,4 +388,5 @@ class bunch(ionTrails, specTrails):
         t2 = datetime.now()
         dt=t2-t1
         print(' elapsed seconds = %12.3f'%(dt.seconds))
-        return
+
+

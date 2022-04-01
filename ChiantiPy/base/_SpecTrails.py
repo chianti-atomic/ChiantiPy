@@ -3,6 +3,7 @@ Base class used in several ChiantiPy objects
 """
 
 from datetime import datetime
+import pickle
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -319,18 +320,56 @@ class specTrails(object):
     #
     # -------------------------------------------------------------------------
     #
+    def saveData(self, filename):
+        """
+
+        :param filename: filename where the pickle file of the saved data will be stored
+        :type filename: str
+
+        following running a ch.spectrum calculation, save the calculation as a dictionary to a pickle file
+        """
+        data = {'temperature':self.Temperature, 'eDensity':self.EDensity,
+            'em':self.Em, 'abundanceName':self.AbundanceName, 'abundAll':self.AbundAll,
+            'ionsCalculated':self.IonsCalculated,
+            'defaults':self.Defaults, 'intensity':self.Intensity,
+            'nTemp':self.Ntemp, 'nDens':self.Ndens, 'nTempDens':self.NTempDens}
+
+#          'elementList':self.elementList, 'ionList':self.ionList,
+#            'minAbund':self.minAbund, 'keepIons':self.keepIons, 'em':self.em, 'abundance':self.abundance,
+#            'allLines':self.allLines}
+
+        if hasattr(self, 'Spectrum'):
+            data['spectrum'] = self.Spectrum
+        if hasattr(self, 'Wvl'):
+            data['wvl'] = self.Wvl
+        if hasattr(self, 'Wavelength'):
+            data['wavelength'] = self.Wavelength
+        if hasattr(self, 'WvlRange'):
+            data['wvlRange'] = self.WvlRange
+        if hasattr(self, 'PDensity'):
+            data['pDensity'] = self.PDensity
+        if hasattr(self, 'IonInstances'):
+            data['ionInstances'] = self.IonInstances
+        if hasattr(self, 'Xlabel'):
+            data['xlabel'] = self.Xlabel
+        if hasattr(self, 'Ylabel'):
+            data['ylabel'] = self.Ylabel
+        with open(filename, 'wb') as outpt:
+            pickle.dump(data, outpt)
+
     def spectrumPlot(self, index=-1, integrated=0, saveFile=0, linLog = 'lin'):
         '''
         to plot the spectrum as a function of wavelength
         '''
+        fs = 14
         plt.figure()
         mask = self.Em > 1.
         if mask.sum() == 0:
-            ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
+            self.Ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
         else:
-            ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$'
+            self.Ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$'
         #
-        xlabel = 'Wavelength ('+self.Defaults['wavelength'] +')'
+        self.Xlabel = 'Wavelength ('+self.Defaults['wavelength'] +')'
         #
 #        ymin = 10.**(np.log10(emiss.min()).round(0))
         #
@@ -341,9 +380,9 @@ class specTrails(object):
                 plt.plot(self.Spectrum['wavelength'], self.Spectrum['integrated'])
             elif 'wvl' in sorted(self.Spectrum.keys()):
                 plt.plot(self.Spectrum['wvl'], self.Spectrum['integrated'])
-            plt.xlabel(xlabel)
-            plt.ylabel(ylabel)
-            plt.title('integrated spectrum')
+            plt.xlabel(self.Xlabel,  fontsize=fs)
+            plt.ylabel(self.Ylabel,  fontsize=fs)
+            plt.title('integrated spectrum',  fontsize=fs)
         else:
             nTempDens = self.NTempDens
             if nTempDens == 1:
@@ -352,7 +391,7 @@ class specTrails(object):
                     plt.plot(self.Spectrum['wavelength'], self.Spectrum['intensity'])
                 elif 'wvl' in sorted(self.Spectrum.keys()):
                     plt.plot(self.Spectrum['wvl'], self.Spectrum['intensity'])
-                    plt.title(' Temperature = %10.2e K'%(self.Temperature))
+                    plt.title(' Temperature = %10.2e K'%(self.Temperature),  fontsize=fs)
             else:
                 if index < 0:
                     index = nTempDens/2
@@ -360,9 +399,11 @@ class specTrails(object):
                     plt.plot(self.Spectrum['wavelength'], self.Spectrum['intensity'][index])
                 elif 'wvl' in sorted(self.Spectrum.keys()):
                     plt.plot(self.Spectrum['wvl'], self.Spectrum['intensity'][index])
-                    plt.title(' Temperature = %10.2e K for index = %3i'%(self.Temperature[index], index))
-                plt.xlabel(xlabel)
-                plt.ylabel(ylabel)
+                    plt.title(' Temperature = %10.2e K for index = %3i'%(self.Temperature[index], index),  fontsize=fs)
+                plt.xlabel(self.Xlabel,  fontsize=fs)
+                plt.ylabel(self.Ylabel,  fontsize=fs)
+        ylim = plt.ylim()
+        plt.ylim([0., ylim[1]])
         plt.tight_layout()
         if saveFile:
             plt.savefig(saveFile)

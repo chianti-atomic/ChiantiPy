@@ -1,5 +1,7 @@
 """
 Reading and writing functions
+
+TODO:  see if klgfbRead is needed or not
 """
 import os
 from datetime import date
@@ -1027,43 +1029,43 @@ def itohRead():
     return {'itohCoef':gff}
 
 
-def klgfbRead():
-    """
-    Read CHIANTI files containing the free-bound gaunt factors for n=1-6 from [13]_.
-
-    Returns
-    -------
-    {'pe', 'klgfb'} : `dict`
-        Photon energy and the free-bound gaunt factors
-
-    References
-    ----------
-    .. [13] Karzas and Latter, 1961, ApJSS, `6, 167
-        <http://adsabs.harvard.edu/abs/1961ApJS....6..167K>`_
-    """
-    xuvtop = os.environ['XUVTOP']
-    fname = os.path.join(xuvtop, 'continuum', 'klgfb.dat')
-    input = open(fname)
-    lines = input.readlines()
-    input.close()
-    #
-    ngfb = int(lines[0].split()[0])
-    nume = int(lines[0].split()[1])
-
-    gfb = np.zeros((ngfb, ngfb, nume), np.float64)
-    nlines = len(lines)
-#        print 'nlines, nume, ngfb = ', nlines,  nume, ngfb
-    pe = np.asarray(lines[1].split(), np.float64)
-    for iline in range(2, nlines):
-        data = lines[iline].split()
-        n = int(data[0])
-        l = int(data[1])
-        gfb[n-1, l] = np.array(data[2:], np.float64)
-    return {'pe':pe, 'klgfb':gfb}
+#def klgfbRead():
+#    """
+#    Read CHIANTI files containing the free-bound gaunt factors for n=1-6 from [13]_.
+#
+#    Returns
+#    -------
+#    {'pe', 'klgfb'} : `dict`
+#        Photon energy and the free-bound gaunt factors
+#
+#    References
+#    ----------
+#    .. [13] Karzas and Latter, 1961, ApJSS, `6, 167
+#        <http://adsabs.harvard.edu/abs/1961ApJS....6..167K>`_
+#    """
+#    xuvtop = os.environ['XUVTOP']
+#    fname = os.path.join(xuvtop, 'continuum', 'klgfb.dat')
+#    input = open(fname)
+#    lines = input.readlines()
+#    input.close()
+#    #
+#    ngfb = int(lines[0].split()[0])
+#    nume = int(lines[0].split()[1])
+#
+#    gfb = np.zeros((ngfb, ngfb, nume), np.float64)
+#    nlines = len(lines)
+##        print 'nlines, nume, ngfb = ', nlines,  nume, ngfb
+#    pe = np.asarray(lines[1].split(), np.float64)
+#    for iline in range(2, nlines):
+#        data = lines[iline].split()
+#        n = int(data[0])
+#        l = int(data[1])
+#        gfb[n-1, l] = np.array(data[2:], np.float64)
+#    return {'pe':pe, 'klgfb':gfb}
 
 def klgbfnRead(filename):
     """
-    Read CHIANTI files containing the free-bound gaunt factors for n=1-6 from [13]_.
+    Read CHIANTI files containing the free-bound gaunt factors for n=1-6 from [14]_.
     This reads the corrected KL files in CHIANTI version 10+
 
     Parameters
@@ -1079,7 +1081,7 @@ def klgbfnRead(filename):
 
     References
     ----------
-    .. [13] Karzas and Latter, 1961, ApJSS, `6, 167
+    .. [14] Karzas and Latter, 1961, ApJSS, `6, 167
         <http://adsabs.harvard.edu/abs/1961ApJS....6..167K>`_
     """
     kl = np.loadtxt(filename)

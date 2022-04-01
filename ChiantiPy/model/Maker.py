@@ -159,127 +159,6 @@ def emPlot(matchDict, vs='T', loc='upper right', fs=10,  adjust=None, position='
         plt.ylabel('Emission Measure (cm$^{-5}$)', fontsize=14)
         plt.xlabel('Electron Density (cm$^{-3}$)',  fontsize=14)
     #
-    # --------------------------------------------------------------------------
-    #
-def diffPrintMcF(specData,  matchDict, filename='diffPrintMcF.txt',  sort=None):
-    '''
-    calculates the weighted and straight differences between observed and predicted
-    prints the values saves to a file from a PyMC run
-    '''
-    match = matchDict['match']
-    temp = matchDict['Temperature']
-    dens = matchDict['EDensity']
-    if 'Emindices' in matchDict.keys():
-        emIndices = matchDict['EmIndices']
-    else:
-        emIndices = None
-        print('EmIndices missing from matchDict')
-    if 'Em' in matchDict.keys():
-        em = matchDict['Em']
-    else:
-        Em = None
-        print('Em missing from matchDict')
-
-    nMatch = len(match)
-    if sort is None:
-        sorter = range(nMatch)
-    elif sort == 'ion':
-        indexer = []
-        for amatch in match:
-            ionStr = amatch['exptIon']
-            ionDict = util.convertName(ionStr)
-            Z = ionDict['Z']
-            stage = ionDict['Ion']
-            number = Z*1000 + stage
-            indexer.append(number)
-        sorter = np.argsort(indexer)
-
-    wDiff = []
-    relDevList = []
-    stdDevList = []
-    intOverPred = []
-    dash = ' -------------------------------------------------'
-    pformat1 = ' %5i %7s %10.3f %10.2e %10.2e %10.3f %10.3f %10.3f %10.3f'
-    pformat1a = ' %5i %7s %10.3f %10.2e %10.2e *****NID******'
-    sformat  = ' %5s %7s %10s %10s %10s %10s %10s %10s %10s'
-    fsformat  = ' %5s %7s %10s %10s %10s %10s %10s %10s %10s\n'
-    with open(filename, 'w') as outpt:
-        print(' %5s %12s %12s %12s'%('index',  'density',  'temperature',  'Em'''))
-        outpt.write(' %5s %12s %12s %12s \n'%('index',  'density',  'temperature',  'Em'''))
-        if emIndices is not None:
-            for emidx in emIndices:
-                print(' %5i %12.2e %12.2e %12.2e'%(emidx, dens[emidx],  temp[emidx], em[emidx]))
-                outpt.write(' %5i %12.2e %12.2e %12.2e \n'%(emidx, dens[emidx],  temp[emidx], em[emidx]))
-        print(dash)
-        outpt.write(dash+'\n')
-        print(' chi = abs(int/(wght*pred))  strDiff = (int - pred)/pred')
-        outpt.write(' chi = abs(int/(2*wght*pred))  strDiff = (int - pred)/pred \n')
-        print(sformat%('iwvl', 'ionS', 'wvl', 'intensity', 'predicted', 'int/pred', 'chi', 'relDev', 'stdDev'))
-        outpt.write(fsformat%('iwvl', 'ionS', 'wvl', 'intensity', 'predicted', 'int/pred', 'chi', 'relDev',  'stdDev'))
-        for iwvl in sorter:
-            amatch = match[iwvl]
-            if amatch['predicted'] > 0. :
-                chi = np.abs(self.Intensity[iwvl]-amatch['predicted'])/(self.WghtFactor*self.Intensity[iwvl])
-                wDiff.append(chi)
-                intOverPred.append(np.abs(self.Intensity[iwvl]/amatch['predicted'] - 1.))
-                relDevList.append(np.abs(self.Intensity[iwvl]-amatch['predicted'])/self.Intensity[iwvl])
-                stdDevList.append(relDevList[-1])
-                pstring = pformat1%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'], self.Intensity[iwvl]/amatch['predicted'], chi, relDevList[-1],  stdDevList[-1] )
-            else:
-                pstring = pformat1a%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'])
-            print(pstring)
-            outpt.write(pstring+'\n')
-        diff = np.asarray(relDevList, np.float64)
-        stdDev = np.asarray(stdDevList, np.float64)
-        print(' mean of relative Deviation = %10.3f 3*relDev = %10.3f stdDev = %10.3f\n'%(diff.mean(), 3.*diff.mean(), stdDev.mean()))
-        outpt.write(' mean of rel Dev = %10.3f 3*rel Dev  = %10.3f stdDiff:  %10.3f \n'%(diff.mean(), 3.*diff.mean(), stdDev.mean()))
-        print(' mean of intOverPred = abs(int/pred -1.) %10.3f'%(np.mean(intOverPred)))
-        outpt.write(' mean of intOverPred = abs(int/pred -1.) %10.3f \n'%(np.mean(intOverPred)))
-        threeSig = 3.*diff.mean()
-        print(' 3*std = %10.3f'%(threeSig))
-        outpt.write(' 3*std = %10.3f \n'%(threeSig))
-        normChisq = self.getNormalizedChisq()
-        print('Normalized Chisq = %10.3f'%(normChisq))
-        outpt.write('Normalized Chisq = %10.3f \n'%(normChisq))
-        poor = diff > threeSig
-        idx = np.arange(diff.size)
-        pdx = idx[poor]
-        for i in pdx:
-            print('%5i %s %10.3f %10.3f'%(i, self.IonS[i],  self.Wvl[i], diff[i]))
-            outpt.write('%5i %s %10.3f %10.3f \n'%(i, self.IonS[i],  self.Wvl[i], diff[i]))
-    self.diffDict = {'diff':diff, 'wvl':self.Wvl, 'ionS':self.IonS, '3sig':threeSig, 'poor':poor}
-#        self.SearchData['diff'] = diffDict
-     #
-    #-----------------------------------------------------
-    #
-def makeMatchPkl(specData, temp, dens, wghtFactor = 0.25,  abundanceName = None, minAbund=1.e-6, useMgofnt=1, verbose=0):
-    '''
-    input a data dictionary and instantiate a maker class,
-    and run mgofnt and then make a pickle file
-    to use multiprocessing, this needs to be run in an ipython console
-
-    Parameters
-
-    specData : dict
-        the observed line intensities, wavelegths ...
-    '''
-
-    mydem = maker(specData, wghtFactor = wghtFactor, abundanceName =  abundanceName, minAbund=minAbund, verbose=verbose)
-    mydem.makeMatch()
-    if useMgofnt:
-        mydem.mgofnt(temp, dens, verbose=1)
-    else:
-        mydem.gofnt(temp, dens)
-#    mydem.predictor()
-    filename = specData['filename']
-    outname = os.path.splitext(filename)[0] + '-match-' + mydem.AbundanceName +'.pkl'
-    mydem.PklName = outname
-    print(' pickle name = %s'%(outname))
-    mydem.dump(outname)
-#    with open(outname, 'wb') as outpt:
-#        pickle.dump(mydem.match, outpt)
-    print(' should now move this to the working dir where it will be used')
-    #
     #-----------------------------------------------------
     #
 class maker(ionTrails,  specTrails):
@@ -737,13 +616,14 @@ class maker(ionTrails,  specTrails):
         #
         # --------------------------------------------------------
         #
-    def emSetIndices(self, indices, verbose=0):
+    def emSetIndices(self, indices, add=0.,  verbose=0):
         '''
         to set the indices of the N temperature/density EM distribution
+        can increase the number of paramaters if additional parameters have been used
         '''
         if hasattr(self, 'Temperature'):
             self.EmIndices = np.atleast_1d(indices)
-            self.Nparams = 2.*self.EmIndices.size + 1.  # for sigma
+            self.Nparams = 2.*self.EmIndices.size + add
             self.NT = self.EmIndices.size
             if verbose:
                 for adx in self.EmIndices:
@@ -1069,126 +949,16 @@ class maker(ionTrails,  specTrails):
         #
         # --------------------------------------------------------------------------
         #
-    def diffPrintChi(self, dir = '.', filename='diffPrintChi.txt',  sort=None):
+    def diff(self, sort=None):
         '''
         calculates the weighted and straight differences between observed and predicted
-        prints the values saves the as a dictionary self.Diff
-        to be used together with a prior brute-force chi-squared minimization approach
-        '''
-        wghtFactor = self.WghtFactor
-        nMatch = len(self.Match)
-        if sort is None:
-            sorter = range(nMatch)
-        elif sort == 'ion':
-            indexer = []
-            for amatch in self.Match:
-                ionStr = amatch['exptIon']
-                ionDict = util.convertName(ionStr)
-                Z = ionDict['Z']
-                stage = ionDict['Ion']
-                number = Z*1000 + stage
-                indexer.append(number)
-            sorter = np.argsort(indexer)
-        elif sort == 'wvl':
-            indexer = []
-            for amatch in self.Match:
-                wvlObs = amatch['obsWvl']
-                indexer.append(wvlObs)
-            sorter = np.argsort(indexer)
-
-        wDiff = []
-        relDevList = []
-        stdDevList = []
-        intOverPred = []
-        dash = ' -------------------------------------------------'
-        pformat1 = ' %5i %7s %10.3f %10.2e %10.2e %10.3f %10.3f %10.3f %10.3f'
-        pformat1o = ' %5i %7s %10.3f %10.2e %10.2e %10.3f %10.3f %10.3f \n'
-        sformat  = ' %5s %7s %10s %10s %10s %10s %10s %10s %10s'
-        with open(filename, 'w') as outpt:
-
-            try:
-                idx = self.SearchData['best']['idx']
-                dens = self.SearchData['best']['density']
-                temp = self.SearchData['best']['temperature']
-                emfit = self.SearchData['best']['emfit']
-                em = self.SearchData['best']['em']
-                print(' %5i %10.2e %10.2e %10.3f %10.2e'%(idx, dens, temp, emfit, em))
-                outpt.write(' %5i %10.2e %10.2e %10.3f %10.2e \n'%(idx, dens, temp, emfit, em))
-            except:
-                emIndices = self.EmIndices
-                for emidx in emIndices:
-                    print(' %5i %12.2e %12.2e %12.2e'%(emidx, self.EDensity[emidx],  self.Temperature[emidx], self.Em[emidx]))
-                    outpt.write(' %5i %12.2e %12.2e %12.2e \n'%(emidx, self.EDensity[emidx],  self.Temperature[emidx], self.Em[emidx]))
-            finally:
-                pass
-            print(dash)
-            outpt.write(dash +'\n')
-            print(' match filename = %s \n'%(self.MatchName))
-            outpt.write(' match filename = %s \n'%(self.MatchName))
-            print(' wghtFactor %10.3f'%(self.WghtFactor))
-            outpt.write(' wghtFactor %10.3f'%(self.WghtFactor))
-            print(' chi = abs(int/(2*wght*pred))  relDiff = (int - pred)/pred')
-            outpt.write(' chi = abs(int/(2*wght*pred))  relDiff = (int - pred)/pred \n')
-            sprint = sformat%('iwvl', 'ionS', 'wvl', 'intensity', 'predicted', 'int/pred', 'chi', 'relDiff', 'stdDev')
-            print(sprint)
-            outpt.write(sprint +'\n')
-            for iwvl in sorter:
-                amatch = self.Match[iwvl]
-                if amatch['predicted'] > 0. :
-                    chi = np.abs(self.Intensity[iwvl]-amatch['predicted'])/(self.WghtFactor*amatch['predicted'])
-                    wDiff.append(chi)
-                    intOverPred.append(np.abs(self.Intensity[iwvl]/amatch['predicted'] - 1.))
-                    relDevList.append(np.abs(self.Intensity[iwvl]-amatch['predicted'])/amatch['predicted'])
-                    stdDevList.append(relDevList[-1]**2)
-                    pstring = pformat1%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'], self.Intensity[iwvl]/amatch['predicted'], chi, relDevList[-1], stdDevList[-1] )
-                else:
-                    pstring = pformat1%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'], -1.)
-                print(pstring)
-                outpt.write(pstring + '\n')
-            relDev = np.asarray(relDevList, np.float64)
-            stdDev = np.asarray(stdDevList, np.float64)
-            print(' WghtFactor = %10.3f'%(wghtFactor))
-            outpt.write(' WghtFactor = %10.3f \n'%(wghtFactor))
-
-            print(' mean of relative difference = %10.3f std = %10.3f stdDev  %10.3f'%(relDev.mean(), relDev.std(), stdDev.mean()))
-            outpt.write(' mean of relative difference = %10.3f std = %10.3f stdDev  %10.3f \n'%(relDev.mean(), relDev.std(), stdDev.mean()))
-            print(' mean of intOverPred = abs(int/pred -1.) %10.3f'%(np.mean(intOverPred)))
-            outpt.write(' mean of intOverPred = abs(int/pred -1.) %10.3f \n'%(np.mean(intOverPred)))
-            onestd = diffOverIntNp.std()
-            threeSig = 3.*diffOverIntNp.std()
-            print(' std = %10.3f 3*std = %10.3f'%(onestd,  threeSig))
-            outpt.write(' std = %10.3f   3*std = %10.3f \n'%(onestd,  threeSig))
-
-            threeSig = 3.*relDev.std()
-            print(' 3*std = %10.3f'%(threeSig))
-            normChisq = self.getNormalizedChisq()
-            print('Normalized Chisq = %10.3f'%(normChisq))
-            outpt.write('Normalized Chisq = %10.3f \n'%(normChisq))
-            poor = relDev > threeSig
-            idx = np.arange(relDev.size)
-            pdx = idx[poor]
-            for i in pdx:
-                print('%5i %s %10.3f %10.3f %10.3f'%(i, self.IonS[i],  self.Wvl[i], relDev[i], stdDev[i]))
-                outpt.write('%5i %s %10.3f %10.3f %10.3f \n'%(i, self.IonS[i],  self.Wvl[i], relDev[i], stdDev[i]))
-        diffDict = {'diff':relDev, 'wvl':self.Wvl, 'ionS':self.IonS, '3sig':threeSig, 'poor':poor, 'stdDev':stdDev}
-        if hasattr(self, 'SearchData'):
-            self.SearchData['diff'] = diffDict
-        #
-        # --------------------------------------------------------------------------
-        #
-    def diffPrintMc(self, dir = '.', filename='diffPrintMc.txt',  sort=None):
-        '''
-        calculates the weighted and straight differences between observed and predicted
-        prints the values saves to a file from a PyMC3 run
-        also created a attribute self.Dict, a dict with the following keys:
+        creates an  attribute self.Dict, a dict with the following keys:
         'wvl' = observed wavelength (A)
         'relDiff' = (I_obs - I_pred)/(I_obs)
         'ionS' the CHIANTI type name for an ion
+        sort be either of none, 'wvl', or 'ion'
         '''
         wghtFactor = self.WghtFactor
-        cwd = os.getcwd()
-        today = date.today()
-        thisday =today.strftime('%Y_%B_%d')
         nMatch = len(self.Match)
         if sort is None:
             sorter = range(nMatch)
@@ -1209,108 +979,43 @@ class maker(ionTrails,  specTrails):
                 indexer.append(wvlObs)
             sorter = np.argsort(indexer)
 
+        diff = []
         wDiff = []
         intOverPred = []
         diffOverInt = []
-        dash = ' -------------------------------------------------'
-        pformat1 = ' %5i %7s %10.3f %10.2e %10.2e %10.3f %10.3f %10.3f %10.3f'
-        pformat1a = ' %5i %7s %10.3f %10.2e %10.2e *****NID******'
-        sformat  = ' %5s %7s %10s %10s %10s %10s %10s %10s %10s'
-        fsformat  = ' %5s %7s %10s %10s %10s %10s %10s %10s %10s\n'
-        with open(filename, 'w') as outpt:
-            print(' cwd:  %s'%(cwd))
-            outpt.write(' cwd:  %s \n'%(cwd))
-            print(' today is %s'%(thisday))
-            outpt.write(' today is %s \n'%(thisday))
-            print(' WghtFactor = %10.3f'%(wghtFactor))
-            outpt.write(' WghtFactor = %10.3f \n'%(wghtFactor))
-            emIndices = self.EmIndices
-            print(' %5s %12s %12s %12s'%('index',  'density',  'temperature',  'Em'))
-            outpt.write(' %5s %12s %12s %12s \n'%('index',  'density',  'temperature',  'Em'))
-            for emidx in emIndices:
-                print(' %5i %12.2e %12.2e %12.2e %8.3f'%(emidx, self.EDensity[emidx],  self.Temperature[emidx], self.Em[emidx],  self.EmLog[emidx]))
-                outpt.write(' %5i %12.2e %12.2e %12.2e %8.3f \n'%(emidx, self.EDensity[emidx],  self.Temperature[emidx], self.Em[emidx],  self.EmLog[emidx]))
-            print(dash)
-            outpt.write(dash+'\n')
-            print(' chi = abs(int - pred)/(wght*int))  strDiff = (int - pred)/pred')
-            outpt.write(' chi = abs(int-pred)/(wght*int))  strDiff = (int - pred)/int \n')
-            print(sformat%('', '', 'A', '', '', '', '', 'abs', 'abs' ))
-            print(sformat%('iwvl', 'ionS', 'wvl', 'intensity', 'predicted', 'int/pred', 'chi', 'relDev', 'dif/int'))
-            outpt.write(fsformat%('', '', 'A', '', '', '', '', ' ', ' ' ))
-            outpt.write(fsformat%('iwvl', 'ionS', 'wvl', 'intensity', 'predicted', 'int/pred', 'chi', 'relDev',  'dif/int'))
-            for iwvl in sorter:
-                amatch = self.Match[iwvl]
-                if amatch['predicted'] > 0. :
-                    chi = np.abs(self.Intensity[iwvl]-amatch['predicted'])/(wghtFactor*self.Intensity[iwvl])
-                    wDiff.append(chi)
-                    intOverPred.append(self.Intensity[iwvl]/amatch['predicted'] - 1.)
-                    diffOverInt.append((self.Intensity[iwvl]-amatch['predicted'])/self.Intensity[iwvl])
-                    pstring = pformat1%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'], self.Intensity[iwvl]/amatch['predicted'], chi, intOverPred[-1],  diffOverInt[-1] )
-                else:
-                    pstring = pformat1a%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'])
-                    wDiff.append(0.)
-                    intOverPred.append(0.)
-                    diffOverInt.append(0.)
-                print(pstring)
-                outpt.write(pstring+'\n')
 
-            print(' WghtFactor = %10.3f'%(wghtFactor))
-            outpt.write(' WghtFactor = %10.3f \n'%(wghtFactor))
+        noPredIdx = []
+        noPredWvl = []
+        noPredIon = []
 
-            intOverPredNp = np.asarray(intOverPred, np.float64)
-            diffOverIntNp = np.asarray(diffOverInt, np.float64)
-            wghtDiffOverIntNp = diffOverIntNp/wghtFactor
-            chisq2 = (wghtDiffOverIntNp**2).sum()
 
-            intOverPredNp = np.asarray(intOverPred, np.float64)
-            diffOverIntNp = np.asarray(diffOverInt, np.float64)
-            wghtDiffOverIntNp = diffOverIntNp/wghtFactor
-            chisq2 = (wghtDiffOverIntNp**2).sum()
 
-            print(' mean of relative Deviation = %10.3f 3*relDev = %10.3f stdDev = %10.3f\n'%(intOverPredNp.mean(), 3.*intOverPredNp.mean(), intOverPredNp.std()))
-            outpt.write(' mean of rel Dev = %10.3f 3*rel Dev  = %10.3f stdDiff:  %10.3f \n'%(intOverPredNp.mean(), 3.*intOverPredNp.mean(), intOverPredNp.std()))
-            print(' mean of intOverPred = abs(int/pred -1.) %10.3f'%(intOverPredNp.mean()))
-            outpt.write(' mean of intOverPred = abs(int/pred -1.) %10.3f \n'%(intOverPredNp.mean()))
+        for iwvl in sorter:
+            amatch = self.Match[iwvl]
+            if amatch['predicted'] > 0. :
+                diff.append(self.Intensity[iwvl]-amatch['predicted'])
+                chi = np.abs(self.Intensity[iwvl]-amatch['predicted'])/(wghtFactor*self.Intensity[iwvl])
+                wDiff.append(chi)
+                intOverPred.append(self.Intensity[iwvl]/amatch['predicted'] - 1.)
+                diffOverInt.append((self.Intensity[iwvl]-amatch['predicted'])/self.Intensity[iwvl])
 
-            onestd = diffOverIntNp.std()
-            threeSig = 3.*diffOverIntNp.std()
-            print(' std = %10.3f 3*std = %10.3f'%(onestd,  threeSig))
-            outpt.write(' std = %10.3f   3*std = %10.3f \n'%(onestd,  threeSig))
+            else:
 
-            print(' sum of diffOverInt^2 =  %10.3f weighted %10.3f '%((diffOverIntNp**2).sum(),  (diffOverIntNp**2).sum()/wghtFactor**2))
-            outpt.write(' sum of diffOverInt^2 =  %10.3f  weighted %10.3f\n'%((diffOverIntNp**2).sum(), (diffOverIntNp**2).sum()/wghtFactor**2  ))
+                noPredIdx.append(iwvl)
+                noPredWvl.append(self.Match[iwvl]['wvl'])
+                noPredIon.append(self.Match[iwvl]['ions'])
 
-            print(' chisq2 = %10.3f'%(chisq2))
-            outpt.write(' chisq2 = %10.3f \n'%(chisq2))
+        diffNp = np.asarray(diff, np.float64)
+        intOverPredNp = np.asarray(intOverPred, np.float64)
+        diffOverIntNp = np.asarray(diffOverInt, np.float64)
 
-            print(' Nobs = %i Nions = %i'%(self.Nobs,  self.Nions))
-            outpt.write(' Nobs = %i  Nions = %i \n'%(self.Nobs,  self.Nions))
-            print(' Nfree = %i'%(self.Nfree))
-            outpt.write(' Nfree = %i \n'%(self.Nfree))
-            chisq,  msk = self.getChisq()
-            normChisq = self.getNormalizedChisq()
-            print('           Chisq = %10.3f'%(chisq))
-            print('Normalized Chisq = %10.3f chisq/(nobs)'%(chisq/float(nMatch)))
-            print('Normalized Chisq = %10.3f chisq/(nobs -nfree)'%(normChisq))
-            print('Normalized Chisq = %10.3f chisq/(nions -nfree)'%(chisq/(self.Nions - self.Nfree)))
-            outpt.write('           Chisq = %10.3f \n'%(chisq))
-            outpt.write('Normalized Chisq = %10.3f chisq/(nobs) \n'%(chisq/float(nMatch)))
-            outpt.write('Normalized Chisq = %10.3f  chisq/(nobs -nfree)\n'%(normChisq))
-            outpt.write('Normalized Chisq = %10.3f chisq/(nions -nfree)\n'%(chisq/(self.Nions - self.Nfree)))
-            poor = np.abs(diffOverIntNp) > threeSig
-#            idx = np.arange(nMatch)
-#            pdx = idx[poor]
-            if poor.size != len(sorter):
-                print(' poor.size %i  len(sorter) %i'%(poor.size,  len(sorter)))
-            npsorter = np.asarray(sorter)
-            pdx = npsorter[poor]
-            for i in pdx:
-                print('%5i %s %10.3f %10.3f %10.3f'%(i, self.IonS[i],  self.Wvl[i], np.abs(intOverPredNp)[i],  diffOverIntNp[i]))
-                outpt.write('%5i %s %10.3f %10.3f %10.3f\n'%(i, self.IonS[i],  self.Wvl[i], np.abs(intOverPredNp)[i], diffOverIntNp[i]))
-        if sort is None:
-            self.DiffMc = {'intOverPred':intOverPredNp, 'diffOverInt':diffOverIntNp, 'wvl':self.Wvl, 'ionS':self.IonS, '3sig':threeSig, 'poor':poor}
-        else:
-            self.DiffMcSort = {'intOverPred':intOverPredNp, 'diffOverInt':diffOverIntNp, 'wvl':self.Wvl, 'ionS':self.IonS, '3sig':threeSig, 'poor':poor}
+        threeSig = 3.*diffOverIntNp.std()
+
+        poor = np.abs(diffOverIntNp) > threeSig
+
+        self.Diff = {'diff':diffNp, 'intOverPred':intOverPredNp, 'diffOverInt':diffOverIntNp,
+            'wvl':self.Wvl, 'ionS':self.IonS, '3sig':threeSig, 'poor':poor, 'noPredIdx':noPredIdx,
+            'noPredWvl':noPredWvl, 'noPredIon':noPredIon}
         #
         # -------------------------------------------------------------------------
         #
@@ -1361,6 +1066,7 @@ class maker(ionTrails,  specTrails):
         else:
             print(' the Diff attribute does not exist')
             print(' run method diffPrint to create it')
+        #
         # --------------------------------------------------------------------------
         #
     def diffPrint(self, dir = '.', filename='diffPrint.txt',  sort=None):
@@ -1399,6 +1105,11 @@ class maker(ionTrails,  specTrails):
         wDiff = []
         intOverPred = []
         diffOverInt = []
+
+        noPredIdx = []
+        noPredWvl = []
+        noPredIon = []
+
         dash = ' -------------------------------------------------'
         pformat1 = ' %5i %7s %10.3f %10.2e %10.2e %10.3f %10.3f %10.3f %10.3f'
         pformat1a = ' %5i %7s %10.3f %10.2e %10.2e *****NID******'
@@ -1455,10 +1166,10 @@ class maker(ionTrails,  specTrails):
                     pstring = pformat1%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'], self.Intensity[iwvl]/amatch['predicted'], chi, intOverPred[-1],  diffOverInt[-1] )
                 else:
                     pstring = pformat1a%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'])
-                    diff.append(0.)
-                    wDiff.append(0.)
-                    intOverPred.append(0.)
-                    diffOverInt.append(0.)
+                    noPredIdx.append(iwvl)
+                    noPredWvl.append(self.Match[iwvl]['wvl'])
+                    noPredIon.append(self.Match[iwvl]['ions'])
+
                 print(pstring)
                 outpt.write(pstring+'\n')
 
@@ -1509,7 +1220,8 @@ class maker(ionTrails,  specTrails):
             for i in pdx:
                 print('%5i %s %10.3f %10.3f %10.3f'%(i, self.IonS[i],  self.Wvl[i], np.abs(intOverPredNp)[i],  diffOverIntNp[i]))
                 outpt.write('%5i %s %10.3f %10.3f %10.3f\n'%(i, self.IonS[i],  self.Wvl[i], np.abs(intOverPredNp)[i], diffOverIntNp[i]))
-        self.Diff = {'diff':diffNp, 'intOverPred':intOverPredNp, 'diffOverInt':diffOverIntNp, 'wvl':self.Wvl, 'ionS':self.IonS, '3sig':threeSig, 'poor':poor}
+        self.Diff = {'diff':diffNp, 'intOverPred':intOverPredNp, 'diffOverInt':diffOverIntNp, 'wvl':self.Wvl, 'ionS':self.IonS, '3sig':threeSig, 'poor':poor, 'noPredIdx':noPredIdx,
+            'noPredWvl':noPredWvl, 'noPredIon':noPredIon}
         #
         # --------------------------------------------------------------------------
         #
@@ -2442,7 +2154,7 @@ class maker(ionTrails,  specTrails):
         #
         #-----------------------------------------------------
         #
-    def dumpMatch(self, filename):
+    def saveMatch(self, filename):
         """to save the attribute match to a pickle file
         """
         matchDict={'match':self.Match, 'Temperature':self.Temperature, 'EDensity':self.EDensity, 'Ndens':self.Ndens,
@@ -2482,7 +2194,7 @@ class maker(ionTrails,  specTrails):
         with open(filename, 'rb') as inpt:
             self.SearchData = pickle.load(inpt)
 
-    def dumpSearchData(self, filename):
+    def saveSearchData(self, filename):
         """to save the attribute SearchData to a pickle file
         """
         with open(filename, 'wb') as outpt:

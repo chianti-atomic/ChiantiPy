@@ -287,10 +287,10 @@ class ionTrails(object):
             outpt.close()
 
 
-    def intensityPlot(self, index=-1, wvlRange=None, top=10, linLog='lin', relative=False, verbose=False, plotFile=0, em=0 ):
+    def intensityPlot(self, index=-1, wvlRange=None, top=10, linLog='lin', relative=False, verbose=False, plotFile=0, em=0):
         """
         Plot the line intensities. Uses `Intensity` if it already exists. If
-        not, call the `intensity` method.
+        not, calls the `intensity` method.
 
         Parameters
         -----------
@@ -313,7 +313,7 @@ class ionTrails(object):
             if an Intensity attribute needs be created, then the emission measure is applied
         """
         if hasattr(self, 'Spectroscopic'):
-            title = self.Spectroscopic
+            title = 'Spectroscopic'
         else:
             title = ''
 
@@ -362,8 +362,8 @@ class ionTrails(object):
                 self.Message = 'using index = %5i specifying temperature = %10.2e, eDensity =  %10.2e'%(index, temperature[index], eDensity[index])
 
             intensity = self.Intensity['intensity'][index]
-            dstr=' -  Density = %10.2e (cm$^{-3}$)' % eDensity[index]
-            tstr=' -  T = %10.2e (K)' % temperature[index]
+            dstr=' Density = %10.2e (cm$^{-3}$)' % eDensity[index]
+            tstr=' T = %10.2e (K)' % temperature[index]
 
         if wvlRange is not None:
             wvlIndex = util.between(wvl, wvlRange)
@@ -389,7 +389,7 @@ class ionTrails(object):
 
         # must follow setting top
         plt.figure()
-        ylabel = 'intensity'
+        ylabel = 'Intensity'
         if relative:
             intensity = intensity/intensity[-1]
             ylabel += ' (Relative)'

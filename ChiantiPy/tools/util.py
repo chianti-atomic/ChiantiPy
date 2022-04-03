@@ -18,6 +18,16 @@ def between(array,limits):
     """
     Find the indices of `array` corresponding to values in the range given by `limits`
 
+    Parameters
+    ----------
+
+    array:  `list`, `ndarray`
+        contains a list of elements such a wavelengths
+
+    limits:  `list`, `ndarray`
+        a 2 element array specifying the lower and upper limits of the array to be included
+
+
     """
     array = np.asarray(array)
     nlines = len(array)
@@ -314,6 +324,11 @@ def ion2filename(ions):
     fname:  str
         the full file name of the ion directory in the CHIANTI database
         assumes a top directory from the environmental variable XUVTOP
+
+    Todo
+    ----
+
+    this duplicates what 'convertName' does
     """
     dir = os.environ["XUVTOP"]
     nameDict = convertName(ions)

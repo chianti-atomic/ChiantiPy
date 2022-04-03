@@ -29,7 +29,7 @@ class specTrails(object):
         #
         # ---------------------------------------------------------------------------
         #
-    def convolve(self, wavelength=0, filter=(chfilters.gaussianR, 1000.), label=0, verbose=0):
+    def convolve(self, wavelength=0, filter=(chfilters.gaussianR, 1000.), label=0, verbose=False):
         '''
         the first application of spectrum calculates the line intensities within the specified wavelength range and for set of ions specified
 
@@ -37,6 +37,23 @@ class specTrails(object):
 
         wavelength IS need for 'bunch' objects - in this case, the wavelength should not extend beyond the limits of the
         wvlRange used for the 'bunch' calculation
+
+        Keyword Arguments
+        -----------------
+
+        wavelength:  'int', `list`
+            if an `int`, the attribute 'Wavelength' is looked for
+            otherwise, wavelength is used
+
+        filter: `tuple`
+            first elements if one of the ChiantiPy.tools.filters object
+            second element is the width appropriate to the filter
+
+        label:  `str`
+            if set, creates a Spectrum[label] attribute
+
+        verbose: `bool`
+            if True, prints info to the terminal
 
         '''
         if not hasattr(self, 'IonInstances'):
@@ -357,9 +374,25 @@ class specTrails(object):
         with open(filename, 'wb') as outpt:
             pickle.dump(data, outpt)
 
-    def spectrumPlot(self, index=-1, integrated=0, saveFile=0, linLog = 'lin'):
+    def spectrumPlot(self, index=-1, integrated=False, saveFile=False, linLog = 'lin'):
         '''
         to plot the spectrum as a function of wavelength
+
+        Keyword Arguments
+        -----------------
+
+        index:  `int`
+            selects the temperature of the calculated spectrum
+
+        integrated:  `bool`
+            if True, plots the integrated/summed spectrum
+
+        saveFile:  `bool`, `str`
+            if set, saves the plot to 'saveFile'
+
+        linLog:  `str`
+            should be either 'lin' for linear, or 'log' for logarithmic base10
+
         '''
         fs = 14
         plt.figure()
@@ -410,9 +443,25 @@ class specTrails(object):
     #
     # -------------------------------------------------------------------------
     #
-    def lineSpectrumPlot(self, index = 0, integrated=0, saveFile=0, linLog = 'lin'):
+    def lineSpectrumPlot(self, index = 0, integrated=False, saveFile=False, linLog = 'lin'):
         '''
         to plot the line spectrum as a function of wavelength
+
+        Keyword Arguments
+        -----------------
+
+        index:  `int`
+            selects the temperature of the calculated line spectrum
+
+        integrated:  `bool`
+            if True, plots the integrated/summed line spectrum
+
+        saveFile:  `bool`, `str`
+            if set, saves the plot to 'saveFile'
+
+        linLog:  `str`
+            should be either 'lin' for linear, or 'log' for logarithmic base10
+
         '''
         #
         #

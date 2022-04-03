@@ -5,7 +5,8 @@ This software is distributed under the terms of the ISC Software License
 that is found in the LICENSE file
 
 """
-from .Spectrum import spectrum, bunch
+from .Spectrum import spectrum
+from .Bunch import bunch
 from .Mspectrum import mspectrum
 from .IpyMspectrum import ipymspectrum
 from .Continuum import continuum

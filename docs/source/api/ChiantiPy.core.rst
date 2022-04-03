@@ -59,6 +59,14 @@ ChiantiPy\.core\.RadLoss module
     :undoc-members:
     :show-inheritance:
 
+ChiantiPy\.core\.Bunch module
+--------------------------------
+
+.. automodule:: ChiantiPy.core.Bunch
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ChiantiPy\.core\.Spectrum module
 --------------------------------
 
@@ -66,7 +74,6 @@ ChiantiPy\.core\.Spectrum module
     :members:
     :undoc-members:
     :show-inheritance:
-
 
 Module contents
 ---------------

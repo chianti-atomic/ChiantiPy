@@ -20,6 +20,17 @@ today = date.today()
 def abundanceRead(abundancename='', verbose=False):
     """
     Read abundance file `abundancename` and return the abundance values relative to hydrogen
+
+    Keyword Arguments
+    -----------------
+
+    abundancename:  `str`
+        the name of the abundance file in the $XUVTOP/abundance directory to be read
+        the default is an empty string and then the 'default' abundance values are read
+
+    verbose:  `bool`
+        if true, prints out some info
+
     """
     abundance = np.zeros((50),np.float64)
     xuvtop = os.environ["XUVTOP"]
@@ -78,11 +89,22 @@ def zion2name(z,ion, dielectronic=False):
     ion : `int`
         the ion stage, for example, 14 for Fe XIV
 
+    Keyword Arguments
+    -----------------
+
+    dielectronic:  `bool`
+        if True, created the name of a dielectronic ion, with a 'd' at the end
+    Todo
+    ----
+
+    See if dielectronic is still appropriate
+
+    Put in separate module to avoid multiple copies
 
     Notes
     -----
     A duplicate of the routine in `ChiantiPy.tools.util` but needed by masterList Info
-    TODO: Put in separate module to avoid multiple copies
+
     """
     if ion == 0:
         thisone = 0
@@ -108,11 +130,15 @@ def convertName(name):
         a generic name of an ion in the CHIANTI database,
         such as fe_14 for Fe XIV
 
+    Todo
+    ----
+
+    Put in separate module to avoid multiple copies
 
     Notes
     -----
     A duplicate of the routine in `ChiantiPy.tools.util` but needed by masterList Info
-    TODO: Put in separate module to avoid multiple copies
+
     """
     s2 = name.split('_')
     els = s2[0].strip()
@@ -415,8 +441,10 @@ def diRead(ions, filename=None):
 
     Parameters
     ----------
+
     ions : `str`
         Ion, e.g. 'c_5' for C V
+
     filename : `str`, optional
         Custom filename, will override that specified by `ions`
     """
@@ -485,6 +513,15 @@ def drRead(ions, filename=None):
     """
     Read CHIANTI dielectronic recombination .drparams files
     if filename is set, then reads that file
+
+    Parameters
+    ----------
+
+    ions : `str`
+        Ion, e.g. 'c_5' for C V
+
+    filename : `str`, optional
+        Custom filename, will override that specified by `ions`
     """
     #
     #
@@ -802,6 +839,19 @@ def elvlcWrite(info, outfile=None, round=0, addLvl=0, includeRyd=False, includeE
 def emRead(emName=''):
     """
     Read emission measure file `emName` and return the temperatures, densities and emission measures
+
+    Keyword Arguments
+    -----------------
+
+    emName:  `str`
+        the name of the emission measure file to read in the $XUVTOP/em directory
+
+    Returns
+    -------
+
+    EM:  `dict`
+        keywords are `temperature`, `density`, `em`, `filename`
+
     """
     xuvtop = os.environ["XUVTOP"]
     emdir = os.path.join(xuvtop,'em')
@@ -851,6 +901,14 @@ def fblvlRead(ions, filename=None, verbose=False):
     """
     Read a Chianti energy level file for calculating the
     free-bound continuum
+
+    Parameters
+    ----------
+    ions : `str`
+        Ion, e.g. 'c_5' for C V
+    filename : `str`, optional
+        Custom filename, will override that specified by `ions`
+
     """
     fstring = 'i5,a20,2i5,a3,i5,2f20.3'
     header_line = FortranRecordReader(fstring)
@@ -1111,7 +1169,18 @@ def maoParsRead(filename = None):
     62- 71  E10.4 ---     a2        Addiational fitting parameter
     73- 82  E10.4 ---     b2        Addiational fitting parameter
     84- 86  F3.1  ---     mdp       Maximum deviation in percent
+
+    Keyword Arguments
+    -----------------
+
+    filename:  `str`
+
+    Returns
+    -------
+
+    data: `dict`
     '''
+
     if filename is None:
         filename = os.path.join(os.environ['XUVTOP'], 'continuum', 'rrloss_mao_2017_pars.dat')
     else:
@@ -1151,6 +1220,18 @@ def ioneqRead(ioneqName='', minIoneq=1.e-20, verbose=False):
     """
     Reads an ioneq file
     ionization equilibrium values less then minIoneq are returns as zeros
+
+    Keyword Arguments
+    -----------------
+
+    ioneqName:  `str`
+        reads the file in the $XUVTOP/ioneq directory, if a blank, the default is read
+
+    minIoneq:  `float`
+        sets values to zero if less the minIoneq
+
+    verbose:  `bool`
+        if true, prints into to the terminal
     Returns
     -------
     {'ioneqname','ioneqAll','ioneqTemperature','ioneqRef'} : `dict`
@@ -1277,6 +1358,15 @@ def masterListInfo(force=False, verbose=False):
     """
     Get information about ions in the CHIANTI masterlist.
 
+    Keyword Arguments
+    -----------------
+
+    force:  `bool`
+        if true, recreates the masterListInfo file
+
+    verbose:  `bool`
+        if true, prints into to the terminal
+
     Returns
     -------
     masterListInfo : `dict`
@@ -1387,69 +1477,21 @@ def masterListInfo(force=False, verbose=False):
     return masterListInfo
 
 
-def photoxRead(ions):
-    """
-    Read CHIANTI photoionization .photox files
-
-    Returns
-    -------
-    {'lvl1', 'lvl2', 'energy', 'cross', 'ref'} : `dict`
-        Energy (in Rydbergs) and cross section (in :math:`\mathrm{cm}^{-2}`)
-
-    Notes
-    -----
-    The photox files are not in any released version of the CHIANTI database.
-    """
-    #
-    zion = util.convertName(ions)
-    if zion['Z'] < zion['Ion']:
-        print((' this is a bare nucleus that has no ionization rate'))
-        return
-    #
-    fname = util.ion2filename(ions)
-    paramname = fname+'.photox'
-    input = open(paramname,'r')
-    lines = input.readlines()
-    input.close
-    # get number of energies
-#    neng = int(lines[0][0:6])
-    dataEnd = 0
-    lvl1 = []
-    lvl2 = []
-    energy = []
-    cross = []
-    icounter = 0
-    while not dataEnd:
-        lvl11 = int(lines[icounter][:8])
-        lvl21 = int(lines[icounter][8:15])
-        ener = lines[icounter][15:].split()
-        energy1 = np.asarray(ener, np.float64)
-        #
-        icounter += 1
-        irsl = int(lines[icounter][:8])
-        ind0 = int(lines[icounter][8:15])
-        if irsl != lvl11 or ind0 != lvl21:
-            # this only happens if the file was written incorrectly
-            print((' lvl1, lvl2 = %7i %7i'%(lvl11, lvl21)))
-            print((' irsl, indo = %7i %7i'%(irsl,  ind0)))
-            return
-        crs = lines[icounter][15:].split()
-        cross1 = np.asarray(crs, np.float64)
-        lvl1.append(lvl11)
-        lvl2.append(lvl21)
-        energy.append(energy1)
-        cross.append(cross1)
-        icounter += 1
-        dataEnd = lines[icounter].count('-1')
-    ref = lines[icounter+1:-1]
-    cross = np.asarray(cross, np.float64)
-    energy = np.asarray(energy, np.float64)
-    return {'lvl1':lvl1, 'lvl2':lvl2,'energy':energy, 'cross':cross,  'ref':ref}
-
-
 def rrRead(ions, filename=None):
     """
     Read CHIANTI radiative recombination .rrparams files
+
+
+    Parameters
+    ----------
+    ions : `str`
+        Ion, e.g. 'c_5' for C V
+
+    Keyword Arguments
+    -----------------
+
+    filename : `str`, optional
+        Custom filename, will override that specified by `ions`
 
     Returns
     -------
@@ -1543,9 +1585,14 @@ def scupsRead(ions, filename=None, verbose=False):
     ----------
     ions : `str`
         Ion, e.g. 'c_5' for C V
+
+    Keyword Arguments
+    -----------------
+
     filename : `str`, optional
         Custom filename, will override that specified by `ions`
     verbose : `bool`
+        if True, prints info to the terminal
 
     '''
     #
@@ -1631,8 +1678,12 @@ def splomRead(ions, ea=False, filename=None):
     ----------
     ions : `str`
         Ion, e.g. 'c_5' for C V
+
+    Keyword Arguments
+    -----------------
+
     ea : `bool`
-        Read .easplom file
+        if true, reads the  .easplom file
     filename : `str`, optional
         Custom filename, will override that specified by `ions`
 
@@ -1721,6 +1772,9 @@ def splupsRead(ions, filename=None, filetype='splups'):
     ----------
     ions : `str`
         Ion, e.g. 'c_5' for C V
+
+    Keyword Arguments
+    -----------------
     filename : `str`, optional
         Custom filename, will override that specified by `ions`
     filetype : `str`, optional
@@ -1806,28 +1860,6 @@ def splupsRead(ions, filename=None, filetype='splups'):
 #                ,"nspl":nspl,"splups":splups,"ref":ref}
             return {"lvl1":lvl1,"lvl2":lvl2,"ttype":ttype,"gf":gf,"de":de,"cups":cups
                 ,"nspl":nspl,"splups":splups,"ref":ref, 'filename':splupsname}
-
-def trRead(ionS):
-    ''' read the files containing total recombination rates .trparams
-    '''
-    stuff = util.convertName(ionS)
-    filename = stuff['filename']
-    trname = filename + '.trparams'
-    if os.path.exists(trname):
-        temperature = []
-        rate = []
-        inpt = open(trname)
-        lines = inpt.readlines()
-        ndata = int(lines[0])
-        inpt.close()
-        for jline in range(1, ndata+1):
-            dummy = lines[jline].replace(os.linesep, '').split()
-            temperature.append(float(dummy[0]))
-            rate.append(float(dummy[1]))
-        return {'temperature':np.asarray(temperature, np.float64), 'rate':np.asarray(rate, np.float64)}
-    else:
-        return 'file does not exist'
-
 
 
 def twophotonHRead():
@@ -1960,6 +1992,10 @@ def wgfaRead(ions, filename=None, elvlcname=0, total=False, verbose=False):
     ----------
     ions : `str`
         Ion, e.g. 'c_5' for C V
+
+    Keyword Arguments
+    -----------------
+
     filename : `str`
         Custom filename, will override that specified by `ions`
     elvlcname : `str`

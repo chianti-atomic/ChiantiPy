@@ -1,8 +1,6 @@
 import copy
 from datetime import datetime
-import pickle
 import numpy as np
-
 import ChiantiPy
 import ChiantiPy.tools.data as chdata
 import ChiantiPy.tools.constants as const

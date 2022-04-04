@@ -3,15 +3,21 @@ Changelog
 ===========
 
 
-Changes from 0.11.0 to 0.11.1
+Changes from 0.11.0 to 0.12.0
 =============================
 
 
 A bug in the inherited method base._IntensityRatio() was not properly corrected in v0.10.0.  This is fixed here
 
-Development continues on the model package
+Development on the model package
 
 For Windows users, it is now possible to place the chiantirc file in $PROJECTHOME/.config or $PROJECTHOME/.chianti
+
+Many improved docstrings for the documentation
+
+the bunch class has been moved to a new module core.Bunch
+
+a number of jupyter ipython notebooks have been created/improved to demonstrate the use of the bunch, spectrum and model.Maker classes.  A short README.txt can be found in the same directory provides an introduction to these notebooks
 
 
 Changes from 0.10.0 to 0.11.0

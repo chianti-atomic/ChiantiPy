@@ -5,8 +5,6 @@ import numpy as np
 
 import ChiantiPy
 import ChiantiPy.tools.data as chdata
-import ChiantiPy.tools.constants as const
-import ChiantiPy.tools.filters as chfilters
 import ChiantiPy.tools.util as util
 import ChiantiPy.Gui as chGui
 from ChiantiPy.base import ionTrails

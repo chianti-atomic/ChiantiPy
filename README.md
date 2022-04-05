@@ -1,4 +1,4 @@
-# ChiantiPy - Version 0.11.1
+# ChiantiPy - Version 0.12.0
 [![Documentation Status](http://readthedocs.org/projects/chiantipy/badge/?version=latest)](http://chiantipy.readthedocs.io/en/latest/?badge=latest)
 [![Coverage Status](https://coveralls.io/repos/github/chianti-atomic/ChiantiPy/badge.svg?branch=master)](https://coveralls.io/github/chianti-atomic/ChiantiPy?branch=master)
 [![ascl:1308.017](https://img.shields.io/badge/ascl-1308.017-blue.svg?colorB=262255)](http://ascl.net/1308.017)
@@ -54,7 +54,6 @@ As a quick example, we'll calculate the populations of the top 10 levels of Fe X
 ## Help
 For more information about installing and using either ChiantiPy or the CHIANTI atomic database, check out the following links:
 
-* [ChiantiPy Documentation on github.io](http://chianti-atomic.github.io/)
 * [ChiantiPy Documentation on ReadTheDocs](https://chiantipy.readthedocs.io/)
 * [Chianti Google Mailing List](https://groups.google.com/forum/#!forum/chianti)
 * [CHIANTI Atomic Database Webpage](http://www.chiantidatabase.org/)

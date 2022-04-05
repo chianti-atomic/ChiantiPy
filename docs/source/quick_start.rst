@@ -4,7 +4,7 @@ Quick Start
 
 This short tutorial will demonstrate some of the capabilities of ChiantiPy and the CHIANTI database.  It assumes that you know what the CHIANTI database provides and why you want to use it.  It is useful to begin by exploring the properties of the **ion class**, as much of ChiantiPy is based on it.  An ion such as Fe XIV is specified by the string 'fe_14', in the usual CHIANTI notation.
 
-Perhaps the easiest way is to use a jupyter-notebook or a jupyter3-notebook to load the quick start notebook file QuickStart.ipynb in the directory ipython_notebooks.  Then, just run each cell step by step.  If you are not familiar with notebooks, then you can cut and paste the following code into a Python/IPython session.
+Perhaps the easiest way is to use a jupyter-notebook or a jupyter3-notebook to load the quick start notebook file QuickStart.ipynb in the directory jupyter_notebooks.  Then, just run each cell step by step.  If you are not familiar with notebooks, then you can cut and paste the following code into a Python/IPython session.
 
 N.B.:  in the time some of the plots and data were produced, there have been some changes to ChiantiPy and CHIANTI.  It is possible that you might find difference (hopefully small).
 
@@ -401,7 +401,7 @@ produces and initial plot of the selected lines, a selection widget and finally 
 
 there seems to be a significant temperature dependence to the ratio, even though both are formed near 4.e+5 K.
 
-A new keyword argument **keepIons** has been added in v0.6 to the bunch and the 3 spectrum classes.
+A new keyword argument **keepIons** has been added in v0.6 to the bunch and the 3 spectrum classes.  It should be used with some care as it can lead to very large instances in the case of a large number of ions, temperature, or densities.
 
 ::
 
@@ -450,6 +450,7 @@ produces
 .. image:: _static/ne6_mg6_spectrum.png
     :align:  center
 
+There is demo notebooks for the **bunch** class, bunch_demo.ipynb, in the jupyter_notebooks directory
 
 Spectra of multiple ions and continuum
 --------------------------------------
@@ -588,7 +589,7 @@ It is also possible to specify a selection of ions by means of the *ionList* key
 .. image:: _static/spectrum_200_300_w_si_9.png
     :align:  center
 
-Because **keepIons** has been set, the ion instances of all of the ions are maintained in the s2.IonInstances dictionary. It has been possible to compare the spectrum of all of the ions with the spectrum of a single ion.
+Because **keepIons** has been set, the ion instances of all of the ions are maintained in the s2.IonInstances dictionary. It has been possible to compare the spectrum of all of the ions with the spectrum of a single ion.    It should be used with some care as it can lead to very large instances in the case of a large number of ions, temperature, or densities.
 
 ::
 
@@ -631,6 +632,9 @@ produces
     :align:  center
 
 
+There are two demo notebooks, spectrum_demo.ipynb and spectrum_demo_2.ipynb in the jupyter_notebooks directory.
+
+
 Radiative loss rate
 -------------------
 
@@ -653,3 +657,63 @@ the radiative losses are kept in the rl.RadLoss dictionary
 the **abundance** keyword argument can be set to the name of an available abundance file in XUVTOP/abund
 
 if abundance='abc', or some name that does not match an abundance name, a dialog will come up so that a abundance file can be selected
+
+
+Jupyter Notebooks
+-----------------
+
+There are 9 jupyter notebooks in the jupyter_notebooks that demonstrate the capabilities of ChiantyPy together with the CHIANTI database.  There is also a README.txt file that provides a short explanation of the notebooks.
+
+A summary of the notebooks
+==========================
+
+
+This directory contains 9 Jupyter IPython notebooks that demonstrate some of the ways to use ChiantiPy and the CHIANTI database
+
+QuickStart.ipynb - a notebook that generally follows the Quick-Start guide in the docs
+
+A demo of the bunch class is found in:  bunch_demo.ipynb
+
+Two demos of the spectrum class are found in:  spectrum_demo.ipynb and spectrum_demo_2.ipynb
+
+The directory also contains 5 other notebooks and a json file.  These are demo files for reproducing some of the analyses in the paper "Electron densities and their uncertainties derived from spectral emission line intensities" by Kenneth Dere.  This paper has been published in the Monthly Notices of the Royal Astronomical Society, 2020, 496, 2334.
+
+The notebook file '1_fe_13_demo_make_model.ipynb' constructs the model that is used by 2_fe_13_demo_check_model.ipynb and 3_fe_13_demo_chi2_search.ipynb by reading the 'tab2_1993_qs_fe_13.json' file.  It is easiest if all files are placed in the same directory.  This files contains the Fe XIII line intensities from Brosius et al., 1996, Astrophysical Journal Supplement Series, 106, 143.  This notebook file needs to be run first.
+
+The next notebook to run is:  2_fe_13_demo_check_model.ipynb  -- This notebook load the previously created pickle containing the match attribute.  In this notebook a density and emission measure are guessed from an 'em loci' plot and the predictions compard with the observations.
+
+The next notebook to run is:  3_fe_13_demo_chi2_search.ipynb -- This performs a brute force chi-squared search over the density range and finds the best fit density and emission measure.  These best values are then inserted into the model, a prediction made and compared with the observations.
+
+The next notebook to run is:  4_fe_13_demo_mcmc.ipynb -- This performs a MCMC analysis of the spectra to determine the most likely density and emission measure from an analysis of the trace.  The trace is also save for futher analysis.
+
+The next notebook to run is:  5_fe_13_demo_mcmc_trace_analyze.ipynb -- the load the trace so that it can be re-analyzed
+
+
+QuickStart.ipynb
+================
+
+
+bunch_demo.ipynb
+================
+
+spectrum_demo.ipynb
+===================
+
+spectrum_demo_2.ipynb
+=====================
+
+1_fe_13_demo_make_match.ipynb
+=============================
+
+2_fe_13_demo_check_model.ipynb
+==============================
+
+3_fe_13_demo_chi2_search.ipynb
+==============================
+
+4_fe_13_demo_mcmc.ipynb
+=======================
+
+5_fe_13_demo_mcmc_trace_analyze.ipynb
+=====================================
+

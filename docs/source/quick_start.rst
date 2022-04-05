@@ -662,7 +662,10 @@ if abundance='abc', or some name that does not match an abundance name, a dialog
 Jupyter Notebooks
 -----------------
 
-There are 9 jupyter notebooks in the jupyter_notebooks that demonstrate the capabilities of ChiantyPy together with the CHIANTI database.  There is also a README.txt file that provides a short explanation of the notebooks.
+There are 9 jupyter notebooks in the `jupyter_notebooks`_ directory that demonstrate the capabilities of ChiantyPy together with the CHIANTI database.  There is also a README.txt file that provides a short explanation of the notebooks.
+
+
+.. _jupyter_notebooks:  https://github.com/chianti-atomic/ChiantiPy/tree/master/jupyter_notebooks
 
 A summary of the notebooks
 ==========================

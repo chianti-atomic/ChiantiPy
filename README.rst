@@ -1,4 +1,4 @@
-ChiantiPy - Version 0.11.1
+ChiantiPy - Version 0.12.0
 ==========================
 
 |Documentation Status| |Coverage Status| |ascl:1308.017|
@@ -18,6 +18,8 @@ high-temperature, optically-thin astrophysical sources. The CHIANTI
 project provides a suite of routines written in Interactive Data
 Language (IDL) to access the database and calculate various quantities
 for use in interpreting observed spectra or producing synthetic spectra.
+As of ChiantiPy 0.10.0, the CHIANTI database version 10 or later is
+required
 
 Installation
 ------------
@@ -43,7 +45,7 @@ dependencies, we recommend the `Anaconda
 platform <https://www.continuum.io/downloads>`__. Next, download the
 `CHIANTI
 database <http://www.chiantidatabase.org/chianti_download.html>`__,
-version 9.0 or later. Assuming you’ve placed the CHIANTI tree in
+version 10.0 or later. Assuming you’ve placed the CHIANTI tree in
 ``$HOME``, set the environment variable in your ``.bashrc`` file,
 
 .. code:: shell
@@ -84,8 +86,6 @@ Help
 For more information about installing and using either ChiantiPy or the
 CHIANTI atomic database, check out the following links:
 
--  `ChiantiPy Documentation on
-   github.io <http://chianti-atomic.github.io/>`__
 -  `ChiantiPy Documentation on
    ReadTheDocs <https://chiantipy.readthedocs.io/>`__
 -  `Chianti Google Mailing

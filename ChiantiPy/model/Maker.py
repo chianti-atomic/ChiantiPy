@@ -23,7 +23,6 @@ import matplotlib.pyplot as plt
 import ChiantiPy.core as ch
 import ChiantiPy.tools.io as io
 import ChiantiPy.tools.util as util
-import ChiantiPy.tools.constants as const
 import ChiantiPy.tools.data as chdata
 import ChiantiPy.Gui as chGui
 from ChiantiPy.base import ionTrails, specTrails    #

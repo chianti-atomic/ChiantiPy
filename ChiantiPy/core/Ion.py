@@ -7,6 +7,7 @@ import time
 
 import numpy as np
 from scipy.interpolate import splev, splrep
+from scipy import special
 
 import matplotlib.pyplot as plt
 
@@ -420,7 +421,7 @@ class ion(ioneqOne, ionTrails, specTrails):
                     cross += cross1*1.e-14
             self.DiCross = {'energy':energy, 'cross':cross}
 
-    def diRate(self):
+    def diRate(self, ngl=20):
         """
         Calculate the direct ionization rate coefficient as a function of temperature (K)
         """
@@ -431,8 +432,13 @@ class ion(ioneqOne, ionTrails, specTrails):
             print(' temperature is not defined in diRate')
             return
         # Gauss-Laguerre constants
-        xgl = const.xgl
-        wgl = const.wgl
+
+        zgl = special.roots_laguerre(ngl)
+        xgl = zgl[0]
+        wgl = zgl[1]
+
+#        xgl = const.xgl
+#        wgl = const.wgl
 
         alpha = 5.287e+13
         tev = const.boltzmannEv*temperature
@@ -466,7 +472,7 @@ class ion(ioneqOne, ionTrails, specTrails):
                 term2 = wgl*crossgl
                 newcross = alpha*beta*np.exp(-x0)*(term1.sum()+x0*term2.sum())
                 rate[itemp] = newcross
-        self.DiRate = {'temperature':temperature, 'rate':rate}
+        self.DiRate = {'temperature':temperature, 'rate':rate,  'ngl':ngl}
 
     def eaDescale(self):
         """
@@ -670,7 +676,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             ionizCross = self.DiCross['cross'] + self.EaCross['cross']
         self.IonizCross = {'cross':ionizCross, 'energy':energy}
 
-    def ionizRate(self):
+    def ionizRate(self, ngl=20):
         """
         Provides the total ionization rate.
 
@@ -679,14 +685,14 @@ class ion(ioneqOne, ionTrails, specTrails):
         if self.Z < self.Ion:
             self.IonizRate = {'rate':np.zeros_like(self.Temperature), 'temperature':self.Temperature}
             return
-        self.diRate()
+        self.diRate(ngl=ngl)
         self.eaRate()
         if self.DiParams['info']['neaev'] == 0:
             ionizrate = self.DiRate['rate']
         else:
             ionizrate = self.DiRate['rate']+self.EaRate['rate']
         self.IonizRate = {'rate':ionizrate,
-                        'temperature':self.DiRate['temperature']}
+                        'temperature':self.DiRate['temperature'],  'ngl':ngl}
 
     def rrRate(self):
         """

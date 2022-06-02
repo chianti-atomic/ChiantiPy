@@ -119,20 +119,15 @@ class ion(ioneqOne, ionTrails, specTrails):
         self.Defaults = chdata.Defaults
 
         if abundance is not None:
-            try:
-                self.Abundance = float(abundance)
-            except ValueError:
-                if abundance in chdata.AbundanceList:
-                    self.AbundanceName = abundance
-                else:
-                    abundChoices = chdata.AbundanceList
-                    abundChoice = chGui.gui.selectorDialog(abundChoices,label='Select Abundance name', multiChoice=False)
-                    abundChoice_idx = abundChoice.selectedIndex
-                    self.AbundanceName = abundChoices[abundChoice_idx[0]]
+            ab = io.abundanceRead(abundance)
+            self.Abundance = ab['abundance'][self.Z-1]
+            self.AbundanceName = abundance
         else:
             self.AbundanceName = self.Defaults['abundfile']
-        if hasattr(self,'AbundanceName'):
-            self.Abundance = chdata.Abundance[self.AbundanceName]['abundance'][self.Z-1]
+        #
+            ab = chdata.Abundance[self.AbundanceName]['abundance']
+            self.Abundance = ab['abundance'][self.Z-1]
+
 
         self.IoneqName = self.Defaults['ioneqfile']
         self.RadTemperature = radTemperature

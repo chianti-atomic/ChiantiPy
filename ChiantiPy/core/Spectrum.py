@@ -6,6 +6,7 @@ import ChiantiPy.tools.data as chdata
 import ChiantiPy.tools.constants as const
 import ChiantiPy.tools.filters as chfilters
 import ChiantiPy.tools.util as util
+import ChiantiPy.tools.io as chio
 import ChiantiPy.Gui as chGui
 from ChiantiPy.base import ionTrails
 from ChiantiPy.base import specTrails
@@ -116,7 +117,9 @@ class spectrum(ionTrails, specTrails):
         verbose:  whether to allow certain print statements
 
     '''
-    def __init__(self, temperature, eDensity, wavelength, filter=(chfilters.gaussianR, 1000.), label=None, elementList = None, ionList = None, minAbund=None, doLines=1, doContinuum=1, em=None, keepIons=0,  abundance=None, verbose=0, allLines=1):
+    def __init__(self, temperature, eDensity, wavelength, filter=(chfilters.gaussianR, 1000.), label=None,
+        elementList = None, ionList = None, minAbund=None, doLines=1, doContinuum=1, em=None, keepIons=0,
+        abundance=None, verbose=0, allLines=1):
         #
         wavelength = np.atleast_1d(wavelength)
         if wavelength.size < 2:
@@ -149,26 +152,23 @@ class spectrum(ionTrails, specTrails):
         #
         #
         if abundance is not None:
-            if type(abundance) == str:
-                if abundance in chdata.AbundanceList:
-                    self.AbundanceName = abundance
-                else:
-                    abundChoices = chdata.AbundanceList
-                    abundChoice = chGui.gui.selectorDialog(abundChoices,label='Select Abundance name', multiChoice=False)
-                    abundChoice_idx = abundChoice.selectedIndex
-                    self.AbundanceName = abundChoices[abundChoice_idx[0]]
-                print((' Abundance chosen:  %s '%(self.AbundanceName)))
-            else:
-                print(' keyword abundance must be a string, either a blank (\'\') or the name of an abundance file')
-                return
+            ab = chio.abundanceRead(abundance)
+            abundAll = ab['abundance']
+            self.AbundanceName = abundance
+#            if abundance in list(chdata.Abundance.keys()):
+#                self.AbundanceName = abundance
+#            else:
+#                abundChoices = list(chdata.Abundance.keys())
+#                abundChoice = chGui.gui.selectorDialog(abundChoices,label='Select Abundance name', multiChoice=False)
+#                abundChoice_idx = abundChoice.selectedIndex
+#                self.AbundanceName = abundChoices[abundChoice_idx[0]]
+#                print((' Abundance chosen:  %s '%(self.AbundanceName)))
         else:
             self.AbundanceName = self.Defaults['abundfile']
-        if hasattr(self,'AbundanceName'):
-            self.Abundance = chdata.Abundance[self.AbundanceName]['abundance']
-        #
-        abundAll = chdata.Abundance[self.AbundanceName]['abundance']
+            abundAll = chdata.Abundance[self.AbundanceName]['abundance']
         # needed by ionGate
         self.AbundAll = abundAll
+        self.Abundance = abundAll
         #
         self.MinAbund = minAbund
         wavelength = np.asarray(wavelength)

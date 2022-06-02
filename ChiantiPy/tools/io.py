@@ -17,7 +17,7 @@ from  ChiantiPy.fortranformat import FortranRecordReader
 
 today = date.today()
 
-def abundanceRead(abundancename='', verbose=False):
+def abundanceRead(abundancename=None, verbose=False):
     """
     Read abundance file `abundancename` and return the abundance values relative to hydrogen
 
@@ -37,25 +37,28 @@ def abundanceRead(abundancename='', verbose=False):
     abundDir = os.path.join(xuvtop,'abundance')
     abundList = os.listdir(abundDir)
     if abundancename:
-        # a specific abundance file name has been specified
-        cnt = abundancename.count('.abund')
-        if cnt == 0:
-            abundancename += '.abund'
-    if abundancename in abundList:
-        abundanceFileName = os.path.join(abundDir,abundancename)
-        if verbose:
-            print('abundanceFileName: %s'%(abundanceFileName))
-
-    else:
-        # the user will select an abundance file
-        abundLabel = 'ChiantiPy - Select an abundance file'
-        mypick = chgui.gui.selectorDialog(abundList, label=abundLabel)
-        abundName = mypick.selectedText[0]
-        if abundName is None:
-            print((' no abundance file selected'))
-            return 0
+        if os.path.isfile(abundancename):
+            abundanceFileName = abundancename
+            # a specific abundance file name has been specified
         else:
-            abundanceFileName = os.path.join(abundDir,abundName)
+            cnt = abundancename.count('.abund')
+            if cnt == 0:
+                abundancename += '.abund'
+            if abundancename in abundList:
+                abundanceFileName = os.path.join(abundDir,abundancename)
+                if verbose:
+                    print('abundanceFileName: %s'%(abundanceFileName))
+
+            else:
+                # the user will select an abundance file
+                abundLabel = 'ChiantiPy - Select an abundance file'
+                mypick = chgui.gui.selectorDialog(abundList, label=abundLabel)
+                abundName = mypick.selectedText[0]
+                if abundName is None:
+                    print((' no abundance file selected'))
+                    return 0
+                else:
+                    abundanceFileName = os.path.join(abundDir,abundName)
 
     input = open(abundanceFileName,'r')
     s1 = input.readlines()

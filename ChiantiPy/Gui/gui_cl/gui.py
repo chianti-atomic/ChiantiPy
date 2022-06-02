@@ -32,7 +32,7 @@ class selectorDialog:
 
     expects the input of an array of items, will select one or more
     the label and parent keywords are for consistency with other modules but do nothing'''
-    def __init__(self, items, label=None ,  parent=None):
+    def __init__(self, items, label=None ,  parent=None, multiChoice=False):
         #
         print(' - make a selection from these - ')
         for i, one in enumerate(items):

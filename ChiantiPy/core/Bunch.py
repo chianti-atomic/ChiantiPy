@@ -6,6 +6,7 @@ import numpy as np
 import ChiantiPy
 import ChiantiPy.tools.data as chdata
 import ChiantiPy.tools.util as util
+import ChiantiPy.tools.io as chio
 import ChiantiPy.Gui as chGui
 from ChiantiPy.base import ionTrails
 from ChiantiPy.base import specTrails
@@ -102,7 +103,8 @@ class bunch(ionTrails, specTrails):
     #
     # ------------------------------------------------------------------------------------
     #
-    def __init__(self, temperature, eDensity, wvlRange, elementList=None, ionList=None, minAbund=None, keepIons=0, em=None, abundance=None, verbose=0, allLines=True):
+    def __init__(self, temperature, eDensity, wvlRange, elementList=None, ionList=None, minAbund=None,
+        keepIons=0, em=None, abundance=None, verbose=0, allLines=True):
         """
         Calculate the emission line spectrum as a function of temperature and density.
 
@@ -117,18 +119,13 @@ class bunch(ionTrails, specTrails):
         #
         #
         if abundance is not None:
-            if abundance in list(chdata.Abundance.keys()):
-                self.AbundanceName = abundance
-            else:
-                abundChoices = list(chdata.Abundance.keys())
-                abundChoice = chGui.gui.selectorDialog(abundChoices,label='Select Abundance name', multiChoice=False)
-                abundChoice_idx = abundChoice.selectedIndex
-                self.AbundanceName = abundChoices[abundChoice_idx[0]]
-                print((' Abundance chosen:  %s '%(self.AbundanceName)))
+            ab = chio.abundanceRead(abundance)
+            abundAll = ab['abundance']
+            self.AbundanceName = abundance
         else:
             self.AbundanceName = self.Defaults['abundfile']
         #
-        abundAll = chdata.Abundance[self.AbundanceName]['abundance']
+            abundAll = chdata.Abundance[self.AbundanceName]['abundance']
         # needed by ionGate
         self.AbundAll = abundAll
         #

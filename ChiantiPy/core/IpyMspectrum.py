@@ -13,6 +13,7 @@ import ChiantiPy.tools.data as chdata
 import ChiantiPy.tools.constants as const
 import ChiantiPy.tools.filters as chfilters
 import ChiantiPy.tools.util as util
+import ChiantiPy.tools.io as chio
 import ChiantiPy.Gui as chGui
 from ChiantiPy.base import ionTrails
 from ChiantiPy.base import specTrails
@@ -63,11 +64,13 @@ class ipymspectrum(ionTrails, specTrails):
     allLines = 1 will include lines with either theoretical or observed wavelengths.  allLines=0 will
     include only those lines with observed wavelengths
 
-    proc = the number of processors to use
     timeout - a small but non-zero value seems to be necessary
     '''
-    def __init__(self, temperature, eDensity, wavelength, filter=(chfilters.gaussianR, 1000.), label=None, elementList = None, ionList = None, minAbund=None, keepIons=0, doLines=1, doContinuum=1, allLines = 1, em=None, abundance=None, verbose=0,  timeout=0.1):
+    def __init__(self, temperature, eDensity, wavelength, filter=(chfilters.gaussianR, 1000.), label=None,
+        elementList = None, ionList = None, minAbund=None, keepIons=0, doLines=1, doContinuum=1,
+        allLines = 1, em=None, abundance=None, verbose=0,  timeout=0.1):
         #
+        print('in some terminal \n >ipcluster start --n=4 , or some other integer')
         wavelength = np.atleast_1d(wavelength)
         if wavelength.size < 2:
             print(' wavelength must have at least two values, current length %3i'%(wavelength.size))
@@ -106,19 +109,15 @@ class ipymspectrum(ionTrails, specTrails):
         #
         #
         if abundance is not None:
-            if abundance in list(chdata.Abundance.keys()):
-                self.AbundanceName = abundance
-            else:
-                abundChoices = list(chdata.Abundance.keys())
-                abundChoice = chGui.gui.selectorDialog(abundChoices,label='Select Abundance name', multiChoice=False)
-                abundChoice_idx = abundChoice.selectedIndex
-                self.AbundanceName = abundChoices[abundChoice_idx[0]]
-                print((' Abundance chosen:  %s '%(self.AbundanceName)))
+            ab = chio.abundanceRead(abundance)
+            abundAll = ab['abundance']
+            self.AbundanceName = abundance
         else:
             self.AbundanceName = self.Defaults['abundfile']
         #
-        #
-        abundAll = chdata.Abundance[self.AbundanceName]['abundance']
+            abundAll = chdata.Abundance[self.AbundanceName]['abundance']
+        # needed by ionGate
+        self.AbundAll = abundAll
         self.AbundAll = abundAll
         self.MinAbund = minAbund
         #
@@ -149,7 +148,7 @@ class ipymspectrum(ionTrails, specTrails):
         for akey in sorted(self.Todo.keys()):
             zStuff = util.convertName(akey)
             Z = zStuff['Z']
-            abundance = chdata.Abundance[self.AbundanceName]['abundance'][Z - 1]
+            abundance = self.AbundAll[Z - 1]
             if verbose:
                 print(' %5i %5s abundance = %10.2e '%(Z, const.El[Z-1],  abundance))
             if verbose:

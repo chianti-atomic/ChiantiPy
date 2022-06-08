@@ -37,7 +37,10 @@ class selectorDialog:
         print(' - make a selection from these - ')
         for i, one in enumerate(items):
             print('%6i %s '%( i, one))
-        print(' type the comma-separated index/indices of your selection')
+        if multiChoice:
+            print(' type the comma-separated index/indices of your selection and hit return')
+        else:
+            print(' type the index of your selection and hit return')
         raw = input('>>> ')
         #
         sraw = list(raw.split(','))

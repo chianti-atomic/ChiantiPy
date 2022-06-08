@@ -422,6 +422,9 @@ class ionTrails(object):
         A plot of relative emissivities is shown and then a dialog appears for the user to
         choose a set of lines.
 
+        Note:  if the default value for gui is set to False, then it is usually necessary to invoke
+            this method twice to get the desired result.
+
         Parameters
         -----------
         wvlRange : array-like
@@ -431,7 +434,12 @@ class ionTrails(object):
             wavelength ranges can be specified
         top : `int`
             specifies to plot only the top strongest lines, default = 10
+        title : `bool`
+            if True, places a title on the plot
         """
+        if not self.Defaults['gui']:
+            print(' it may be necessary to invoke this method twice to ')
+            print(' get the desired result')
 
         if not hasattr(self, 'Intensity'):
             try:
@@ -561,7 +569,6 @@ class ionTrails(object):
         plt.draw()
         #  need time to let matplotlib finish plotting
         time.sleep(0.5)
-
         # get line selection
         selectTags = []
         for itop in topLines:

@@ -60,9 +60,8 @@ def abundanceRead(abundancename=None, verbose=False):
                 else:
                     abundanceFileName = os.path.join(abundDir,abundName)
 
-    input = open(abundanceFileName,'r')
-    s1 = input.readlines()
-    input.close()
+    with open(abundanceFileName,'r') as inpt:
+        s1 = inpt.readlines()
     nlines = 0
     idx = -1
     while idx <= 0:

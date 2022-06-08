@@ -118,7 +118,7 @@ class ipymspectrum(ionTrails, specTrails):
             abundAll = chdata.Abundance[self.AbundanceName]['abundance']
         # needed by ionGate
         self.AbundAll = abundAll
-        self.AbundAll = abundAll
+        self.Abundance = abundAll
         self.MinAbund = minAbund
         #
         #ionInfo = chio.masterListInfo()
@@ -148,7 +148,7 @@ class ipymspectrum(ionTrails, specTrails):
         for akey in sorted(self.Todo.keys()):
             zStuff = util.convertName(akey)
             Z = zStuff['Z']
-            abundance = self.AbundAll[Z - 1]
+            abundance = self.Abundance[Z - 1]
             if verbose:
                 print(' %5i %5s abundance = %10.2e '%(Z, const.El[Z-1],  abundance))
             if verbose:

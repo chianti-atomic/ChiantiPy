@@ -243,7 +243,8 @@ class specTrails(object):
         #  the relative H abundance is 1.0, the rest are all smaller
         if minAbund is not None and type(minAbund) is float:
             for iz in range(1, 31):
-                abundance = chdata.Abundance[self.AbundanceName]['abundance'][iz-1]
+#                abundance = chdata.Abundance[self.AbundanceName]['abundance'][iz-1]
+                abundance = self.Abundance[iz-1]
                 if abundance >= minAbund:
                     if verbose:
                         print(' %5i %5s abundance = %10.2e '%(iz, const.El[iz-1],  abundance))

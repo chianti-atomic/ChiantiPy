@@ -9,7 +9,7 @@ from .Ion import ion
 import ChiantiPy.tools.data as chdata
 import ChiantiPy.tools.constants as const
 import ChiantiPy.tools.util as util
-import ChiantiPy.Gui as chGui
+import ChiantiPy.tools.io as chio
 from ChiantiPy.base import specTrails
 from ChiantiPy.base import ionTrails
 
@@ -69,35 +69,26 @@ class radLoss(ionTrails, specTrails):
 
         #
         if abundance is not None:
-            if type(abundance) == str:
-                if abundance in chdata.AbundanceList:
-                    self.AbundanceName = abundance
-                else:
-                    abundChoices = chdata.AbundanceList
-                    abundChoice = chGui.gui.selectorDialog(abundChoices,label='Select Abundance name',multiChoice=False)
-                    abundChoice_idx = abundChoice.selectedIndex
-                    self.AbundanceName = abundChoices[abundChoice_idx[0]]
-                    if verbose:
-                        print(' %s abundances chosen'%(self.AbundanceName))
-            else:
-                print(' keyword abundance must be a string, either a blank (\'\') or the name of an abundance file')
-                return
+            ab = chio.abundanceRead(abundance)
+            abundAll = ab['abundance']
+            self.AbundanceName = abundance
         else:
             self.AbundanceName = self.Defaults['abundfile']
-        if hasattr(self,'AbundanceName'):
-            self.Abundance = chdata.Abundance[self.AbundanceName]['abundance']
+        #
+            abundAll = chdata.Abundance[self.AbundanceName]['abundance']
         #
 #        abundAll = chdata.Abundance[self.AbundanceName]['abundance']
 #        # needed by ionGate
-        self.AbundAll = self.Abundance
+        self.AbundAll = abundAll
+        self.Abundance = abundAll
         #
-        nonzed = self.Abundance > 0.
-        minAbundAll = self.Abundance[nonzed].min()
+#        nonzed = self.Abundance > 0.
+#        minAbundAll = self.Abundance[nonzed].min()
         # if minAbund is even set
-        if minAbund:
-            if minAbund < minAbundAll:
-                minAbund = minAbundAll
-        self.MinAbund = minAbund
+#        if minAbund:
+#            if minAbund < minAbundAll:
+#                minAbund = minAbundAll
+#        self.MinAbund = minAbund
 #        ionInfo = util.masterListInfo()
         #
         nTempDens = self.NTempDens
@@ -122,9 +113,9 @@ class radLoss(ionTrails, specTrails):
             Z = zStuff['Z']
             ionstage = zStuff['Ion']
             dielectronic = zStuff['Dielectronic']
-            abundance = self.Abundance[Z - 1]
+            abundanceZ = self.Abundance[Z - 1]
             if verbose:
-                print(' %5i %5s abundance = %10.2e '%(Z, const.El[Z-1],  abundance))
+                print(' %5i %5s abundance = %10.2e '%(Z, const.El[Z-1],  abundanceZ))
             if verbose:
                 print(' doing ion %s for the following processes %s'%(akey, self.Todo[akey]))
             if ionstage != 1:
@@ -132,20 +123,20 @@ class radLoss(ionTrails, specTrails):
                     print(' calculating ff continuum for :  %s'%(akey))
                 if 'ff' in self.Todo[akey]:
                     # need to skip the neutral
-                    cont = continuum(akey, temperature, abundance=abundance)
+                    cont = continuum(akey, temperature, abundance=abundanceZ)
                     cont.freeFreeLoss()
                     freeFreeLoss += cont.FreeFreeLoss['rate']
                 if 'fb' in self.Todo[akey]:
                     if verbose:
                         print(' calculating fb continuum for :  %s'%(akey))
-                    cont = continuum(akey, temperature, abundance=abundance)
+                    cont = continuum(akey, temperature, abundance=abundanceZ)
                     cont.freeBoundLoss(verbose=verbose)
                     if 'errorMessage' not in cont.FreeBoundLoss.keys():
                         freeBoundLoss += cont.FreeBoundLoss['rate']
             if 'line' in self.Todo[akey]:
                 if verbose:
                     print(' calculating spectrum for  :  %s'%(akey))
-                thisIon = ion(akey, temperature, eDensity, abundance=abundance)
+                thisIon = ion(akey, temperature, eDensity, abundance=abundanceZ)
                 thisIon.intensity(allLines=allLines)
                 self.IonsCalculated.append(akey)
                 if 'errorMessage' not in  thisIon.Intensity.keys():

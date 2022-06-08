@@ -119,9 +119,12 @@ class ion(ioneqOne, ionTrails, specTrails):
         self.Defaults = chdata.Defaults
 
         if abundance is not None:
-            ab = io.abundanceRead(abundance)
-            self.Abundance = ab['abundance'][self.Z-1]
-            self.AbundanceName = abundance
+            if isinstance(abundance,  float):
+                self.Abundance = abundance
+            elif isinstance(abundance, str):
+                ab = io.abundanceRead(abundance)
+                self.Abundance = ab['abundance'][self.Z-1]
+                self.AbundanceName = abundance
         else:
             self.AbundanceName = self.Defaults['abundfile']
         #
@@ -1172,7 +1175,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             self.recombRate()
             #  get the higher ionization stage and its recombination rates to this ion
             highers = util.zion2name(self.Z, self.Ion+1)
-            higher = ion(highers, temperature, setup=0)
+            higher = ion(highers, temperature, abundance=self.Abundance, setup=0)
             higher.setupIonrec()
             higher.recombRate()
         #  the populating matrix for radiative transitions and autoionization transitions
@@ -2401,7 +2404,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         #
         # -------------------------------------------------------------------------------------
         #
-    def emissRatio(self,wvlRange=None, wvlRanges=None,top=10):
+    def emissRatio(self, wvlRange=None, wvlRanges=None, top=10):
         """
         Plot the ratio of 2 lines or sums of lines.
         Shown as a function of density and/or temperature.
@@ -2790,7 +2793,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         self.IntensityRatioInterpolated = {'data':data, 'value':interpolatedData}
 
 
-    def gofnt(self,wvlRange=0,top=10, verbose=0, plot = True):
+    def gofnt(self, wvlRange=None, top=10, verbose=False, plot = True):
         """
         Calculate the 'so-called' G(T) function.
 
@@ -2798,7 +2801,32 @@ class ion(ioneqOne, ionTrails, specTrails):
 
         Only the top( set by 'top') brightest lines are plotted.
         the G(T) function is returned in a dictionary self.Gofnt
+
+        Note:  if the default value for gui is set to False, then it is usually
+            necessary to invoke this method twice to get the desired result.
+
+
+        Keyword Arguments
+        -----------------
+
+        wvlRange:  `array-like`
+            the wavelength range to be considered, a two element array-type
+
+        top : `int`
+            specifies to plot only the top strongest lines, default = 10
+
+        verbose:  `bool`
+            if True, additional information is printed to the console
+
+        plot:  `bool`
+            if True, the G(T) functionis plotted, default - True
+
         """
+
+        if not self.Defaults['gui']:
+            print(' it may be necessary to invoke this method twice to ')
+            print(' get the desired result')
+
 
         if hasattr(self, 'Emiss'):
             em = copy.copy(self.Emiss)
@@ -2818,7 +2846,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         lvl2 = em['lvl2']
 
         # find which lines are in the wavelength range if it is set
-        if type(wvlRange) != type(1):
+        if wvlRange:
             igvl = util.between(wvl,wvlRange)
         else:
             igvl = range(len(wvl))

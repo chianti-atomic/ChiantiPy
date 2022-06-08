@@ -94,14 +94,6 @@ class mspectrum(ionTrails, specTrails):
             ab = chio.abundanceRead(abundance)
             abundAll = ab['abundance']
             self.AbundanceName = abundance
-#            if abundance in list(chdata.Abundance.keys()):
-#                self.AbundanceName = abundance
-#            else:
-#                abundChoices = list(chdata.Abundance.keys())
-#                abundChoice = chGui.gui.selectorDialog(abundChoices,label='Select Abundance name', multiChoice=False)
-#                abundChoice_idx = abundChoice.selectedIndex
-#                self.AbundanceName = abundChoices[abundChoice_idx[0]]
-#                print((' Abundance chosen:  %s '%(self.AbundanceName)))
         else:
             self.AbundanceName = self.Defaults['abundfile']
             abundAll = chdata.Abundance[self.AbundanceName]['abundance']

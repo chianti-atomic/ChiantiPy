@@ -30,13 +30,18 @@ class continuum(ionTrails):
         CHIANTI notation for the given ion, e.g. 'fe_12' that corresponds to the Fe XII ion.
     temperature : array-like
         In units of Kelvin
-    abundance : `float` or `str`, optional
+
+    Keyword arguments
+    -----------------
+    abundance : `float`, `str`, optional
         Elemental abundance relative to Hydrogen or name of CHIANTI abundance file,
         without the '.abund' suffix, e.g. 'sun_photospheric_1998_grevesse'.
     em : array-like, optional
         Line-of-sight emission measure (:math:`\int\mathrm{d}l\,n_en_H`), in units of
         :math:`\mathrm{cm}^{-5}`, or the volumetric emission measure (:math:`\int\mathrm{d}V\,n_en_H`)
         in units of :math:`\mathrm{cm}^{-3}`.
+    verbose : `bool`
+        if True, prints additional info to the console
 
     Examples
     --------
@@ -89,20 +94,18 @@ class continuum(ionTrails):
         self.IprCm = 1.e+8/(const.ev2Ang/self.Ipr)
         # Set abundance
         if abundance is not None:
-            try:
-                self.Abundance = float(abundance)
-            except ValueError:
-                if abundance in chdata.AbundanceList:
-                    self.AbundanceName = abundance
-                else:
-                    abundChoices = chdata.AbundanceList
-                    abundChoice = chGui.gui.selectorDialog(abundChoices, label='Select Abundance name')
-                    abundChoice_idx = abundChoice.selectedIndex
-                    self.AbundanceName = abundChoices[abundChoice_idx[0]]
+            if isinstance(abundance,  float):
+                self.Abundance = abundance
+            elif isinstance(abundance, str):
+                ab = io.abundanceRead(abundance)
+                self.Abundance = ab['abundance'][self.Z-1]
+                self.AbundanceName = abundance
         else:
-            self.AbundanceName = chdata.Defaults['abundfile']
-        if not hasattr(self, 'Abundance'):
-            self.Abundance = chdata.Abundance[self.AbundanceName]['abundance'][self.Z-1]
+            self.AbundanceName = self.Defaults['abundfile']
+        #
+            ab = chdata.Abundance[self.AbundanceName]['abundance']
+            self.Abundance = ab['abundance'][self.Z-1]
+
         self.ioneqOne()
 
     def free_free_loss(self,  includeAbund=True, includeIoneq=True, **kwargs):

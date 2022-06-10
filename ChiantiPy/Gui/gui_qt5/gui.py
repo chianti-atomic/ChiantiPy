@@ -52,7 +52,7 @@ class selectorDialog(QtWidgets.QDialog):
     '''Make a single or multiple selection from a list of items.
 
     expects the input of an array of items, will select one or more'''
-    def __init__(self, items, label=None ,  parent=None, multiChoice=True):
+    def __init__(self, items, label=None ,  parent=None, multiChoice=False):
         QtWidgets.QDialog.__init__(self)
         self.ui = Ui_selectorDialogForm()
         self.ui.setupUi(self)

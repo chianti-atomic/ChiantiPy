@@ -121,7 +121,7 @@ class bunch(ionTrails, specTrails):
         if abundance is not None:
             ab = chio.abundanceRead(abundance)
             abundAll = ab['abundance']
-            self.AbundanceName = abundance
+            self.AbundanceName = ab['abundancename']
         else:
             self.AbundanceName = self.Defaults['abundfile']
         #

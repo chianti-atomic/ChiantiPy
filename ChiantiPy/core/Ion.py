@@ -114,22 +114,27 @@ class ion(ioneqOne, ionTrails, specTrails):
         self.Iso = _tmp_convert_name['iso']
         self.Dielectronic = _tmp_convert_name['Dielectronic']
         self.HigherName = _tmp_convert_name['higher']
-        self.Spectroscopic = util.zion2spectroscopic(self.Z,self.Ion)
-        self.FileName = util.zion2filename(self.Z, self.Ion,dielectronic=self.Dielectronic )
+        self.Spectroscopic = _tmp_convert_name['spectroscopic']
+        self.FileName = _tmp_convert_name['filename']
         self.Defaults = chdata.Defaults
 
         if abundance is not None:
             if isinstance(abundance,  float):
                 self.Abundance = abundance
+                # need the following for p2eRatio but will use default abundance
+                self.AbundAll = chdata.AbundanceDefault['abundance']
             elif isinstance(abundance, str):
-                ab = io.abundanceRead(abundance)
+                ab = io.abundanceRead(abundance,  verbose=1)
                 self.Abundance = ab['abundance'][self.Z-1]
                 self.AbundanceName = abundance
+                self.AbundAll = ab['abundance']
+
         else:
-            self.AbundanceName = self.Defaults['abundfile']
+#            self.AbundanceName = self.Defaults['abundfile']
         #
-            ab = chdata.Abundance[self.AbundanceName]['abundance']
-            self.Abundance = ab['abundance'][self.Z-1]
+#            ab = chdata.Abundance[self.AbundanceName]['abundance']
+            self.Abundance = chdata.AbundanceDefault['abundance'][self.Z-1]
+            self.AbundAll = chdata.AbundanceDefault['abundance']
 
 
         self.IoneqName = self.Defaults['ioneqfile']
@@ -1809,13 +1814,14 @@ class ion(ioneqOne, ionTrails, specTrails):
             temperature = self.Temperature
         else:
             temperature = self.IoneqAll['ioneqTemperature']
-        if not hasattr(self, 'AbundanceName'):
-            AbundanceName = self.Defaults['abundfile']
-        else:
-            AbundanceName = self.AbundanceName
+#        if not hasattr(self, 'AbundanceName'):
+#            AbundanceName = self.Defaults['abundfile']
+#        else:
+#            AbundanceName = self.AbundanceName
 
-        tmp_abundance = io.abundanceRead(abundancename=AbundanceName)
-        abundance = tmp_abundance['abundance'][tmp_abundance['abundance']>0]
+        tmp_abundance = self.AbundAll
+#        abundance = tmp_abundance['abundance'][tmp_abundance['abundance']>0]
+        abundance = tmp_abundance[tmp_abundance > 0]
         denominator = np.zeros(len(self.IoneqAll['ioneqTemperature']))
         for i in range(len(abundance)):
             for z in range(1,i+2):

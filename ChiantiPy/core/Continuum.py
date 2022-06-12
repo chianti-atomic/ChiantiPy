@@ -92,19 +92,25 @@ class continuum(ionTrails):
         self.ionization_potential = chdata.Ip[self.Z-1, self.Stage-1]*const.ev2Erg
         self.IprErg = self.Ipr*const.ev2Erg
         self.IprCm = 1.e+8/(const.ev2Ang/self.Ipr)
+
         # Set abundance
         if abundance is not None:
             if isinstance(abundance,  float):
                 self.Abundance = abundance
+                # need the following for p2eRatio but will use default abundance
+                self.AbundAll = chdata.AbundanceDefault['abundance']
             elif isinstance(abundance, str):
-                ab = io.abundanceRead(abundance)
+                ab = io.abundanceRead(abundance,  verbose=1)
                 self.Abundance = ab['abundance'][self.Z-1]
                 self.AbundanceName = abundance
+                self.AbundAll = ab['abundance']
+
         else:
-            self.AbundanceName = self.Defaults['abundfile']
+#            self.AbundanceName = self.Defaults['abundfile']
         #
-            ab = chdata.Abundance[self.AbundanceName]['abundance']
-            self.Abundance = ab['abundance'][self.Z-1]
+#            ab = chdata.Abundance[self.AbundanceName]['abundance']
+            self.Abundance = chdata.AbundanceDefault['abundance'][self.Z-1]
+            self.AbundAll = chdata.AbundanceDefault['abundance']
 
         self.ioneqOne()
 

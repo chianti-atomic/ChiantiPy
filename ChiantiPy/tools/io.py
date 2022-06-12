@@ -391,7 +391,7 @@ def defaultsRead(verbose=False):
     """
     Read in configuration from .chiantirc file or set defaults if one is not found.
     """
-    initDefaults = {'abundfile': 'sun_photospheric_2015_scott','ioneqfile': 'chianti', 'wavelength': 'angstrom', 'flux': 'energy','gui':False}
+    initDefaults = {'abundfile': 'sun_photospheric_2015_scott','ioneqfile': 'chianti', 'wavelength': 'angstrom', 'flux': 'energy','gui':True}
 
     if "HOME" in os.environ.keys():
         if os.path.isdir(os.environ["HOME"]):

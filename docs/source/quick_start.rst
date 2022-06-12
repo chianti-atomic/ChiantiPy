@@ -450,7 +450,13 @@ produces
 .. image:: _static/ne6_mg6_spectrum.png
     :align:  center
 
-There is demo notebooks for the **bunch** class, bunch_demo.ipynb, in the jupyter_notebooks directory
+There is demo notebooks for the **bunch** class, bunch_demo.ipynb, in the jupyter_notebooks directory.  Among other things, it shows how to label the intensity plots with the corresponding ion and wavelength as in
+
+.. image:: _static/bunch_399_404_label.png
+    :align:  center
+
+
+
 
 Spectra of multiple ions and continuum
 --------------------------------------
@@ -667,6 +673,7 @@ There are 9 jupyter notebooks in the `jupyter_notebooks`_ directory that demonst
 
 .. _jupyter_notebooks:  https://github.com/chianti-atomic/ChiantiPy/tree/master/jupyter_notebooks
 
+
 A summary of the notebooks
 ==========================
 
@@ -677,7 +684,11 @@ QuickStart.ipynb - a notebook that generally follows the Quick-Start guide in th
 
 A demo of the bunch class is found in:  bunch_demo.ipynb
 
+These notebook show some of the characteristics and capabilities of the bunch class.  Among other things, it shows how to apply labels to plots of line intensities.
+
 Two demos of the spectrum class are found in:  spectrum_demo.ipynb and spectrum_demo_2.ipynb
+
+As with the bunch notebook, these notebook show some of the characteristics and capabilities of the spectrum class.  Among other things, it shows how to apply labels to plots of spectra as a funcition of wavelength.
 
 The directory also contains 5 other notebooks and a json file.  These are demo files for reproducing some of the analyses in the paper "Electron densities and their uncertainties derived from spectral emission line intensities" by Kenneth Dere.  This paper has been published in the Monthly Notices of the Royal Astronomical Society, 2020, 496, 2334.
 

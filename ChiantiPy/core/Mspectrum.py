@@ -71,7 +71,7 @@ class mspectrum(ionTrails, specTrails):
         self.Defaults = chdata.Defaults
         #
 
-        self.argCheck(temperature=temperature, eDensity=eDensity, pDensity=None, em=em)
+        self.argCheck(temperature=temperature, eDensity=eDensity, pDensity=None, em=em,  verbose=verbose)
 
         nTempDens = self.NTempDens
 
@@ -132,16 +132,18 @@ class mspectrum(ionTrails, specTrails):
         self.Finished = []
         #
 
-        self.ionGate(elementList = elementList, ionList = ionList, minAbund=minAbund, doLines=doLines, doContinuum=doContinuum, verbose = verbose)
-        for one in self.Todo.keys():
-            print(' %s  %s'%(one, self.Todo[one]))
+        self.ionGate(elementList = elementList, ionList = ionList, minAbund=minAbund, doLines=doLines,
+            doContinuum=doContinuum, verbose = 0)
+#        print(' \n in mspectrum \n')
+#        for one in self.Todo.keys():
+#            print(' %s  %s'%(one, self.Todo[one]))
         #
         for akey in sorted(self.Todo.keys()):
             zStuff = util.convertName(akey)
             Z = zStuff['Z']
             abundance = self.Abundance[Z - 1]
-            if verbose:
-                print(' %5i %5s abundance = %10.2e '%(Z, const.El[Z-1],  abundance))
+#            if verbose:
+#                print(' %5i %5s abundance = %10.2e '%(Z, const.El[Z-1],  abundance))
             if verbose:
                 print(' doing ion %s for the following processes %s'%(akey, self.Todo[akey]))
             if 'ff' in self.Todo[akey]:
@@ -263,5 +265,7 @@ class mspectrum(ionTrails, specTrails):
                 self.Spectrum = {label:{'wavelength':wavelength, 'intensity':total.squeeze(), 'filter':filter[0].__name__,   'width':filter[1], 'integrated':integrated, 'ions':self.IonsCalculated, 'em':em,
                 'Abundance':self.AbundanceName, 'xlabel':xlabel, 'ylabel':ylabel}, 'minAbund':minAbund}
         else:
-            self.Spectrum ={'wavelength':wavelength, 'intensity':total.squeeze(), 'filter':filter[0].__name__,   'width':filter[1], 'integrated':integrated, 'ions':self.IonsCalculated,
-            'em':em, 'Abundance':self.AbundanceName, 'xlabel':xlabel, 'ylabel':ylabel, 'minAbund':minAbund}
+            self.Spectrum ={'wavelength':wavelength, 'intensity':total.squeeze(), 'filter':filter[0].__name__,
+            'width':filter[1], 'integrated':integrated, 'ions':self.IonsCalculated, 'em':em,
+            'Abundance':self.AbundanceName, 'xlabel':xlabel, 'ylabel':ylabel, 'minAbund':minAbund,
+            'todo':self.Todo}

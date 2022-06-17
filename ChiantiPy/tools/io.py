@@ -12,7 +12,6 @@ import numpy as np
 
 import ChiantiPy.tools.util as util
 import ChiantiPy.tools.constants as const
-import ChiantiPy.tools.data as chdata
 import ChiantiPy.Gui as chgui
 from  ChiantiPy.fortranformat import FortranRecordReader
 
@@ -59,7 +58,8 @@ def abundanceRead(abundancename=None, verbose=False):
                 else:
                     abundanceFileName = os.path.join(abundDir,abundName)
     else:
-        return chdata.AbundanceDefault
+        defaults = defaultsRead()
+        abundanceFileName = os.path.join(abundDir, defaults['abundfile'] +'.abund')
 
     with open(abundanceFileName,'r') as inpt:
         s1 = inpt.readlines()

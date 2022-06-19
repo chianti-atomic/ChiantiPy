@@ -90,16 +90,12 @@ class ipymspectrum(ionTrails, specTrails):
         self.Defaults = chdata.Defaults
         #
         self.argCheck(temperature=temperature, eDensity=eDensity, pDensity = None,  em=em)
-        if verbose:
-            print('NTempDens:  %5i'%(self.NTempDens))
             #
         #
         if self.Em.max() == 1.:
             ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
         else:
             ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ $'
-        if verbose:
-            print('len of self.Em %5i'%(len(self.Em)))
         #
         #
         #
@@ -150,8 +146,8 @@ class ipymspectrum(ionTrails, specTrails):
             zStuff = util.convertName(akey)
             Z = zStuff['Z']
             abundance = self.Abundance[Z - 1]
-            if verbose:
-                print(' %5i %5s abundance = %10.2e '%(Z, const.El[Z-1],  abundance))
+#            if verbose:
+#                print(' %5i %5s abundance = %10.2e '%(Z, const.El[Z-1],  abundance))
             if verbose:
                 print(' doing ion %s for the following processes %s'%(akey, self.Todo[akey]))
             if 'ff' in self.Todo[akey]:

@@ -179,7 +179,8 @@ class spectrum(ionTrails, specTrails):
             self.FbInstances = {}
         self.Finished = []
         #
-        self.ionGate(elementList = elementList, ionList = ionList, minAbund=minAbund, doLines=doLines, doContinuum=doContinuum, verbose = verbose)
+        self.ionGate(elementList = elementList, ionList = ionList, minAbund=minAbund, doLines=doLines,
+            doContinuum=doContinuum, verbose = False)
         #
         for akey in sorted(self.Todo.keys()):
             zStuff = util.convertName(akey)

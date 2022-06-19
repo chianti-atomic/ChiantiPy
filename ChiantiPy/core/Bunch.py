@@ -146,7 +146,8 @@ class bunch(ionTrails, specTrails):
         # also needed by ionGate
         self.WvlRange = np.asarray(wvlRange, 'float64')
         #
-        self.ionGate(elementList = elementList, ionList = ionList, minAbund=minAbund, doLines=1, doContinuum=0, verbose = verbose)
+        self.ionGate(elementList = elementList, ionList = ionList, minAbund=minAbund, doLines=1,
+            doContinuum=0, verbose = False)
         #
         for ionS in sorted(self.Todo.keys()):
             nameStuff = util.convertName(ionS)

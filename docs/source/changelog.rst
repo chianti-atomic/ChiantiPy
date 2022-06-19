@@ -6,11 +6,13 @@ Changelog
 Changes from 0.12.0 to 0.13.0
 =============================
 
-it is now possible to incorporate a user created abundance file.  It needs to be of the same structure as one of the .abund files in the XUVTOP/abundance directory.  The file can be located anywhere on the user's computer.  It will be read if the abundance keyword is set the to a fully qualified file name of the new abundance file.
+it is now possible to incorporate a user created abundance file.  It needs to be of the same structure as one of the .abund files in the XUVTOP/abundance directory.  The file can be located anywhere on the user's computer.  It will be read if the abundance keyword is set to a fully qualified file name of the new abundance file, such as '/home/me/myabudance.abund', or equally, '/home/me/myabudance.txt'
 
 in the core classes, bunch and spectrum, now have saveData methods to save calculations to a pickle file
 
 by default, the pyQt widgets are now used a selection tools.  The command line selection tools are still available but the ~/.chianti/chiantirc file needs to select them.
+
+Problems with the ionGate method have been fixed.  This method help to select which ions will be used in multi-ion calculations
 
 
 

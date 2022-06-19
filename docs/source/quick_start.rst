@@ -401,6 +401,14 @@ produces and initial plot of the selected lines, a selection widget and finally 
 
 there seems to be a significant temperature dependence to the ratio, even though both are formed near 4.e+5 K.
 
+with version 0.13.0 it is possible to save multi-ion calculations as a pickle file
+
+::
+
+  dataName = 'mybunch.pkl'
+  bnch.saveData(dataName)
+
+
 A new keyword argument **keepIons** has been added in v0.6 to the bunch and the 3 spectrum classes.  It should be used with some care as it can lead to very large instances in the case of a large number of ions, temperature, or densities.
 
 ::
@@ -468,6 +476,8 @@ The spectrum for a selection of all of the ions in the CHIANTI database can also
 *  **spectrum** - the single processor implementation that can be used anywhere
 *  **mspectrum** - uses the Python multiprocessing class and cannot be used in a IPython qtconsole or notebook
 *  **ipymspectrum** [new in v0.6] - uses the IPython parallel class and can be used in a IPython qtconsole or notebook
+
+As of version 0.13.0, it is now possible to save the calculations with the **saveData** methods, demonstrated with the bunch class above
 
 The single processor spectrum class
 ===================================

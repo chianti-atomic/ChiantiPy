@@ -6,7 +6,7 @@ Changelog
 Changes from 0.12.0 to 0.13.0
 =============================
 
-it is now possible to incorporate a user created abundance file.  It needs to be of the same structure as one of the .abund files in the XUVTOP/abundance directory.  The file can be located anywhere on the user's computer.  It will be read if the abundance keyword is set to a fully qualified file name of the new abundance file, such as '/home/me/myabudance.abund', or equally, '/home/me/myabudance.txt'
+it is now possible to incorporate a user created abundance file.  It needs to be of the same structure as one of the .abund files in the XUVTOP/abundance directory.  The file can be located anywhere on the user's computer.  It will be read if the abundance keyword is set to a fully qualified file name of the new abundance file, such as '/home/me/myabundance.abund', or equally, '/home/me/myabundance.txt'
 
 in the core classes, bunch and spectrum, now have saveData methods to save calculations to a pickle file
 

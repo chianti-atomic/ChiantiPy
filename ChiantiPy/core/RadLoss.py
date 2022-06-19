@@ -105,7 +105,7 @@ class radLoss(ionTrails, specTrails):
         #
         self.WvlRange = [0., 1.e+30]
         #
-        self.ionGate(elementList = elementList, ionList = ionList, minAbund=minAbund, doContinuum=doContinuum, doWvlTest=0, verbose=verbose)
+        self.ionGate(elementList = elementList, ionList = ionList, minAbund=minAbund, doContinuum=doContinuum, doWvlTest=0, verbose=False)
         #
         #
         for akey in sorted(self.Todo.keys()):

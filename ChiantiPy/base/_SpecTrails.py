@@ -344,7 +344,7 @@ class specTrails(object):
                                 print(' for ion %s do : %s'%(ionSd, todo[ionSd]))
         #
                     #
-                    for ionstage in range(2, iz+1):
+                    for ionstage in range(2, iz+2):
                         ionS = util.zion2name(iz, ionstage)
                         if ionS in ionInfo.keys():
                             ioneqTest = (temperature.max() >= ionInfo[ionS]['tmin']) and (temperature.min() <= ionInfo[ionS]['tmax'])

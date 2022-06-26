@@ -3,6 +3,12 @@ Changelog
 ===========
 
 
+Changes from 0.13.0 to 0.13.1
+=============================
+
+This is primarily a bug fix release to correct a bug in ionGate that was not taken care of in the 0.13.0 release
+
+
 Changes from 0.12.0 to 0.13.0
 =============================
 

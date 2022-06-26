@@ -401,7 +401,7 @@ produces and initial plot of the selected lines, a selection widget and finally 
 
 there seems to be a significant temperature dependence to the ratio, even though both are formed near 4.e+5 K.
 
-with version 0.13.0 it is possible to save multi-ion calculations as a pickle file
+with version 0.13.0 it is possible to save multi-ion calculations as a pickle file with the saveData method
 
 ::
 

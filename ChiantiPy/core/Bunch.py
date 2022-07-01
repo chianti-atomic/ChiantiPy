@@ -1,3 +1,4 @@
+import os.path
 import copy
 from datetime import datetime
 
@@ -103,12 +104,13 @@ class bunch(ionTrails, specTrails):
     #
     # ------------------------------------------------------------------------------------
     #
-    def __init__(self, temperature, eDensity, wvlRange, elementList=None, ionList=None, minAbund=None,
-        keepIons=0, em=None, abundance=None, verbose=0, allLines=True):
+    def __init__(self, temperature, eDensity, wvlRange, elementList=None, ionList=None,
+        minAbund=None, keepIons=0, em=None, abundance=None, verbose=0, allLines=True):
         """
         Calculate the emission line spectrum as a function of temperature and density.
 
         """
+
         #
         t1 = datetime.now()
         # creates Intensity dict from first ion calculated
@@ -166,7 +168,8 @@ class bunch(ionTrails, specTrails):
                     self.IonInstances[ionS] = copy.deepcopy(thisIon)
                 if setupIntensity:
                     for akey in self.Intensity:
-                        self.Intensity[akey] = np.hstack((copy.copy(self.Intensity[akey]), thisIon.Intensity[akey]))
+                        self.Intensity[akey] = np.hstack((copy.copy(self.Intensity[akey]),
+                            thisIon.Intensity[akey]))
                 else:
                     setupIntensity = 1
 #                                print(' creating Intensity dict from ion %s'%(ionS))

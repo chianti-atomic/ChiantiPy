@@ -21,118 +21,12 @@ class specTrails(object):
     """
 
 
-    def __init__(self, temperature, density):
-        self.Temperature = temperature
-        self.EDensity = density
-        self.AbundanceName = chdata.Defaults['abundfile']
-        self.AbundAll = chdata.Abundance[self.AbundanceName]['abundance']
-        #
-        # ---------------------------------------------------------------------------
-        #
-    def convolve(self, wavelength=None, filter=(chfilters.gaussianR, 1000.), label=0, verbose=False):
-        '''
-        the first application of spectrum calculates the line intensities within the specified wavelength
-        range and for set of ions specified
-
-        wavelength will not be used if applied to 'spectrum' objects
-
-        wavelength IS need for 'bunch' objects - in this case, the wavelength should not extend beyond
-        the limits of the wvlRange used for the 'bunch' calculation
-
-        Keyword Arguments
-        -----------------
-
-        wavelength:  'int', `list`
-            if an `int`, the attribute 'Wavelength' is looked for
-            otherwise, wavelength is used
-
-        filter: `tuple`
-            first elements if one of the ChiantiPy.tools.filters object
-            second element is the width appropriate to the filter
-
-        label:  `str`
-            if set, creates a Spectrum[label] attribute
-
-        verbose: `bool`
-            if True, prints info to the terminal
-
-        '''
-        if not hasattr(self, 'IonInstances'):
-            print(' must set keepIons=1 in order to keep self.IonInstances')
-        #
-        if type(label)!= type(0):
-            if type(label) != str:
-                print(' label must either be zero or a string')
-        #
-        t1 = datetime.now()
-        #:
-        if hasattr(self, 'Wavelength'):
-                nWvl = len(self.Wavelength)
-                wavelength = self.Wavelength
-        elif wavelength is not None:
-            self.Wavelength = wavelength
-            nWvl = len(wavelength)
-        else:
-            print(' a wavelength array must be given')
-            return
-        if not hasattr(self, 'NTempDens'):
-            self.NTempDens = max([self.Ntemp,  self.Ndens])
-        lineSpectrum = np.zeros((self.NTempDens, nWvl), np.float64).squeeze()
-        for akey in sorted(self.IonInstances.keys()):
-            if verbose:
-                print( ' trying ion = %s'%(akey))
-#            thisIon = self.IonInstances[akey]
-            if not 'errorMessage' in sorted(self.IonInstances[akey].Intensity.keys()):
-                if verbose:
-                    print(' doing convolve on ion %s '%(akey))
-                self.IonInstances[akey].spectrum(wavelength, filter)
-#                lineSpectrum = np.add(lineSpectrum, self.IonInstances[akey].Spectrum['intensity'])
-                if 'errorMessage' in sorted(self.IonInstances[akey].Spectrum.keys()):
-                    print(self.IonInstances[akey].Spectrum['errorMessage'])
-                else:
-                    lineSpectrum += self.IonInstances[akey].Spectrum['intensity']
-#                if self.NTempDens == 1:
-#                    lineSpectrum += thisIon.Spectrum['intensity']
-#                else:
-#                    for iTempDen in range(self.NTempDens):
-#                        lineSpectrum[iTempDen] += thisIon.Spectrum['intensity'][iTempDen]
-            else:
-                if 'errorMessage' in sorted(self.IonInstances[akey].Intensity.keys()):
-                    print(self.IonInstances[akey].Intensity['errorMessage'])
-
-        self.LineSpectrum = {'wavelength':wavelength, 'intensity':lineSpectrum.squeeze()}
-        #
-        total = self.LineSpectrum['intensity']
-        #
-        # the following is required in order to be applied to both a 'spectrum' and a 'bunch' object
-        #
-        if hasattr(self, 'FreeFree'):
-            total += self.FreeFree['intensity']
-        if hasattr(self, 'FreeBound'):
-            total += self.FreeBound['intensity']
-        if hasattr(self, 'TwoPhoton'):
-            total += self.TwoPhoton['intensity']
-        self.Total = total
-        #
-        #
-        if self.NTempDens == 1:
-            integrated = total
-        else:
-            integrated = total.sum(axis=0)
-        #
-        t2 = datetime.now()
-        dt = t2 - t1
-        print(' elapsed seconds = %12.3e'%(dt.seconds))
-        #
-        if type(label) == type(''):
-            if hasattr(self, 'Spectrum'):
-                self.Spectrum[label] = {'wavelength':wavelength, 'intensity':total.squeeze(), 'filter':filter[0].__name__,   'width':filter[1], 'integrated':integrated, 'em':self.Em,  'Abundance':self.AbundanceName}
-            else:
-                self.Spectrum = {label:{'wavelength':wavelength, 'intensity':total.squeeze(), 'filter':filter[0].__name__,   'width':filter[1], 'integrated':integrated, 'em':self.Em,  'Abundance':self.AbundanceName}}
-        else:
-            self.Spectrum ={'wavelength':wavelength, 'intensity':total.squeeze(), 'filter':filter[0].__name__,   'width':filter[1], 'Abundance':self.AbundanceName}
-        return
-        #
+#    def __init__(self, temperature, density):
+#        self.Temperature = temperature
+#        self.EDensity = density
+#        self.AbundanceName = chdata.Defaults['abundfile']
+#        self.AbundAll = chdata.Abundance[self.AbundanceName]['abundance']
+#        #
         # ---------------------------------------------------------------------------
         #
     def ionGate(self, elementList = None, ionList = None, minAbund=None, doLines=1, doContinuum=1, doWvlTest=1, doIoneqTest=1, includeDiel=False,  verbose=0):

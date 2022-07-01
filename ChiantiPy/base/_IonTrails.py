@@ -365,10 +365,15 @@ class ionTrails(object):
             dstr=' Density = %10.2e (cm$^{-3}$)' % eDensity[index]
             tstr=' T = %10.2e (K)' % temperature[index]
 
+
         if wvlRange is not None:
             wvlIndex = util.between(wvl, wvlRange)
         else:
-            wvlIndex = range(wvl.size)
+            if hasattr(self, 'WvlRange'):
+                wvlRange = self.WvlRange
+                wvlIndex = util.between(wvl, wvlRange)
+            else:
+                wvlIndex = range(wvl.size)
         intensity = intensity[wvlIndex]
         wvl = wvl[wvlIndex]
 
@@ -408,7 +413,7 @@ class ionTrails(object):
         plt.ylabel(ylabel)
         plt.title(title+tstr+dstr)
         plt.tight_layout()
-        if wvlRange:
+        if wvlRange is not None:
             plt.axis([wvlRange[0], wvlRange[1], ymin, intensity.max()])
         if plotFile:
             plt.savefig(plotFile)

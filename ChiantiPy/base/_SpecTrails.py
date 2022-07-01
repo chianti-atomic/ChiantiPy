@@ -29,14 +29,15 @@ class specTrails(object):
         #
         # ---------------------------------------------------------------------------
         #
-    def convolve(self, wavelength=0, filter=(chfilters.gaussianR, 1000.), label=0, verbose=False):
+    def convolve(self, wavelength=None, filter=(chfilters.gaussianR, 1000.), label=0, verbose=False):
         '''
-        the first application of spectrum calculates the line intensities within the specified wavelength range and for set of ions specified
+        the first application of spectrum calculates the line intensities within the specified wavelength
+        range and for set of ions specified
 
         wavelength will not be used if applied to 'spectrum' objects
 
-        wavelength IS need for 'bunch' objects - in this case, the wavelength should not extend beyond the limits of the
-        wvlRange used for the 'bunch' calculation
+        wavelength IS need for 'bunch' objects - in this case, the wavelength should not extend beyond
+        the limits of the wvlRange used for the 'bunch' calculation
 
         Keyword Arguments
         -----------------
@@ -58,24 +59,24 @@ class specTrails(object):
         '''
         if not hasattr(self, 'IonInstances'):
             print(' must set keepIons=1 in order to keep self.IonInstances')
-            return
         #
         if type(label)!= type(0):
             if type(label) != str:
                 print(' label must either be zero or a string')
-                return
         #
         t1 = datetime.now()
         #:
         if hasattr(self, 'Wavelength'):
                 nWvl = len(self.Wavelength)
                 wavelength = self.Wavelength
-        elif type(wavelength) == int:
-            print(' a wavelength array must be given')
-            return
-        else:
+        elif wavelength is not None:
             self.Wavelength = wavelength
             nWvl = len(wavelength)
+        else:
+            print(' a wavelength array must be given')
+            return
+        if not hasattr(self, 'NTempDens'):
+            self.NTempDens = max([self.Ntemp,  self.Ndens])
         lineSpectrum = np.zeros((self.NTempDens, nWvl), np.float64).squeeze()
         for akey in sorted(self.IonInstances.keys()):
             if verbose:
@@ -400,42 +401,47 @@ class specTrails(object):
     #
     # -------------------------------------------------------------------------
     #
-    def saveData(self, filename):
+    def restoreData(self,  filename):
+        """
+
+        :param filename: filename where the pickle file of the saved data to be loaded
+        :type filename: str
+
+        """
+        with open(filename, 'rb') as inpt:
+            data = pickle.load(inpt)
+
+        for akey in data.keys():
+            setattr(self, akey,  data[akey])
+        return
+
+    #
+    # -------------------------------------------------------------------------
+    #
+    def saveData(self, filename, verbose=False):
         """
 
         :param filename: filename where the pickle file of the saved data will be stored
         :type filename: str
 
-        following running a ch.spectrum calculation, save the calculation as a dictionary to a pickle file
+        following running a multi-ion calculation (bunch, spectrum, mspectrum, ipymspectrum, radloss,
+        save the calculation as a dictionary to a pickle file
         """
-        data = {'temperature':self.Temperature, 'eDensity':self.EDensity,
-            'em':self.Em, 'abundanceName':self.AbundanceName, 'abundAll':self.AbundAll,
-            'ionsCalculated':self.IonsCalculated,
-            'defaults':self.Defaults, 'intensity':self.Intensity,
-            'nTemp':self.Ntemp, 'nDens':self.Ndens, 'nTempDens':self.NTempDens}
 
-#          'elementList':self.elementList, 'ionList':self.ionList,
-#            'minAbund':self.minAbund, 'keepIons':self.keepIons, 'em':self.em, 'abundance':self.abundance,
-#            'allLines':self.allLines}
+        t0 = datetime.now()
+        data = {'Filename':filename, 'Date':t0.strftime('%Y %B %d %H%M'),  'ClassName':self.__class__}
+        for aname in self.__dict__.keys():
+            if hasattr(self, aname):
+                data[aname] = getattr(self, aname)
 
-        if hasattr(self, 'Spectrum'):
-            data['spectrum'] = self.Spectrum
-        if hasattr(self, 'Wvl'):
-            data['wvl'] = self.Wvl
-        if hasattr(self, 'Wavelength'):
-            data['wavelength'] = self.Wavelength
-        if hasattr(self, 'WvlRange'):
-            data['wvlRange'] = self.WvlRange
-        if hasattr(self, 'PDensity'):
-            data['pDensity'] = self.PDensity
-        if hasattr(self, 'IonInstances'):
-            data['ionInstances'] = self.IonInstances
-        if hasattr(self, 'Xlabel'):
-            data['xlabel'] = self.Xlabel
-        if hasattr(self, 'Ylabel'):
-            data['ylabel'] = self.Ylabel
         with open(filename, 'wb') as outpt:
             pickle.dump(data, outpt)
+
+        if verbose:
+            for aname  in data:
+                print(' saving attribute:  %s'%(aname))
+
+
 
     def spectrumPlot(self, index=-1, integrated=False, saveFile=False, linLog = 'lin'):
         '''

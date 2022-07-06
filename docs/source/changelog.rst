@@ -2,6 +2,21 @@
 Changelog
 ===========
 
+Changes from 0.13.1 to 0.14.0
+=============================
+
+a new class 'ch.redux' restores the attributes saved by the saveData methods.  It inherits as number of methods, especially, for plotting.
+
+the inherited methods 'intensityPlot' and 'spectrumPlot' have been improved.  These are inherited by the ion, bunch, spectrum, mspectrum, ipymspectrum and redux classes.
+
+First, these methods will also display the ion name ('Fe XIV') and wavelength together with the line intensities or spectral intensity.
+
+
+The are more flexible in the several keyword arguments have been added:
+
+    'doLabel' governs whether to display the ion name and wavelength
+    'lw' the linewidth of the marker in matplotlib units (default=1)
+    'doTitle' governs whether to add a title to the plot
 
 Changes from 0.13.0 to 0.13.1
 =============================

@@ -1069,7 +1069,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         """
 
         ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
-        xlabel = 'Wavelength ('+self.Defaults['wavelength'] +')'
+        xlabel = 'Wavelength ('+self.Defaults['wavelength'].capitalize() +')'
 
         useFilter = filter[0]
         useFactor = filter[1]
@@ -1107,18 +1107,25 @@ class ion(ioneqOne, ionTrails, specTrails):
                         aspectrum[itemp] += useFilter(wavelength, wvlCalc, factor=useFactor)*self.Intensity['intensity'][itemp, iwvl]
                     if useEm:
                         aspectrum[itemp] *= em[itemp]
+        integrated = aspectrum.sum(axis=0)
 
         if type(label) == type(''):
             if hasattr(self, 'Spectrum'):
-                self.Spectrum[label] = {'intensity':aspectrum.squeeze(),  'wvl':wavelength, 'filter':useFilter.__name__, 'filterWidth':useFactor, 'allLines':allLines, 'em':em, 'xlabel':xlabel, 'ylabel':ylabel}
+                self.Spectrum[label] = {'intensity':aspectrum.squeeze(), 'integrated':integrated,
+                    'wavelength':wavelength, 'filter':useFilter.__name__, 'filterWidth':useFactor,
+                    'allLines':allLines, 'em':em, 'xlabel':xlabel, 'ylabel':ylabel}
                 if errorMessage is not None:
                     self.Spectrum[label]['errorMessage'] = errorMessage
             else:
-                self.Spectrum = {label:{'intensity':aspectrum.squeeze(),  'wvl':wavelength, 'filter':useFilter.__name__, 'filterWidth':useFactor, 'allLines':allLines, 'em':em, 'xlabel':xlabel, 'ylabel':ylabel}}
+                self.Spectrum = {label:{'intensity':aspectrum.squeeze(), 'integrated':integrated,
+                    'wavelength':wavelength, 'filter':useFilter.__name__, 'filterWidth':useFactor,
+                    'allLines':allLines, 'em':em, 'xlabel':xlabel, 'ylabel':ylabel}}
                 if errorMessage is not None:
                     self.Spectrum[label]['errorMessage'] = errorMessage
         else:
-            self.Spectrum = {'intensity':aspectrum.squeeze(),  'wvl':wavelength, 'filter':useFilter.__name__, 'filterWidth':useFactor, 'allLines':allLines, 'em':em, 'xlabel':xlabel, 'ylabel':ylabel}
+            self.Spectrum = {'intensity':aspectrum.squeeze(), 'integrated':integrated,
+                'wavelength':wavelength, 'filter':useFilter.__name__, 'filterWidth':useFactor,
+                'allLines':allLines, 'em':em, 'xlabel':xlabel, 'ylabel':ylabel}
             if errorMessage is not None:
                 self.Spectrum['errorMessage'] = errorMessage
 

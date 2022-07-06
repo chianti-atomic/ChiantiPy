@@ -257,14 +257,20 @@ class spectrum(ionTrails, specTrails):
         #
         if type(label) == type(''):
             if hasattr(self, 'Spectrum'):
-                self.Spectrum[label] = {'wavelength':wavelength, 'intensity':total.squeeze(), 'filter':filter[0].__name__,   'width':filter[1], 'integrated':integrated, 'em':em, 'ions':self.IonsCalculated,
-                'Abundance':self.AbundanceName, 'xlabel':self.Xlabel, 'ylabel':self.Ylabel, 'minAbund':minAbund}
+                self.Spectrum[label] = {'wavelength':wavelength, 'intensity':total.squeeze(),
+                    'filter':filter[0].__name__,   'width':filter[1], 'integrated':integrated, 'em':em,
+                    'ions':self.IonsCalculated, 'Abundance':self.AbundanceName, 'xlabel':self.Xlabel,
+                    'ylabel':self.Ylabel, 'minAbund':minAbund}
             else:
-                self.Spectrum = {label:{'wavelength':wavelength, 'intensity':total.squeeze(), 'filter':filter[0].__name__,   'width':filter[1], 'integrated':integrated, 'em':em, 'ions':self.IonsCalculated,
-                'Abundance':self.AbundanceName, 'xlabel':self.Xlabel, 'ylabel':self.Ylabel}, 'minAbund':minAbund}
+                self.Spectrum = {label:{'wavelength':wavelength, 'intensity':total.squeeze(),
+                    'filter':filter[0].__name__,   'width':filter[1], 'integrated':integrated, 'em':em,
+                    'ions':self.IonsCalculated, 'Abundance':self.AbundanceName, 'xlabel':self.Xlabel,
+                    'ylabel':self.Ylabel}, 'minAbund':minAbund}
         else:
-            self.Spectrum ={'wavelength':wavelength, 'intensity':total.squeeze(), 'filter':filter[0].__name__,   'width':filter[1], 'integrated':integrated,  'ions':self.IonsCalculated,
-            'Abundance':self.AbundanceName, 'xlabel':self.Xlabel, 'ylabel':self.Ylabel, 'minAbund':minAbund}
+            self.Spectrum ={'wavelength':wavelength, 'intensity':total.squeeze(),
+                'filter':filter[0].__name__,   'width':filter[1], 'integrated':integrated,
+                'ions':self.IonsCalculated, 'Abundance':self.AbundanceName, 'xlabel':self.Xlabel,
+                'ylabel':self.Ylabel, 'minAbund':minAbund}
 
 
 

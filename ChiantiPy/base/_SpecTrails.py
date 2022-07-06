@@ -323,7 +323,8 @@ class specTrails(object):
         """
 
         t0 = datetime.now()
-        data = {'Filename':filename, 'Date':t0.strftime('%Y %B %d %H%M'),  'ClassName':self.__class__}
+        data = {'Filename':filename, 'Date':t0.strftime('%Y %B %d %H%M'),
+            'ClassName':self.__class__.__name__}
         for aname in self.__dict__.keys():
             if hasattr(self, aname):
                 data[aname] = getattr(self, aname)
@@ -337,12 +338,15 @@ class specTrails(object):
 
 
 
-    def spectrumPlot(self, index=-1, integrated=False, saveFile=False, linLog = 'lin'):
+    def spectrumPlot(self,  wvlRange=None, index=None, integrated=False, saveFile=False, linLog = 'lin',
+        doLabel=True, lw=1, doTitle=True, top=10):
         '''
         to plot the spectrum as a function of wavelength
 
         Keyword Arguments
         -----------------
+
+        wvlRange:  2 element tuple, list or array determines the wavelength range to plot
 
         index:  `int`
             selects the temperature of the calculated spectrum
@@ -356,6 +360,17 @@ class specTrails(object):
         linLog:  `str`
             should be either 'lin' for linear, or 'log' for logarithmic base10
 
+        doLabel: `bool`
+            if set to True, labels of the top spectral lines are added
+
+        lw:  `int`, width of the label line in matplotlib units (default=1)
+
+        doTitle:  `bool` if True, then a title is applied to the plot (default=True)
+
+
+        top:  integer
+            specifies to plot only the top strongest lines, default = 10
+
         '''
         fs = 14
         plt.figure()
@@ -365,41 +380,118 @@ class specTrails(object):
         else:
             self.Ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$'
         #
-        self.Xlabel = 'Wavelength ('+self.Defaults['wavelength'] +')'
+        self.Xlabel = 'Wavelength ('+self.Defaults['wavelength'].capitalize() +')'
         #
-#        ymin = 10.**(np.log10(emiss.min()).round(0))
+        if hasattr(self, 'Spectroscopic'):
+            title1 = self.Spectroscopic
+        elif hasattr(self, 'ClassName'):
+            title1 = self.ClassName
+        else:
+            title1 = self.__class__.__name__
+
+        if wvlRange is None:
+            if hasattr(self, 'WvlRange'):
+                wvlRange = self.WvlRange
+            else:
+                wvlRange = [self.Intensity['wvl'].min(),  self.Intensity['wvl'].max()]
+                print(' wvlRange should be specified')
+
+        if integrated:
+            lineIntensity = self.Intensity['integrated']
+            lineWvl = self.Intensity['wvl']
+            lineIonS = self.Intensity['ionS']
+
+            wvlIndex = util.between(lineWvl, wvlRange)
+
+            lineIntensity = lineIntensity[wvlIndex]
+            lineWvl = lineWvl[wvlIndex]
+            lineIonS = lineIonS[wvlIndex]
+        else:
+            lineIntensity = self.Intensity['intensity'][index]
+            lineWvl = self.Intensity['wvl']
+            lineIonS = self.Intensity['ionS']
+
+        wvlIndex = util.between(lineWvl, wvlRange)
+
+        lineIntensity = lineIntensity[wvlIndex]
+        lineWvl = lineWvl[wvlIndex]
+        lineIonS = lineIonS[wvlIndex]
+        lineIonSpectr = []
+        for anion in lineIonS:
+            nameDict = util.convertName(anion)
+            lineIonSpectr.append(nameDict['spectroscopic'])
+        lineIonSpectr = np.asarray(lineIonSpectr)
+
+
+        self.Error = 0
+        if lineWvl.size == 0:
+            print('No lines in this wavelength interval')
+            self.Error = 1
+            self.Message = 'No lines in this wavelength interval'
+            return
+        elif top == 0:
+            top = lineWvl.size
+        elif lineWvl.size > top:
+            intsrt = np.argsort(lineIntensity)
+            lineWvl = lineWvl[intsrt[-top:]]
+            lineIonS = lineIonS[intsrt[-top:]]
+            lineIonSpectr = lineIonSpectr[intsrt[-top:]]
+            lineIntensity = lineIntensity[intsrt[-top:]]
+        else:
+            top = lineWvl.size
+
+
         #
         plt.ion()
         #
         if integrated:
+            spectrum = self.Spectrum['integrated']
             if 'wavelength' in sorted(self.Spectrum.keys()):
-                plt.plot(self.Spectrum['wavelength'], self.Spectrum['integrated'])
+                plt.plot(self.Spectrum['wavelength'], spectrum)
             elif 'wvl' in sorted(self.Spectrum.keys()):
                 plt.plot(self.Spectrum['wvl'], self.Spectrum['integrated'])
-            plt.xlabel(self.Xlabel,  fontsize=fs)
-            plt.ylabel(self.Ylabel,  fontsize=fs)
-            plt.title('integrated spectrum',  fontsize=fs)
+            title = title1 + ' integrated spectrum'
         else:
             nTempDens = self.NTempDens
             if nTempDens == 1:
             #
+                spectrum = self.Spectrum['intensity']
                 if 'wavelength' in sorted(self.Spectrum.keys()):
-                    plt.plot(self.Spectrum['wavelength'], self.Spectrum['intensity'])
+                    plt.plot(self.Spectrum['wavelength'], spectrum)
                 elif 'wvl' in sorted(self.Spectrum.keys()):
-                    plt.plot(self.Spectrum['wvl'], self.Spectrum['intensity'])
-                    plt.title(' Temperature = %10.2e K'%(self.Temperature),  fontsize=fs)
+                    plt.plot(self.Spectrum['wvl'], spectrum)
+                title = title1 + ' Temperature = %10.2e K'%(self.Temperature)
             else:
-                if index < 0:
+                if index is None:
                     index = nTempDens/2
+                spectrum = self.Spectrum['intensity'][index]
                 if 'wavelength' in sorted(self.Spectrum.keys()):
-                    plt.plot(self.Spectrum['wavelength'], self.Spectrum['intensity'][index])
+                    plt.plot(self.Spectrum['wavelength'], spectrum)
                 elif 'wvl' in sorted(self.Spectrum.keys()):
-                    plt.plot(self.Spectrum['wvl'], self.Spectrum['intensity'][index])
-                    plt.title(' Temperature = %10.2e K for index = %3i'%(self.Temperature[index], index),  fontsize=fs)
-                plt.xlabel(self.Xlabel,  fontsize=fs)
-                plt.ylabel(self.Ylabel,  fontsize=fs)
-        ylim = plt.ylim()
-        plt.ylim([0., ylim[1]])
+                    plt.plot(self.Spectrum['wvl'], spectrum)
+                title = title1 + ' Temperature = %10.2e K for index = %3i'%(self.Temperature[index],  index)
+        plt.xlabel(self.Xlabel,  fontsize=fs)
+        plt.ylabel(self.Ylabel,  fontsize=fs)
+        if doTitle:
+            plt.title(title, fontsize=fs)
+        if doLabel:
+            for iwvl, awvl in enumerate(lineWvl):
+                wdl = np.argmin(np.abs(awvl - self.Spectrum['wavelength']))
+                spIntens = spectrum[wdl]
+                plt.plot([awvl,  awvl], [0.,  1.2*spIntens], 'k',  lw=lw)
+                ypos = 1.25*spIntens
+                lbl = lineIonSpectr[iwvl] + ' %8.3f'%(awvl)
+                plt.text(awvl,  ypos, lbl, va='bottom', ha='center',rotation='vertical')
+
+        wdx = util.between(self.Spectrum['wavelength'],  wvlRange)
+        ymax = spectrum[wdx].max()
+#        plt.xlim(wvlRange)
+#        plt.ylim([0., ylim[1]])
+        if doLabel:
+            plt.axis([wvlRange[0],  wvlRange[1],  0., 1.8*ymax])
+        else:
+            plt.axis([wvlRange[0],  wvlRange[1],  0., 1.1*ymax])
+
         plt.tight_layout()
         if saveFile:
             plt.savefig(saveFile)

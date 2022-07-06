@@ -121,6 +121,7 @@ class ipymspectrum(ionTrails, specTrails):
         wavelength = np.asarray(wavelength)
         nWvl = wavelength.size
         self.Wavelength = wavelength
+        self.WvlRange = [wavelength[0],  wavelength[-1]]
         ntemp = self.Ntemp
         #
         #

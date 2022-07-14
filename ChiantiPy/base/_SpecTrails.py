@@ -373,6 +373,8 @@ class specTrails(object):
 
         '''
         fs = 14
+        #  fontsize for labels:
+        lfs = 12
         plt.figure()
         mask = self.Em > 1.
         if mask.sum() == 0:
@@ -395,6 +397,7 @@ class specTrails(object):
             else:
                 wvlRange = [self.Intensity['wvl'].min(),  self.Intensity['wvl'].max()]
                 print(' wvlRange should be specified')
+        nTempDens = self.NTempDens
 
         if integrated:
             lineIntensity = self.Intensity['integrated']
@@ -406,7 +409,14 @@ class specTrails(object):
             lineIntensity = lineIntensity[wvlIndex]
             lineWvl = lineWvl[wvlIndex]
             lineIonS = lineIonS[wvlIndex]
+        elif nTempDens == 1:
+            index = 0
+            lineIntensity = self.Intensity['intensity'][0]
+            lineWvl = self.Intensity['wvl']
+            lineIonS = self.Intensity['ionS']
         else:
+            if index is None:
+                index = nTempDens//2
             lineIntensity = self.Intensity['intensity'][index]
             lineWvl = self.Intensity['wvl']
             lineIonS = self.Intensity['ionS']
@@ -481,7 +491,7 @@ class specTrails(object):
                 plt.plot([awvl,  awvl], [0.,  1.2*spIntens], 'k',  lw=lw)
                 ypos = 1.25*spIntens
                 lbl = lineIonSpectr[iwvl] + ' %8.3f'%(awvl)
-                plt.text(awvl,  ypos, lbl, va='bottom', ha='center',rotation='vertical')
+                plt.text(awvl,  ypos, lbl, va='bottom', ha='center',rotation='vertical',  fontsize=lfs)
 
         wdx = util.between(self.Spectrum['wavelength'],  wvlRange)
         ymax = spectrum[wdx].max()

@@ -239,7 +239,8 @@ class maker(ionTrails,  specTrails):
         if True, additional output is sent to the terminal
 
     '''
-    def __init__(self, specData, temperature=None, eDensity=None, elementList=[], ionList=[], allLines=False, abundanceName = None, minAbund=10., wghtFactor=None,  verbose=False):
+    def __init__(self, specData, temperature=None, eDensity=None, elementList=[], ionList=[],
+        allLines=False, abundanceName = None, minAbund=10., wghtFactor=None,  verbose=False):
         '''
         input a list of wavelengths and a wavelength difference
         find a list of predicted spectral lines for each wavelength
@@ -251,10 +252,11 @@ class maker(ionTrails,  specTrails):
         #
         # --------------------------------------------------------------------------------
         #
+        print(' starting maker')
         if temperature is not None:
-            self.Temperature = np.asarray(temperature, np.float64)
+            self.Temperature = np.array(temperature, np.float64)
         if eDensity is not None:
-            self.EDensity = np.asarray(eDensity, np.float64)
+            self.EDensity = np.array(eDensity, np.float64)
         self.Defaults = chdata.Defaults
         self.XUVTOP = os.environ['XUVTOP']
         print(' XUVTOP = %s'%(self.XUVTOP))

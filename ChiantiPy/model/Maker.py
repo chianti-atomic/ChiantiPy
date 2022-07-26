@@ -11,11 +11,11 @@ try:
     import multiprocessing as mp
 except:
     print(' your version of Python does not support multiprocessing \n you will not be able to use mgofnt')
-#
-try:
-    from ipyparallel import Client
-except ImportError:
-    warnings.warn("ipyparallel not found. You won't be able to use the ipymgofnt module")
+
+#try:
+#    from ipyparallel import Client
+#except ImportError:
+#    warnings.warn("ipyparallel not found. You won't be able to use the ipymgofnt module")
 
 import numpy as np
 import scipy.optimize as optimize
@@ -252,7 +252,6 @@ class maker(ionTrails,  specTrails):
         #
         # --------------------------------------------------------------------------------
         #
-        print(' starting maker')
         if temperature is not None:
             self.Temperature = np.array(temperature, np.float64)
         if eDensity is not None:
@@ -273,6 +272,7 @@ class maker(ionTrails,  specTrails):
         print(' abundanceName = %s'%(self.AbundanceName))
         abundAll = chdata.Abundance[self.AbundanceName]['abundance']
         self.AbundAll = abundAll
+        self.Abundance = abundAll
         if wghtFactor is not None:
             self.WghtFactor = wghtFactor
 
@@ -1164,7 +1164,7 @@ class maker(ionTrails,  specTrails):
         #
         # --------------------------------------------------------------------------
         #
-    def diff(self, sort=None):
+    def diff(self, sort=None,  verbose=False):
         '''
         calculates the weighted and straight differences between observed and predicted
         creates an  attribute self.Dict, a dict with the following keys:
@@ -1203,6 +1203,7 @@ class maker(ionTrails,  specTrails):
                 indexer.append(wvlObs)
             sorter = np.argsort(indexer)
 
+        wvlDiff = []
         diff = []
         wDiff = []
         intOverPred = []
@@ -1217,6 +1218,7 @@ class maker(ionTrails,  specTrails):
         for iwvl in sorter:
             amatch = self.Match[iwvl]
             if amatch['predicted'] > 0. :
+                wvlDiff.append(amatch['obsWvl'])
                 diff.append(self.Intensity[iwvl]-amatch['predicted'])
                 chi = np.abs(self.Intensity[iwvl]-amatch['predicted'])/(wghtFactor*self.Intensity[iwvl])
                 wDiff.append(chi)
@@ -1224,7 +1226,8 @@ class maker(ionTrails,  specTrails):
                 diffOverInt.append((self.Intensity[iwvl]-amatch['predicted'])/self.Intensity[iwvl])
 
             else:
-
+                if verbose:
+                    print(' no prediction wvl:  %8.2f ion:  %s'%(amatch['obsWvl'], amatch['ionS']))
                 noPredIdx.append(iwvl)
                 noPredWvl.append(self.Match[iwvl]['wvl'])
                 noPredIon.append(self.Match[iwvl]['ions'])
@@ -1238,7 +1241,7 @@ class maker(ionTrails,  specTrails):
         poor = np.abs(diffOverIntNp) > threeSig
 
         self.Diff = {'diff':diffNp, 'intOverPred':intOverPredNp, 'diffOverInt':diffOverIntNp,
-            'wvl':self.Wvl, 'ionS':self.IonS, '3sig':threeSig, 'poor':poor, 'noPredIdx':noPredIdx,
+            'wvl':wvlDiff, 'ionS':self.IonS, '3sig':threeSig, 'poor':poor, 'noPredIdx':noPredIdx,
             'noPredWvl':noPredWvl, 'noPredIon':noPredIon}
         #
         # -------------------------------------------------------------------------
@@ -1338,6 +1341,8 @@ class maker(ionTrails,  specTrails):
                 wvlObs = amatch['obsWvl']
                 indexer.append(wvlObs)
             sorter = np.argsort(indexer)
+
+        wvlDiff = []
         diff = []
         wDiff = []
         intOverPred = []
@@ -1395,6 +1400,7 @@ class maker(ionTrails,  specTrails):
             for iwvl in sorter:
                 amatch = self.Match[iwvl]
                 if amatch['predicted'] > 0. :
+                    wvlDiff.append(amatch['obsWvl'])
                     diff.append(self.Intensity[iwvl]-amatch['predicted'])
                     chi = np.abs(self.Intensity[iwvl]-amatch['predicted'])/(wghtFactor*self.Intensity[iwvl])
                     wDiff.append(chi)
@@ -1457,7 +1463,8 @@ class maker(ionTrails,  specTrails):
             for i in pdx:
                 print('%5i %s %10.3f %10.3f %10.3f'%(i, self.IonS[i],  self.Wvl[i], np.abs(intOverPredNp)[i],  diffOverIntNp[i]))
                 outpt.write('%5i %s %10.3f %10.3f %10.3f\n'%(i, self.IonS[i],  self.Wvl[i], np.abs(intOverPredNp)[i], diffOverIntNp[i]))
-        self.Diff = {'diff':diffNp, 'intOverPred':intOverPredNp, 'diffOverInt':diffOverIntNp, 'wvl':self.Wvl, 'ionS':self.IonS, '3sig':threeSig, 'poor':poor, 'noPredIdx':noPredIdx,
+        self.Diff = {'diff':diffNp, 'intOverPred':intOverPredNp, 'diffOverInt':diffOverIntNp,
+            'wvl':wvlDiff, 'ionS':self.IonS, '3sig':threeSig, 'poor':poor, 'noPredIdx':noPredIdx,
             'noPredWvl':noPredWvl, 'noPredIon':noPredIon}
         #
         # --------------------------------------------------------------------------

@@ -5,17 +5,7 @@ import os
 from datetime import date
 from datetime import datetime
 import pickle
-import warnings
 
-try:
-    import multiprocessing as mp
-except:
-    print(' your version of Python does not support multiprocessing \n you will not be able to use mgofnt')
-
-#try:
-#    from ipyparallel import Client
-#except ImportError:
-#    warnings.warn("ipyparallel not found. You won't be able to use the ipymgofnt module")
 
 import numpy as np
 import scipy.optimize as optimize

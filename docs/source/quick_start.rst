@@ -66,20 +66,29 @@ Spectral Line Intensities
 
 ::
 
-  fe14.intensityPlot(wvlRange=[210.,220.],linLog='log')
+  fe14.intensityPlot(wvlRange=[210.,220.])
 
-will plot the intensities for the top (default = 10) lines in the specified wavelength range.  If the **Intensity** attribute has not yet been calculated, it will calculate it.  Since there are 21 temperature involved, a single temperature is selected (21/2 = 10).  Otherwise,
+will plot the intensities for the top (default = 10) lines in the specified wavelength range.  If the **Intensity** attribute has not yet been calculated, it will calculate it.  Since there are 21 temperature involved, a single temperature is selected (21//2 = 10).  Otherwise,
 
-.. image:: _static/fe14_intensity_plot_log.png
+.. image:: _static/fe14_intensity_plot_lin.png
     :align:  center
 
 ::
 
-  fe14.intensityPlot(index=2, wvlRange=[210., 220.], linLog = 'log')
+  fe14.intensityPlot(index=10, wvlRange=[210., 220.])
 
-plots the intensities for a temperature = t[2] = 7.9e+5, in this case.  And, by specifying relative = 1, the emissivities will be plotted relative to the strongest line.
+plots the intensities for a temperature = t[10] = 2.e+6, in this case.  And, by specifying relative = 1, the emissivities will be plotted relative to the strongest line.
 
-.. image:: _static/fe14_intensity_plot_log_index2.png
+.. image:: _static/fe14_intensity_plot_lin_index10.png
+    :align:  center
+
+::
+
+  fe14.intensityPlot(index=10, wvlRange=[210., 220.], relative=True, doTitle=False, lw=2)
+
+.. plots the intensities for a temperature = t[10] = 2.e+6, in this case.  And, by specifying relative = True, the emissivities will be plotted relative to the strongest line, doTitle=False, stops the title from appearing and lw sets the line width to 2.
+
+.. image:: _static/fe14_intensity_plot_lin_index10_rel_notitle.png
     :align:  center
 
 ::
@@ -136,6 +145,24 @@ give the following terminal/notebook output
   fe_14     2    12              3s2.3p 2P1.5 - 3s2.3d 2D2.5                  219.1305    2.096e-01     4.27e+10 Y
 
  ------------------------------------------
+
+
+The effect of electron density on line intensities
+--------------------------------------------------
+
+::
+
+  temp = 2.e+6
+  dens = 10.**(6. + 0.1*np.arange(61))
+  fe14 = ch.ion('fe_14', temp, dens)
+  fe14.popPlot()
+
+
+a plot of the population of the top 10 levels is produced as a function of the electron density
+
+.. image:: _static/fe14.int.vs.d.png
+    :align:  center
+
 
 
 G(n,T) function
@@ -276,11 +303,24 @@ Spectra of a single ion
   fe14 = ch.ion('fe_14', temperature = 2.e+6, density = 1.e+9)
   wvl = wvl=200. + 0.125*arange(801)
   fe14.spectrum(wvl, em=1.e+27)
-  plot(wvl, fe14.Spectrum['intensity'])
+
+::
+
+  plt.figure()
+  plt.plot(wvl, fe14.Spectrum['intensity'])
+  xy = plt.axis()
+  xy
+
+::
+
+  plt.axis([200., 300., 0., 400.])
+  plt.xlabel(fe14.Spectrum['xlabel'], fontsize=14)
+  plt.ylabel(fe14.Spectrum['ylabel'], fontsize=14)
+  plt.tight_layout()
 
 this will calculate the spectrum of fe_14 over the specified wavelength range and filter it with the default filter which is a gaussian (filters.gaussianR) with a 'resolving power' of 1000 which gives a gaussian width of wvl/1000.
 
-.. image:: _static/fe14.spectrum.png
+.. image:: _static/fe14_spectrum.png
     :align:  center
 
 other filters available in chianti.tools.filters include a boxcar filter and a gaussian filter where the width can be specified directly
@@ -322,11 +362,72 @@ ylabel
   plt.xlabel(fe14.Spectrum['xlabel'])
   plt.ylabel(fe14.Spectrum['ylabel'])
 
-.. image:: _static/fe14.spectrum2.png
+.. image:: _static/fe14_spectrum2.png
     :align:  center
 
+As of **ChiantiPy 0.14.0**, the **ion** class inherits the spectrumPlot method.
 
-New in **ChiantiPy 0.6**, the *label* keyword has been added to the ion.spectrum method, and also to the other various spectral classes. This allows several spectral calculations for different filters to be saved and compared
+::
+
+  wvlRange = [wvl[0], wvl[-1]
+  fe14.spectrumPlot(wvlRange=wvlRange, index=5)
+
+.. image:: _static/fe14_spectrumPlot.png
+    :align:  center
+
+Also in 0.14.0 is the saveData method and the redux class.  Using the **saveData** method, the calculations can be save and the restored later with the **redux** class
+
+::
+
+  saveName = 'fe14_save.pkl'
+  fe14.saveData(saveName, verbose=True)
+
+
+the attributes are used to create a dict and saved as a pickle file.  If verbose is set to True, these attributes are listed
+
+::
+
+    with open(saveName,'rb') as inpt:
+        fe14Dict = pickle.load(inpt)
+
+::
+
+  for akey in fe14Dict:
+    print(' key = %s'%(akey))
+
+::
+
+  for akey in fe14Dict['Spectrum']:
+      print(' key = %s'%(akey))
+
+it is possible to work directly with the saved data
+
+::
+
+  plt.figure()
+  plt.plot(fe14Dict['Spectrum']['wavelength'], fe14Dict['Spectrum']['intensity'])
+
+
+with version 0.14.0, there is a new class, **redux**
+
+with this class, the saved data can be restored and all of the apprpriated inherited methods are available
+
+
+::
+
+  rdx = ch.redux(saveName, verbose=True)
+
+
+The save data are loaded as attributes.  With verbose=True, they are listed
+
+::
+
+  rdx.spectrumPlot(wvlRange=wvlRange, index=5)
+
+
+Returns the previous plot
+
+New in **ChiantiPy 0.6**, the *label* keyword has been added to the ion.spectrum method, and also to the other various spectral classes. This allows several spectral calculations for different filters to be saved and compared.  However, when the *label* keyword is specified, the intensityPlot and spectrumPlot methods do not work, as of version 0.14.0
 
 ::
 
@@ -341,10 +442,10 @@ New in **ChiantiPy 0.6**, the *label* keyword has been added to the ion.spectrum
   plt.plot(wvl,fe14.Spectrum['1.']['intensity'][5],'-r')
   plt.xlabel(fe14.Spectrum['.4']['xlabel'])
   plt.ylabel(fe14.Spectrum['.4']['ylabel'])
-  plt.legen(loc='upper right')
+  plt.legend(loc='upper right')
 
 
-.. image:: _static/fe14.spectrum_label.png
+.. image:: _static/fe14_spectrum_label.png
     :align:  center
 
 
@@ -401,12 +502,24 @@ produces and initial plot of the selected lines, a selection widget and finally 
 
 there seems to be a significant temperature dependence to the ratio, even though both are formed near 4.e+5 K.
 
+
+The intensityPlot method can also be used with the bunch class
+
+::
+
+  bnch.intensityPlot(index=5, wvlRange=[300., 500.])
+
+results in
+
+.. image:: _static/bunch_intensityPlot.png
+    :align:  center
+
 with version 0.13.0 it is possible to save multi-ion calculations as a pickle file with the saveData method
 
 ::
 
   dataName = 'mybunch.pkl'
-  bnch.saveData(dataName)
+  bnch.saveData(dataName, verbose=True)
 
 
 A new keyword argument **keepIons** has been added in v0.6 to the bunch and the 3 spectrum classes.  It should be used with some care as it can lead to very large instances in the case of a large number of ions, temperature, or densities.
@@ -418,6 +531,9 @@ A new keyword argument **keepIons** has been added in v0.6 to the bunch and the 
   wvl = 394. + dwvl*np.arange(nwvl+1)
   bnch2=ch.bunch(t, 1.e+9, wvlRange=[wvl.min(),wvl.max()], elementList=['ne','mg'], keepIons=1,em=1.e+27)
   bnch2.convolve(wvl,filter=(chfilters.gaussian,5.*dwvl))
+
+::
+
   plt.plot(wvl, bnch2.Spectrum['intensity'][6],label='Total')
   plt.title('Temperature = %10.2e for t[6]'%(t[6]))
 
@@ -446,7 +562,7 @@ ne_5
 ne_6
 ne_8
 
-these IonInstances have all the properties of the Ion class for each of these ions
+these IonInstances have all the properties of the Ion class for each of these ions.  However, this should be used with some caution as it can result in a memory-hogging instance.
 
 ::
 
@@ -458,9 +574,14 @@ produces
 .. image:: _static/ne6_mg6_spectrum.png
     :align:  center
 
-There is demo notebooks for the **bunch** class, bunch_demo.ipynb, in the jupyter_notebooks directory.  Among other things, it shows how to label the intensity plots with the corresponding ion and wavelength as in
 
-.. image:: _static/bunch_399_404_label.png
+The spectrumPlot method can also be used with bunch after convolve is run
+
+::
+
+  bnch2.spectrumPlot()
+
+.. image:: _static/bunch_spectrumPlot.png
     :align:  center
 
 
@@ -514,6 +635,23 @@ The integrated spectrum is formed by summing the spectra for all temperatures.
 The filter is not applied to the continuum.
 
 
+Save the calculations
+
+::
+
+  saveName = 'spectrum.pkl'
+  s.saveData(saveName, verbose=True)
+
+The spectrumPlot method is also available
+
+::
+
+  s.spectrumPlot(integrated=True)
+
+yields
+
+.. image:: _static/spectrum_spectrumPlot.png
+    :align:  center
 
 
 
@@ -536,9 +674,83 @@ The multiple processor mspectrum class
 
 Another way to speed up calculations is to use the *mspectrum* class which uses multiple cores on your local computer.  It requires the Python *multiprocessing* module which is available with Python versions 2.6 and later. *mspectrum* is called in the same way as *spectrum* but you can specify the number of cores with the *proc* keyword.  The default is 3 but it will not use more cores than are available on your machine.  For example,
 
+
 ::
 
-  s = ch.mspectrum(temperature, density ,wvl, em=emeasure, filter = (chfilters.gaussian,.005), proc=4)
+  temp = [1.e+7, 2.e+7, 3.e+7]
+  dens = 1.e+9
+  wvl = np.linspace(1.5, 4., 10001)
+  emeasure = 1.e+27
+  core=6
+
+::
+
+  dwvl = wvl[1] - wvl[0]
+  ' dwvl:  %8.4f'%(dwvl)
+
+::
+
+  sm = ch.mspectrum(temperature, density ,wvl, em=emeasure, filter = (chfilters.gaussian, 5.*dwvl), proc=core)
+
+::
+
+  sm.spectrumPlot(wvlRange=[1.84, 1.88], index=2)
+
+yields
+
+.. image:: _static/mspectrum_spectrumPlot_fe.png
+    :align:  center
+
+::
+
+  temp=2.e+7
+  dens=1.e+9
+  wvl = 1. + 0.002*np.arange(4501)
+  s3 = ch.mspectrum(temp, dens, wvl, filter = (chfilters.gaussian,.015), doContinuum=1, em=1.e+27, minAbund=1.e-5, verbose=0)
+
+::
+
+  plt.plot(wvl, s3.Spectrum['intensity'])
+
+
+.. image:: _static/spectrum_1_10.png
+    :align:  center
+
+The spectrumPlot method can also be used
+
+::
+
+  s3.spectrumPlot(top=6)
+
+.. image:: _static/mspectrum_spectrumPlot_1_10.png
+    :align:  center
+
+with doContinuum=1, the continuum can be plotted separately
+
+::
+
+  plt.plot(wvl, s3.Spectrum['intensity'])
+  plt.plot(wvl, s3.FreeFree['intensity'])
+  plt.plot(wvl, s3.FreeBound['intensity'])
+  plt.plot(wvl, s3.FreeBound['intensity']+s.FreeFree['intensity'])
+
+
+
+produces
+
+.. image:: _static/continuum_2e7_1_10.png
+    :align:  center
+
+::
+
+  s3.spectrumPlot(wvlRange=[10., 13.], top=6)
+
+produces
+
+.. image:: _static/mspectrum_spectrumPlot_10_13.png
+    :align:  center
+
+
 
 The multiple processor ipymspectrum class
 =========================================
@@ -562,7 +774,13 @@ then in an IPython notebook or qtconsole
   dens = 1.e+9
   wvl = 200. + 0.05*np.arange(2001)
   emeasure = [1.e+27 ,1.e+27]
-  s = ch.ipymspectrum(temp, dens, wvl, filter = (chfilters.gaussian,.2), em = emeasure, doContinuum=1, minAbund=1.e-5, verbose=0)
+
+::
+
+  s = ch.ipymspectrum(temp, dens, wvl, filter = (chfilters.gaussian,.2), em = emeasure, doContinuum=1, minAbund=1.e-5, verbose=True)
+
+::
+
   plt.figure
   plt.plot(wvl, s.Spectrum['integrated'])
 
@@ -607,32 +825,6 @@ It is also possible to specify a selection of ions by means of the *ionList* key
 
 Because **keepIons** has been set, the ion instances of all of the ions are maintained in the s2.IonInstances dictionary. It has been possible to compare the spectrum of all of the ions with the spectrum of a single ion.    It should be used with some care as it can lead to very large instances in the case of a large number of ions, temperature, or densities.
 
-::
-
-  temp=2.e+7
-  dens=1.e+9
-  wvl = 1. + 0.002*np.arange(4501)
-  s3 = ch.ipymspectrum(temp, dens, wvl, filter = (chfilters.gaussian,.015),doContinuum=1, em=1.e+27,minAbund=1.e-5,verbose=0)
-  plt.plot(wvl, s3.Spectrum['intensity'])
-
-
-.. image:: _static/spectrum_1_10.png
-    :align:  center
-
-with doContinuum=1, the continuum can be plotted separately
-
-::
-
-  plot(wvl, s3.Spectrum['intensity'])  plot(wvl,s.FreeFree['intensity'])
-  plot(wvl,s.FreeBound['intensity'])
-  plot(wvl,s.FreeBound['intensity']+s.FreeFree['intensity'])
-
-
-
-produces
-
-.. image:: _static/continuum_2e7_1_10.png
-    :align:  center
 
 ::
 

@@ -5,6 +5,7 @@ import os
 from datetime import date
 from datetime import datetime
 import pickle
+import multiprocessing as mp
 
 
 import numpy as np
@@ -1544,8 +1545,9 @@ class maker(ionTrails,  specTrails):
                     print(' attribute EmIndices has not been created')
                     outpt.write(' attribute EmIndices has not been created \n')
                     return
-                print('matchPkl %s '%(self.MatchName))
-                outpt.write('matchPkl %s \n'%(self.MatchName))
+                if hasattr(self, 'MatchName'):
+                    print('matchPkl %s '%(self.MatchName))
+                    outpt.write('matchPkl %s \n'%(self.MatchName))
                 print('wghtFactor %10.3f'%(wghtFactor))
                 outpt.write('wghtFactor %10.3f \n'%(wghtFactor))
                 print(dash)

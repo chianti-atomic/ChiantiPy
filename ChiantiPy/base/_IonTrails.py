@@ -443,11 +443,17 @@ class ionTrails(object):
 
         # must follow setting top
         plt.figure()
-        ylabel = 'Intensity'
+        ylabel = self.Intensity['ylabel']
         if relative:
             intensity = intensity/intensity[-1]
-            ylabel += ' (Relative)'
-        xlbl = 'Wavelength ('+self.Defaults['wavelength'].capitalize() +')'
+            ylabel = ' Relative Intensity'
+
+#        if self.Defaults['wavelength'] == 'angstrom':
+#            xlbl = r'Wavelength ($\AA$)'
+#        else:
+#            xlbl = 'Wavelength ('+self.Defaults['wavelength'] +')'
+
+#        xlbl = 'Wavelength ('+self.Defaults['wavelength'].capitalize() +')'
         ymin = 10.**(np.log10(intensity[0].min()).round(0)-0.5 )
         plt.ion()
         intmax = intensity[:top].max()
@@ -469,7 +475,7 @@ class ionTrails(object):
                     ypos = 1.1*intensity[idx]
                     plt.text(wvl[idx],  ypos, lbl, va='bottom', ha='center',
                         rotation='vertical')
-        plt.xlabel(xlbl, fontsize=14)
+        plt.xlabel(self.Intensity['xlabel'], fontsize=14)
         plt.ylabel(ylabel, fontsize=14)
         if doTitle:
             plt.title(title + tstr + dstr, fontsize=14)
@@ -673,7 +679,8 @@ class ionTrails(object):
         #  maxAll is an array
         plt.figure()
         ax = plt.subplot(111)
-        plt.loglog(xvalues,numIntens/denIntens)
+#        plt.loglog(xvalues,numIntens/denIntens)
+        plt.semilogx(xvalues,numIntens/denIntens)
         plt.xlim(xvalues.min(),xvalues.max())
         plt.xlabel(xlbl,fontsize=fontsize)
         plt.ylabel('Ratio ('+self.Defaults['flux']+')',fontsize=fontsize)

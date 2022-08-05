@@ -93,13 +93,14 @@ class ipymspectrum(ionTrails, specTrails):
             #
         #
         if self.Em.max() == 1.:
-            ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
+            self.Ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
         else:
-            ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ $'
+            self.Ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$'
         #
-        #
-        #
-        xlabel = 'Wavelength ('+self.Defaults['wavelength'] +')'
+        if self.Defaults['wavelength'] == 'angstrom':
+            self.Xlabel = r'Wavelength ($\AA$)'
+        else:
+            self.Xlabel = 'Wavelength ('+self.Defaults['wavelength'] +')'
         #
         self.AllLines = allLines
         #
@@ -247,14 +248,17 @@ class ipymspectrum(ionTrails, specTrails):
         if type(label) == type(''):
             if hasattr(self, 'Spectrum'):
                 print(' hasattr = true')
-                self.Spectrum[label] = {'wavelength':wavelength, 'intensity':total.squeeze(), 'filter':filter[0].__name__,   'width':filter[1], 'integrated':integrated, 'em':em,  'Abundance':self.AbundanceName,
-                                            'xlabel':xlabel, 'ylabel':ylabel}
+                self.Spectrum[label] = {'wavelength':wavelength, 'intensity':total.squeeze(),
+                    'filter':filter[0].__name__,   'width':filter[1], 'integrated':integrated, 'em':em,
+                    'Abundance':self.AbundanceName, 'xlabel':self.Xlabel, 'ylabel':self.Ylabel}
             else:
-                self.Spectrum = {label:{'wavelength':wavelength, 'intensity':total.squeeze(), 'filter':filter[0].__name__,   'width':filter[1], 'integrated':integrated, 'em':em, 'Abundance':self.AbundanceName,
-                                'xlabel':xlabel, 'ylabel':ylabel}}
+                self.Spectrum = {label:{'wavelength':wavelength, 'intensity':total.squeeze(),
+                    'filter':filter[0].__name__,   'width':filter[1], 'integrated':integrated, 'em':em,
+                    'Abundance':self.AbundanceName,'xlabel':self.Xlabel, 'ylabel':self.Ylabel}}
         else:
-            self.Spectrum = {'wavelength':wavelength, 'intensity':total.squeeze(), 'filter':filter[0].__name__,   'width':filter[1], 'integrated':integrated, 'em':em, 'Abundance':self.AbundanceName,
-                                'xlabel':xlabel, 'ylabel':ylabel}
+            self.Spectrum = {'wavelength':wavelength, 'intensity':total.squeeze(),
+                'filter':filter[0].__name__,   'width':filter[1], 'integrated':integrated, 'em':em,
+                'Abundance':self.AbundanceName, 'xlabel':self.Xlabel, 'ylabel':self.Ylabel}
     #
     # -------------------------------------------------------------------------
     #

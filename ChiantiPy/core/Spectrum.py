@@ -7,7 +7,7 @@ import ChiantiPy.tools.constants as const
 import ChiantiPy.tools.filters as chfilters
 import ChiantiPy.tools.util as util
 import ChiantiPy.tools.io as chio
-import ChiantiPy.Gui as chGui
+
 from ChiantiPy.base import ionTrails
 from ChiantiPy.base import specTrails
 
@@ -138,17 +138,17 @@ class spectrum(ionTrails, specTrails):
         nTempDens = self.NTempDens
 
         if self.Em.max() == 1.:
-            self.Ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
+            ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
         else:
-            self.Ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ $'
+            ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$'
 
         #
-#        print(' em = %12.2e '%(em[0]))
         #
         if self.Defaults['wavelength'] == 'angstrom':
-            self.Xlabel = r'Wavelength ($\AA$)'
+#            xlabel = r'Wavelength ($\AA$)'
+            xlabel = 'Wavelength \u212B'
         else:
-            self.Xlabel = 'Wavelength ('+self.Defaults['wavelength'] +')'
+            xlabel = r'Wavelength ('+self.Defaults['wavelength'] +')'
         #
         #
         if abundance is not None:
@@ -259,18 +259,18 @@ class spectrum(ionTrails, specTrails):
             if hasattr(self, 'Spectrum'):
                 self.Spectrum[label] = {'wavelength':wavelength, 'intensity':total.squeeze(),
                     'filter':filter[0].__name__,   'width':filter[1], 'integrated':integrated, 'em':em,
-                    'ions':self.IonsCalculated, 'Abundance':self.AbundanceName, 'xlabel':self.Xlabel,
-                    'ylabel':self.Ylabel, 'minAbund':minAbund}
+                    'ions':self.IonsCalculated, 'Abundance':self.AbundanceName, 'xlabel':xlabel,
+                    'ylabel':ylabel, 'minAbund':minAbund}
             else:
                 self.Spectrum = {label:{'wavelength':wavelength, 'intensity':total.squeeze(),
                     'filter':filter[0].__name__,   'width':filter[1], 'integrated':integrated, 'em':em,
-                    'ions':self.IonsCalculated, 'Abundance':self.AbundanceName, 'xlabel':self.Xlabel,
-                    'ylabel':self.Ylabel}, 'minAbund':minAbund}
+                    'ions':self.IonsCalculated, 'Abundance':self.AbundanceName, 'xlabel':xlabel,
+                    'ylabel':ylabel}, 'minAbund':minAbund}
         else:
-            self.Spectrum ={'wavelength':wavelength, 'intensity':total.squeeze(),
+            self.Spectrum = {'wavelength':wavelength, 'intensity':total.squeeze(),
                 'filter':filter[0].__name__,   'width':filter[1], 'integrated':integrated,
-                'ions':self.IonsCalculated, 'Abundance':self.AbundanceName, 'xlabel':self.Xlabel,
-                'ylabel':self.Ylabel, 'minAbund':minAbund}
+                'ions':self.IonsCalculated, 'Abundance':self.AbundanceName, 'xlabel':xlabel,
+                'ylabel':ylabel, 'minAbund':minAbund}
 
 
 

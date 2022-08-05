@@ -43,7 +43,7 @@ class specTrails(object):
         minAbundAll = abundAll[nonzed].min()
         if minAbund:
             if minAbund < minAbundAll:
-                minAbund = minAbundAll
+                minAbund = float(minAbundAll)
         ionInfo = chio.masterListInfo()
         #
         if hasattr(self, 'Wavelength'):
@@ -376,13 +376,14 @@ class specTrails(object):
         #  fontsize for labels:
         lfs = 12
         plt.figure()
-        mask = self.Em > 1.
-        if mask.sum() == 0:
-            self.Ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
-        else:
-            self.Ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$'
+#        mask = self.Em > 1.
+#
+#        if mask.sum() == 0:
+#            self.Ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
+#        else:
+#            self.Ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$'
         #
-        self.Xlabel = 'Wavelength ('+self.Defaults['wavelength'].capitalize() +')'
+#        self.Xlabel = 'Wavelength ('+self.Defaults['wavelength'].capitalize() +')'
         #
         if hasattr(self, 'Spectroscopic'):
             title1 = self.Spectroscopic
@@ -480,8 +481,8 @@ class specTrails(object):
                 elif 'wvl' in sorted(self.Spectrum.keys()):
                     plt.plot(self.Spectrum['wvl'], spectrum)
                 title = title1 + ' Temperature = %10.2e K for index = %3i'%(self.Temperature[index],  index)
-        plt.xlabel(self.Xlabel,  fontsize=fs)
-        plt.ylabel(self.Ylabel,  fontsize=fs)
+        plt.xlabel(self.Spectrum['xlabel'],  fontsize=fs)
+        plt.ylabel(self.Spectrum['ylabel'],  fontsize=fs)
         if doTitle:
             plt.title(title, fontsize=fs)
         if doLabel:

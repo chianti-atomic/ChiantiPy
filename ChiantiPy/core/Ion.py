@@ -137,6 +137,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             self.AbundAll = chdata.AbundanceDefault['abundance']
 
 
+
         self.IoneqName = self.Defaults['ioneqfile']
         self.RadTemperature = radTemperature
         self.RStar = rStar
@@ -1068,8 +1069,8 @@ class ion(ioneqOne, ionTrails, specTrails):
         scipy.ndimage.filters also includes a range of filters.
         """
 
-        ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
-        xlabel = 'Wavelength ('+self.Defaults['wavelength'].capitalize() +')'
+        if not hasattr(self, 'WvlRange'):
+            self.WvlRange = [wavelength[0],  wavelength[-1]]
 
         useFilter = filter[0]
         useFactor = filter[1]
@@ -1088,11 +1089,18 @@ class ion(ioneqOne, ionTrails, specTrails):
         if hasattr(self, 'Em'):
             em = self.Em
             useEm = 0
-        if self.Em.any() > 0.:
-            ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ '
+
+        # unicode character for angstrom is \u212B
+        if self.Em.max() == 1.:
+            ylabel = 'erg cm$^{-2}$ s$^{-1}$ sr$^{-1}$ \u212B$^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
         else:
-            ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
-        xlabel = 'Wavelength ('+self.Defaults['wavelength'].capitalize() +')'
+            ylabel = 'erg cm$^{-2}$ s$^{-1}$ sr$^{-1}$ \u212B$^{-1}$'
+
+        if self.Defaults['wavelength'] == 'angstrom':
+            xlabel = 'Wavelength (\u212B)'
+        else:
+            xlabel = 'Wavelength ('+self.Defaults['wavelength'] +')'
+
         aspectrum = np.zeros((self.NTempDens, wavelength.size), np.float64)
         if not 'errorMessage' in self.Intensity.keys():
             idx = util.between(self.Intensity['wvl'], wvlRange)
@@ -1840,7 +1848,8 @@ class ion(ioneqOne, ionTrails, specTrails):
 
 
 
-    def popPlot(self, top=10, levels=[], scale=0, plotFile=0, outFile=0, pub=0, addTitle=None):
+    def popPlot(self, top=10, levels=[], scale=0, plotFile=0, outFile=0, pub=0, addTitle=None,
+        addLegend=True):
         """
         Plots populations vs temperature or eDensity.
 
@@ -1852,6 +1861,8 @@ class ion(ioneqOne, ionTrails, specTrails):
         only useful if plotting level populations vs density
 
         if pub is set, the want publication plots (bw, lw=2).
+
+        if addLegend is set, a matplotlib legend is added
         """
 
         if pub:
@@ -1963,7 +1974,8 @@ class ion(ioneqOne, ionTrails, specTrails):
                         ymin =  pop[:, ilvl-1].min()
                 print(' doLvl ymin %12.2e  ymax %12.2e'%(ymin, ymax))
                 plt.ylim(ymin/1.1, ymax*1.1 )
-            plt.legend(loc = 'lower right')
+            if addLegend:
+                plt.legend(loc = 'lower right')
 
         elif ntemp == 1:
             xlabel = r'Electron Density (cm$^{-3}$)'
@@ -2026,7 +2038,8 @@ class ion(ioneqOne, ionTrails, specTrails):
                             ymin =  pop[:, ilvl-1].min()
                 print(' doLvl ymin %12.2e  ymax %12.2e'%(ymin, ymax))
                 plt.ylim(ymin/1.1, ymax*1.1 )
-            plt.legend(loc='lower right')
+            if addLegend:
+                plt.legend(loc='lower right')
         else:
             ax = plt.subplot(111)
             toppops = np.zeros((top, ntemp), np.float64)
@@ -2120,6 +2133,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         except:
             ntempden = 1
             em = np.zeros(nwvl,np.float64)
+
         plotLabels = {}
         if self.Defaults['wavelength'] == 'angstrom':
             plotLabels["xLabel"] = "Angstroms"
@@ -2646,6 +2660,17 @@ class ion(ioneqOne, ionTrails, specTrails):
         avalue = emiss['avalue']
         errorMessage = None
 
+        if self.Defaults['wavelength'] == 'angstrom':
+            xlabel = 'Wavelength \u212B'
+        else:
+            xlabel = 'Wavelength ('+self.Defaults['wavelength'] +')'
+
+        # unicode character for angstrom is \u212B
+        if self.Em.max() == 1.:
+            ylabel = 'erg cm$^{-2}$ s$^{-1}$ sr$^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
+        else:
+            ylabel = 'erg cm$^{-2}$ s$^{-1}$ sr$^{-1}$'
+
         if hasattr(self, 'Abundance'):
             ab = self.Abundance
         else:
@@ -2676,7 +2701,9 @@ class ion(ioneqOne, ionTrails, specTrails):
             integrated = intensity
         else:
             integrated = intensity.sum(axis=0)
-        Intensity = {'intensity':intensity, 'integrated':integrated,'ionS':ionS, 'wvl':wvl, 'lvl1':lvl1, 'lvl2':lvl2, 'pretty1':pretty1, 'pretty2':pretty2,  'obs':obs, 'avalue':avalue, 'em':self.Em}
+        Intensity = {'intensity':intensity, 'integrated':integrated,'ionS':ionS, 'wvl':wvl, 'lvl1':lvl1,
+            'lvl2':lvl2, 'pretty1':pretty1, 'pretty2':pretty2,  'obs':obs, 'avalue':avalue,
+            'em':self.Em, 'xlabel':xlabel, 'ylabel':ylabel}
         if errorMessage is not None:
             Intensity['errorMessage'] = errorMessage
         self.Intensity = Intensity
@@ -2850,7 +2877,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         if not hasattr(self, 'Abundance'):
             self.Abundance = io.abundanceRead()
 
-        fontsize = 12
+        fontsize = 14
         emiss = em["emiss"]
         wvl = em["wvl"]
         pretty1 = em['pretty1']
@@ -2994,16 +3021,13 @@ class ion(ioneqOne, ionTrails, specTrails):
             plt.xlim(xvalues.min(),xvalues.max())
             plt.xlabel(xlabel,fontsize=fontsize)
             plt.ylabel('Gofnt',fontsize=fontsize)
-            newTitle = '%9s'%(self.Spectroscopic) + '%12.3f %4i %4i %s - %s'%(wvl[g_line[0]], lvl1[g_line[0]], lvl2[g_line[0]], pretty1[g_line[0]], pretty2[g_line[0]])
+            newTitle = '%s'%(self.Spectroscopic) + '%12.3f %4i - %4i %s - %s'%(wvl[g_line[0]], lvl1[g_line[0]], lvl2[g_line[0]], pretty1[g_line[0]], pretty2[g_line[0]])
             if len(g_line) > 1:
                 newTitle += '\n'
             for igl in g_line[1:]:
                 newTitle += ' ' + '%12.3f %4i %4i %s - %s'%(wvl[igl], lvl1[igl], lvl2[igl], pretty1[igl], pretty2[igl])
                 if igl != g_line[-1]:
                     newTitle += '\n'
-            plt.annotate(newTitle, xy=(-10, 10),
-                    xycoords = 'axes points',
-                    horizontalalignment='right', verticalalignment='bottom')
             if ndens == ntemp and ntemp > 1:
                 plt.text(0.07, 0.5,newTitle, horizontalalignment='left', verticalalignment='center', fontsize=fontsize,  transform = ax.transAxes)
                 ax2 = plt.twiny()
@@ -3015,6 +3039,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             self.Gofnt['transition'] = newTitle
             self.Gofnt['xlabel'] = xlabel
             self.Gofnt['ylabel'] = ylabel
+            plt.tight_layout()
 
     def twoPhotonEmiss(self, wvl):
         """
@@ -3165,7 +3190,7 @@ class ion(ioneqOne, ionTrails, specTrails):
 #                    else:
                     for it in range(nTempDens):
                         rate[it, goodWvl] = f*pop[it, l2]*distr*ab*thisIoneq[it]*self.Em[it]/eDensity[it]
-                self.TwoPhoton = {'wvl':wvl, 'intensity':rate.squeeze()}
+                self.TwoPhoton = {'wvl':wvl, 'intensity':rate.squeeze(), 'em':self.Em}
 
             else:
                 # He seq

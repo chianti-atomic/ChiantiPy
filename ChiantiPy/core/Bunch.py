@@ -8,6 +8,7 @@ import ChiantiPy
 import ChiantiPy.tools.data as chdata
 import ChiantiPy.tools.util as util
 import ChiantiPy.tools.io as chio
+import ChiantiPy.tools.filters as chfilters
 import ChiantiPy.Gui as chGui
 from ChiantiPy.base import ionTrails
 from ChiantiPy.base import specTrails
@@ -105,7 +106,7 @@ class bunch(ionTrails, specTrails):
     # ------------------------------------------------------------------------------------
     #
     def __init__(self, temperature, eDensity, wvlRange, elementList=None, ionList=None,
-        minAbund=None, keepIons=0, em=None, abundance=None, verbose=0, allLines=True):
+        minAbund=None, keepIons=False, em=None, abundance=None, verbose=False, allLines=True):
         """
         Calculate the emission line spectrum as a function of temperature and density.
 
@@ -130,7 +131,31 @@ class bunch(ionTrails, specTrails):
             abundAll = chdata.Abundance[self.AbundanceName]['abundance']
         # needed by ionGate
         self.AbundAll = abundAll
+        self.Abundance = abundAll
         #
+        # the following is usually done in argCheck
+        if em is not None:
+            em = np.atleast_1d(em)
+            self.Em = em
+            if em.size == 1:
+                self.Em = np.tile(em,self.NTempDens)
+
+            elif em.size != self.NTempDens:
+                raise ValueError('the size of em must be either 1 or the size of the larger of temperature or density %5i'%(self.NTempDens))
+        else:
+            self.Em = np.ones_like(self.Temperature, np.float64)
+
+        if self.Defaults['wavelength'] == 'angstrom':
+            xlabel = 'Wavelength \u212B'
+        else:
+            xlabel = 'Wavelength ('+self.Defaults['wavelength'] +')'
+
+        # unicode character for angstrom is \u212B
+        if self.Em.max() == 1.:
+            ylabel = 'erg cm$^{-2}$ s$^{-1}$ sr$^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
+        else:
+            ylabel = 'erg cm$^{-2}$ s$^{-1}$ sr$^{-1}$'
+
 #        nonzed = abundAll > 0.
 #        minAbundAll = abundAll[nonzed].min()
 #        # if minAbund is even set
@@ -178,9 +203,144 @@ class bunch(ionTrails, specTrails):
                 if verbose:
                     print(thisIon.Intensity['errorMessage'])
         #
+        self.Intensity['xlabel'] = xlabel
+        self.Intensity['ylabel'] = ylabel
         #
         t2 = datetime.now()
         dt=t2-t1
         print(' elapsed seconds = %12.3f'%(dt.seconds))
+
+
+    def convolve(self, wavelength=None, filter=(chfilters.gaussianR, 1000.), label=None, verbose=False):
+        '''
+        the first application of spectrum calculates the line intensities within the specified wavelength
+        range and for set of ions specified
+
+        wavelength will not be used if applied to 'spectrum' objects
+
+        wavelength IS need for 'bunch' objects - in this case, the wavelength should not extend beyond
+        the limits of the wvlRange used for the 'bunch' calculation
+
+        Keyword Arguments
+        -----------------
+
+        wavelength:  'int', `list`
+            if an `int`, the attribute 'Wavelength' is looked for
+            otherwise, wavelength is used
+
+        filter: `tuple`
+            first elements if one of the ChiantiPy.tools.filters object
+            second element is the width appropriate to the filter
+
+        label:  `str`
+            if set, creates a Spectrum[label] attribute
+
+        verbose: `bool`
+            if True, prints info to the terminal
+
+        '''
+        useFilter = filter[0]
+        useFactor = filter[1]
+
+        #
+        if label is not None:
+            if not isinstance(label, str):
+                print(' label must either be None or a string')
+        #
+        t1 = datetime.now()
+
+        # unicode character for angstrom is \u212B
+        if self.Em.max() == 1.:
+            ylabel = 'erg cm$^{-2}$ s$^{-1}$ sr$^{-1}$ \u212B$^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
+        else:
+            ylabel = 'erg cm$^{-2}$ s$^{-1}$ sr$^{-1}$ \u212B$^{-1}$'
+
+        if self.Defaults['wavelength'] == 'angstrom':
+            xlabel = 'Wavelength \u212B'
+        else:
+            xlabel = 'Wavelength ('+self.Defaults['wavelength'] +')'
+
+        #:
+        if hasattr(self, 'Wavelength'):
+                wavelength = self.Wavelength
+        elif wavelength is not None:
+            self.Wavelength = wavelength
+        else:
+            print(' a wavelength array must be given')
+            return
+        if not hasattr(self, 'NTempDens'):
+            self.NTempDens = max([self.Ntemp,  self.Ndens])
+
+#        aspectrum = np.zeros((self.NTempDens, wavelength.size), np.float64)
+
+        if hasattr(self, 'IonInstances'):
+            for akey in sorted(self.IonInstances.keys()):
+                if verbose:
+                    print( ' trying ion = %s'%(akey))
+                if not 'errorMessage' in sorted(self.IonInstances[akey].Intensity.keys()):
+                    if verbose:
+                        print(' doing convolve on ion %s '%(akey))
+                    self.IonInstances[akey].spectrum(wavelength, filter)
+                    if verbose:
+                        if 'errorMessage' in sorted(self.IonInstances[akey].Spectrum.keys()):
+                            print(self.IonInstances[akey].Spectrum['errorMessage'])
+#                    else:
+#                        aspectrum += self.IonInstances[akey].Spectrum['intensity']
+    #                if self.NTempDens == 1:
+    #                    lineSpectrum += thisIon.Spectrum['intensity']
+    #                else:
+    #                    for iTempDen in range(self.NTempDens):
+    #                        lineSpectrum[iTempDen] += thisIon.Spectrum['intensity'][iTempDen]
+                else:
+                    if verbose:
+                        if 'errorMessage' in sorted(self.IonInstances[akey].Intensity.keys()):
+                            print(self.IonInstances[akey].Intensity['errorMessage'])
+
+        bspectrum = np.zeros((self.NTempDens, wavelength.size), np.float64)
+        if hasattr(self, 'Intensity'):
+            for itemp in range(self.NTempDens):
+                for iwvl, awvl in enumerate(self.Intensity['wvl']):
+                    bspectrum[itemp] += useFilter(wavelength, awvl, factor=useFactor)*self.Intensity['intensity'][itemp, iwvl]
+
+#        self.LineSpectrum = {'wavelength':wavelength, 'intensity':aspectrum.squeeze()}
+        #
+#        total = self.LineSpectrum['intensity']
+        #
+#        # the following is required in order to be applied to both a 'spectrum' and a 'bunch' object
+#        #
+#        if hasattr(self, 'FreeFree'):
+#            total += self.FreeFree['intensity']
+#        if hasattr(self, 'FreeBound'):
+#            total += self.FreeBound['intensity']
+#        if hasattr(self, 'TwoPhoton'):
+#            total += self.TwoPhoton['intensity']
+#        self.Total = total
+        #
+        #
+        if self.NTempDens == 1:
+            integrated = bspectrum
+        else:
+            integrated = bspectrum.sum(axis=0)
+        #
+        t2 = datetime.now()
+        dt = t2 - t1
+        print(' elapsed seconds = %12.3e'%(dt.seconds))
+        #
+        print(' creating Spectrum attr')
+        self.Spectrum = {'wavelength':wavelength, 'intensity':bspectrum.squeeze(),
+            'integrated':integrated,'filter':filter[0].__name__, 'width':filter[1],
+            'Abundance':self.AbundanceName, 'xlabel':xlabel, 'ylabel':ylabel}
+#        if label is not None:
+#        if hasattr(self, 'IonInstances'):
+#            print(' has IonInstances')
+#            if hasattr(self, 'Spectrum'):
+#                self.Spectrum[label] = {'wavelength':wavelength, 'intensity':aspectrum.squeeze(),
+#                    'filter':filter[0].__name__,   'width':filter[1], 'integrated':integrated,
+#                    'em':self.Em,  'Abundance':self.AbundanceName, 'xlabel':xlabel, 'ylabel':ylabel}
+#            else:
+#                self.Spectrum = {label:{'wavelength':wavelength, 'intensity':aspectrum.squeeze(),
+#                    'filter':filter[0].__name__,   'width':filter[1], 'integrated':integrated,
+#                    'em':self.Em,  'Abundance':self.AbundanceName}, 'xlabel':xlabel, 'ylabel':ylabel}
+#        else:
 
 

@@ -150,17 +150,17 @@ class ioneq(object):
         or if oplot=True or oplot=1 and a widget will come up so that a file can be selected.
         bw, if True, the plot is made in black and white
         '''
-        mpl.rcParams['xtick.major.size'] = 7
-        mpl.rcParams['xtick.major.width'] = 2
-
-        mpl.rcParams['xtick.minor.size'] = 5
-        mpl.rcParams['xtick.minor.width'] = 1.5
-
-        mpl.rcParams['ytick.major.size'] = 7
-        mpl.rcParams['ytick.major.width'] = 2
-
-        mpl.rcParams['ytick.minor.size'] = 5
-        mpl.rcParams['ytick.minor.width'] = 1.5
+#        mpl.rcParams['xtick.major.size'] = 7
+#        mpl.rcParams['xtick.major.width'] = 2
+#
+#        mpl.rcParams['xtick.minor.size'] = 5
+#        mpl.rcParams['xtick.minor.width'] = 1.5
+#
+#        mpl.rcParams['ytick.major.size'] = 7
+#        mpl.rcParams['ytick.major.width'] = 2
+#
+#        mpl.rcParams['ytick.minor.size'] = 5
+#        mpl.rcParams['ytick.minor.width'] = 1.5
 
         if hasattr(self, 'Ioneq'):
             ioneq = getattr(self, 'Ioneq')
@@ -170,11 +170,13 @@ class ioneq(object):
 
         if bw:
             linestyle = ['k-','k--', 'k-.', 'k:']
-            plt.rcParams['font.size'] = 16.
+#            plt.rcParams['font.size'] = 16.
+            fs = 14
             lw = 2
         else:
             linestyle = ['b-','r--', 'g-.', 'm:']
-            plt.rcParams['font.size'] = 16
+#            plt.rcParams['font.size'] = 16
+            fs = 14
             lw = 2
         #
         if not stages:
@@ -212,8 +214,8 @@ class ioneq(object):
                     idx = int(jdx[idx].mean())
                 ann = const.Ionstage[iz-1]
                 plt.annotate(ann, [self.Temperature[idx], 0.7*ioneq[iz-1, idx]], ha='center')
-        plt.xlabel('Temperature (K)')
-        plt.ylabel('Ion Fraction')
+        plt.xlabel('Temperature (K)',  fontsize=fs)
+        plt.ylabel('Ion Fraction',  fontsize=fs)
         atitle = 'Chianti Ionization Equilibrium for '+const.El[self.Z-1].capitalize()
         #
         if oplot:
@@ -242,7 +244,7 @@ class ioneq(object):
             else:
                 print(' oplot file not understood %s'%(oplot))
         if title:
-            plt.title(atitle)
+            plt.title(atitle,  fontsize=fs)
         plt.tight_layout()
         plt.axis(xyr)
 

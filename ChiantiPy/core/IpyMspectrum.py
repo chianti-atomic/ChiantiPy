@@ -98,7 +98,7 @@ class ipymspectrum(ionTrails, specTrails):
             self.Ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$'
         #
         if self.Defaults['wavelength'] == 'angstrom':
-            self.Xlabel = r'Wavelength ($\AA$)'
+            self.Xlabel = 'Wavelength (\u212B)'
         else:
             self.Xlabel = 'Wavelength ('+self.Defaults['wavelength'] +')'
         #

@@ -145,8 +145,7 @@ class spectrum(ionTrails, specTrails):
         #
         #
         if self.Defaults['wavelength'] == 'angstrom':
-#            xlabel = r'Wavelength ($\AA$)'
-            xlabel = 'Wavelength \u212B'
+            xlabel = 'Wavelength (\u212B)'
         else:
             xlabel = r'Wavelength ('+self.Defaults['wavelength'] +')'
         #

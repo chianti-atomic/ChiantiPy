@@ -183,6 +183,16 @@ class continuum(ionTrails):
             If True, include the ionization equilibrium in the final output
 
         """
+        if self.Em.max() == 1.:
+            ylabel = 'erg cm$^{-2}$ s$^{-1}$ sr$^{-1}$ \u212B$^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
+        else:
+            ylabel = 'erg cm$^{-2}$ s$^{-1}$ sr$^{-1}$ \u212B$^{-1}$'
+
+        if self.Defaults['wavelength'] == 'angstrom':
+            xlabel = 'Wavelength \u212B'
+        else:
+            xlabel = r'Wavelength ('+self.Defaults['wavelength'] +')'
+
         wavelength = np.atleast_1d(wavelength)
         # define the numerical prefactor
         prefactor = ((const.light*1e8)/3./const.emass
@@ -209,7 +219,8 @@ class continuum(ionTrails):
             energy_factor = const.planck*(1.e8*const.light)/wavelength
 
         free_free_emission = (prefactor[:,np.newaxis]*exp_factor*gf/energy_factor).squeeze()
-        self.FreeFree = {'intensity':free_free_emission, 'temperature':self.Temperature, 'wvl':wavelength, 'em':self.Em, 'ions':self.IonStr}
+        self.FreeFree = {'intensity':free_free_emission, 'temperature':self.Temperature, 'wvl':wavelength,
+            'em':self.Em, 'ions':self.IonStr, 'xlabel':xlabel,  'ylabel':ylabel}
 
     def freeFreeLoss(self, includeAbund=True, includeIoneq=True,  **kwargs):
         """
@@ -717,6 +728,16 @@ class continuum(ionTrails):
         wvl = np.asarray(wvl, np.float64)
         em = self.Em
 
+        if self.Em.max() == 1.:
+            ylabel = 'erg cm$^{-2}$ s$^{-1}$ sr$^{-1}$ \u212B$^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
+        else:
+            ylabel = 'erg cm$^{-2}$ s$^{-1}$ sr$^{-1}$ \u212B$^{-1}$'
+
+        if self.Defaults['wavelength'] == 'angstrom':
+            xlabel = 'Wavelength (\u212B)'
+        else:
+            xlabel = r'Wavelength ('+self.Defaults['wavelength'] +')'
+
         if includeAbund:
             abund = self.Abundance
         else:
@@ -893,7 +914,8 @@ class continuum(ionTrails):
         fb.fill_value = 0.
         #
         self.FreeBound = {'intensity':fb.squeeze(), 'temperature':temperature,'wvl':wvl, 'em':em, \
-            'abund':abund, 'ioneq':ioneq, 'gf':mygf, 'edgeLvlAng':edgeLvlAng,  'fbn':fbn}
+            'abund':abund, 'ioneq':ioneq, 'gf':mygf, 'edgeLvlAng':edgeLvlAng,  'fbn':fbn,
+            'xlabel':xlabel, 'ylabel':ylabel}
 
     def vernerCross(self, wvl):
         """

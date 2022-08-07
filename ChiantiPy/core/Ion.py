@@ -3125,6 +3125,16 @@ class ion(ioneqOne, ionTrails, specTrails):
         .. [105] Young et al., 2003, ApJSS, `144, 135  <http://adsabs.harvard.edu/abs/2003ApJS..144..135Y>`_
 
         '''
+        if self.Em.max() == 1.:
+            ylabel = 'erg cm$^{-2}$ s$^{-1}$ sr$^{-1}$ \u212B$^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
+        else:
+            ylabel = 'erg cm$^{-2}$ s$^{-1}$ sr$^{-1}$ \u212B$^{-1}$'
+
+        if self.Defaults['wavelength'] == 'angstrom':
+            xlabel = 'Wavelength (\u212B)'
+        else:
+            xlabel = r'Wavelength ('+self.Defaults['wavelength'] +')'
+
         wvl = np.array(wvl, np.float64)
         #
         #
@@ -3215,7 +3225,8 @@ class ion(ioneqOne, ionTrails, specTrails):
 #                    else:
                     for it in range(nTempDens):
                         rate[it, goodWvl] = f*pop[it, l2]*distr*ab*thisIoneq[it]*self.Em[it]/eDensity[it]
-                self.TwoPhoton = {'wvl':wvl, 'intensity':rate.squeeze(), 'em':self.Em}
+                self.TwoPhoton = {'wvl':wvl, 'intensity':rate.squeeze(), 'em':self.Em,  'xlabel':xlabel,
+                'ylabel':ylabel}
 
     def twoPhotonLoss(self):
         '''

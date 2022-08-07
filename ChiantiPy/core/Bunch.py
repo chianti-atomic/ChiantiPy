@@ -256,7 +256,7 @@ class bunch(ionTrails, specTrails):
             ylabel = 'erg cm$^{-2}$ s$^{-1}$ sr$^{-1}$ \u212B$^{-1}$'
 
         if self.Defaults['wavelength'] == 'angstrom':
-            xlabel = 'Wavelength \u212B'
+            xlabel = 'Wavelength (\u212B)'
         else:
             xlabel = 'Wavelength ('+self.Defaults['wavelength'] +')'
 

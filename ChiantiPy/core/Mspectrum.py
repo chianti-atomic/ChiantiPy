@@ -83,7 +83,7 @@ class mspectrum(ionTrails, specTrails):
         #
         #
         if self.Defaults['wavelength'] == 'angstrom':
-            self.Xlabel = 'Wavelength \u212B'
+            self.Xlabel = 'Wavelength (\u212B)'
         else:
             self.Xlabel = 'Wavelength ('+self.Defaults['wavelength'] +')'
         #

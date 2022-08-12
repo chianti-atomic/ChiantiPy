@@ -16,7 +16,6 @@ import ChiantiPy.tools.data as chdata
 import ChiantiPy.tools.util as util
 import ChiantiPy.tools.io as io
 import ChiantiPy.tools.constants as const
-import ChiantiPy.Gui as chGui
 
 
 class continuum(ionTrails):
@@ -148,7 +147,7 @@ class continuum(ionTrails):
         if includeIoneq:
             prefactor *= self.ioneq_one(self.Stage, **kwargs)
 
-        self.free_free_loss = prefactor*(self.Z**2)*np.sqrt(self.Temperature)*gaunt_factor
+        self.FreeFreeLoss = prefactor*(self.Z**2)*np.sqrt(self.Temperature)*gaunt_factor
 
     def freeFree(self, wavelength, includeAbund=True, includeIoneq=True, **kwargs):
         """

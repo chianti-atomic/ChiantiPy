@@ -11,12 +11,13 @@ the inherited methods 'intensityPlot' and 'spectrumPlot' have been improved.  Th
 
 First, these methods will also display the ion name ('Fe XIV') and wavelength together with the line intensities or spectral intensity.
 
-
-The are more flexible in the several keyword arguments have been added:
+These are more flexible and several keyword arguments have been added:
 
     'doLabel' governs whether to display the ion name and wavelength
     'lw' the linewidth of the marker in matplotlib units (default=1)
     'doTitle' governs whether to add a title to the plot
+
+Import bug fix:  the indices for calculating the two-photon continue were update to match the new ordering of the energy levels for the h-like and he-like ions.
 
 Changes from 0.13.0 to 0.13.1
 =============================

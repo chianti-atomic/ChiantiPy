@@ -21,8 +21,8 @@ from ChiantiPy.base import ionTrails
 from ChiantiPy.base import specTrails
 from ChiantiPy.base import ioneqOne
 
-heseqLvl2 = [-1,3,-1,-1,-1,6,6,6,-1,6,6,6,5,5,3,5,3,5,3,5,-1,-1,-1,-1,-1,4,-1,4,-1,4]
-# for populate and drPopulate to include populated lower levels for ionization
+#  upper level of two photon transitions for helium-like ions
+heseqLvl2 = [-1,3,-1,-1,-1,3,6,6,-1,6,6,6,6,6,3,5,3,5,3,5,-1,5,-1,5,-1,5,-1,5,-1,5]
 
 
 class ion(ioneqOne, ionTrails, specTrails):
@@ -3105,9 +3105,6 @@ class ion(ioneqOne, ionTrails, specTrails):
                     f = (const.light*const.planck*1.e+8)/wvl[goodWvl]
                 else:
                     f = 1.
-#                if nTempDens == 1:
-#                    emiss[goodWvl] = f*pop[l2]*distr/self.EDensity
-#                else:
                 for it in range(nTempDens):
                     emiss[it, goodWvl] = f*pop[it, l2]*distr/self.EDensity[it]
                 self.TwoPhotonEmiss = {'wvl':wvl, 'emiss':emiss}
@@ -3195,9 +3192,6 @@ class ion(ioneqOne, ionTrails, specTrails):
                         f = (const.light*const.planck*1.e+8)/(4.*const.pi*wvl[goodWvl])
                     else:
                         f = 1./(4.*const.pi)
-#                    if nTempDens == 1:
-#                        rate[goodWvl] = f*pop[l2]*distr*ab*thisIoneq*self.Em/eDensity
-#                    else:
                     for it in range(nTempDens):
                         rate[it, goodWvl] = f*pop[it, l2]*distr*ab*thisIoneq[it]*self.Em[it]/eDensity[it]
                 self.TwoPhoton = {'wvl':wvl, 'intensity':rate.squeeze(), 'em':self.Em}
@@ -3220,9 +3214,6 @@ class ion(ioneqOne, ionTrails, specTrails):
                         f = (const.light*const.planck*1.e+8)/(4.*const.pi*wvl[goodWvl])
                     else:
                         f = 1./(4.*const.pi)
-#                    if nTempDens == 1:
-#                        rate[goodWvl] = f*pop[l2]*distr*ab*thisIoneq*self.Em/eDensity
-#                    else:
                     for it in range(nTempDens):
                         rate[it, goodWvl] = f*pop[it, l2]*distr*ab*thisIoneq[it]*self.Em[it]/eDensity[it]
                 self.TwoPhoton = {'wvl':wvl, 'intensity':rate.squeeze(), 'em':self.Em,  'xlabel':xlabel,
@@ -3259,9 +3250,6 @@ class ion(ioneqOne, ionTrails, specTrails):
                 pop = self.Population['population']
                 nTempDens = max(self.Temperature.size, self.EDensity.size)
             rate = np.zeros((nTempDens), np.float64)
-#                if self.EDensity.size == 1:
-#                    eDensity = np.repeat(self.EDensity, nTempDens)
-#                else:
             eDensity = self.EDensity
 #            else:
             eDensity = self.EDensity
@@ -3273,9 +3261,6 @@ class ion(ioneqOne, ionTrails, specTrails):
                 dist = io.twophotonHRead()
                 avalue = dist['avalue'][self.Z-1]
                 f = (avalue*const.light*const.planck*1.e+8)/wvl0
-#                if nTempDens == 1:
-#                    rate = f*pop[l2]*ab*thisIoneq/eDensity
-#                else:
                 for it in range(nTempDens):
                     rate[it] = f*pop[it, l2]*ab*thisIoneq[it]/eDensity[it]
                 self.TwoPhotonLoss = {'temperature':self.Temperature,'eDensity':self.EDensity,'rate':rate}
@@ -3287,9 +3272,6 @@ class ion(ioneqOne, ionTrails, specTrails):
                 dist = io.twophotonHeRead()
                 avalue = dist['avalue'][self.Z-1]
                 f = (avalue*const.light*const.planck*1.e+8)/wvl0
-#                if nTempDens == 1:
-#                    rate = f*pop[l2]*ab*thisIoneq/eDensity
-#                else:
                 for it in range(nTempDens):
                     rate[it] = f*pop[it, l2]*ab*thisIoneq[it]/eDensity[it]
                 self.TwoPhotonLoss = {'temperature':self.Temperature,'eDensity':self.EDensity,'rate':rate}

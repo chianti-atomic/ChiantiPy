@@ -167,7 +167,7 @@ Bring up a Python session, or better yet, an IPython session
 ::
 
   import ChiantiPy.core as ch
-  fe14 = ch.ion('fe_14')
+  fe14 = ch.ion('fe_14', setup=False)
 
 The fe14 object is instantiated with a number of methods and data.  Methods start with lowercase letters and attributes start with uppercase letters.  It is best not to simply import ion as there is a method with the same name in matplotlib.  A few examples:
 
@@ -250,9 +250,9 @@ If the fe14 **ion** object had be instantiated (created) with a temperature and 
 ::
 
   import numpy as np
-  t = 10.**(5.8+0.1*np.arange(11))
+  temp = 10.**(5.8+0.1*np.arange(11))
   dens = 1.e+9
-  fe14 = ch.ion('fe_14')
+  fe14 = ch.ion('fe_14', temp, dens)
   fe14.populate()
   fe14.Population.keys()
   >>['ci', 'protonDensity', 'popmat', 'eDensity', 'rec', 'population', 'temperature']

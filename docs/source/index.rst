@@ -17,7 +17,7 @@ ChiantiPy v0.14.0 is released under the OSI approved ISC license. From `Wikipedi
 CHIANTI is developed and maintained by scientists at George Mason University (USA), the University of Michigan (USA), and the University of Cambridge (UK). The first version of CHIANTI was released in 1997 and version 10.0 in 2021.
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 2
 
    getting_started
    quick_start

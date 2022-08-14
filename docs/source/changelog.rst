@@ -19,6 +19,8 @@ These are more flexible and several keyword arguments have been added:
 
 Import bug fix:  the indices for calculating the two-photon continue were update to match the new ordering of the energy levels for the h-like and he-like ions.
 
+The ionization potential array (Ip) has been enlarged to make room for call to zn_31
+
 Changes from 0.13.0 to 0.13.1
 =============================
 

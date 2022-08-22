@@ -398,13 +398,17 @@ class specTrails(object):
             else:
                 wvlRange = [self.Intensity['wvl'].min(),  self.Intensity['wvl'].max()]
                 print(' wvlRange should be specified')
+
+
         nTempDens = self.NTempDens
+
+
+
 
         if integrated:
             lineIntensity = self.Intensity['integrated']
             lineWvl = self.Intensity['wvl']
             lineIonS = self.Intensity['ionS']
-
             wvlIndex = util.between(lineWvl, wvlRange)
 
             lineIntensity = lineIntensity[wvlIndex]
@@ -432,7 +436,6 @@ class specTrails(object):
             nameDict = util.convertName(anion)
             lineIonSpectr.append(nameDict['spectroscopic'])
         lineIonSpectr = np.asarray(lineIonSpectr)
-
 
         self.Error = 0
         if lineWvl.size == 0:
@@ -485,10 +488,13 @@ class specTrails(object):
         plt.ylabel(self.Spectrum['ylabel'],  fontsize=fs)
         if doTitle:
             plt.title(title, fontsize=fs)
+
         if doLabel:
+            useFilter = self.Spectrum['filter']
+            useFactor = self.Spectrum['filterWidth']
             for iwvl, awvl in enumerate(lineWvl):
-                wdl = np.argmin(np.abs(awvl - self.Spectrum['wavelength']))
-                spIntens = spectrum[wdl]
+                filterFactor = useFilter(self.Spectrum['wavelength'], awvl, factor=useFactor).max()
+                spIntens = filterFactor*lineIntensity[iwvl]
                 plt.plot([awvl,  awvl], [0.,  1.2*spIntens], 'k',  lw=lw)
                 ypos = 1.25*spIntens
                 lbl = lineIonSpectr[iwvl] + ' %8.3f'%(awvl)

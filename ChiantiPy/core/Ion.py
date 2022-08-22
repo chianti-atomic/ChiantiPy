@@ -1120,19 +1120,19 @@ class ion(ioneqOne, ionTrails, specTrails):
         if type(label) == type(''):
             if hasattr(self, 'Spectrum'):
                 self.Spectrum[label] = {'intensity':aspectrum.squeeze(), 'integrated':integrated,
-                    'wavelength':wavelength, 'filter':useFilter.__name__, 'filterWidth':useFactor,
+                    'wavelength':wavelength, 'filter':useFilter, 'filterWidth':useFactor,
                     'allLines':allLines, 'em':em, 'xlabel':xlabel, 'ylabel':ylabel}
                 if errorMessage is not None:
                     self.Spectrum[label]['errorMessage'] = errorMessage
             else:
                 self.Spectrum = {label:{'intensity':aspectrum.squeeze(), 'integrated':integrated,
-                    'wavelength':wavelength, 'filter':useFilter.__name__, 'filterWidth':useFactor,
+                    'wavelength':wavelength, 'filter':useFilter, 'filterWidth':useFactor,
                     'allLines':allLines, 'em':em, 'xlabel':xlabel, 'ylabel':ylabel}}
                 if errorMessage is not None:
                     self.Spectrum[label]['errorMessage'] = errorMessage
         else:
             self.Spectrum = {'intensity':aspectrum.squeeze(), 'integrated':integrated,
-                'wavelength':wavelength, 'filter':useFilter.__name__, 'filterWidth':useFactor,
+                'wavelength':wavelength, 'filter':useFilter, 'filterWidth':useFactor,
                 'allLines':allLines, 'em':em, 'xlabel':xlabel, 'ylabel':ylabel}
             if errorMessage is not None:
                 self.Spectrum['errorMessage'] = errorMessage

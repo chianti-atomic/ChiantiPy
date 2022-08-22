@@ -249,15 +249,15 @@ class ipymspectrum(ionTrails, specTrails):
             if hasattr(self, 'Spectrum'):
                 print(' hasattr = true')
                 self.Spectrum[label] = {'wavelength':wavelength, 'intensity':total.squeeze(),
-                    'filter':filter[0].__name__,   'width':filter[1], 'integrated':integrated, 'em':em,
+                    'filter':filter[0],   'filterWidth':filter[1], 'integrated':integrated, 'em':em,
                     'Abundance':self.AbundanceName, 'xlabel':self.Xlabel, 'ylabel':self.Ylabel}
             else:
                 self.Spectrum = {label:{'wavelength':wavelength, 'intensity':total.squeeze(),
-                    'filter':filter[0].__name__,   'width':filter[1], 'integrated':integrated, 'em':em,
+                    'filter':filter[0],   'filterWidth':filter[1], 'integrated':integrated, 'em':em,
                     'Abundance':self.AbundanceName,'xlabel':self.Xlabel, 'ylabel':self.Ylabel}}
         else:
             self.Spectrum = {'wavelength':wavelength, 'intensity':total.squeeze(),
-                'filter':filter[0].__name__,   'width':filter[1], 'integrated':integrated, 'em':em,
+                'filter':filter[0],   'filterWidth':filter[1], 'integrated':integrated, 'em':em,
                 'Abundance':self.AbundanceName, 'xlabel':self.Xlabel, 'ylabel':self.Ylabel}
     #
     # -------------------------------------------------------------------------

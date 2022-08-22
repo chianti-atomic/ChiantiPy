@@ -326,9 +326,8 @@ class bunch(ionTrails, specTrails):
         dt = t2 - t1
         print(' elapsed seconds = %12.3e'%(dt.seconds))
         #
-        print(' creating Spectrum attr')
         self.Spectrum = {'wavelength':wavelength, 'intensity':bspectrum.squeeze(),
-            'integrated':integrated,'filter':filter[0].__name__, 'width':filter[1],
+            'integrated':integrated,'filter':filter[0], 'filterWidth':filter[1],
             'Abundance':self.AbundanceName, 'xlabel':xlabel, 'ylabel':ylabel}
 #        if label is not None:
 #        if hasattr(self, 'IonInstances'):

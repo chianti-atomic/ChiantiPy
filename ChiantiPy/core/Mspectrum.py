@@ -262,16 +262,16 @@ class mspectrum(ionTrails, specTrails):
         if type(label) == type(''):
             if hasattr(self, 'Spectrum'):
                 self.Spectrum[label] = {'wavelength':wavelength, 'intensity':total.squeeze(),
-                'filter':filter[0].__name__,   'width':filter[1], 'integrated':integrated,
+                'filter':filter[0],   'filterWidth':filter[1], 'integrated':integrated,
                 'ions':self.IonsCalculated, 'em':em, 'Abundance':self.AbundanceName, 'xlabel':self.Xlabel,
                 'ylabel':self.Ylabel, 'minAbund':minAbund}
             else:
                 self.Spectrum = {label:{'wavelength':wavelength, 'intensity':total.squeeze(),
-                'filter':filter[0].__name__,   'width':filter[1], 'integrated':integrated,
+                'filter':filter[0],   'filterWidth':filter[1], 'integrated':integrated,
                 'ions':self.IonsCalculated, 'em':em, 'Abundance':self.AbundanceName, 'xlabel':self.Xlabel,
                 'ylabel':self.Ylabel}, 'minAbund':minAbund}
         else:
             self.Spectrum ={'wavelength':wavelength, 'intensity':total.squeeze(),
-            'filter':filter[0].__name__, 'width':filter[1], 'integrated':integrated,
+            'filter':filter[0], 'filterWidth':filter[1], 'integrated':integrated,
             'ions':self.IonsCalculated, 'em':em, 'Abundance':self.AbundanceName, 'xlabel':self.Xlabel,
             'ylabel':self.Ylabel, 'minAbund':minAbund, 'todo':self.Todo}

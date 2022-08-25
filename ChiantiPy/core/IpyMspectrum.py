@@ -232,6 +232,8 @@ class ipymspectrum(ionTrails, specTrails):
         self.FreeBound = {'wavelength':wavelength, 'intensity':freeBound.squeeze()}
         self.LineSpectrum = {'wavelength':wavelength, 'intensity':lineSpectrum.squeeze()}
         self.TwoPhoton = {'wavelength':wavelength, 'intensity':twoPhoton.squeeze()}
+        cont = freeFree.squeeze() + freeBound.squeeze() + twoPhoton.squeeze()
+        self.Continuum = {'wavelength':wavelength, 'intensity':cont}
         #
         total = freeFree + freeBound + lineSpectrum + twoPhoton
         #

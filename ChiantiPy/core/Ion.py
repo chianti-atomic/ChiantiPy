@@ -1068,7 +1068,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         ------
         scipy.ndimage.filters also includes a range of filters.
         """
-
+        self.Wavelength = wavelength
         if not hasattr(self, 'WvlRange'):
             self.WvlRange = [wavelength[0],  wavelength[-1]]
 

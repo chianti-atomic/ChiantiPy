@@ -1274,7 +1274,7 @@ class maker(ionTrails,  specTrails):
             ax.axhline(diffMean - 2.*diffStd, color='b', lw=2, linestyle='dotted')  #, label='2 std')
             ax.axhline(diffMean + 3.*diffStd, color='g', lw=2, linestyle='dotted', label='3 std')
             ax.axhline(diffMean - 3.*diffStd, color='g', lw=2, linestyle='dotted')  #, label='3 std')
-            ax.set_xlabel('Wavelength ($\AA$)', fontsize=14)
+            ax.set_xlabel('Wavelength (\u212B)', fontsize=14)
             ax.set_ylabel(r'(Obs - Pred)/(w $\times$ Obs)', fontsize=14)
             if title:
                 mytitle = 'diff Mean %10.3f  diff Std  %10.3f'%(diffMean, diffStd)

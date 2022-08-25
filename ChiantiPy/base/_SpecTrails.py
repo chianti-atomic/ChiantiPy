@@ -410,6 +410,10 @@ class specTrails(object):
             lineWvl = self.Intensity['wvl']
             lineIonS = self.Intensity['ionS']
             wvlIndex = util.between(lineWvl, wvlRange)
+            if hasattr(self, 'Continuum'):
+                continuum = self.Continuum['intensity'].sum(axis=0)
+            else:
+                continuum = np.zeros_like(lineIntensity)
 
             lineIntensity = lineIntensity[wvlIndex]
             lineWvl = lineWvl[wvlIndex]
@@ -417,6 +421,10 @@ class specTrails(object):
         elif nTempDens == 1:
             index = 0
             lineIntensity = self.Intensity['intensity'][0]
+            if hasattr(self, 'Continuum'):
+                continuum = self.Continuum['intensity'][0]
+            else:
+                continuum = np.zeros_like(lineIntensity)
             lineWvl = self.Intensity['wvl']
             lineIonS = self.Intensity['ionS']
         else:
@@ -425,7 +433,10 @@ class specTrails(object):
             lineIntensity = self.Intensity['intensity'][index]
             lineWvl = self.Intensity['wvl']
             lineIonS = self.Intensity['ionS']
-
+            if hasattr(self, 'Continuum'):
+                continuum = self.Continuum['intensity'][index]
+            else:
+                continuum = np.zeros_like(lineIntensity)
         wvlIndex = util.between(lineWvl, wvlRange)
 
         lineIntensity = lineIntensity[wvlIndex]
@@ -494,7 +505,9 @@ class specTrails(object):
             useFactor = self.Spectrum['filterWidth']
             for iwvl, awvl in enumerate(lineWvl):
                 filterFactor = useFilter(self.Spectrum['wavelength'], awvl, factor=useFactor).max()
-                spIntens = filterFactor*lineIntensity[iwvl]
+                # need to take into account the continuum
+                idx = np.argmin(np.abs(lineWvl[iwvl] - self.Wavelength))
+                spIntens = filterFactor*lineIntensity[iwvl] + continuum[idx]
                 plt.plot([awvl,  awvl], [0.,  1.2*spIntens], 'k',  lw=lw)
                 ypos = 1.25*spIntens
                 lbl = lineIonSpectr[iwvl] + ' %8.3f'%(awvl)

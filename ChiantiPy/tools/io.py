@@ -839,6 +839,88 @@ def elvlcWrite(info, outfile=None, round=0, addLvl=0, includeRyd=False, includeE
     out.close()
     return
 
+def demRead(demName=''):
+    """
+    Read emission measure file `emName` and return the temperatures, densities and emission measures
+
+    Keyword Arguments
+    -----------------
+
+    demName:  `str`
+        the name of the differential emission measure file to read in the $XUVTOP/dem directory
+
+    Returns
+    -------
+
+    DEM:  `dict`
+        keywords are `temperature`, `density`, `dem`, `em`, `dt`, `filename`
+
+    """
+    xuvtop = os.environ["XUVTOP"]
+    demdir = os.path.join(xuvtop,'dem')
+    demList = os.listdir(demdir)
+    temp = []
+    dens = []
+    dem = []
+    em = []
+    if demName:
+        # a specific abundance file name has been specified
+        cnt = demName.count('.dem')
+        if cnt == 0:
+            demName += '.dem'
+    if demName in demList:
+        demFileName = os.path.join(xuvtop,'dem',demName)
+    else:
+        # the user will select an emission measure file
+        demlabel = 'ChiantiPy - Select a differential emission measure file'
+        mypick = chgui.gui.selectorDialog(demList, label=demlabel)
+        demName = mypick.selectedText[0]
+        if demName is None:
+            print((' no DEM file selected'))
+            return 0
+        else:
+            demName = mypick.selectedText[0]
+            demFileName = os.path.join(xuvtop,'dem',demName)
+    with open(demFileName,'r') as inpt:
+        s1 = inpt.readlines()
+    nlines = 0
+    idx = -1
+    while idx <= 0:
+        minChar = min([5, len(s1[nlines])])
+        aline = s1[nlines][0:minChar]
+        idx = aline.find('-1')
+        nlines += 1
+    nlines -= 1
+    for line in range(nlines):
+        a, b = s1[line].split()
+        temp.append(10.**float(a))
+        dem.append(10.**float(b))
+
+    temp = np.asarray(temp)
+    dem = np.asarray(dem)
+
+
+    if 'quiet' in demName:
+        dens = 3.e+8*np.ones_like(temp)
+    elif 'active' in demName:
+        dens = 2.e+9*np.ones_like(temp)
+    elif 'flare' in demName:
+        dens = 1.e+10*np.ones_like(temp)
+    elif 'prom' in demName:
+        dens = 3.e+8*np.ones_like(temp)
+    elif 'hole' in demName:
+        dens = 1.e+8*np.ones_like(temp)
+    else:
+        dens = 3.e+8*np.ones_like(temp)
+
+    #  dlnT = dt/T
+    dt = np.log(10.**.1)*temp
+    em = dem*dt
+
+    ref = s1[nlines+1:]
+    return{'temperature':temp, 'density':dens, 'dem':dem, 'em':em, 'dt':dt,
+        'ref':ref, 'filename':demFileName}
+
 def emRead(emName=''):
     """
     Read emission measure file `emName` and return the temperatures, densities and emission measures
@@ -880,9 +962,8 @@ def emRead(emName=''):
         else:
             emName = mypick.selectedText[0]
             emFileName = os.path.join(xuvtop,'em',emName)
-    input = open(emFileName,'r')
-    s1 = input.readlines()
-    input.close()
+    with open(emFileName,'r') as inpt:
+        s1 = inpt.readlines()
     nlines = 0
     idx = -1
     while idx <= 0:

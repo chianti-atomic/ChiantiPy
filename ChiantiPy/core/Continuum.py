@@ -755,7 +755,7 @@ class continuum(ionTrails):
                 return
         elif self.Z == self.Stage-1:
             #dealing with the fully ionized stage
-            self.Fblvl = {'mult':[2., 2.]}
+            self.Fblvl = {'mult':[1., 1.]}
             fblvl = self.Fblvl
         else:
             fblvlname = self.nameDict['filename']+'.fblvl'

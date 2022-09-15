@@ -2,6 +2,18 @@
 Changelog
 ===========
 
+Changes from 0.14.0 to 0.14.1
+=============================
+
+This relatively minor release adds some new features and corrects some glitches
+
+A function demRead has been to ChiantiPy.tools.io for reading the CHIANTI .dem files in the XUVTOP/dem directory
+
+The spectrumPlot method has been updated to provide more correct labeling of syntheic spectra
+
+The QuickStart guide (html and notebook) have been updated to reflect these changes and show how to use the .dem files
+
+
 Changes from 0.13.1 to 0.14.0
 =============================
 
@@ -16,6 +28,8 @@ These are more flexible and several keyword arguments have been added:
     'doLabel' governs whether to display the ion name and wavelength
     'lw' the linewidth of the marker in matplotlib units (default=1)
     'doTitle' governs whether to add a title to the plot
+
+The QuickStart (html and notebook) has been updated to demonstrate some of these new features
 
 Import bug fix:  the indices for calculating the two-photon continue were update to match the new ordering of the energy levels for the h-like and he-like ions.
 

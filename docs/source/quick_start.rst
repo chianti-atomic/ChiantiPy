@@ -6,7 +6,7 @@ This short tutorial will demonstrate some of the capabilities of ChiantiPy and t
 
 Perhaps the easiest way is to use a jupyter-notebook or a jupyter3-notebook to load the quick start notebook file QuickStart.ipynb in the directory jupyter_notebooks.  Then, just run each cell step by step.  If you are not familiar with notebooks, then you can cut and paste the following code into a Python/IPython session.
 
-N.B.:  in the time some of the plots and data were produced, there have been some changes to ChiantiPy and CHIANTI.  It is possible that you might find difference (hopefully small).
+N.B.:  in the time some of the plots and data were produced, there have been some changes to ChiantiPy and CHIANTI.  It is possible that you might find differences (hopefully small).
 
 Bring up a Python session (using > Python -i ), or better yet, an IPython session
 
@@ -145,6 +145,8 @@ give the following terminal/notebook output
   fe_14     2    12              3s2.3p 2P1.5 - 3s2.3d 2D2.5                  219.1305    2.096e-01     4.27e+10 Y
 
  ------------------------------------------
+
+
 
 
 The effect of electron density on line intensities
@@ -471,6 +473,62 @@ New in **ChiantiPy 0.6**, the *label* keyword has been added to the ion.spectrum
 .. image:: _static/fe14_spectrum_label.png
     :align:  center
 
+Using emission measures (EM)
+----------------------------
+
+::
+
+  emDir = os.path.join(os.environ['XUVTOP'], 'em')
+  emList = os.listdir(emDir)
+  for idx, emFile in enumerate(emList):
+    print('%i  %s'%(idx, emFile))
+
+the following is printed
+
+
+| 0  quiet_sun_1993_serts_4T.em
+| 1  active_region_1993_serts_4T.em
+
+
+Beginning with CHIANTI version 10, a new directory, em, as been added to contain emission measure files.
+
+At this time, there only 2 files available and we can pick the active region file
+
+::
+
+  arDict = chio.emRead(emList[1])
+  arDict.keys()
+
+dict_keys(['temperature', 'density', 'em', 'ref', 'filename'])
+
+::
+
+  arTemp = arDict['temperature']
+  arDens = arDict['density']
+  arEm = arDict['em']
+
+
+::
+
+  for idx, atemp in enumerate(arTemp):
+      print('%i %10.2e %10.2e %10.2e'%(idx, atemp, arDens[idx], arEm[idx]))
+
+
+| 0   6.17e+05   2.00e+09   4.97e+26
+| 1   1.12e+06   2.00e+09   2.09e+27
+| 2   1.86e+06   2.00e+09   7.89e+27
+| 3   3.16e+06   2.00e+09   1.46e+28
+
+::
+
+  fe14  = ch.ion('fe_14', arTemp, arDens, em=arEm)
+  wvl = np.linspace(200., 300., 10001)
+  fe14.spectrum(wvl, filter=(chfilters.gaussian, .03))
+  fe14.spectrumPlot(wvlRange=[264., 275.], integrated=True, top=5)
+
+
+.. image:: _static/fe14_integrated_spectrum_label.png
+    :align:  center
 
 
 Free-free and free-bound continuum
@@ -551,6 +609,27 @@ with version 0.13.0 it is possible to save multi-ion calculations as a pickle fi
   dataName = 'mybunch.pkl'
   bnch.saveData(dataName, verbose=True)
 
+the saveData method creates a dict of all of the attributes of the bnch instance.  The pickle file can be loaded an it is possible to work directly with the data.
+
+::
+
+  with open(dataName, 'rb') as inpt:
+      mybnch = pickle.load(inpt)
+
+::
+
+  mybnch.keys()
+  mybunch['Intensity']['intensity'].shape
+
+
+with version 0.14.1, the redux class is introduced to allow the use of the pickled data inside a class that inherits such methods as intensityPlot and spectrumPlot
+
+::
+
+    rebnch = ch.redux(dataName, verbose=False)
+    rebnch.intensityPlot(index=5, wvlRange=[398., 404.])
+
+then returns the above plot
 
 A new keyword argument **keepIons** has been added in v0.6 to the bunch and the 3 spectrum classes.  It should be used with some care as it can lead to very large instances in the case of a large number of ions, temperature, or densities.
 
@@ -578,20 +657,20 @@ elapsed seconds =       11.000
 
 yields:
 
-mg_10
-mg_10d
-mg_3
-mg_4
-mg_5
-mg_6
-mg_8
-mg_9
-ne_10
-ne_2
-ne_3
-ne_5
-ne_6
-ne_8
+| mg_10
+| mg_10d
+| mg_3
+| mg_4
+| mg_5
+| mg_6
+| mg_8
+| mg_9
+| ne_10
+| ne_2
+| ne_3
+| ne_5
+| ne_6
+| ne_8
 
 these IonInstances have all the properties of the Ion class for each of these ions.  However, this should be used with some caution as it can result in a memory-hogging instance.
 
@@ -753,20 +832,87 @@ yields
 
 another example
 
+Using differential emission measures (DEM)
+------------------------------------------
+
+
+Beginning with CHIANTI version 14.1, the io.demRead function has been added to read dem file in the existing XUVTOP/dem directory
+
 
 ::
 
-  temp=2.e+7
-  dens=1.e+9
+  demDir = os.path.join(os.environ['XUVTOP'], 'dem')
+  demList = os.listdir(demDir)
+
+::
+
+  for idx, demFile in enumerate(demList):
+      print('%i  %s'%(idx, demFile))
+
+produces
+
+| 0  quiet_sun_eis.dem
+| 1  version_3
+| 2  coronal_hole.dem
+| 3  flare.dem
+| 4  flare_ext.dem
+| 5  AU_Mic.dem
+| 6  quiet_sun.dem
+| 7  active_region.dem
+| 8  prominence.dem
+
+
+select the desired file by index
+
+::
+
+  flDict = chio.demRead(demList[3])
+
+
+::
+
+  flDict.keys()
+
+
+dict_keys(['temperature', 'density', 'dem', 'em', 'dt', 'ref', 'filename'])
+
+
+since we will be looking at X-ray wavelengths, select only the highest temperatures
+
+::
+
+  flTemp = flDict['temperature'][20:]
+  flDens = flDict['density'][20:]
+  flEm = flDict['em'][20:]
+
+
+::
+
   wvl = 1. + 0.002*np.arange(4501)
+  core = 6
 
 ::
 
-  s3 = ch.mspectrum(temp, dens, wvl, filter = (chfilters.gaussian,.015), doContinuum=1, em=1.e+27, minAbund=1.e-5, verbose=0)
+  s3 = ch.mspectrum(flTemp, flDens, wvl, filter = (chfilters.gaussian,.015), em=flEm, minAbund=1.e-5, proc=core, verbose=0)
+
+
+save the calculations
+=====================
 
 ::
 
-  plt.plot(wvl, s3.Spectrum['intensity'])
+  saveName = 'mspectrum3_dem.pkl'
+  s3.saveData(saveName)
+
+::
+
+  plt.figure()
+  plt.plot(wvl, s3.Spectrum['intensity'].sum(axis=0))
+  plt.xlabel(s3.Spectrum['xlabel'], fontsize=14)
+  plt.ylabel(s3.Spectrum['ylabel'], fontsize=14)
+  plt.ylim(bottom = 0.)
+  plt.xlim([0., wvl[-1]])
+  plt.tight_layout()
 
 
 .. image:: _static/mspectrum_1_10.png
@@ -778,10 +924,12 @@ The spectrumPlot method can also be used
 
   s3.spectrumPlot(top=6)
 
+
 .. image:: _static/mspectrum_spectrumPlot_1_10.png
     :align:  center
 
-with doContinuum=1, the continuum can be plotted separately
+
+the default value for doContinuum is True, so, the continuum can be plotted separately
 
 ::
 
@@ -789,8 +937,7 @@ with doContinuum=1, the continuum can be plotted separately
   plt.plot(wvl, s3.FreeFree['intensity'], label='FF')
   plt.plot(wvl, s3.FreeBound['intensity'], label='FB')
   plt.plot(wvl, s3.TwoPhoton['intensity'], label='2 Photon')
-  total = s3.FreeFree['intensity'] + s3.FreeBound['intensity'] + s3.TwoPhoton['intensity']
-  plt.plot(wvl, total, label='Total')
+  plt.plot(wvl, s3.Continuum['intensity'].sum(axis=0), label='Total')
   plt.xlabel(s3.Spectrum['xlabel'], fontsize=14)
   plt.ylabel(s3.Spectrum['ylabel'], fontsize=14)
   plt.ylim(bottom = 0.)
@@ -807,11 +954,29 @@ produces
 
 ::
 
-  s3.spectrumPlot(wvlRange=[4., 9.], top=6)
+  s3.spectrumPlot(wvlRange=[4., 9.], top=6, integrated=True)
 
 produces
 
 .. image:: _static/mspectrum_spectrumPlot_4_9.png
+    :align:  center
+
+With the redux class, the save calculations can be restored
+===========================================================
+
+::
+
+  s3r = ch.redux(saveName, verbose=True)
+
+
+the redux class inherits the intensityPlot and spectrumPlot methods as well as a few others
+
+::
+
+  s3r.spectrumPlot(wvlRange=[6., 7.], integrated=True, top=5)
+
+
+.. image:: _static/mspectrum_spectrumPlot_6_7.png
     :align:  center
 
 
@@ -942,6 +1107,13 @@ the radiative loss rate can be calculated as a function of temperature and densi
 
   temp = 10.**(4.+0.05*arange(81))
   rl = ch.radLoss(temp, 1.e+4, minAbund=2.e-5)
+
+
+these calculations can take some time so it is a good idea to save them
+
+::
+
+  rl.saveData('radloss.pkl')
 
 ::
 

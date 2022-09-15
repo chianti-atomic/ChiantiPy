@@ -280,7 +280,12 @@ class maker(ionTrails,  specTrails):
         self.Nions = len(self.IonSet)
         self.Dwvl = specData['dwvl']
         wvl = specData['wvl0']
-        self.WvlRange = [min(wvl)-max(self.Dwvl), max(wvl)+max(self.Dwvl)]
+        try:
+            self.WvlRange = [min(wvl)-max(self.Dwvl), max(wvl)+max(self.Dwvl)]
+        except:
+            if not hasattr(self, 'WvlRange'):
+                print(' need to set WvlRange attribute')
+                return
         reduceNobs = 0.
         for anion in self.IonSet:
             same = specData['ions'].count(anion)
@@ -833,7 +838,7 @@ class maker(ionTrails,  specTrails):
         #
         # ---------------------------------------------------------
         #
-    def emPlot(self, vs='T', loc='upper right', fs=10,  adjust=None, position='both', label=True, legend = True, fontsize=16, tscale=1.,   verbose=True):
+    def emPlot(self, vs='T', loc='upper right', fs=10,  adjust=None, position='both', label = True, legend = True, fontsize=16, tscale=1.,   verbose=True):
         '''
         to plot line intensities divided by gofnt
         adjust is to provide an adjustment to the position of the labels
@@ -1275,7 +1280,7 @@ class maker(ionTrails,  specTrails):
             ax.axhline(diffMean + 3.*diffStd, color='g', lw=2, linestyle='dotted', label='3 std')
             ax.axhline(diffMean - 3.*diffStd, color='g', lw=2, linestyle='dotted')  #, label='3 std')
             ax.set_xlabel('Wavelength (\u212B)', fontsize=14)
-            ax.set_ylabel(r'(Obs - Pred)/(w $\times$ Obs)', fontsize=14)
+            ax.set_ylabel(r'(Obs - Pred)/Obs', fontsize=14)
             if title:
                 mytitle = 'diff Mean %10.3f  diff Std  %10.3f'%(diffMean, diffStd)
                 ax.set_title(mytitle, fontsize=fontsize)

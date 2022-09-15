@@ -91,7 +91,6 @@ class continuum(ionTrails):
         self.ionization_potential = chdata.Ip[self.Z-1, self.Stage-1]*const.ev2Erg
         self.IprErg = self.Ipr*const.ev2Erg
         self.IprCm = 1.e+8/(const.ev2Ang/self.Ipr)
-
         # Set abundance
         if abundance is not None:
             if isinstance(abundance,  float):
@@ -105,12 +104,8 @@ class continuum(ionTrails):
                 self.AbundAll = ab['abundance']
 
         else:
-#            self.AbundanceName = self.Defaults['abundfile']
-        #
-#            ab = chdata.Abundance[self.AbundanceName]['abundance']
             self.Abundance = chdata.AbundanceDefault['abundance'][self.Z-1]
             self.AbundAll = chdata.AbundanceDefault['abundance']
-
         self.ioneqOne()
 
     def free_free_loss(self,  includeAbund=True, includeIoneq=True, **kwargs):
@@ -843,6 +838,8 @@ class continuum(ionTrails):
 #                expf[0,itemp] = np.exp((iprLvlErg - 1.e+8*const.planck*const.light/wvl)/(const.boltzmann*atemp))
 #                fbrate[0,itemp] = ioneq[itemp]*em[itemp]*(const.planck*const.light/(1.e-8*wvl))**5 \
 #                    *const.verner*ratg[0]*expf[0,itemp]*vCross/atemp**1.5
+        # restrict calculations to temperatures where the ionization equ. is non-zero
+        goodT = [ it for it, anioneq in enumerate(self.IoneqOne) if anioneq > 0.]
         for ilvl in range(lvl1,nlvls):
             pqnIdx = pqn[ilvl] - 1
             lIdx = l[ilvl]
@@ -870,35 +867,32 @@ class continuum(ionTrails):
                     print(' ilvl %i   mygf.max() %10.2e'%(ilvl, np.max(mygf[ilvl])))
                 ratg[ilvl] = float(multr[ilvl])/float(mult[0]) # ratio of statistical weights
 
-                for itemp,  atemp in enumerate(temperature):
-                    phE = hnu
-                    expfun = np.exp((iprLvlErg - phE)/(const.boltzmann*atemp))
-                    expfunIsnan = np.isnan(expfun)
-                    expfunIsinf = np.isinf(expfun)
-                    if expfunIsnan.sum() > 0:
-                        print('%i some of expfun are nan %i'%(itemp, expfunIsnan.sum()))
-                        expfun[expfunIsnan] = 0.
-                    elif expfunIsinf.sum() > 0:
-                        print('%i some of expfun are inf %i'%(itemp, expfunIsinf.sum()))
-                        expfun[expfunIsinf] = 0.
-                    fbn[ilvl, itemp] = K0*phE**2*expfun*iprLvlErg**2*ratg[ilvl]*mygf[ilvl]/(atemp**(1.5)*float(pqn[ilvl]))
-                    fbnIsNan = np.isnan(fbn[ilvl, itemp])
-                    fbnIsInf = np.isinf(fbn[ilvl, itemp])
+                for itemp in goodT:
+                    atemp = self.Temperature[itemp]
+                    if ioneq[itemp] > 0.:
+                        phE = hnu
+                        expfun = np.exp((iprLvlErg - phE)/(const.boltzmann*atemp))
+                        expfunIsnan = np.isnan(expfun)
+                        expfunIsinf = np.isinf(expfun)
+                        if expfunIsnan.sum() > 0:
+                            print('%i some of expfun are nan %i'%(itemp, expfunIsnan.sum()))
+                            expfun[expfunIsnan] = 0.
+                        elif expfunIsinf.sum() > 0:
+                            print('%i some of expfun are inf %i'%(itemp, expfunIsinf.sum()))
+                            expfun[expfunIsinf] = 0.
+                        fbn[ilvl, itemp] = K0*phE**2*expfun*iprLvlErg**2*ratg[ilvl]*mygf[ilvl]/(atemp**(1.5)*float(pqn[ilvl]))
+                        fbnIsNan = np.isnan(fbn[ilvl, itemp])
+                        fbnIsInf = np.isinf(fbn[ilvl, itemp])
 
-                    if fbnIsNan.sum() > 0:
-                        print('%i some fbn are Nan %i'%(itemp,  fbnIsNan.sum()))
-                        fbn[ilvl, itemp,  fbnIsNan] = 0.
-                    elif fbnIsInf.sum() > 0:
-                        print('%i some fbn are Inf %i'%(itemp,  fbnIsInf.sum()))
-                        fbn[ilvl, itemp,  fbnIsInf] = 0.
-                    mask[ilvl,itemp] = 1.e+8/wvl < (self.IprCm - ecm[ilvl])
-#                    if verbose:
-#                        print('iprcm %10.2e ecm %10.2e diff %10.2e'%(self.IprCm, ecm[ilvl], self.IprCm -ecm[ilvl]  ))
-#                        print('ilvl %i sum of mask %i'%(ilvl,  np.sum(mask[ilvl])))
-#                        print(' pqn %i np.sum(fbn[ilvl]) %10.2e'%(pqn[ilvl],   np.sum(fbn[ilvl,  itemp])))
-                    fbIntensity[ilvl, itemp] = abund*em[itemp]*ioneq[itemp]*fbn[ilvl, itemp]
-            else:
-                pass
+                        if fbnIsNan.sum() > 0:
+                            print('%s  %i some fbn are Nan %i'%(self.IonStr, itemp, fbnIsNan.sum()))
+                            fbn[ilvl, itemp,  fbnIsNan] = 0.
+                        elif fbnIsInf.sum() > 0:
+                            print('%s %i some fbn are Inf %i'%(self.IonStr, itemp, fbnIsInf.sum()))
+                            fbn[ilvl, itemp,  fbnIsInf] = 0.
+                        mask[ilvl,itemp] = 1.e+8/wvl < (self.IprCm - ecm[ilvl])
+                        fbIntensity[ilvl, itemp] = abund*em[itemp]*ioneq[itemp]*fbn[ilvl, itemp]
+
         fbTest = fbIntensity.sum(axis=0)
         fbTestisNan = np.isnan(fbTest)
         fbTestisInf = np.isinf(fbTest)

@@ -2104,6 +2104,12 @@ class ion(ioneqOne, ionTrails, specTrails):
 
         wvl = np.asarray(self.Wgfa["wvl"], np.float64)
         obs = np.where(wvl > 0., 'Y', 'N')
+
+        if self.Defaults['wavelength'] == 'kev':
+            wvl = const.ev2Ang/np.asarray(wvl)
+        elif self.Defaults['wavelength'] == 'nm':
+            wvl = wvl/10.
+
         if allLines:
             wvl=np.abs(wvl)
         l1  =  np.asarray(self.Wgfa['lvl1'], 'int64')
@@ -2154,10 +2160,6 @@ class ion(ioneqOne, ionTrails, specTrails):
             for iwvl in range(nwvl):
                 p = pop[itempden,l2[iwvl]-1]
                 em[iwvl, itempden] = factor[iwvl]*p*avalue[iwvl]
-        if self.Defaults['wavelength'] == 'kev':
-            wvl = const.ev2Ang/np.asarray(wvl)
-        elif self.Defaults['wavelength'] == 'nm':
-            wvl = wvl/10.
 #        else:
 #            for iwvl in range(0,nwvl):
 #                p = pop[l2[iwvl]-1]
@@ -2168,11 +2170,12 @@ class ion(ioneqOne, ionTrails, specTrails):
 #                wvl = wvl/10.
         nlvl = len(l1)
         ionS = np.asarray([self.IonStr]*nlvl)
-        Emiss = {'ionS':ionS,"wvl":wvl, "emiss":em, "plotLabels":plotLabels, 'lvl1':l1, 'lvl2':l2, 'avalue':avalue, 'obs':obs, 'pretty1':pretty1, 'pretty2':pretty2}
+        Emiss = {'ionS':ionS,"wvl":wvl, "emiss":em, "plotLabels":plotLabels, 'lvl1':l1, 'lvl2':l2,
+            'avalue':avalue, 'obs':obs, 'pretty1':pretty1, 'pretty2':pretty2}
         self.Emiss = Emiss
         return
 
-    def emissList(self, index=-1,  wvlRange=None, wvlRanges=None,   top=10, relative=0, outFile=0 ):
+    def emissList(self, index=None, wvlRange=None, wvlRanges=None, top=10, relative=0, outFile=0 ):
         """
         List the emissivities.
 
@@ -2194,17 +2197,6 @@ class ion(ioneqOne, ionTrails, specTrails):
                 print(' perhaps the temperature and/or eDensity are not set')
                 return
         #
-        emissivity = copy.copy(self.Emiss)
-        emiss = emissivity['emiss']
-        ionS = emissivity['ionS']
-        wvl = emissivity['wvl']
-        lvl1 = emissivity['lvl1']
-        lvl2 = emissivity['lvl2']
-        avalue = emissivity['avalue']
-        obs = emissivity['obs']
-        pretty1 = emissivity['pretty1']
-        pretty2 = emissivity['pretty2']
-#        plotLabels = emissivity['plotLabels']
         #
         temperature = self.Temperature
         eDensity = self.EDensity
@@ -2215,25 +2207,34 @@ class ion(ioneqOne, ionTrails, specTrails):
         if ndens == 1 and ntemp == 1:
             dstr = ' -  Density = %10.2e (cm$^{-3}$)' %(eDensity)
             tstr = ' -  T = %10.2e (K)' %(temperature)
+            index = 0
         elif ndens == 1 and ntemp > 1:
-            if index < 0:
+            if index is None:
                 index = ntemp//2
             print('using index = %5i specifying temperature =  %10.2e'%(index, temperature[index]))
             self.Message = 'using index = %5i specifying temperature  =   %10.2e'%(index, temperature[index])
-
-            emiss = emiss[:, index]
         elif ndens > 1 and ntemp == 1:
-            if index < 0:
+            if index is None:
                 index = ntemp//2
             print('using index =%5i specifying eDensity = %10.2e'%(index, eDensity[index]))
             self.Message = 'using index = %5i specifying eDensity = %10.2e'%(index, eDensity[index])
-            emiss = emiss[:, index]
         elif ndens > 1 and ntemp > 1:
-            if index < 0:
-                index = ntemp//-1232
+            if index is None:
+                index = ntemp//2
             print('using index = %5i specifying temperature = %10.2e, eDensity =  %10.2e'%(index, temperature[index], eDensity[index]))
             self.Message = 'using index = %5i specifying temperature = %10.2e, eDensity =  %10.2e'%(index, temperature[index], eDensity[index])
-            emiss = emiss[:, index]
+
+        emissivity = copy.copy(self.Emiss)
+        emiss = emissivity['emiss'][:, index]
+        ionS = emissivity['ionS']
+        wvl = emissivity['wvl']
+        lvl1 = emissivity['lvl1']
+        lvl2 = emissivity['lvl2']
+        avalue = emissivity['avalue']
+        obs = emissivity['obs']
+        pretty1 = emissivity['pretty1']
+        pretty2 = emissivity['pretty2']
+#        plotLabels = emissivity['plotLabels']
         #
         if wvlRange:
             wvlIndex = util.between(wvl,wvlRange)
@@ -2295,13 +2296,15 @@ class ion(ioneqOne, ionTrails, specTrails):
         print('  ')
         print(' Ion   lvl1  lvl2         lower                     upper                   Wvl(A)   Emissivity      A value Obs')
         for kdx in idx:
-            print(fmt%(ionS[kdx], lvl1[kdx], lvl2[kdx], pretty1[kdx], pretty2[kdx], wvl[kdx], emiss[kdx], avalue[kdx], obs[kdx]))
+            print(fmt%(ionS[kdx], lvl1[kdx], lvl2[kdx], pretty1[kdx], pretty2[kdx], wvl[kdx],
+                emiss[kdx], avalue[kdx], obs[kdx]))
         print('   ')
         print(' ------------------------------------------')
         print('   ')
         #
         self.Emiss['wvlTop'] = wvl[idx]
         self.Emiss['emissTop'] = emiss[idx]
+        self.Emiss['idx'] = idx
         if outFile:
             fmt = '%5s %5i %5i %25s - %25s %12.3f %12.3e %12.2e %1s'
             output.write('   \n')
@@ -2317,7 +2320,8 @@ class ion(ioneqOne, ionTrails, specTrails):
         #
         # ---------------------------------------------------------------------------
         #
-    def emissPlot(self, index=-1,  wvlRange=None,  top=10, linLog='lin', relative=0,  verbose=0, plotFile = 0, saveFile=0 ):
+    def emissPlot(self, index=None, wvlRange=None,  top=10, linLog='lin', relative=0,  verbose=0,
+        plotFile = 0, saveFile=0 ):
         '''Plot the emissivities.
 
         wvlRange, a 2 element tuple, list or array determines the wavelength range
@@ -2351,29 +2355,35 @@ class ion(ioneqOne, ionTrails, specTrails):
         if ndens == 1 and ntemp == 1:
             dstr = ' -  Density = %10.2e (cm$^{-3}$)' %(eDensity)
             tstr = ' -  T = %10.2e (K)' %(temperature)
+            index = 0
         elif ndens == 1 and ntemp > 1:
-            if index < 0:
-                index = ntemp/2
+            if index is None:
+                index = ntemp//2
                 print('using index = %5i specifying temperature =  %10.2e'%(index, temperature[index]))
                 self.Message = 'using index = %5i specifying temperature = %10.2e'%(index, temperature[index])
-            dstr = ' -  Density = %10.2e (cm$^{-3}$)' % eDensity
+            dstr = ' -  Density = %10.2e (cm$^{-3}$)' % eDensity[index]
             tstr = ' -  T = %10.2e (K)' % temperature[index]
+#            emiss = emiss[:, index]
         elif ndens > 1 and ntemp == 1:
-            if index < 0:
-                index = ntemp/2
+            if index is None:
+                index = ntemp//2
                 print('using index =%5i specifying eDensity = %10.2e'%(index, eDensity[index]))
                 self.Message = 'using index =%5i specifying eDensity = %10.2e'%(index, eDensity[index])
             emiss = emiss[:, index]
             dstr = ' -  Density = %10.2e (cm$^{-3}$)' % eDensity[index]
             tstr = ' -  T = %10.2e (K)' % temperature
+#            emiss = emiss[:, index]
         elif ndens > 1 and ntemp > 1:
-            if index < 0:
-                index = ntemp/2
+            if index is None:
+                index = ntemp//2
                 print('using index = %5i specifying temperature = %10.2e, eDensity =  %10.2e'%(index, temperature[index], eDensity[index]))
                 self.Message = 'using index = %5i specifying temperature = %10.2e, eDensity =  %10.2e'%(index, temperature[index], eDensity[index])
-            emiss = emiss[:, index]
+#            emiss = emiss[:, index]
             dstr = ' -  Density  =  %10.2e (cm$^{-3}$)' % eDensity[index]
             tstr=' -  T = %10.2e (K)' % temperature[index]
+
+        emiss = emiss[:, index]
+
         if wvlRange is not None:
             wvlIndex = util.between(wvl, wvlRange)
         else:
@@ -2421,13 +2431,9 @@ class ion(ioneqOne, ionTrails, specTrails):
         plt.ylabel(ylabel)
         plt.title(title+tstr+dstr)
         if wvlRange:
-            plt.axis([wvlRange[0], wvlRange[1], ymin, emiss.max()])
+            plt.axis([wvlRange[0], wvlRange[1], 0., 1.1*emiss.max()])
         if plotFile:
             plt.savefig(plotFile)
-        #
-        idx = np.argsort(wvl)
-        self.Emiss['wvlTop'] = wvl[idx]
-        self.Emiss['emissTop'] = emiss[idx]
         #
         # -------------------------------------------------------------------------------------
         #
@@ -2452,6 +2458,18 @@ class ion(ioneqOne, ionTrails, specTrails):
             em = self.Emiss
         fontsize = 14
         eDensity = self.EDensity
+        temperature = self.Temperature
+        ntemp = temperature.size
+
+        if ntemp > 0:
+            if temperature[0] == temperature[-1]:
+                ntemp = 1
+        ndens = eDensity.size
+        if ndens > 0:
+            if eDensity[0] == eDensity[-1]:
+                ndens = 1
+        print(' ndens = %5i ntemp = %5i'%(ndens, ntemp))
+
         emiss = em['emiss']
         ionS = em['ionS']
         wvl = em["wvl"]
@@ -2461,6 +2479,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         plotLabels = em["plotLabels"]
         xLabel = plotLabels["xLabel"]
         yLabel = plotLabels["yLabel"]
+
         # find which lines are in the wavelength range if it is set
         if wvlRange:
             igvl = util.between(wvl,wvlRange)
@@ -2483,6 +2502,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         for iline in range(nlines):
             if maxEmiss[iline] == maxEmiss.max():
                 maxAll = emiss[igvl[iline]]
+
         igvlsort = np.take(igvl,np.argsort(maxEmiss))
         topLines = igvlsort[-top:]
         maxWvl = '%5.3f' % wvl[topLines[-1]]
@@ -2506,12 +2526,12 @@ class ion(ioneqOne, ionTrails, specTrails):
             xvalues = self.Temperature
             outTemperature = self.Temperature
             outDensity = np.zeros(ntemp,np.float64)
-            outDensity.fill(self.EDensity)
-            desc_str = ' at  Density = %10.2e (cm)$^{-3}$' % self.EDensity
+            outDensity.fill(self.EDensity[0])
+            desc_str = ' at  Density = %10.2e (cm)$^{-3}$' % self.EDensity[0]
         elif ntemp == 1:
             xvalues = self.EDensity
             outTemperature = np.zeros(ndens,np.float64)
-            outTemperature.fill(self.Temperature)
+            outTemperature.fill(self.Temperature[0])
             outDensity = self.EDensity
             xlabel = r'$\rm{Electron Density (cm)^{-3}}$'
             desc_str = ' at Temp = %10.2e (K)' % self.Temperature
@@ -2530,7 +2550,10 @@ class ion(ioneqOne, ionTrails, specTrails):
         plt.figure()
         ax = plt.subplot(111)
         nxvalues = len(xvalues)
-        for iline in range(top):
+
+        # reversing is necessary - otherwise, get a ymin=ymax and a matplotlib error
+        for iline in range(top-1, -1, -1):
+
             tline = topLines[iline]
             plt.loglog(xvalues,emiss[tline]/maxAll)
             if np.min(emiss[tline]/maxAll) < ymin:
@@ -2556,6 +2579,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         else:
             plt.ylim(ymin/1.2, 1.2*ymax)
             plt.title(title+desc_str,fontsize=fontsize)
+        plt.tight_layout()
         plt.draw()
         #  need time to let matplotlib finish plotting
         time.sleep(0.5)
@@ -2616,6 +2640,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         else:
 #            plt.ylim(ymin, ymax)
             plt.title(desc,fontsize=fontsize)
+        plt.tight_layout()
         #
         intensityRatioFileName = self.IonStr
         for aline in num_idx:

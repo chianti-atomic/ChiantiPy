@@ -818,6 +818,7 @@ class ionTrails(object):
         eDensity = self.EDensity
         temperature = self.Temperature
         ntemp = temperature.size
+
         if ntemp > 0:
             if temperature[0] == temperature[-1]:
                 ntemp = 1
@@ -849,8 +850,10 @@ class ionTrails(object):
             igvl=range(len(wvl))
         nlines=len(igvl)
         igvl=np.take(igvl,wvl[igvl].argsort())
+
         if top > nlines:
             top=nlines
+
         intensity = self.Intensity['intensity']
         maxIntens = np.zeros(nlines,np.float64)
         for iline in range(nlines):
@@ -858,11 +861,12 @@ class ionTrails(object):
         for iline in range(nlines):
             if maxIntens[iline]==maxIntens.max():
                 maxAll=intensity[:, igvl[iline]]
+
         igvlsort=np.take(igvl,np.argsort(maxIntens))
         topLines=igvlsort[-top:]
         maxWvl='%5.3f' % wvl[topLines[-1]]
         topLines=topLines[wvl[topLines].argsort()]
-        print(' maxWvl = %s'%(maxWvl))
+#        print(' maxWvl = %s'%(maxWvl))
 
         # need to make sure there are no negative values before plotting
         good = intensity > 0.
@@ -901,6 +905,7 @@ class ionTrails(object):
         plt.figure()
         ax = plt.subplot(111)
         nxvalues=len(xvalues)
+
         # reversing is necessary - otherwise, get a ymin=ymax and a matplotlib error
         for iline in range(top-1, -1, -1):
             tline=topLines[iline]
@@ -918,7 +923,6 @@ class ionTrails(object):
                     text = '%s %10.4f'%(ionS[tline], wvl[tline])
                 plt.text(xvalues[ixvalue], intensity[ixvalue, tline]/maxAll[ixvalue], text)
         if ndens == 1:
-            print('%12.2e  %12.2e '%(xvalues.min(),xvalues.max()))
             plt.xlim(xvalues.min(),xvalues.max())
             plt.xlabel(xlbl,fontsize=fontsize)
             plt.ylabel(ylabel,fontsize=fontsize)

@@ -837,3 +837,70 @@ def scale_classical(inDict, ip):
     else:
         print(' input dict does not have the correct keys')
     return
+
+def units(defaults):
+    """ to create a set of units compatible with ChiantiPy default values
+    """
+    # get xlabel for plotting
+    if defaults['wavelength'] == 'angstrom':
+        xlabel = 'Wavelength (\u212B)'
+    elif defaults['wavelength'] == 'nm':
+        xlabel = 'Wavelength (nm)'
+    elif defaults['wavelength'] == 'ev':
+        xlabel = 'Energy (eV)'
+    elif defaults['wavelength'] == 'kev':
+        xlabel = 'Energy (keV)'
+
+    # get wavlength label for listing
+    if defaults['wavelength'] == 'angstrom':
+        listXlabel = 'Wvl (\u212B)'
+    elif defaults['wavelength'] == 'nm':
+        listXlabel = 'Wvl (nm)'
+    elif defaults['wavelength'] == 'ev':
+        listXlabel = 'Energy (eV)'
+    elif defaults['wavelength'] == 'kev':
+        listXlabel = 'Energy (keV)'
+    #
+    #  get Emiss Units
+
+    if defaults['flux'] == 'energy':
+        emissYlabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1}$ ion$^{-1}$'
+    elif defaults['flux'] == 'photon':
+        emissYlabel = r'photon cm$^{-2}$ s$^{-1}$ sr$^{-1}$ ion$^{-1}$'
+
+    #  get Intensity Units
+
+    if defaults['flux'] == 'energy':
+        intYlabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1}$'
+    elif defaults['flux'] == 'photon':
+        intYlabel = r'photon cm$^{-2}$ s$^{-1}$ sr$^{-1}$'
+
+    # get Spectrum Units
+
+    if defaults['flux'] == 'energy':
+        if defaults['wavelength'] == 'angstrom':
+            spYlabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1}$' +  '\u212B' + '$^{-1}$'
+        if defaults['wavelength'] == 'nm':
+            spYlabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1}$ nm$^{-1}$'
+        if defaults['wavelength'] == 'ev':
+            spYlabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1}$ eV$^{-1}$'
+        if defaults['wavelength'] == 'kev':
+            spYlabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1}$ keV$^{-1}$'
+    elif defaults['flux'] == 'photon':
+        if defaults['wavelength'] == 'angstrom':
+            spYlabel = 'photon cm$^{-2}$ s$^{-1}$ sr$^{-1}$' +  '\u212B' + '$^{-1}$'
+        if defaults['wavelength'] == 'nm':
+            spYlabel = r'photon cm$^{-2}$ s$^{-1}$ sr$^{-1}$ nm$^{-1}$'
+        if defaults['wavelength'] == 'ev':
+            spYlabel = r'photon cm$^{-2}$ s$^{-1}$ sr$^{-1}$ eV$^{-1}$'
+        if defaults['wavelength'] == 'kev':
+            spYlabel = r'photon cm$^{-2}$ s$^{-1}$ sr$^{-1}$ keV$^{-1}$'
+    labels = {}
+    labels['xlabel'] = xlabel
+    labels['listXlabel'] = listXlabel
+    labels['emissYlabel'] = emissYlabel
+    labels['intensityYlabel'] = intYlabel
+    labels['spectrumYlabel'] = spYlabel
+
+    return labels
+

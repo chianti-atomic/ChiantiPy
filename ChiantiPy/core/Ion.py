@@ -117,6 +117,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         self.Spectroscopic = _tmp_convert_name['spectroscopic']
         self.FileName = _tmp_convert_name['filename']
         self.Defaults = chdata.Defaults
+        self.Labels = util.units(chdata.Defaults)
 
         if abundance is not None:
             if isinstance(abundance,  float):
@@ -1091,15 +1092,22 @@ class ion(ioneqOne, ionTrails, specTrails):
             useEm = 0
 
         # unicode character for angstrom is \u212B
-        if self.Em.max() == 1.:
-            ylabel = 'erg cm$^{-2}$ s$^{-1}$ sr$^{-1}$ \u212B$^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
-        else:
-            ylabel = 'erg cm$^{-2}$ s$^{-1}$ sr$^{-1}$ \u212B$^{-1}$'
+#        if self.Em.max() == 1.:
+#            ylabel = 'erg cm$^{-2}$ s$^{-1}$ sr$^{-1}$ \u212B$^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
+#        else:
+#            ylabel = 'erg cm$^{-2}$ s$^{-1}$ sr$^{-1}$ \u212B$^{-1}$'
 
-        if self.Defaults['wavelength'] == 'angstrom':
-            xlabel = 'Wavelength (\u212B)'
-        else:
-            xlabel = 'Wavelength ('+self.Defaults['wavelength'] +')'
+        xlabel = self.Labels['xlabel']
+        ylabel = self.Labels['spectrumYlabel']
+
+        if np.array_equal(self.Em, np.ones_like(self.Em)):
+            ylabel += '($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
+
+#        if self.Defaults['wavelength'] == 'angstrom':
+#            xlabel = 'Wavelength (\u212B)'
+#        else:
+#            xlabel = 'Wavelength ('+self.Defaults['wavelength'] +')'
+
 
         aspectrum = np.zeros((self.NTempDens, wavelength.size), np.float64)
         if not 'errorMessage' in self.Intensity.keys():
@@ -2105,10 +2113,12 @@ class ion(ioneqOne, ionTrails, specTrails):
         wvl = np.asarray(self.Wgfa["wvl"], np.float64)
         obs = np.where(wvl > 0., 'Y', 'N')
 
-        if self.Defaults['wavelength'] == 'kev':
-            wvl = const.ev2Ang/np.asarray(wvl)
-        elif self.Defaults['wavelength'] == 'nm':
-            wvl = wvl/10.
+#        if self.Defaults['wavelength'] == 'ev':
+#            wvl = const.ev2Ang/np.asarray(wvl)
+#        if self.Defaults['wavelength'] == 'kev':
+#            wvl = 1.e-3*const.ev2Ang/np.asarray(wvl)
+#        elif self.Defaults['wavelength'] == 'nm':
+#            wvl = wvl/10.
 
         if allLines:
             wvl=np.abs(wvl)
@@ -2133,6 +2143,26 @@ class ion(ioneqOne, ionTrails, specTrails):
         obs = obs[nonzed]
         nwvl = len(wvl)
 
+#        wvl = np.asarray(self.Wgfa["wvl"], np.float64)
+#        obs = np.where(wvl > 0., 'Y', 'N')
+
+        if self.Defaults['wavelength'] == 'ev':
+            wvl = const.ev2Ang/np.asarray(wvl)
+        if self.Defaults['wavelength'] == 'kev':
+            wvl = 1.e-3*const.ev2Ang/np.asarray(wvl)
+        elif self.Defaults['wavelength'] == 'nm':
+            wvl = wvl/10.
+
+#        if allLines:
+#            wvl=np.abs(wvl)
+#        l1  =  np.asarray(self.Wgfa['lvl1'], 'int64')
+#        l2 = np.asarray(self.Wgfa["lvl2"], 'int64')
+#        avalue = np.asarray(self.Wgfa["avalue"], np.float64)
+#        if 'pretty1' in self.Wgfa.keys():
+#            pretty1 = np.asarray(self.Wgfa['pretty1'])
+#        if 'pretty2' in self.Wgfa.keys():
+#            pretty2 = np.asarray(self.Wgfa['pretty2'])
+
         try:
             ntempden,nlvls = pop.shape
             em = np.zeros((nwvl, ntempden),np.float64)
@@ -2140,21 +2170,22 @@ class ion(ioneqOne, ionTrails, specTrails):
             ntempden = 1
             em = np.zeros(nwvl,np.float64)
 
-        plotLabels = {}
-        if self.Defaults['wavelength'] == 'angstrom':
-            plotLabels["xLabel"] = "Angstroms"
-        elif self.Defaults['wavelength'] == 'nm':
-            plotLabels["xLabel"] = "nanometers"
-        elif self.Defaults['wavelength'] == 'kev':
-            plotLabels["xLabel"] = "kev"
+#        plotLabels = {}
+#        if self.Defaults['wavelength'] == 'angstrom':
+#            plotLabels["xLabel"] = "Angstroms"
+#        elif self.Defaults['wavelength'] == 'nm':
+#            plotLabels["xLabel"] = "nanometers"
+#        elif self.Defaults['wavelength'] == 'kev':
+#            plotLabels["xLabel"] = "kev"
+        xlabel = self.Labels['xlabel']
 
         if self.Defaults['flux'] == 'energy':
             factor = const.planck*const.light/(4.*const.pi*1.e-8*wvl)
-            plotLabels["yLabel"] = "ergs cm^-3 s^-1"
+#            plotLabels["yLabel"] = "ergs cm^-3 s^-1"
         elif self.Defaults['flux'] == 'photon':
             factor = np.ones((nwvl),np.float64)/(4.*const.pi)
-            plotLabels["yLabel"] = "photons cm^-3 s^-1"
-
+#            plotLabels["yLabel"] = "photons cm^-3 s^-1"
+        ylabel = self.Labels['emissYlabel']
 #        if ntempden > 1:
         for itempden in range(ntempden):
             for iwvl in range(nwvl):
@@ -2170,8 +2201,8 @@ class ion(ioneqOne, ionTrails, specTrails):
 #                wvl = wvl/10.
         nlvl = len(l1)
         ionS = np.asarray([self.IonStr]*nlvl)
-        Emiss = {'ionS':ionS,"wvl":wvl, "emiss":em, "plotLabels":plotLabels, 'lvl1':l1, 'lvl2':l2,
-            'avalue':avalue, 'obs':obs, 'pretty1':pretty1, 'pretty2':pretty2}
+        Emiss = {'ionS':ionS,"wvl":wvl, "emiss":em, 'lvl1':l1, 'lvl2':l2, 'avalue':avalue,
+            'obs':obs, 'pretty1':pretty1, 'pretty2':pretty2, 'xlabel':xlabel,  'ylabel':ylabel}
         self.Emiss = Emiss
         return
 
@@ -2291,10 +2322,14 @@ class ion(ioneqOne, ionTrails, specTrails):
         idx = np.argsort(wvl)
         #
         fmt = '%5s %5i %5i %25s - %25s %12.3f %12.3e %12.2e %1s'
+        fmtTitle = '%5s %5s %5s %25s - %25s %12s %12s %12s %1s'
         print( '  ')
         print( '------------------------------------------')
         print('  ')
-        print(' Ion   lvl1  lvl2         lower                     upper                   Wvl(A)   Emissivity      A value Obs')
+#        print(' Ion   lvl1  lvl2         lower                     upper                   Wvl(A)   Emissivity      A value Obs')
+        title = fmtTitle%('Ion', 'lvl1', 'lvl2', 'lower', 'upper', self.Labels['listXlabel'],
+            'Emissivity', 'A value', 'Obs')
+        print(title)
         for kdx in idx:
             print(fmt%(ionS[kdx], lvl1[kdx], lvl2[kdx], pretty1[kdx], pretty2[kdx], wvl[kdx],
                 emiss[kdx], avalue[kdx], obs[kdx]))
@@ -2302,9 +2337,9 @@ class ion(ioneqOne, ionTrails, specTrails):
         print(' ------------------------------------------')
         print('   ')
         #
-        self.Emiss['wvlTop'] = wvl[idx]
-        self.Emiss['emissTop'] = emiss[idx]
-        self.Emiss['idx'] = idx
+#        self.Emiss['wvlTop'] = wvl[idx]
+#        self.Emiss['emissTop'] = emiss[idx]
+#        self.Emiss['idx'] = idx
         if outFile:
             fmt = '%5s %5i %5i %25s - %25s %12.3f %12.3e %12.2e %1s'
             output.write('   \n')
@@ -2332,6 +2367,7 @@ class ion(ioneqOne, ionTrails, specTrails):
 
         normalize = 1 specifies whether to normalize to strongest line, default = 0'''
         #
+        fs = 14
         title = self.Spectroscopic
         #
         if hasattr(self, 'Emiss'):
@@ -2408,12 +2444,13 @@ class ion(ioneqOne, ionTrails, specTrails):
         # must follow setting top
         #
         plt.figure()
-        ylabel = 'Emissivity'
+        ylabel = self.Labels['emissYlabel']
         if relative:
             emiss = emiss/emiss[:top].max()
             ylabel += ' (Relative)'
         #
-        xlabel = 'Wavelength ('+self.Defaults['wavelength'] +')'
+#        xlabel = 'Wavelength ('+self.Defaults['wavelength'] +')'
+        xlabel = self.Labels['xlabel']
         #
         ymin = 10.**(np.log10(emiss.min()).round(0)-0.5 )
         #
@@ -2427,9 +2464,10 @@ class ion(ioneqOne, ionTrails, specTrails):
             else:
                 yy = [ymin/10., emiss[idx]]
                 plt.semilogy(xx, yy)
-        plt.xlabel(xlabel)
-        plt.ylabel(ylabel)
-        plt.title(title+tstr+dstr)
+        plt.xlabel(xlabel, fontsize=fs)
+        plt.ylabel(ylabel, fontsize=fs)
+        plt.title(title+tstr+dstr, fontsize=fs)
+        plt.tight_layout()
         if wvlRange:
             plt.axis([wvlRange[0], wvlRange[1], 0., 1.1*emiss.max()])
         if plotFile:
@@ -2476,9 +2514,8 @@ class ion(ioneqOne, ionTrails, specTrails):
         lineLabel = []
         for iline,  ions in enumerate(ionS):
             lineLabel.append(ions+' '+str(wvl[iline]))
-        plotLabels = em["plotLabels"]
-        xLabel = plotLabels["xLabel"]
-        yLabel = plotLabels["yLabel"]
+        xlabel = self.Labels["xlabel"]
+        ylabel = self.Labels["emissYlabel"]
 
         # find which lines are in the wavelength range if it is set
         if wvlRange:
@@ -2552,7 +2589,18 @@ class ion(ioneqOne, ionTrails, specTrails):
         nxvalues = len(xvalues)
 
         # reversing is necessary - otherwise, get a ymin=ymax and a matplotlib error
-        for iline in range(top-1, -1, -1):
+        if self.Defaults['wavelength'] == 'angstrom' or self.Defaults['wavelength'] == 'nm':
+            param0 = top-1
+            param1 = -1
+            param2 = -1
+        elif self.Defaults['wavelength'] == 'ev' or self.Defaults['wavelength'] == 'kev':
+            param0 = 0
+            param1 = top
+            param2 = 1
+
+#        for iline in range(top-1, -1, -1):
+#        for iline in range(top):
+        for iline in range(param0, param1, param2):
 
             tline = topLines[iline]
             plt.loglog(xvalues,emiss[tline]/maxAll)
@@ -2562,8 +2610,20 @@ class ion(ioneqOne, ionTrails, specTrails):
                 ymax = np.max(emiss[tline]/maxAll)
             skip = 2
             start = divmod(iline,nxvalues)[1]
+
+            if self.Defaults['wavelength'] == 'angstrom':
+                alabel = '%10.3f'%(wvl[tline])
+            elif self.Defaults['wavelength'] == 'nm':
+                alabel = '%10.4f'%(wvl[tline])
+            elif self.Defaults['wavelength'] == 'ev':
+                alabel = '%10.4e'%(wvl[tline])
+            elif self.Defaults['wavelength'] == 'kev':
+                alabel = '%10.3f'%(wvl[tline])
+
+
             for ixvalue in range(start,nxvalues,nxvalues//skip):
-                plt.text(xvalues[ixvalue],emiss[tline,ixvalue]/maxAll[ixvalue],str(wvl[tline]))
+#                plt.text(xvalues[ixvalue],emiss[tline,ixvalue]/maxAll[ixvalue],str(wvl[tline]))
+                plt.text(xvalues[ixvalue],emiss[tline,ixvalue]/maxAll[ixvalue],alabel)
         plt.xlim(xvalues.min(),xvalues.max())
         plt.xlabel(xlabel,fontsize=fontsize)
         plt.ylabel(ylabel,fontsize=fontsize)
@@ -2588,7 +2648,18 @@ class ion(ioneqOne, ionTrails, specTrails):
         #
         selectTags = []
         for itop in topLines:
-            selectTags.append(ionS[itop]+ ' '+ str(wvl[itop]))
+
+            if self.Defaults['wavelength'] == 'angstrom':
+                alabel = '%s %10.3f'%(ionS[itop],  wvl[itop])
+            elif self.Defaults['wavelength'] == 'nm':
+                alabel = '%s %10.4f'%(ionS[itop],  wvl[itop])
+            elif self.Defaults['wavelength'] == 'ev':
+                alabel = '%s %10.4e'%(ionS[itop],  wvl[itop])
+            elif self.Defaults['wavelength'] == 'kev':
+                alabel = '%s %10.3f'%(ionS[itop],  wvl[itop])
+
+#            selectTags.append(ionS[itop]+ ' '+ str(wvl[itop]))
+            selectTags.append(alabel)
         #
         numden = chGui.gui.choice2Dialog(selectTags)
 #        numden = gui.choice2Dialog(wvl[topLines])
@@ -2685,16 +2756,11 @@ class ion(ioneqOne, ionTrails, specTrails):
         avalue = emiss['avalue']
         errorMessage = None
 
-        if self.Defaults['wavelength'] == 'angstrom':
-            xlabel = 'Wavelength \u212B'
-        else:
-            xlabel = 'Wavelength ('+self.Defaults['wavelength'] +')'
+        xlabel = self.Labels['xlabel']
+        ylabel = self.Labels['intensityYlabel']
 
-        # unicode character for angstrom is \u212B
-        if self.Em.max() == 1.:
-            ylabel = 'erg cm$^{-2}$ s$^{-1}$ sr$^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
-        else:
-            ylabel = 'erg cm$^{-2}$ s$^{-1}$ sr$^{-1}$'
+        if np.array_equal(self.Em, np.ones_like(self.Em)):
+            ylabel += '($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
 
         if hasattr(self, 'Abundance'):
             ab = self.Abundance
@@ -3070,6 +3136,16 @@ class ion(ioneqOne, ionTrails, specTrails):
         """
         To calculate the two-photon continuum rate coefficient - only for hydrogen- and helium-like ions
         """
+        if self.Defaults['wavelength'] != 'angstrom':
+            print(' the two-photon continuum can only be calculated for wavelengths in angstroms')
+            return
+
+        xlabel = self.Labels['xlabel']
+        ylabel = self.Labels['emissYlabel']
+
+        if np.array_equal(self.Em, np.ones_like(self.Em)):
+            ylabel += '($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
+
         wvl = np.array(wvl, np.float64)
         nWvl = wvl.size
         if self.Z -self.Ion > 1 or self.Dielectronic:
@@ -3132,7 +3208,8 @@ class ion(ioneqOne, ionTrails, specTrails):
                     f = 1.
                 for it in range(nTempDens):
                     emiss[it, goodWvl] = f*pop[it, l2]*distr/self.EDensity[it]
-                self.TwoPhotonEmiss = {'wvl':wvl, 'emiss':emiss}
+                self.TwoPhotonEmiss = {'wvl':wvl, 'emiss':emiss, 'xlabel':xlabel,
+                    'ylabel':ylabel}
 
     def twoPhoton(self, wvl, verbose=False):
         '''
@@ -3147,15 +3224,15 @@ class ion(ioneqOne, ionTrails, specTrails):
         .. [105] Young et al., 2003, ApJSS, `144, 135  <http://adsabs.harvard.edu/abs/2003ApJS..144..135Y>`_
 
         '''
-        if self.Em.max() == 1.:
-            ylabel = 'erg cm$^{-2}$ s$^{-1}$ sr$^{-1}$ \u212B$^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
-        else:
-            ylabel = 'erg cm$^{-2}$ s$^{-1}$ sr$^{-1}$ \u212B$^{-1}$'
+        if self.Defaults['wavelength'] != 'angstrom':
+            print(' the two-photon continuum can only be calculated for wavelengths in angstroms')
+            return
 
-        if self.Defaults['wavelength'] == 'angstrom':
-            xlabel = 'Wavelength (\u212B)'
-        else:
-            xlabel = r'Wavelength ('+self.Defaults['wavelength'] +')'
+        xlabel = self.Labels['xlabel']
+        ylabel = self.Labels['spectrumYlabel']
+
+        if np.array_equal(self.Em, np.ones_like(self.Em)):
+            ylabel += '($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
 
         wvl = np.array(wvl, np.float64)
         #
@@ -3219,7 +3296,8 @@ class ion(ioneqOne, ionTrails, specTrails):
                         f = 1./(4.*const.pi)
                     for it in range(nTempDens):
                         rate[it, goodWvl] = f*pop[it, l2]*distr*ab*thisIoneq[it]*self.Em[it]/eDensity[it]
-                self.TwoPhoton = {'wvl':wvl, 'intensity':rate.squeeze(), 'em':self.Em}
+                self.TwoPhoton = {'wvl':wvl, 'intensity':rate.squeeze(), 'em':self.Em, 'xlabel':xlabel,
+                'ylabel':ylabel}
 
             else:
                 # He seq
@@ -3241,7 +3319,7 @@ class ion(ioneqOne, ionTrails, specTrails):
                         f = 1./(4.*const.pi)
                     for it in range(nTempDens):
                         rate[it, goodWvl] = f*pop[it, l2]*distr*ab*thisIoneq[it]*self.Em[it]/eDensity[it]
-                self.TwoPhoton = {'wvl':wvl, 'intensity':rate.squeeze(), 'em':self.Em,  'xlabel':xlabel,
+                self.TwoPhoton = {'wvl':wvl, 'intensity':rate.squeeze(), 'em':self.Em, 'xlabel':xlabel,
                 'ylabel':ylabel}
 
     def twoPhotonLoss(self):
@@ -3250,6 +3328,10 @@ class ion(ioneqOne, ionTrails, specTrails):
         includes the elemental abundance and the ionization equilibrium
         does not include the emission measure
         '''
+        if self.Defaults['wavelength'] != 'angstrom':
+            print(' the two-photon continuum can only be calculated for wavelengths in angstroms')
+            return
+
         if self.Z -self.Ion > 1 or self.Dielectronic:
             # this is not a hydrogen-like or helium-like ion
             nTempDens = max(self.Temperature.size, self.EDensity.size)

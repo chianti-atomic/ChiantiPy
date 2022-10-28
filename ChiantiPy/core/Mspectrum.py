@@ -55,6 +55,60 @@ class mspectrum(ionTrails, specTrails):
 
     proc = the number of processors to use
     timeout - a small but non-zero value seems to be necessary
+    keepIons:  set this to keep the ion instances that have been calculated in a dictionary
+    self.IonInstances with the keywords being the CHIANTI-style ion names
+
+    abundance: to select a particular set of abundances, set abundance to the name of a
+    CHIANTI abundance file, without the '.abund' suffix, e.g. 'sun_photospheric_1998_grevesse'
+
+    If set to a blank (''), a gui selection menu will popup and allow the selection of an
+    set of abundances
+
+    Parameters
+    --------------
+
+    temperature: `float`, `list`, `ndarray`
+        the temperature(s) in K
+
+    eDensity: float, ndarray
+        eDensity: electron density in :math:`\mathrm{cm^{-3}}`
+
+    wavelength:  `list` or `ndarray`
+        wavelength:  array of  wavelengths, generally in Angstroms
+
+    elementList:  `list`
+        elementList:  list of elements to include, such as 'fe', 'ne', 's'
+
+    ionList:  `list`
+        ionList:  list of ions to include, such as 'fe_16', 'ne_10'
+
+    minAbund:  `float`
+        minAbund:  minimum abundance (relative to H) to include
+
+    doLines:  `bool1
+        doLines: if true, line intensities are calculated
+
+    doContinuum:  `bool`
+        doContinuum:  if true, continuum intensities are calculated only if wavelengths are in angstroms
+
+    keepIons:  `bool`
+        keepIons:  keep the ion instances used in the calculation
+            should be used with caution otherwise the bunch instance
+            can become quite large
+
+    em:  `float`, `list`, `ndarray`
+        em:  the emission measure - the integral of the electron density times the hydrogen density
+        along the line of sight
+
+    abundance:  `str`
+        abuncance:  the file name of the abuncance set to be used
+            must be one in the $XUVTOP/abund directory
+
+    allLInes:  `bool`
+        allLines:  whether or not to include unobserved lines
+
+    verbose:  `bool`
+        verbose:  whether to allow certain print statements
     '''
     def __init__(self, temperature, eDensity, wavelength, filter=(chfilters.gaussianR, 1000.), label=0,
         elementList = None, ionList = None, minAbund=None, keepIons=0, abundance=None,  doLines=1,
@@ -66,26 +120,27 @@ class mspectrum(ionTrails, specTrails):
             return
         t1 = datetime.now()
         # creates Intensity dict from first ion calculated
-        setupIntensity = 0
+
+        setupIntensity = False
         #
         self.Defaults = chdata.Defaults
         #
+        if doContinuum and self.Defaults['wavelength'] != 'angstrom':
+            print(' the continuum can only be calculated for wavelengths in angstroms')
+            print(' set doContuum = False to continue')
+            return
 
         self.argCheck(temperature=temperature, eDensity=eDensity, pDensity=None, em=em,  verbose=verbose)
 
         nTempDens = self.NTempDens
 
-        # unicode character for angstrom is \u212B
-        if self.Em.max() == 1.:
-            self.Ylabel = 'erg cm$^{-2}$ s$^{-1}$ sr$^{-1}$ \u212B$^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
-        else:
-            self.Ylabel = 'erg cm$^{-2}$ s$^{-1}$ sr$^{-1}$ \u212B$^{-1}$'
-        #
-        #
-        if self.Defaults['wavelength'] == 'angstrom':
-            self.Xlabel = 'Wavelength (\u212B)'
-        else:
-            self.Xlabel = 'Wavelength ('+self.Defaults['wavelength'] +')'
+        self.Labels = util.units(chdata.Defaults)
+
+        xlabel = self.Labels['xlabel']
+        ylabel = self.Labels['spectrumYlabel']
+
+        if np.array_equal(self.Em, np.ones_like(self.Em)):
+            ylabel += '($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
         #
         #
         self.AllLines = allLines
@@ -147,7 +202,8 @@ class mspectrum(ionTrails, specTrails):
 #            if verbose:
 #                print(' %5i %5s abundance = %10.2e '%(Z, const.El[Z-1],  abundance))
             if verbose:
-                print(' doing ion %s for the following processes %s'%(akey, self.Todo[akey]))
+                if self.Todo[akey] != '':
+                    print(' doing ion %s for the following processes %s'%(akey, self.Todo[akey]))
             if 'ff' in self.Todo[akey]:
                 ffWorkerQ.put((akey, temperature, wavelength, abundance, em))
             if 'fb' in self.Todo[akey]:
@@ -222,9 +278,10 @@ class mspectrum(ionTrails, specTrails):
                         self.IonInstances[ionS] = copy.deepcopy(thisIon)
                     if setupIntensity:
                         for akey in sorted(self.Intensity.keys()):
-                            self.Intensity[akey] = np.hstack((copy.copy(self.Intensity[akey]), thisIntensity[akey]))
+                            self.Intensity[akey] = np.hstack((copy.copy(self.Intensity[akey]),
+                                thisIntensity[akey]))
                     else:
-                        setupIntensity = 1
+                        setupIntensity = True
                         self.Intensity  = thisIntensity
                     #
                     if not 'errorMessage' in sorted(thisIon.Spectrum.keys()):
@@ -265,15 +322,15 @@ class mspectrum(ionTrails, specTrails):
             if hasattr(self, 'Spectrum'):
                 self.Spectrum[label] = {'wavelength':wavelength, 'intensity':total.squeeze(),
                 'filter':filter[0],   'filterWidth':filter[1], 'integrated':integrated,
-                'ions':self.IonsCalculated, 'em':em, 'Abundance':self.AbundanceName, 'xlabel':self.Xlabel,
-                'ylabel':self.Ylabel, 'minAbund':minAbund}
+                'ions':self.IonsCalculated, 'em':em, 'Abundance':self.AbundanceName, 'xlabel':xlabel,
+                'ylabel':ylabel, 'minAbund':minAbund}
             else:
                 self.Spectrum = {label:{'wavelength':wavelength, 'intensity':total.squeeze(),
                 'filter':filter[0],   'filterWidth':filter[1], 'integrated':integrated,
-                'ions':self.IonsCalculated, 'em':em, 'Abundance':self.AbundanceName, 'xlabel':self.Xlabel,
-                'ylabel':self.Ylabel}, 'minAbund':minAbund}
+                'ions':self.IonsCalculated, 'em':em, 'Abundance':self.AbundanceName, 'xlabel':xlabel,
+                'ylabel':ylabel}, 'minAbund':minAbund}
         else:
             self.Spectrum ={'wavelength':wavelength, 'intensity':total.squeeze(),
             'filter':filter[0], 'filterWidth':filter[1], 'integrated':integrated,
-            'ions':self.IonsCalculated, 'em':em, 'Abundance':self.AbundanceName, 'xlabel':self.Xlabel,
-            'ylabel':self.Ylabel, 'minAbund':minAbund, 'todo':self.Todo}
+            'ions':self.IonsCalculated, 'em':em, 'Abundance':self.AbundanceName, 'xlabel':xlabel,
+            'ylabel':ylabel, 'minAbund':minAbund, 'todo':self.Todo}

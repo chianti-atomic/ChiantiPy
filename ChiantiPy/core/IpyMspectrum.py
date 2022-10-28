@@ -85,22 +85,25 @@ class ipymspectrum(ionTrails, specTrails):
         #
         # creates Intensity dict from first ion calculated
         #
-        setupIntensity = 0
+        setupIntensity = False
         #
         self.Defaults = chdata.Defaults
         #
+        if doContinuum and self.Defaults['wavelength'] != 'angstrom':
+            print(' the continuum can only be calculated for wavelengths in angstroms')
+            print(' set doContuum = False to continue')
+            return
+
         self.argCheck(temperature=temperature, eDensity=eDensity, pDensity = None,  em=em)
             #
         #
-        if self.Em.max() == 1.:
-            self.Ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
-        else:
-            self.Ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$'
-        #
-        if self.Defaults['wavelength'] == 'angstrom':
-            self.Xlabel = 'Wavelength (\u212B)'
-        else:
-            self.Xlabel = 'Wavelength ('+self.Defaults['wavelength'] +')'
+        self.Labels = util.units(chdata.Defaults)
+
+        xlabel = self.Labels['xlabel']
+        ylabel = self.Labels['spectrumYlabel']
+
+        if np.array_equal(self.Em, np.ones_like(self.Em)):
+            ylabel += '($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
         #
         self.AllLines = allLines
         #
@@ -148,10 +151,10 @@ class ipymspectrum(ionTrails, specTrails):
             zStuff = util.convertName(akey)
             Z = zStuff['Z']
             abundance = self.Abundance[Z - 1]
-#            if verbose:
-#                print(' %5i %5s abundance = %10.2e '%(Z, const.El[Z-1],  abundance))
             if verbose:
-                print(' doing ion %s for the following processes %s'%(akey, self.Todo[akey]))
+#                print(' %5i %5s abundance = %10.2e '%(Z, const.El[Z-1],  abundance))
+                if self.Todo[akey] != '':
+                    print(' doing ion %s for the following processes %s'%(akey, self.Todo[akey]))
             if 'ff' in self.Todo[akey]:
                 allInpt.append([akey, 'ff', temperature, wavelength, abundance, em])
             if 'fb' in self.Todo[akey]:
@@ -252,15 +255,15 @@ class ipymspectrum(ionTrails, specTrails):
                 print(' hasattr = true')
                 self.Spectrum[label] = {'wavelength':wavelength, 'intensity':total.squeeze(),
                     'filter':filter[0],   'filterWidth':filter[1], 'integrated':integrated, 'em':em,
-                    'Abundance':self.AbundanceName, 'xlabel':self.Xlabel, 'ylabel':self.Ylabel}
+                    'Abundance':self.AbundanceName, 'xlabel':xlabel, 'ylabel':ylabel}
             else:
                 self.Spectrum = {label:{'wavelength':wavelength, 'intensity':total.squeeze(),
                     'filter':filter[0],   'filterWidth':filter[1], 'integrated':integrated, 'em':em,
-                    'Abundance':self.AbundanceName,'xlabel':self.Xlabel, 'ylabel':self.Ylabel}}
+                    'Abundance':self.AbundanceName,'xlabel':xlabel, 'ylabel':ylabel}}
         else:
             self.Spectrum = {'wavelength':wavelength, 'intensity':total.squeeze(),
                 'filter':filter[0],   'filterWidth':filter[1], 'integrated':integrated, 'em':em,
-                'Abundance':self.AbundanceName, 'xlabel':self.Xlabel, 'ylabel':self.Ylabel}
+                'Abundance':self.AbundanceName, 'xlabel':xlabel, 'ylabel':ylabel}
     #
     # -------------------------------------------------------------------------
     #

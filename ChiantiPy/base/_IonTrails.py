@@ -75,218 +75,6 @@ class ionTrails(object):
         else:
             self.Em = np.ones_like(self.Temperature, np.float64)
 
-#    def intensityList(self, index=-1, wvlRange=None, wvlRanges=None, top=10, relative=0, outFile=0,
-#        rightDigits=4):
-#        """
-#        List the line intensities. Checks to see if there is an existing Intensity attribute. If it exists, then those values are used.
-#        Otherwise, the `intensity` method is called.
-#
-#        This method prints an ASCII table with the following columns:
-#
-#        1. Ion: the CHIANTI style notation for the ion, e.g. 'c_4' for C IV
-#        2. lvl1:  the lower level of the transition in the CHIANTI .elvlc file
-#        3. lvl2:  the upper level of the transition in the CHIANTI .elvlc file
-#        4. lower:  the notation, usually in LS coupling, of the lower fine
-#           structure level
-#        5. upper:  the notation, usually in LS coupling, of the upper fine
-#           structure level
-#        6. Wvl(A):  the wavelength of the transition in units as specified in
-#           the chiantirc file.
-#        7. Intensity
-#        8. A value:  the Einstein coefficient for spontaneous emission from
-#           level 'j' to level 'i'
-#        9. Obs: indicates whether the CHIANTI database considers this an
-#           observed line or one obtained from theoretical energy levels
-#
-#        Regarding the intensity column, if 'flux' in the chiantirc file is set
-#        to 'energy', the intensity is given by,
-#
-#        .. math::
-#           I = \Delta E_{ij}n_jA_{ij}\mathrm{Ab}\\frac{1}{N_e}
-#           \\frac{N(X^{+m})}{N(X)}\mathrm{EM},
-#
-#        in units of ergs cm\ :sup:`-2` s\ :sup:`-1` sr\ :sup:`-1`. If 'flux' is set to 'photon',
-#
-#        .. math::
-#           I = n_jA_{ij}\mathrm{Ab}\\frac{1}{N_e}\\frac{N(X^{+m})}{N(X)}
-#           \mathrm{EM},
-#
-#        where,
-#
-#        - :math:`\Delta E_{ij}` is the transition energy (ergs)
-#        - :math:`n_j` is  the fractions of ions in level :math:`j`
-#        - :math:`A_{ij}` is the Einstein coefficient for spontaneous emission
-#          from level :math:`j` to level :math:`i` (in s\ :sup:`-1`)
-#        - :math:`\mathrm{Ab}` is the abundance of the specified element
-#          relative to hydrogen
-#        - :math:`N_e` is the electron density (in cm\ :sup:`-3`)
-#        - :math:`N(X^{+m})/N(X)` is the fractional ionization of ion as a
-#          function of temperature
-#        - :math:`\mathrm{EM}` is the emission measure integrated along the
-#          line-of-sight, :math:`\int\mathrm{d}l\,N_eN_H` (cm\ :sup:`-5`) where
-#          :math:`N_H` is the density of hydrogen (neutral + ionized)
-#          (cm\ :sup:`-3`)
-#
-#        Note that if `relative` is set, the line intensity is relative to the
-#        strongest line and so the output will be unitless.
-#
-#        Parameters
-#        -----------
-#        index :  `int`,optional
-#            Index the temperature or eDensity array to use.
-#            -1 (default) sets the specified value to the middle of the array
-#        wvlRange : `tuple`
-#            Wavelength range
-#        wvlRanges : a tuple, list or array that contains at least 2
-#            2 element tuples, lists or arrays so that multiple
-#            wavelength ranges can be specified
-#        top : `int`
-#            Number of lines to plot, sorted by descending magnitude.
-#        relative : `int`
-#            specifies whether to normalize to strongest line
-#            default (relative = 0) specified that the intensities should be
-#            their calculated values
-#        outFile : `str`
-#            specifies the file that the intensities should be output to
-#            default(outFile = 0) intensities are output to the terminal
-#        rightDigits:  `int`
-#            specifies the format for the wavelengths for the number of digits
-#            to right of the decimal place
-#        """
-#
-#        if not hasattr(self, 'Intensity'):
-#            try:
-#                self.intensity()
-#            #TODO: specify what exception to catch! or omit the try, catch
-#            except:
-#                print(' intensities not calculated and emiss() is unable to calculate them')
-#                print(' perhaps the temperature and/or eDensity are not set')
-#                return
-#
-#        temperature = self.Temperature
-#        eDensity = self.EDensity
-#        em = self.Em
-#
-#        ndens = eDensity.size
-#        ntemp = temperature.size
-#
-#        intens = copy.deepcopy(self.Intensity)
-#        if 'errorMessage' in intens.keys():
-#            print(' errorMessage:  %s'%(intens['errorMessage']))
-#            return
-#        intensity = intens['intensity']
-#        ionS = intens['ionS']
-#        wvl = intens['wvl']
-#        lvl1 = intens['lvl1']
-#        lvl2 = intens['lvl2']
-#        pretty1 = intens['pretty1']
-#        pretty2 = intens['pretty2']
-#        obs = intens['obs']
-#        avalue = intens['avalue']
-#
-#        if ndens == 1 and ntemp == 1:
-#            if index < 0:
-#                index = 0
-#            dstr = ' -  Density = %10.2e (cm$^{-3}$)' %(eDensity[index])
-#            tstr = ' -  T = %10.2e (K)' %(temperature[index])
-#            intensity = intensity[index]
-#            print(' temperature =  %10.2e eDensity = %10.2e'%(temperature[index], eDensity[index]))
-#        elif ndens == 1 and ntemp > 1:
-#            if index < 0:
-#                index = ntemp//2
-#            print('using index = %5i specifying temperature =  %10.2e'%(index, temperature[index]))
-#            self.Message = 'using index = %5i specifying temperature =  %10.2e'%(index, temperature[index])
-#
-#            intensity=intensity[index]
-#        elif ndens > 1 and ntemp == 1:
-#            if index < 0:
-#                index = ntemp//2
-#            print('using index =%5i specifying eDensity = %10.2e'%(index, eDensity[index]))
-#            self.Message = 'using index =%5i specifying eDensity = %10.2e'%(index, eDensity[index])
-#            intensity=intensity[index]
-#        elif ndens > 1 and ntemp > 1:
-#            if index < 0:
-#                index = ntemp//2
-#            print('using index = %5i specifying temperature = %10.2e, eDensity =  %10.2e em = %10.2e'%(index, temperature[index], eDensity[index], em[index]))
-#            self.Message = 'using index = %5i specifying temperature = %10.2e, eDensity =  %10.2e = %10.2e'%(index, temperature[index], eDensity[index], em[index])
-#            intensity=intensity[index]
-#        if wvlRange is None and wvlRanges is None:
-#            wvlRange = self.WvlRange
-#            wvlIndex=util.between(wvl,wvlRange)
-#        elif wvlRange is not None:
-#            wvlIndex=util.between(wvl,wvlRange)
-#        elif wvlRanges is not None:
-#            wvlIndex = []
-#            for awvlRange in wvlRanges:
-#                wvlIndex.extend(util.between(wvl,awvlRange))
-#        else:
-#            wvlIndex = range(wvl.size)
-#
-#        #  get lines in the specified wavelength range
-#        intensity = intensity[wvlIndex]
-#        ionS = ionS[wvlIndex]
-#        wvl = wvl[wvlIndex]
-#        lvl1 = lvl1[wvlIndex]
-#        lvl2 = lvl2[wvlIndex]
-#        avalue = avalue[wvlIndex]
-#        pretty1 = pretty1[wvlIndex]
-#        pretty2 = pretty2[wvlIndex]
-#        obs = obs[wvlIndex]
-#
-#        self.Error = 0
-#        if wvl.size == 0:
-#            print('No lines in this wavelength interval')
-#            self.Error = 1
-#            self.Message = 'No lines in this wavelength interval'
-#            return
-#
-#        elif top == 0:
-#            top = wvl.size
-#        elif top > wvl.size:
-#            top = wvl.size
-#
-#        # sort by intensity
-#        isrt = np.argsort(intensity)
-#        ionS = ionS[isrt[-top:]]
-#        wvl = wvl[isrt[-top:]]
-#        lvl1 = lvl1[isrt[-top:]]
-#        lvl2 = lvl2[isrt[-top:]]
-#        obs = obs[isrt[-top:]]
-#        intensity = intensity[isrt[-top:]]
-#        avalue = avalue[isrt[-top:]]
-#        pretty1 = pretty1[isrt[-top:]]
-#        pretty2 = pretty2[isrt[-top:]]
-#
-#        # must follow setting top
-#        if relative:
-#            intensity = intensity/intensity[:top].max()
-#
-#        idx = np.argsort(wvl)
-#        fmt1 = '%5s %5s %5s %25s - %-25s %12s %12s %12s %3s'
-#        fmt = '%5s %5i %5i %25s - %-25s %12.' + str(rightDigits) + \
-#            'f %12.2e %12.2e %1s'
-#        print('   ')
-#        print(' ------------------------------------------')
-#        print('   ')
-#        print(fmt1%('Ion','lvl1','lvl2','lower','upper','Wvl(A)','Intensity','A value','Obs'))
-#        for kdx in idx:
-#            print(fmt%(ionS[kdx], lvl1[kdx], lvl2[kdx], pretty1[kdx], pretty2[kdx], wvl[kdx], intensity[kdx], avalue[kdx], obs[kdx]))
-#        print('   ')
-#        print(' ------------------------------------------')
-#        print('   ')
-#        #
-#        self.Intensity['wvlTop'] = wvl[idx]
-#        self.Intensity['intensityTop'] = intensity[idx]
-#        if outFile:
-#            fmt1a = '%5s %5s %5s %25s - %-25s %12s %12s %12s %3s \n'
-#            fmt = '%5s %5i %5i %25s - %-25s %12.4' + str(rightDigits) + \
-#            'f %12.2e %12.2e %1s \n'
-#            outpt = open(outFile, 'w')
-#            outpt.write(fmt1a%('Ion','lvl1','lvl2','lower','upper','Wvl(A)','Intensity','A value','Obs'))
-#            for kdx in idx:
-#                outpt.write(fmt%(ionS[kdx], lvl1[kdx], lvl2[kdx], pretty1[kdx], pretty2[kdx], wvl[kdx], intensity[kdx], avalue[kdx], obs[kdx]))
-#            outpt.close()
-
 
     def intensityList(self, index=None, wvlRange=None, wvlRanges=None, top=10, integrated=False,
         relative=0, outFile=0, rightDigits=4):
@@ -548,10 +336,14 @@ class ionTrails(object):
         fmt1 = '%5s %5s %5s %25s - %-25s %12s %12s %12s %3s'
         fmt = '%5s %5i %5i %25s - %-25s %12.' + str(rightDigits) + \
             'f %12.2e %12.2e %1s'
+        fmtTitle = '%5s %5s %5s %25s - %25s %12s %12s %12s %1s'
         print('   ')
         print(' ------------------------------------------')
         print('   ')
-        print(fmt1%('Ion','lvl1','lvl2','lower','upper','Wvl(A)','Intensity','A value','Obs'))
+#        print(fmt1%('Ion','lvl1','lvl2','lower','upper','Wvl(A)','Intensity','A value','Obs'))
+        title = fmtTitle%('Ion', 'lvl1', 'lvl2', 'lower', 'upper', self.Labels['listXlabel'],
+            'Intensity', 'A value', 'Obs')
+        print(title)
         for kdx in idx:
             print(fmt%(ionS[kdx], lvl1[kdx], lvl2[kdx], pretty1[kdx], pretty2[kdx], wvl[kdx], intensity[kdx], avalue[kdx], obs[kdx]))
         print('   ')
@@ -779,7 +571,7 @@ class ionTrails(object):
         if plotFile:
             plt.savefig(plotFile)
 
-    def intensityRatio(self, wvlRange=None, wvlRanges=None, top=10,  title=True):
+    def intensityRatio(self, wvlRange=None, wvlRanges=None, top=10,  doTitle=True):
         """
         Plot the intensity ratio of 2 lines or sums of lines.
         Shown as a function of density and/or temperature.
@@ -907,7 +699,19 @@ class ionTrails(object):
         nxvalues=len(xvalues)
 
         # reversing is necessary - otherwise, get a ymin=ymax and a matplotlib error
-        for iline in range(top-1, -1, -1):
+#        for iline in range(top-1, -1, -1):
+        if self.Defaults['wavelength'] == 'angstrom' or self.Defaults['wavelength'] == 'nm':
+            param0 = top-1
+            param1 = -1
+            param2 = -1
+        elif self.Defaults['wavelength'] == 'ev' or self.Defaults['wavelength'] == 'kev':
+            param0 = 0
+            param1 = top
+            param2 = 1
+
+#        for iline in range(top-1, -1, -1):
+#        for iline in range(top):
+        for iline in range(param0, param1, param2):
             tline=topLines[iline]
             plt.loglog(xvalues,intensity[:, tline]/maxAll)
             if np.min(intensity[:, tline]/maxAll) < ymin:
@@ -916,16 +720,29 @@ class ionTrails(object):
                 ymax = np.max(intensity[:, tline]/maxAll)
             skip=2
             start=divmod(iline,nxvalues)[1]
+
+            if self.Defaults['wavelength'] == 'angstrom':
+                alabel = '%10.3f'%(wvl[tline])
+            elif self.Defaults['wavelength'] == 'nm':
+                alabel = '%10.4f'%(wvl[tline])
+            elif self.Defaults['wavelength'] == 'ev':
+                alabel = '%10.4e'%(wvl[tline])
+            elif self.Defaults['wavelength'] == 'kev':
+                alabel = '%10.3f'%(wvl[tline])
+
             for ixvalue in range(start,nxvalues,nxvalues//skip):
                 if ionNum == 1:
-                    text = '%10.4f'%(wvl[tline])
+#                    text = '%10.4f'%(wvl[tline])
+                    text = alabel
                 else:
-                    text = '%s %10.4f'%(ionS[tline], wvl[tline])
+                    text = '%s '%(ionS[tline]) + alabel
                 plt.text(xvalues[ixvalue], intensity[ixvalue, tline]/maxAll[ixvalue], text)
+#        print(' ymin:  %10.2e  ymax:  %10.2e'%(ymin, ymax))
         if ndens == 1:
             plt.xlim(xvalues.min(),xvalues.max())
             plt.xlabel(xlbl,fontsize=fontsize)
             plt.ylabel(ylabel,fontsize=fontsize)
+            plt.ylim(ymin/1.2, 1.2*ymax)
         elif ntemp == 1:
             ax2 = plt.twiny()
             xlblDen=r'Electron Density (cm$^{-3}$)'
@@ -938,14 +755,45 @@ class ionTrails(object):
         plt.tight_layout()
         plt.draw()
         #  need time to let matplotlib finish plotting
-        time.sleep(0.5)
+#        time.sleep(0.5)
         # get line selection
         selectTags = []
+
+
+#            selectTags.append(ionS[itop]+ ' '+ str(wvl[itop]))
+#        selectTags.append(alabel)
+
         for itop in topLines:
-            if ionNum == 1:
-                selectTags.append(str(wvl[itop]))
-            else:
-                selectTags.append(ionS[itop]+ ' '+ str(wvl[itop]))
+
+            if ionNum > 1:
+                if self.Defaults['wavelength'] == 'angstrom':
+                    alabel = '%s %10.3f'%(ionS[itop],  wvl[itop])
+                elif self.Defaults['wavelength'] == 'nm':
+                    alabel = '%s %10.4f'%(ionS[itop],  wvl[itop])
+                elif self.Defaults['wavelength'] == 'ev':
+                    alabel = '%s %10.4e'%(ionS[itop],  wvl[itop])
+                elif self.Defaults['wavelength'] == 'kev':
+                    alabel = '%s %10.3f'%(ionS[itop],  wvl[itop])
+            elif ionNum == 1:
+                if self.Defaults['wavelength'] == 'angstrom':
+                    alabel = '%10.3f'%(wvl[itop])
+                elif self.Defaults['wavelength'] == 'nm':
+                    alabel = '%10.4f'%(wvl[itop])
+                elif self.Defaults['wavelength'] == 'ev':
+                    alabel = '%10.4e'%(wvl[itop])
+                elif self.Defaults['wavelength'] == 'kev':
+                    alabel = '%10.3f'%(wvl[itop])
+
+
+#            if ionNum == 1:
+#                selectTags.append(str(wvl[itop]))
+#            else:
+#                selectTags.append(ionS[itop]+ ' '+ str(wvl[itop]))
+            selectTags.append(alabel)
+#            if ionNum == 1:
+#                selectTags.append(alabel)
+#            else:
+#                selectTags.append(ionS[itop]+ ' '+ alabel)
         numden = chGui.gui.choice2Dialog(selectTags)
 
         # num_idx and den_idx are tuples
@@ -975,20 +823,24 @@ class ionTrails(object):
         plt.xlabel(xlbl,fontsize=fontsize)
         plt.ylabel('Ratio ('+self.Defaults['flux']+')',fontsize=fontsize)
         if ionNum == 1:
-            desc = ionS[0]
+#            desc = ionS[0]
+            desc = ''
         else:
             desc = ''
         for aline in num_idx:
-            if ionNum == 1:
-                desc += ' ' + str(wvl[topLines[aline]])
-            else:
-                desc += ' ' + ionS[topLines[aline]] + ' ' + str(wvl[topLines[aline]])
+#            if ionNum == 1:
+#                desc += ' %s'%(selectTags[aline]) #str(wvl[topLines[aline]])
+#            else:
+#                desc += ' ' + ionS[topLines[aline]] + ' ' + str(wvl[topLines[aline]])
+            desc += selectTags[aline]
         desc += ' / '
         for aline in den_idx:
-            if ionNum == 1:
-                desc += ' ' + str(wvl[topLines[aline]])
-            else:
-                desc += ' ' + ionS[topLines[aline]] + ' ' + str(wvl[topLines[aline]])
+#            if ionNum == 1:
+#                desc += ' %s'%(selectTags[aline]) #str(wvl[topLines[aline]])
+#            else:
+#                desc += ' ' + ionS[topLines[aline]] + ' ' + str(wvl[topLines[aline]])
+            desc += selectTags[aline]
+
         if ndens == ntemp and ntemp > 1:
             plt.text(0.07, 0.5,desc, horizontalalignment='left', verticalalignment='center', fontsize=fontsize,  transform = ax.transAxes)
             #
@@ -998,7 +850,7 @@ class ionTrails(object):
             plt.loglog(eDensity,numIntens/denIntens, visible=False)
             ax2.xaxis.tick_top()
         else:
-            if title:
+            if doTitle:
                 plt.title(desc,fontsize=fontsize)
         plt.tight_layout()
 

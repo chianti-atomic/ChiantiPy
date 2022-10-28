@@ -98,6 +98,12 @@ class spectrum(ionTrails, specTrails):
     minAbund:  `float`
         minAbund:  minimum abundance (relative to H) to include
 
+    doLines:  `bool1
+        doLines: if true, line intensities are calculated
+
+    doContinuum:  `bool`
+        doContinuum:  if true, continuum intensities are calculated only if wavelengths are in angstroms
+
     keepIons:  `bool`
         keepIons:  keep the ion instances used in the calculation
             should be used with caution otherwise the bunch instance
@@ -121,15 +127,23 @@ class spectrum(ionTrails, specTrails):
         elementList = None, ionList = None, minAbund=None, doLines=1, doContinuum=1, em=None, keepIons=0,
         abundance=None, verbose=0, allLines=1):
         #
+        self.Defaults=chdata.Defaults
+
+        if doContinuum and self.Defaults['wavelength'] != 'angstrom':
+            print(' the continuum can only be calculated for wavelengths in angstroms')
+            print(' set doContuum = False to continue')
+            return
+
         wavelength = np.atleast_1d(wavelength)
+
         if wavelength.size < 2:
             print(' wavelength must have at least two values, current length %3i'%(wavelength.size))
             return
+
         t1 = datetime.now()
         # creates Intensity dict from first ion calculated
-        setupIntensity = 0
+        setupIntensity = False
         #
-        self.Defaults=chdata.Defaults
         self.Wavelength = np.asarray(wavelength,  np.float64)
         self.WvlRange = np.asarray([self.Wavelength.min(),  self.Wavelength.max()],  np.float64)
         #
@@ -137,18 +151,13 @@ class spectrum(ionTrails, specTrails):
 
         nTempDens = self.NTempDens
 
-        if self.Em.max() == 1.:
-            ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
-        else:
-            ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$'
+        self.Labels = util.units(chdata.Defaults)
 
-        #
-        #
-        if self.Defaults['wavelength'] == 'angstrom':
-            xlabel = 'Wavelength (\u212B)'
-        else:
-            xlabel = r'Wavelength ('+self.Defaults['wavelength'] +')'
-        #
+        xlabel = self.Labels['xlabel']
+        ylabel = self.Labels['spectrumYlabel']
+
+        if np.array_equal(self.Em, np.ones_like(self.Em)):
+            ylabel += '($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
         #
         if abundance is not None:
             ab = chio.abundanceRead(abundance)
@@ -157,6 +166,7 @@ class spectrum(ionTrails, specTrails):
         else:
             self.AbundanceName = self.Defaults['abundfile']
             abundAll = chdata.Abundance[self.AbundanceName]['abundance']
+
         # needed by ionGate
         self.AbundAll = abundAll
         self.Abundance = abundAll
@@ -179,7 +189,7 @@ class spectrum(ionTrails, specTrails):
         self.Finished = []
         #
         self.ionGate(elementList = elementList, ionList = ionList, minAbund=minAbund, doLines=doLines,
-            doContinuum=doContinuum, verbose = False)
+            doContinuum=doContinuum, verbose = verbose)
         #
         for akey in sorted(self.Todo.keys()):
             zStuff = util.convertName(akey)
@@ -225,9 +235,10 @@ class spectrum(ionTrails, specTrails):
                         self.IonInstances[akey] = copy.deepcopy(thisIon)
                     if setupIntensity:
                         for bkey in self.Intensity:
-                            self.Intensity[bkey] = np.hstack((copy.copy(self.Intensity[bkey]), thisIon.Intensity[bkey]))
+                            self.Intensity[bkey] = np.hstack((copy.copy(self.Intensity[bkey]),
+                                thisIon.Intensity[bkey]))
                     else:
-                        setupIntensity = 1
+                        setupIntensity = True
                         self.Intensity  = thisIon.Intensity
                     lineSpectrum += thisIon.Spectrum['intensity'].squeeze()
                 else:
@@ -248,6 +259,7 @@ class spectrum(ionTrails, specTrails):
         #
         total = freeFree + freeBound + lineSpectrum + twoPhoton
         self.Total = total
+
         t2 = datetime.now()
         dt=t2-t1
         print(' elapsed seconds = %12.3f'%(dt.seconds))
@@ -262,11 +274,13 @@ class spectrum(ionTrails, specTrails):
                     'filter':filter[0],   'filterWidth':filter[1], 'integrated':integrated, 'em':em,
                     'ions':self.IonsCalculated, 'Abundance':self.AbundanceName, 'xlabel':xlabel,
                     'ylabel':ylabel, 'minAbund':minAbund}
+
             else:
                 self.Spectrum = {label:{'wavelength':wavelength, 'intensity':total.squeeze(),
                     'filter':filter[0],   'filterWidth':filter[1], 'integrated':integrated, 'em':em,
                     'ions':self.IonsCalculated, 'Abundance':self.AbundanceName, 'xlabel':xlabel,
-                    'ylabel':ylabel}, 'minAbund':minAbund}
+                    'ylabel':ylabel, 'minAbund':minAbund}}
+
         else:
             self.Spectrum = {'wavelength':wavelength, 'intensity':total.squeeze(),
                 'filter':filter[0],   'filterWidth':filter[1], 'integrated':integrated,

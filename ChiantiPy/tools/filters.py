@@ -39,8 +39,6 @@ def gaussian(wvl, wvl0, factor=1.):
     integrated value is unity
     """
     wvl = np.asarray(wvl, np.float64)
-    dwvl = wvl - np.roll(wvl, 1)
-    dwvl[0] = dwvl[1]
     return np.exp(-0.5*((wvl - wvl0)/factor)**2)/(np.sqrt(2.*np.pi)*factor)
 
 

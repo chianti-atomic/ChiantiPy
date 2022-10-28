@@ -29,7 +29,8 @@ class specTrails(object):
 #        #
         # ---------------------------------------------------------------------------
         #
-    def ionGate(self, elementList = None, ionList = None, minAbund=None, doLines=1, doContinuum=1, doWvlTest=1, doIoneqTest=1, includeDiel=False,  verbose=0):
+    def ionGate(self, elementList = None, ionList = None, minAbund=None, doLines=1, doContinuum=1,
+        doWvlTest=1, doIoneqTest=1, includeDiel=False,  verbose=0):
         '''
         creates a list of ions for free-free, free-bound, and line intensity calculations
         if doing the radiative losses, accept all wavelength -> doWvlTest=0
@@ -154,15 +155,34 @@ class specTrails(object):
             toPop = []
             for ionS in todo:
                 # bare ions have wmin=0 and wmax=1.e+30
+
+                if self.Defaults['wavelength'] == 'angstrom':
+                    wmin = ionInfo[ionS]['wmin']
+                    wmax = ionInfo[ionS]['wmax']
+                elif self.Defaults['wavelength'] == 'nm':
+                    wmin = ionInfo[ionS]['wmin']/10.
+                    wmax = ionInfo[ionS]['wmax']/10.
+                elif self.Defaults['wavelength'] == 'ev':
+                    wmin = const.ev2Ang/ionInfo[ionS]['wmax']
+                    wmax = const.ev2Ang/ionInfo[ionS]['wmin']
+                elif self.Defaults['wavelength'] == 'kev':
+                    wmin = const.kev2Ang/ionInfo[ionS]['wmax']
+                    wmax = const.kev2Ang/ionInfo[ionS]['wmin']
+
+                if verbose:
+                    print('%s wmin:  %10.2e  wmax:  %10.2e'%(ionS,  wmin,  wmax))
+
                 if doWvlTest:
-                    wvlTestMin = wvlRange[0] <= ionInfo[ionS]['wmax']
-                    wvlTestMax = wvlRange[1] >= ionInfo[ionS]['wmin']
+                    wvlTestMin = wvlRange[0] <= wmax
+#                    print(' wvlRange[0] %10.2e <= wmax %10.2e'%(wvlRange[0],  wmax))
+                    wvlTestMax = wvlRange[1] >= wmin
+#                    print(' wvlRange[1] %10.2e >= wmin %10.2e'%(wvlRange[1],  wmin))
                 else:
                     wvlTestMin = 1
                     wvlTestMax = 1
-#                if verbose:
-#                    print(' %s  %8.2f  %8.2f %8.2f %8.2f'%(ionS, ionInfo[ionS]['wmin'], ionInfo[ionS]['wmax'], wvlRange[0], wvlRange[1]))
-#                    print(' %s wvlTestMin  %s  wvlTestMax %s'%(ionS, wvlTestMin, wvlTestMax))
+                if verbose:
+                    print(' %s  %8.2f  %8.2f %8.2f %8.2f'%(ionS, ionInfo[ionS]['wmin'], ionInfo[ionS]['wmax'], wvlRange[0], wvlRange[1]))
+                    print(' %s wvlTestMin  %s  wvlTestMax %s'%(ionS, wvlTestMin, wvlTestMax))
                 if wvlTestMin and wvlTestMax:
                     if verbose:
                         print(' %s passed wvl test'%(ionS))
@@ -370,6 +390,7 @@ class specTrails(object):
 
         top:  integer
             specifies to plot only the top strongest lines, default = 10
+            if set to None, all lines are plotted
 
         '''
         fs = 14
@@ -454,7 +475,7 @@ class specTrails(object):
             self.Error = 1
             self.Message = 'No lines in this wavelength interval'
             return
-        elif top == 0:
+        elif top is None:
             top = lineWvl.size
         elif lineWvl.size > top:
             intsrt = np.argsort(lineIntensity)

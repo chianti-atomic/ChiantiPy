@@ -115,10 +115,11 @@ class bunch(ionTrails, specTrails):
         #
         t1 = datetime.now()
         # creates Intensity dict from first ion calculated
-        setupIntensity = 0
+        setupIntensity = False
         #
         self.argCheck(temperature=temperature, eDensity=eDensity, pDensity=None, em=em, verbose=verbose)
         self.Defaults=chdata.Defaults
+        self.Labels = util.units(chdata.Defaults)
         #
         #
         if abundance is not None:
@@ -133,28 +134,34 @@ class bunch(ionTrails, specTrails):
         self.AbundAll = abundAll
         self.Abundance = abundAll
         #
-        # the following is usually done in argCheck
-        if em is not None:
-            em = np.atleast_1d(em)
-            self.Em = em
-            if em.size == 1:
-                self.Em = np.tile(em,self.NTempDens)
+#        # this is usually done in argCheck
+#        if em is not None:
+#            em = np.atleast_1d(em)
+#            self.Em = em
+#            if em.size == 1:
+#                self.Em = np.tile(em,self.NTempDens)
+#
+#            elif em.size != self.NTempDens:
+#                raise ValueError('the size of em must be either 1 or the size of the larger of temperature or density %5i'%(self.NTempDens))
+#        else:
+#            self.Em = np.ones_like(self.Temperature, np.float64)
 
-            elif em.size != self.NTempDens:
-                raise ValueError('the size of em must be either 1 or the size of the larger of temperature or density %5i'%(self.NTempDens))
-        else:
-            self.Em = np.ones_like(self.Temperature, np.float64)
+#        if self.Defaults['wavelength'] == 'angstrom':
+#            xlabel = 'Wavelength \u212B'
+#        else:
+#            xlabel = 'Wavelength ('+self.Defaults['wavelength'] +')'
+#
+#        # unicode character for angstrom is \u212B
+#        if self.Em.max() == 1.:
+#            ylabel = 'erg cm$^{-2}$ s$^{-1}$ sr$^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
+#        else:
+#            ylabel = 'erg cm$^{-2}$ s$^{-1}$ sr$^{-1}$'
 
-        if self.Defaults['wavelength'] == 'angstrom':
-            xlabel = 'Wavelength \u212B'
-        else:
-            xlabel = 'Wavelength ('+self.Defaults['wavelength'] +')'
+        xlabel = self.Labels['xlabel']
+        ylabel = self.Labels['intensityYlabel']
 
-        # unicode character for angstrom is \u212B
-        if self.Em.max() == 1.:
-            ylabel = 'erg cm$^{-2}$ s$^{-1}$ sr$^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
-        else:
-            ylabel = 'erg cm$^{-2}$ s$^{-1}$ sr$^{-1}$'
+        if np.array_equal(self.Em, np.ones_like(self.Em)):
+            ylabel += '($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
 
 #        nonzed = abundAll > 0.
 #        minAbundAll = abundAll[nonzed].min()
@@ -196,7 +203,7 @@ class bunch(ionTrails, specTrails):
                         self.Intensity[akey] = np.hstack((copy.copy(self.Intensity[akey]),
                             thisIon.Intensity[akey]))
                 else:
-                    setupIntensity = 1
+                    setupIntensity = True
 #                                print(' creating Intensity dict from ion %s'%(ionS))
                     self.Intensity  = thisIon.Intensity
             else:
@@ -251,14 +258,11 @@ class bunch(ionTrails, specTrails):
 
         # unicode character for angstrom is \u212B
         if self.Em.max() == 1.:
-            ylabel = 'erg cm$^{-2}$ s$^{-1}$ sr$^{-1}$ \u212B$^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
+            ylabel = self.Labels['spectrumYlabel'] + ' ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
         else:
-            ylabel = 'erg cm$^{-2}$ s$^{-1}$ sr$^{-1}$ \u212B$^{-1}$'
+            ylabel = self.Labels['spectrumYlabel']
 
-        if self.Defaults['wavelength'] == 'angstrom':
-            xlabel = 'Wavelength (\u212B)'
-        else:
-            xlabel = 'Wavelength ('+self.Defaults['wavelength'] +')'
+        xlabel = self.Labels['xlabel']
 
         #:
         if hasattr(self, 'Wavelength'):
@@ -268,6 +272,7 @@ class bunch(ionTrails, specTrails):
         else:
             print(' a wavelength array must be given')
             return
+
         if not hasattr(self, 'NTempDens'):
             self.NTempDens = max([self.Ntemp,  self.Ndens])
 

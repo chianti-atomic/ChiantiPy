@@ -21,6 +21,7 @@ planckEv = 4.13566743e-15  # ev s
 light = 29979245800.  # cm/s
 q = 4.80320425e-10  # the units of charge
 ev2Ang = 12.39841875e+3
+kev2Ang = 1.e-3*12.39841875e+3
 ev2Erg = 1.602176487e-12
 pi = 3.1415926535897931
 boltzmann = 1.3806504e-16  # cgs

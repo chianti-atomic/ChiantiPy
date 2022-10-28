@@ -73,9 +73,14 @@ class continuum(ionTrails):
     """
 
     def __init__(self, ionStr,  temperature, abundance=None, em=None, verbose=0):
+
+
         self.IonStr = ionStr
         self.nameDict = util.convertName(ionStr)
+        #  Z is the ion charge
         self.Z = self.nameDict['Z']
+        # Zion is the charge of the ion
+        self.Zion = float(self.nameDict['Ion'] -1)
         self.Stage = self.nameDict['Ion']
         self.Ion = self.nameDict['Ion']
         self.Dielectronic = self.nameDict['Dielectronic']
@@ -83,8 +88,14 @@ class continuum(ionTrails):
         self.NTemperature = self.Temperature.size
         self.Defaults = chdata.Defaults
 
+        if self.Defaults['wavelength'] != 'angstrom':
+            print(' the continuum can only be calculated for wavelengths in angstroms')
+            return
 
         self.argCheck(temperature=temperature, eDensity=None, pDensity=None, em=em, verbose=verbose)
+
+        self.Labels = util.units(chdata.Defaults)
+
 
         self.Ip = chdata.Ip[self.Z-1, self.Stage-1]
         self.Ipr = chdata.Ip[self.Z-1, self.Stage-2]
@@ -177,15 +188,16 @@ class continuum(ionTrails):
             If True, include the ionization equilibrium in the final output
 
         """
-        if self.Em.max() == 1.:
-            ylabel = 'erg cm$^{-2}$ s$^{-1}$ sr$^{-1}$ \u212B$^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
-        else:
-            ylabel = 'erg cm$^{-2}$ s$^{-1}$ sr$^{-1}$ \u212B$^{-1}$'
+        if self.Defaults['wavelength'] != 'angstrom':
+            print(' the continuum can only be calculated for wavelengths in angstroms')
+            return
 
-        if self.Defaults['wavelength'] == 'angstrom':
-            xlabel = 'Wavelength \u212B'
-        else:
-            xlabel = r'Wavelength ('+self.Defaults['wavelength'] +')'
+
+        xlabel = self.Labels['xlabel']
+        ylabel = self.Labels['spectrumYlabel']
+
+        if np.array_equal(self.Em, np.ones_like(self.Em)):
+            ylabel += '($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
 
         wavelength = np.atleast_1d(wavelength)
         # define the numerical prefactor
@@ -308,7 +320,7 @@ class continuum(ionTrails):
         """
         # calculate scaled quantities
         lower_u = const.planck*(1.e8*const.light)/const.boltzmann/np.outer(self.Temperature,wavelength)
-        gamma_squared = (self.Z**2)*const.ryd2erg/const.boltzmann/self.Temperature[:,np.newaxis]*np.ones(lower_u.shape)
+        gamma_squared = (self.Zion**2)*const.ryd2erg/const.boltzmann/self.Temperature[:,np.newaxis]*np.ones(lower_u.shape)
         # convert to index coordinates
         i_lower_u = (np.log10(lower_u) + 4.)*10.
         i_gamma_squared = (np.log10(gamma_squared) + 4.)*5.
@@ -558,6 +570,11 @@ class continuum(ionTrails):
         .. [2] Verner & Yakovlev, 1995, A&AS, `109, 125
             <http://adsabs.harvard.edu/abs/1995A%26AS..109..125V>`_
          '''
+        if self.Defaults['wavelength'] != 'angstrom':
+            print(' the continuum can only be calculated for wavelengths in angstroms')
+            return
+
+
         temperature = self.Temperature
 #        tev = const.boltzmannEv*temperature
         em = self.Em
@@ -718,19 +735,21 @@ class continuum(ionTrails):
         .. [3] Verner & Yakovlev, 1995, A&AS, `109, 125
             <http://adsabs.harvard.edu/abs/1995A%26AS..109..125V>`_
         """
+
+        if self.Defaults['wavelength'] != 'angstrom':
+            print(' the continuum can only be calculated for wavelengths in angstroms')
+            return
+
         temperature = self.Temperature
         wvl = np.asarray(wvl, np.float64)
         em = self.Em
 
-        if self.Em.max() == 1.:
-            ylabel = 'erg cm$^{-2}$ s$^{-1}$ sr$^{-1}$ \u212B$^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
-        else:
-            ylabel = 'erg cm$^{-2}$ s$^{-1}$ sr$^{-1}$ \u212B$^{-1}$'
 
-        if self.Defaults['wavelength'] == 'angstrom':
-            xlabel = 'Wavelength (\u212B)'
-        else:
-            xlabel = r'Wavelength ('+self.Defaults['wavelength'] +')'
+        xlabel = self.Labels['xlabel']
+        ylabel = self.Labels['spectrumYlabel']
+
+        if np.array_equal(self.Em, np.ones_like(self.Em)):
+            ylabel += '($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
 
         if includeAbund:
             abund = self.Abundance
@@ -880,7 +899,14 @@ class continuum(ionTrails):
                         elif expfunIsinf.sum() > 0:
                             print('%i some of expfun are inf %i'%(itemp, expfunIsinf.sum()))
                             expfun[expfunIsinf] = 0.
-                        fbn[ilvl, itemp] = K0*phE**2*expfun*iprLvlErg**2*ratg[ilvl]*mygf[ilvl]/(atemp**(1.5)*float(pqn[ilvl]))
+
+                        if self.Defaults['flux'] == 'energy':
+                            fbn[ilvl, itemp] = K0*phE**2*expfun*iprLvlErg**2*ratg[ilvl]*mygf[ilvl]  \
+                                /(atemp**(1.5)*float(pqn[ilvl]))
+                        elif self.Defaults['flux'] == 'photon':
+                            fbn[ilvl, itemp] = K0*phE*expfun*iprLvlErg**2*ratg[ilvl]*mygf[ilvl]  \
+                                /(atemp**(1.5)*float(pqn[ilvl]))
+
                         fbnIsNan = np.isnan(fbn[ilvl, itemp])
                         fbnIsInf = np.isinf(fbn[ilvl, itemp])
 

@@ -1242,7 +1242,7 @@ class maker(ionTrails,  specTrails):
         #
         # -------------------------------------------------------------------------
         #
-    def diffPlot(self, title=False, fontsize=16, figsize=[7., 5.]):
+    def diffPlot(self, title=False, loc='upper right',  fontsize=16, figsize=[7., 5.]):
         """
 
         Parameters
@@ -1284,7 +1284,7 @@ class maker(ionTrails,  specTrails):
             if title:
                 mytitle = 'diff Mean %10.3f  diff Std  %10.3f'%(diffMean, diffStd)
                 ax.set_title(mytitle, fontsize=fontsize)
-            ax.legend(loc='upper right', bbox_to_anchor=(0.99, 1.0), fontsize=12)
+            ax.legend(loc=loc, fontsize=12) #  bbox_to_anchor=(0.99, 1.0),
             fig.tight_layout()
             self.DiffPlot ={'fig':fig, 'ax':ax}
         else:

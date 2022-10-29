@@ -80,7 +80,7 @@ class continuum(ionTrails):
         #  Z is the ion charge
         self.Z = self.nameDict['Z']
         # Zion is the charge of the ion
-        self.Zion = float(self.nameDict['Ion'] -1)
+        self.Zion = self.nameDict['Ion'] -1
         self.Stage = self.nameDict['Ion']
         self.Ion = self.nameDict['Ion']
         self.Dielectronic = self.nameDict['Dielectronic']
@@ -205,7 +205,7 @@ class continuum(ionTrails):
                      * (const.fine*const.planck/np.pi)**3
                      * np.sqrt(2.*np.pi/3./const.emass/const.boltzmann))
         # include temperature dependence
-        prefactor *= self.Z**2/np.sqrt(self.Temperature)
+        prefactor *= self.Zion**2/np.sqrt(self.Temperature)
         if includeAbund:
             prefactor *= self.Abundance
         if includeIoneq:
@@ -226,7 +226,7 @@ class continuum(ionTrails):
 
         free_free_emission = (prefactor[:,np.newaxis]*exp_factor*gf/energy_factor).squeeze()
         self.FreeFree = {'intensity':free_free_emission, 'temperature':self.Temperature, 'wvl':wavelength,
-            'em':self.Em, 'ions':self.IonStr, 'xlabel':xlabel,  'ylabel':ylabel}
+            'em':self.Em, 'ions':self.IonStr, 'xlabel':xlabel,  'ylabel':ylabel,  'gf':gf}
 
     def freeFreeLoss(self, includeAbund=True, includeIoneq=True,  **kwargs):
         """
@@ -295,12 +295,17 @@ class continuum(ionTrails):
         upper_u = 1./2.5*(np.log10(lower_u) + 1.5)
         t = 1./1.25*(np.log10(self.Temperature) - 7.25)
         # read in Itoh coefficients
-        itoh_coefficients = io.itohRead()['itohCoef'][self.Z - 1].reshape(11,11)
+        itoh_coefficients = io.itohRead()['itohCoef'][self.Zion - 1].reshape(11,11)
         # calculate Gaunt factor
         gf = np.zeros(upper_u.shape)
-        for j in range(11):
-            for i in range(11):
-                gf += (itoh_coefficients[i,j]*(t**i))[:,np.newaxis]*(upper_u**j)
+        if self.Ntemp == 1:
+            for j in range(11):
+                for i in range(11):
+                    gf += (itoh_coefficients[i,j]*(t**i))*(upper_u**j)
+        else:
+            for j in range(11):
+                for i in range(11):
+                    gf += (itoh_coefficients[i,j]*(t**i))[:,np.newaxis]*(upper_u**j)
         # apply NaNs where Itoh approximation is not valid
         gf = np.where(np.logical_and(np.log10(lower_u) >= -4., np.log10(lower_u) <= 1.0),gf,np.nan)
         gf[np.where(np.logical_or(np.log10(self.Temperature) <= 6.0,
@@ -328,7 +333,7 @@ class continuum(ionTrails):
         gf_sutherland_data = io.gffRead()
         # interpolate data to scaled quantities
         gf_sutherland = map_coordinates(gf_sutherland_data['gff'],
-                                        [i_gamma_squared.flatten(), i_lower_u.flatten()]).reshape(lower_u.shape)
+            [i_gamma_squared.flatten(), i_lower_u.flatten()]).reshape(lower_u.shape)
 
         return np.where(gf_sutherland < 0., 0., gf_sutherland)
 

@@ -53,10 +53,12 @@ class spectrum(ionTrails, specTrails):
     It is necessary to specify at least an elementList, an ionList, or a minAbund to select any ions
     for a spectrum calculation
 
-    With solar photospheric abundances -
+    With solar photospheric abundances
 
     setting minAbund = 1.e-4 will include H, He, C, O, Ne
+
     setting minAbund = 2.e-5 adds  N, Mg, Si, S, Fe
+
     setting minAbund = 1.e-6 adds  Na, Al, Ar, Ca, Ni
 
     Setting doLines = 0 will skip the calculation of spectral lines.
@@ -68,10 +70,10 @@ class spectrum(ionTrails, specTrails):
     em [for emission measure] can be a float or an array of the same length as the
     temperature/density
 
-    keepIons:  set this to keep the ion instances that have been calculated in a dictionary
+    keepIons -  set this to keep the ion instances that have been calculated in a dictionary
     self.IonInstances with the keywords being the CHIANTI-style ion names
 
-    abundance: to select a particular set of abundances, set abundance to the name of a
+    abundance -  to select a particular set of abundances, set abundance to the name of a
     CHIANTI abundance file, without the '.abund' suffix, e.g. 'sun_photospheric_1998_grevesse'
 
     If set to a blank (''), a gui selection menu will popup and allow the selection of an

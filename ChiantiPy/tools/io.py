@@ -396,8 +396,8 @@ def defaultsRead(verbose=False):
     if "HOME" in os.environ.keys():
         if os.path.isdir(os.environ["HOME"]):
             home = os.environ["HOME"]
-            fn1 = os.path.join(home, '.chianti', 'chiantirc')
-            fn2 = os.path.join(home, '.config', 'chiantirc')
+            fn1 = os.path.join(home, '.config', 'chiantirc')
+            fn2 = os.path.join(home, '.chianti', 'chiantirc')
             rcfile = False
             if os.path.isfile(fn1):
                 rcfile = fn1
@@ -431,7 +431,8 @@ def defaultsRead(verbose=False):
     else:
         defaults = initDefaults
         if verbose:
-            print((' chiantirc file (/HOME/.chianti/chiantirc) does not exist'))
+            print((' chiantirc file can not be found'))
+            print(' should be in $HOME/.config, $HOME/.chianti or $PROFILEHOME/.chianti')
             print((' using the following defaults'))
             for akey in list(defaults.keys()):
                 print((' %s = %s'%(akey, defaults[akey])))

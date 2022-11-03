@@ -153,7 +153,7 @@ class continuum(ionTrails):
         if includeIoneq:
             prefactor *= self.ioneq_one(self.Stage, **kwargs)
 
-        self.FreeFreeLoss = prefactor*(self.Z**2)*np.sqrt(self.Temperature)*gaunt_factor
+        self.FreeFreeLoss = prefactor*(self.Zion**2)*np.sqrt(self.Temperature)*gaunt_factor
 
     def freeFree(self, wavelength, includeAbund=True, includeIoneq=True, **kwargs):
         """
@@ -239,14 +239,14 @@ class continuum(ionTrails):
         .. math::
            \\frac{dW}{dtdV} = \\frac{4\\alpha^3h^2}{3\pi^2m_e}\left(\\frac{2\pi k_B}{3m_e}\\right)^{1/2}Z^2T^{1/2}\\bar{g}_B
 
-        where where :math:`Z` is the nuclear charge, :math:`T` is the electron temperature, and
+        where where :math:`Z` is the ion charge, :math:`T` is the electron temperature, and
         :math:`\\bar{g}_{B}` is the wavelength-averaged and velocity-averaged Gaunt factor. The
         Gaunt factor is calculated using the methods of [103]_. Note that this expression for the
         loss rate is just the integral over wavelength of Eq. 5.14a of [103]_, the free-free emission, and
         is expressed in units of erg :math:`\mathrm{cm}^3\,\mathrm{s}^{-1}`.
 
         """
-        # interpolate wavelength-averaged K&L gaunt factors
+        # interpolate wavelength-averaged  gaunt factors of Sutherland
         gf_kl_info = io.gffintRead()
         gamma_squared = self.IprErg/const.boltzmann/self.Temperature
 #        for i, atemp in enumerate(self.Temperature):
@@ -263,7 +263,7 @@ class continuum(ionTrails):
             prefactor *= self.IoneqOne
 
 
-        self.FreeFreeLoss = {'rate':prefactor*(self.Z**2)*np.sqrt(self.Temperature)*gaunt_factor}
+        self.FreeFreeLoss = {'rate':prefactor*(self.Zion**2)*np.sqrt(self.Temperature)*gaunt_factor}
 
 
     def itoh_gaunt_factor(self, wavelength):

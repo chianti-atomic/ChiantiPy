@@ -476,6 +476,12 @@ New in **ChiantiPy 0.6**, the *label* keyword has been added to the ion.spectrum
 Using emission measures (EM)
 ----------------------------
 
+the line-of-sight emission measure is given by :math:`\mathrm{\int \, n_e \, n_H \, dl}` (:math:`\mathrm{cm}^{-5}`)
+
+the volumetric emission measure is give by :math:`\mathrm{\int \, n_e \, n_H \, dV}` (:math:`\mathrm{cm^{-3}}`)
+
+where the integrations are performed over the source region
+
 ::
 
   emDir = os.path.join(os.environ['XUVTOP'], 'em')
@@ -536,32 +542,86 @@ Free-free and free-bound continuum
 
 The module continuum provides the ability to calculate the free-free and free-bound spectrum for a large number of  individual ions.  The two-photon continuum is produced only by the hydrogen-like and helium-like ions
 
+
+::
+
+  myIon = 'fe_25'
+
+
+::
+
+  temperature = [2.e+7, 3.e+7, 6.e+7]
+  density = 1.e+9
+  em = [1.e+27, 1.e+27, 1.e+27]
+  c = ch.continuum(myIon, temperature = temperature, em=em)
+  wvl = 0.5 + 0.002*np.arange(4501)
+  c.freeFree(wvl)
+  c.freeBound(wvl)
+  fe25=ch.ion(myIon, temperature, density, em=em)
+  fe25.twoPhoton(wvl)
+  total = c.FreeFree['intensity'][itemp] + c.FreeBound['intensity'][itemp] + fe25.TwoPhoton['intensity'][itemp]
+
+::
+
+  itemp = 1
+  plt.figure()
+  plt.plot(wvl, c.FreeFree['intensity'][itemp],label='ff')
+  plt.plot(wvl, c.FreeBound['intensity'][itemp],label='fb')
+  plt.plot(wvl,fe25.TwoPhoton['intensity'][itemp],label='2 photon')
+  plt.plot(wvl, total, 'k', label='total')
+  plt.xlabel(c.FreeFree['xlabel'], fontsize=14)
+  plt.ylabel(c.FreeFree['ylabel'], fontsize=14)
+  plt.legend(loc='upper right', fontsize=14)
+  plt.title(' %s  T = %10.2e'%(fe25.IonStr, temperature[itemp]), fontsize=14)
+  plt.ylim(bottom=0.)
+  plt.xlim([0., wvl[-1]])
+  plt.tight_layout
+
+
+produces
+
+.. image:: _static/fe_25_ff_fb_tp_2e7_1_10.png
+    :align:  center
+
+
+
 ::
 
   myIon = 'o_8'
 
 ::
 
-  temperature = 3.e+6
-  em = 1.e+27
-  wvl = 2. + 0.1*np.arange(1001.)
+  temperature = [3.e+6, 6.e+6]
+  density = 1.e+9
+  em = [2.e+27,1.e+27]
+  c = ch.continuum(myIon, temperature = temperature, em=em)
+  wvl = 2. + 0.2*np.arange(701)
+  c.freeFree(wvl)
+  c.freeBound(wvl)
+  o8 = ch.ion(myIon, temperature, density, em=em)
+  o8.twoPhoton(wvl)
+  total = c.FreeFree['intensity'][itemp] + c.FreeBound['intensity'][itemp] + o8.TwoPhoton['intensity'][itemp]
+
 
 ::
 
-  c = ch.continuum(myIon, temperature = temperature, em = em)
-  c.freeFree(wvl)
-  plt.plot(wvl, c.FreeFree['intensity'])
-  c.freeBound(wvl)
-  plt.plot(wvl, c.FreeBound['intensity'])
-  o8=ch.ion(myIon, 2.e+7,1.e+9,em=1.e+27)
-  o8.twoPhoton(wvl)
-  plt.plot(wvl, fe25.TwoPhoton['intensity'],label='2 photon')
-  plt.legend(loc='upper right')
+  itemp = 1
+  plt.figure()
+  plt.semilogy(wvl, c.FreeFree['intensity'][index],label='ff')
+  plt.semilogy(wvl, c.FreeBound['intensity'][index],label='fb')
+  plt.semilogy(wvl,o8.TwoPhoton['intensity'][index],label='2 photon')
+  plt.plot(wvl, total[itemp], 'k', label='total')
+  plt.ylim(bottom=1.e-4, top=1.)
+  plt.xlabel(c.FreeFree['xlabel'], fontsize=14)
+  plt.ylabel(c.FreeFree['ylabel'], fontsize=14)
+  plt.title(' %s  T = %10.2e'%(o8.IonStr, temperature[itemp]), fontsize=14)
+  plt.legend(loc='upper right', fontsize=14)
+  plt.tight_layout()
 
 
 produces
 
-.. image:: _static/o_8_ff_fb_tp_3e6_1_100.png
+.. image:: _static/o_8_ff_fb_tp_total_3e6_1_100.png
     :align:  center
 
 In the continuum calculations, the specified ion, Fe XXV in this case, is the target ion for the free-free calculation.  For the free-bound calculation, specified ion is also the target ion.  In this case, the radiative recombination spectrum of Fe XXV recombining to form Fe XXIV is returned.
@@ -937,7 +997,7 @@ the default value for doContinuum is True, so, the continuum can be plotted sepa
   plt.plot(wvl, s3.FreeFree['intensity'], label='FF')
   plt.plot(wvl, s3.FreeBound['intensity'], label='FB')
   plt.plot(wvl, s3.TwoPhoton['intensity'], label='2 Photon')
-  plt.plot(wvl, s3.Continuum['intensity'].sum(axis=0), label='Total')
+  plt.plot(wvl, s3.Continuum['intensity'].sum(axis=0), 'k', label='Total')
   plt.xlabel(s3.Spectrum['xlabel'], fontsize=14)
   plt.ylabel(s3.Spectrum['ylabel'], fontsize=14)
   plt.ylim(bottom = 0.)
@@ -949,7 +1009,7 @@ the default value for doContinuum is True, so, the continuum can be plotted sepa
 
 produces
 
-.. image:: _static/continuum_2e7_1_10.png
+.. image:: _static/continuum_flare_dem_1_10.png
     :align:  center
 
 ::

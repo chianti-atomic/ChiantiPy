@@ -70,7 +70,7 @@ class spectrum(ionTrails, specTrails):
     em [for emission measure] can be a float or an array of the same length as the
     temperature/density
 
-    keepIons -  set this to keep the ion instances that have been calculated in a dictionary
+    keepIons  set this to keep the ion instances that have been calculated in a dictionary
     self.IonInstances with the keywords being the CHIANTI-style ion names
 
     abundance -  to select a particular set of abundances, set abundance to the name of a

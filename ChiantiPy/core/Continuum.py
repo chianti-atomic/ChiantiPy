@@ -717,8 +717,7 @@ class continuum(ionTrails):
         #{'rate':fbloss, 'gfIntSum':gfIntSum,'gfInt':gfInt,'gfGL':gfGl, 'egl':egl, 'scaledE':scaledE,'peAll':peAll, 'gfAll':gfAll, 'gfIntAllSum':gfIntAllSum}
 
 
-
-    def freeBound(self, wvl, includeAbund = True,  includeIoneq = True,  verbose=False):
+    def freeBound(self, wvl, includeAbund = True, includeIoneq = True, verner=True, verbose=False):
         """
         Calculates the free-bound (radiative recombination) continuum emissivity of an ion.
         Provides emissivity in units of ergs :math:`\mathrm{cm}^{-2}` :math:`\mathrm{s}^{-1}` :math:`\mathrm{str}^{-1}` :math:`\mathrm{\AA}^{-1}` for an individual ion.  If includeAbund is set,
@@ -727,13 +726,12 @@ class continuum(ionTrails):
 
         Notes
         -----
-        - Uses the Gaunt factors of [103]_ for recombination to the ground level
+        - Uses the Gaunt factors of [103]_ for recombination to the excited levels
         - Uses the photoionization cross sections of [3]_ to develop the free-bound cross section
-        - Does not include the elemental abundance or ionization fraction
+        - Include the elemental abundance and ionization fraction by default
         - The specified ion is the target ion
         - uses the corrected version of the K-L bf gaunt factors available in CHIANTI V10
         - revised to calculate the bf cross, fb cross section and the maxwell energy distribution
-        - the Verner cross sections are not included for now
 
         References
         ----------
@@ -825,15 +823,15 @@ class continuum(ionTrails):
         nWvl = wvl.size
         nTemp = temperature.size
         #
-        #  the verner cross-section is not included in this version
-#        if verner:
-#            self.vernerCross(wvl)
-#            vCross = self.VernerCross
-#            lvl1 = 1
-#        else:
-#            lvl1 = 0
-        lvl1 = 0
-
+        #  the verner cross-section is included in this version
+        if verner:
+            self.vernerCross(wvl)
+            vCross = self.VernerCross
+            lvl1 = 1
+        else:
+            lvl1 = 0
+#        lvl1 = 0
+        expfun = np.zeros((nlvls,nTemp,nWvl),np.float64)
         mask = np.zeros((nlvls,nTemp,nWvl),np.bool_)
         fbn = np.zeros((nlvls,nTemp,nWvl),np.float64)
         fbIntensity = np.zeros((nlvls,nTemp,nWvl),np.float64)
@@ -843,6 +841,8 @@ class continuum(ionTrails):
         iprLvlEv = self.Ipr - const.invCm2Ev*ecm[0]
         iprLvlErg = const.ev2Erg*iprLvlEv
         edgeLvlAng = []
+        hnu = const.planck*const.light/(1.e-8*wvl)
+        hnuEv = const.ev2Ang/wvl
 
         # constants for free bound
         # K_1 = 1.726 \times 10^{-28} = \frac{2^4 h e^2 }{3 \sqrt 3 m_e c}
@@ -854,16 +854,25 @@ class continuum(ionTrails):
         K3 = (1./(const.planck*const.light))*(1./(np.sqrt(2.*const.emass)))*(1./(np.pi*const.boltzmann)**1.5)
         K0 = 1.e-8*K1*K2*K3
 
-#        for itemp,  atemp  in enumerate(temperature):
-#            if verner:
-##                if verbose:
-##                    print(' calculating verner')
-#                mask[0,itemp] = 1.e+8/wvl < (self.IprCm - ecm[0])
-#                expf[0,itemp] = np.exp((iprLvlErg - 1.e+8*const.planck*const.light/wvl)/(const.boltzmann*atemp))
-#                fbrate[0,itemp] = ioneq[itemp]*em[itemp]*(const.planck*const.light/(1.e-8*wvl))**5 \
-#                    *const.verner*ratg[0]*expf[0,itemp]*vCross/atemp**1.5
         # restrict calculations to temperatures where the ionization equ. is non-zero
         goodT = [ it for it, anioneq in enumerate(self.IoneqOne) if anioneq > 0.]
+        if verner:
+            ilvl = 0
+            iprLvlEv = self.Ipr - const.invCm2Ev*ecm[ilvl]
+            edgeLvlAng.append(const.ev2Ang/iprLvlEv)
+            for itemp in goodT:
+                atemp = self.Temperature[itemp]
+#                print(' verner %5i %5i  %10.2e'%(ilvl, itemp, atemp))
+                mask[0,itemp] = 1.e+8/wvl < (self.IprCm - ecm[0])
+                expfun[0, itemp] = np.exp((iprLvlErg - 1.e+8*const.planck*const.light/wvl)/
+                    (const.boltzmann*atemp))
+                fbn[0, itemp] = (const.planck*const.light/(1.e-8*wvl))**5 \
+                    *const.verner*ratg[0]*expfun[0,itemp]*vCross/atemp**1.5
+                fbIntensity[0,itemp] = abund*ioneq[itemp]*em[itemp]*fbn[0,  itemp]
+
+        else:
+            lvl1 = 0
+
         for ilvl in range(lvl1,nlvls):
             pqnIdx = pqn[ilvl] - 1
             lIdx = l[ilvl]
@@ -873,8 +882,6 @@ class continuum(ionTrails):
             iprLvlEv = self.Ipr - const.invCm2Ev*ecm[ilvl]
             edgeLvlAng.append(const.ev2Ang/iprLvlEv)
             iprLvlErg = const.ev2Erg*iprLvlEv
-            hnu = const.planck*const.light/(1.e-8*wvl)
-            hnuEv = const.ev2Ang/wvl
 
             # scaled energy is relative to the ionization potential
 
@@ -884,45 +891,46 @@ class continuum(ionTrails):
                 print(' %i nWvl  %i badlong.sum %i'%(ilvl, nWvl,  badLong.sum()))
             if badLong.sum() < nWvl:
                 tck = splrep(np.log(pe), np.log(gf),  s=0)
-                gflog = splev(np.log(scaledE), tck,  der=0,  ext=1)
+                gflog = splev(np.log(scaledE), tck,  der=0,  ext=3)
                 mygf[ilvl] = np.exp(gflog)
                 mygf[ilvl][badLong] = 0.
-                if verbose:
-                    print(' ilvl %i   mygf.max() %10.2e'%(ilvl, np.max(mygf[ilvl])))
+#                if verbose:
+#                    print(' ilvl %i   mygf.max() %10.2e'%(ilvl, np.max(mygf[ilvl])))
                 ratg[ilvl] = float(multr[ilvl])/float(mult[0]) # ratio of statistical weights
 
                 for itemp in goodT:
                     atemp = self.Temperature[itemp]
-                    if ioneq[itemp] > 0.:
-                        phE = hnu
-                        expfun = np.exp((iprLvlErg - phE)/(const.boltzmann*atemp))
-                        expfunIsnan = np.isnan(expfun)
-                        expfunIsinf = np.isinf(expfun)
-                        if expfunIsnan.sum() > 0:
-                            print('%i some of expfun are nan %i'%(itemp, expfunIsnan.sum()))
-                            expfun[expfunIsnan] = 0.
-                        elif expfunIsinf.sum() > 0:
-                            print('%i some of expfun are inf %i'%(itemp, expfunIsinf.sum()))
-                            expfun[expfunIsinf] = 0.
+#                    print(' kl %5i %5i  %10.2e'%(ilvl, itemp, atemp))
+                    # this test if not really needed
+#                    if ioneq[itemp] > 0.:
+                    expfun = np.exp((iprLvlErg - hnu)/(const.boltzmann*atemp))
+                    expfunIsnan = np.isnan(expfun)
+                    expfunIsinf = np.isinf(expfun)
+                    if expfunIsnan.sum() > 0:
+                        print('%i some of expfun are nan %i'%(itemp, expfunIsnan.sum()))
+                        expfun[expfunIsnan] = 0.
+                    elif expfunIsinf.sum() > 0:
+                        print('%i some of expfun are inf %i'%(itemp, expfunIsinf.sum()))
+                        expfun[expfunIsinf] = 0.
 
-                        if self.Defaults['flux'] == 'energy':
-                            fbn[ilvl, itemp] = K0*phE**2*expfun*iprLvlErg**2*ratg[ilvl]*mygf[ilvl]  \
-                                /(atemp**(1.5)*float(pqn[ilvl]))
-                        elif self.Defaults['flux'] == 'photon':
-                            fbn[ilvl, itemp] = K0*phE*expfun*iprLvlErg**2*ratg[ilvl]*mygf[ilvl]  \
-                                /(atemp**(1.5)*float(pqn[ilvl]))
+                    if self.Defaults['flux'] == 'energy':
+                        fbn[ilvl, itemp] = K0*hnu**2*expfun*iprLvlErg**2*ratg[ilvl]*mygf[ilvl]  \
+                            /(atemp**(1.5)*float(pqn[ilvl]))
+                    elif self.Defaults['flux'] == 'photon':
+                        fbn[ilvl, itemp] = K0*hnu*expfun*iprLvlErg**2*ratg[ilvl]*mygf[ilvl]  \
+                            /(atemp**(1.5)*float(pqn[ilvl]))
 
-                        fbnIsNan = np.isnan(fbn[ilvl, itemp])
-                        fbnIsInf = np.isinf(fbn[ilvl, itemp])
+                    fbnIsNan = np.isnan(fbn[ilvl, itemp])
+                    fbnIsInf = np.isinf(fbn[ilvl, itemp])
 
-                        if fbnIsNan.sum() > 0:
-                            print('%s  %i some fbn are Nan %i'%(self.IonStr, itemp, fbnIsNan.sum()))
-                            fbn[ilvl, itemp,  fbnIsNan] = 0.
-                        elif fbnIsInf.sum() > 0:
-                            print('%s %i some fbn are Inf %i'%(self.IonStr, itemp, fbnIsInf.sum()))
-                            fbn[ilvl, itemp,  fbnIsInf] = 0.
-                        mask[ilvl,itemp] = 1.e+8/wvl < (self.IprCm - ecm[ilvl])
-                        fbIntensity[ilvl, itemp] = abund*em[itemp]*ioneq[itemp]*fbn[ilvl, itemp]
+                    if fbnIsNan.sum() > 0:
+                        print('%s  %i some fbn are Nan %i'%(self.IonStr, itemp, fbnIsNan.sum()))
+                        fbn[ilvl, itemp,  fbnIsNan] = 0.
+                    elif fbnIsInf.sum() > 0:
+                        print('%s %i some fbn are Inf %i'%(self.IonStr, itemp, fbnIsInf.sum()))
+                        fbn[ilvl, itemp,  fbnIsInf] = 0.
+                    mask[ilvl,itemp] = 1.e+8/wvl < (self.IprCm - ecm[ilvl])
+                    fbIntensity[ilvl, itemp] = abund*em[itemp]*ioneq[itemp]*fbn[ilvl, itemp]
 
         fbTest = fbIntensity.sum(axis=0)
         fbTestisNan = np.isnan(fbTest)
@@ -940,6 +948,7 @@ class continuum(ionTrails):
         self.FreeBound = {'intensity':fb.squeeze(), 'temperature':temperature,'wvl':wvl, 'em':em, \
             'abund':abund, 'ioneq':ioneq, 'gf':mygf, 'edgeLvlAng':edgeLvlAng,  'fbn':fbn,
             'xlabel':xlabel, 'ylabel':ylabel}
+
 
     def vernerCross(self, wvl):
         """
@@ -959,7 +968,7 @@ class continuum(ionTrails):
 
         """
         # read verner data
-        verner_info = io.vernerRead()
+        verner_info = chdata.Verner_info
         eth = verner_info['eth'][self.Z,self.Stage-1]   #*const.ev2Erg
         yw = verner_info['yw'][self.Z,self.Stage-1]
         ya = verner_info['ya'][self.Z,self.Stage-1]

@@ -9,6 +9,10 @@ Significant improvement have been made.  It is now possible to calculate spectra
 
 Calculations of the continuum still require that the wavelengths are in angstroms.
 
+The free-bound continuum now includes the photoionization cross sections of Verner for recombination to the ground level
+
+The free-free continuum has been correction to use the ion charge, not the nuclear charge previously used
+
 The chiantirc file can now also be place in the $HOME/.config directory
 
 

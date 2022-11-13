@@ -16,20 +16,13 @@ from ChiantiPy.base import ionTrails
 
 class radLoss(ionTrails, specTrails):
     '''
-    Calculate the emission spectrum as a function of temperature and density.
+    Calculate the radiative emission loss rate as a function of temperature and density.
 
     includes elemental abundances or ionization equilibria
 
     temperature and density can be arrays but, unless the size of either is one (1),
     the two must have the same size
 
-    the returned spectrum will be convolved with a filter of the specified width on the
-    specified wavelength array
-
-    the default filter is gaussianR with a resolving power of 1000.  Other filters,
-    such as gaussian, box and lorentz, are available in ChiantiPy.filters.  When using the box filter,
-    the width should equal the wavelength interval to keep the units of the continuum and line
-    spectrum the same.
 
     A selection of ions can be make with ionList containing the names of
     the desired lines in Chianti notation, i.e. C VI = c_6
@@ -48,9 +41,11 @@ class radLoss(ionTrails, specTrails):
 
     abundance: to select a particular set of abundances, set abundance to the name of a CHIANTI abundance file,
         without the '.abund' suffix, e.g. 'sun_photospheric_1998_grevesse'
-        If set to a blank (''), a gui selection menu will popup and allow the selection of an set of abundances
+        If set to a blank (''), a gui selection menu will popup and allow the
+        selection of an set of abundances
     '''
-    def __init__(self, temperature, eDensity, elementList=None, ionList = None, minAbund=None, doContinuum=1, abundance=None, verbose=0, allLines=1, keepIons=0):
+    def __init__(self, temperature, eDensity, elementList=None, ionList = None, minAbund=None,
+        doContinuum=True, doLines=True, abundance=None, verbose=0, allLines=1):
         t1 = datetime.now()
         masterlist = chdata.MasterList
         # use the ionList but make sure the ions are in the database
@@ -91,7 +86,7 @@ class radLoss(ionTrails, specTrails):
 #        self.MinAbund = minAbund
 #        ionInfo = util.masterListInfo()
         #
-        nTempDens = self.NTempDens
+
         freeFreeLoss = np.zeros_like(self.Temperature)
         freeBoundLoss = np.zeros_like(self.Temperature)
         twoPhotonLoss = np.zeros_like(self.Temperature)
@@ -99,13 +94,13 @@ class radLoss(ionTrails, specTrails):
         twoPhotonLoss = np.zeros_like(self.Temperature)
         #
         self.IonsCalculated = []
-        if keepIons:
-            self.IonInstances = {}
+
         self.Finished = []
         #
         self.WvlRange = [0., 1.e+30]
         #
-        self.ionGate(elementList = elementList, ionList = ionList, minAbund=minAbund, doContinuum=doContinuum, doWvlTest=0, verbose=False)
+        self.ionGate(elementList = elementList, ionList = ionList, minAbund=minAbund, doLines=doLines,
+            doContinuum=doContinuum, doWvlTest=0, verbose=False)
         #
         #
         for akey in sorted(self.Todo.keys()):
@@ -159,25 +154,37 @@ class radLoss(ionTrails, specTrails):
         t2 = datetime.now()
         dt=t2-t1
         print(' elapsed seconds = %10.2e'%(dt.seconds))
-        xlabel = 'Temperature (K)'
-        ylabel = r'erg  s$^{-1}$ cm$^{3}$'
-        self.RadLoss = {'rate':total, 'temperature':self.Temperature, 'density':self.EDensity, 'minAbund':minAbund, 'abundance':self.AbundanceName, 'ylabel':ylabel, 'xlabel':xlabel}
+        xlabel = self.Labels['radlossTlabel']
+        ylabel = self.Labels['radlossYlabel']
+        self.RadLoss = {'rate':total, 'temperature':self.Temperature, 'density':self.EDensity,
+            'minAbund':minAbund, 'abundance':self.AbundanceName, 'ylabel':ylabel, 'xlabel':xlabel}
     #
     # -------------------------------------------------------------------
     #
-    def radLossPlot(self, title=0):
+    def radLossPlot(self, doTitle=False):
         '''
         to plot the radiative losses vs temperature
+
+        Parameters
+        ----------
+
+        doTitle:  `bool`
+
+            if True, a title is applied to the plot.  The default is for no title
+
         '''
         fontsize = 16
         temp = self.RadLoss['temperature']
         rate = self.RadLoss['rate']
-        plt.loglog(temp, rate)
-#        plt.ylabel(r'erg  s$^{-1}$  ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$',fontsize=fontsize)
+        plt.loglog(temp, rate,  'k',  lw=2)
         plt.xlabel(self.RadLoss['xlabel'],fontsize=fontsize)
         plt.ylabel(self.RadLoss['ylabel'],fontsize=fontsize)
-        if title:
-            title = 'Radiative loss rate,  minAbund = %10.2e'%(self.MinAbund)
+        plt.xlim(left = temp.min(),  right = temp.max())
+        if doTitle:
+            if hasattr(self, 'AbundanceName'):
+                title = 'Radiative loss rate,  %s'%(self.AbundanceName)
+            if hasattr(self, 'MinAbund'):
+                title += ' minAbund = %10.2e'%(self.MinAbund)
             if self.EDensity.size == 1:
                 title += ', density = %10.2e'%(self.EDensity)
             plt.title(title, fontsize=fontsize)

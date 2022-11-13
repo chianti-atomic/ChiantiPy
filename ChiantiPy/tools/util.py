@@ -895,12 +895,19 @@ def units(defaults):
             spYlabel = r'photon cm$^{-2}$ s$^{-1}$ sr$^{-1}$ eV$^{-1}$'
         if defaults['wavelength'] == 'kev':
             spYlabel = r'photon cm$^{-2}$ s$^{-1}$ sr$^{-1}$ keV$^{-1}$'
+
+    # get radloss units
+
+    radlossTlabel = 'Temperature (K)'
+    radlossYlabel = 'erg  s$^{-1}$ cm$^{3}$'
     labels = {}
     labels['xlabel'] = xlabel
     labels['listXlabel'] = listXlabel
     labels['emissYlabel'] = emissYlabel
     labels['intensityYlabel'] = intYlabel
     labels['spectrumYlabel'] = spYlabel
+    labels['radlossTlabel'] = radlossTlabel
+    labels['radlossYlabel'] = radlossYlabel
 
     return labels
 

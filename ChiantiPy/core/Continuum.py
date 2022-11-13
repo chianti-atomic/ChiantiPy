@@ -253,7 +253,7 @@ class continuum(ionTrails):
 #            print('%s T:  %10.2e gamma_squared  %10.2e'%(self.IonStr, atemp, gamma_squared[i]))
         gaunt_factor = splev(np.log(gamma_squared),
                              splrep(gf_kl_info['g2'],gf_kl_info['gffint']), ext=3)
-        # calculate numerical constant
+        # calculate numerical constant = Sutherland's Fk
         prefactor = (4.*(const.fine**3)*(const.planck**2)/3./(np.pi**2)/const.emass
                      * np.sqrt(2.*np.pi*const.boltzmann/3./const.emass))
         # include abundance and ionization equilibrium
@@ -262,8 +262,9 @@ class continuum(ionTrails):
         if includeIoneq:
             prefactor *= self.IoneqOne
 
-
-        self.FreeFreeLoss = {'rate':prefactor*(self.Zion**2)*np.sqrt(self.Temperature)*gaunt_factor}
+        rate = prefactor*(self.Zion**2)*np.sqrt(self.Temperature)*gaunt_factor
+        self.FreeFreeLoss = {'temperature':self.Temperature, 'rate':rate,  'gf':gaunt_factor,
+            'prefactor':prefactor}
 
 
     def itoh_gaunt_factor(self, wavelength):

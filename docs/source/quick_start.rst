@@ -1166,7 +1166,7 @@ the radiative loss rate can be calculated as a function of temperature and densi
 ::
 
   temp = 10.**(4.+0.05*arange(81))
-  rl = ch.radLoss(temp, 1.e+4, minAbund=2.e-5)
+  rl = ch.radLoss(temp, 1.e+4, minAbund=1.e-5)
 
 
 these calculations can take some time so it is a good idea to save them
@@ -1191,6 +1191,46 @@ the radiative losses are kept in the rl.RadLoss dictionary
 the **abundance** keyword argument can be set to the name of an available abundance file in XUVTOP/abund
 
 if abundance='abc', or some name that does not match an abundance name, a dialog will come up so that a abundance file can be selected
+
+or:
+
+::
+
+  abundDir = os.path.join(os.environ['XUVTOP'], 'abundance')
+
+::
+
+  abundList = os.listdir(abundDir)
+
+::
+
+  for idx, aname in enumerate(abundList):
+    print('%5i  %s'%(idx, aname))
+
+::
+
+  rl2 = ch.radLoss(temp, dens, elementList=['h', 'he'], abundance=abundList[2], verbose=1)
+
+
+::
+
+  plt.figure()
+  plt.loglog(temp, rl2.RadLoss['rate'], 'k', label='Total')
+  plt.loglog(temp, rl2.BoundBoundLoss, label = 'BB')
+  plt.loglog(temp, rl2.FreeFreeLoss, label = 'FF')
+  plt.loglog(temp, rl2.FreeBoundLoss, label = 'FB')
+  plt.loglog(temp, rl2.TwoPhotonLoss, label = '2P')
+  plt.xlabel(rl2.RadLoss['xlabel'], fontsize=14)
+  plt.ylabel(rl2.RadLoss['ylabel'], fontsize=14)
+  plt.legend(loc='lower center', fontsize=14)
+  plt.tight_layout()
+
+::
+
+  produces
+
+.. image:: _static/radloss_h_he.png
+    :align:  center
 
 
 Jupyter Notebooks

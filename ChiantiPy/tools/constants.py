@@ -18,6 +18,7 @@ from scipy import special
 
 planck = 6.6260693e-27   #erg s
 planckEv = 4.13566743e-15  # ev s
+hbar = planck/(2.*np.pi)
 light = 29979245800.  # cm/s
 q = 4.80320425e-10  # the units of charge
 ev2Ang = 12.39841875e+3

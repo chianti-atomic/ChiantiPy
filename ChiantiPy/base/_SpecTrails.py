@@ -47,12 +47,13 @@ class specTrails(object):
                 minAbund = float(minAbundAll)
         ionInfo = chio.masterListInfo()
         #
-        if hasattr(self, 'Wavelength'):
-            wvlRange = [self.Wavelength.min(), self.Wavelength.max()]
-        elif hasattr(self, 'WvlRange'):
-            wvlRange = self.WvlRange
-        else:
-            print(' need a wavelength range in ionGate ')
+        if doWvlTest:
+            if hasattr(self, 'Wavelength'):
+                wvlRange = [self.Wavelength.min(), self.Wavelength.max()]
+            elif hasattr(self, 'WvlRange'):
+                wvlRange = self.WvlRange
+            else:
+                print(' need a wavelength range in ionGate ')
         #
         temperature = self.Temperature
         #

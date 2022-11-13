@@ -153,6 +153,7 @@ class mspectrum(ionTrails, specTrails):
         else:
             self.AbundanceName = self.Defaults['abundfile']
             abundAll = chdata.Abundance[self.AbundanceName]['abundance']
+
         # needed by ionGate
         self.Abundance = abundAll
         self.AbundAll = abundAll

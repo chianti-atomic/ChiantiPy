@@ -23,6 +23,7 @@ class ioneqOne(object):
             ioneqAll = self.IoneqAll
         else:
             self.IoneqAll = chdata.IoneqAll
+            ioneqAll = self.IoneqAll
         #
         ioneqTemperature = self.IoneqAll['ioneqTemperature']
         Z = self.Z

@@ -900,6 +900,13 @@ def units(defaults):
 
     radlossTlabel = 'Temperature (K)'
     radlossYlabel = 'erg  s$^{-1}$ cm$^{3}$'
+
+
+    # get rate labels
+
+    rateTlabel = 'Temperature (K)'
+    rateYlabel = 's$^{-1}$ cm$^{3}$'
+
     labels = {}
     labels['xlabel'] = xlabel
     labels['listXlabel'] = listXlabel
@@ -908,6 +915,8 @@ def units(defaults):
     labels['spectrumYlabel'] = spYlabel
     labels['radlossTlabel'] = radlossTlabel
     labels['radlossYlabel'] = radlossYlabel
+    labels['rateTlabel'] = rateTlabel
+    labels['rateYlabel'] = rateYlabel
 
     return labels
 

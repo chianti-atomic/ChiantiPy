@@ -3,7 +3,7 @@ Base classes used in the `ChiantiPy.core.ion` and `ChiantiPy.core.spectrum`
 classes. Mostly printing, plotting and saving routines.
 """
 import copy
-import time
+
 import numpy as np
 
 import matplotlib.pyplot as plt

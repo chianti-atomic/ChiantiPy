@@ -297,7 +297,7 @@ class ion(ioneqOne, ionTrails, specTrails):
                 # don't expect one for the bare ion
                 if verbose:
                     print(' Elvlc file missing for '+self.IonStr)
-            return
+#            return
         cilvlFile = fileName +'.cilvl'
         if os.path.isfile(cilvlFile):
             self.Cilvl = io.cireclvlRead('',filename = fileName,
@@ -334,6 +334,12 @@ class ion(ioneqOne, ionTrails, specTrails):
             self.EaParams = io.eaRead('',  filename=easplupsFile)
             ups = self.eaDescale()
             self.EaParams['ups'] = ups
+
+        if not hasattr(self, 'IoneqOne'):
+            if verbose:
+                print(' getting ioneqone')
+            self.IoneqAll = chdata.IoneqAll
+            self.ioneqOne()
 
     def diCross(self, energy=None, verbose=False):
         """

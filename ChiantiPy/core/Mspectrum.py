@@ -50,11 +50,13 @@ class mspectrum(ionTrails, specTrails):
 
     em [for emission measure], can be a float or an array of the same length as the
     temperature/density.
+
     allLines = 1 will include lines with either theoretical or observed wavelengths.  allLines=0 will
     include only those lines with observed wavelengths
 
-    proc = the number of processors to use
-    timeout - a small but non-zero value seems to be necessary
+    proc, the number of processors to use
+
+    timeout,   a small but non-zero value seems to be necessary
     keepIons:  set this to keep the ion instances that have been calculated in a dictionary
     self.IonInstances with the keywords being the CHIANTI-style ion names
 

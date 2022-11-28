@@ -59,6 +59,14 @@ ChiantiPy\.core\.RadLoss module
     :undoc-members:
     :show-inheritance:
 
+ChiantiPy\.core\.MradLoss module
+--------------------------------
+
+.. automodule:: ChiantiPy.core.MradLoss
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ChiantiPy\.core\.Bunch module
 --------------------------------
 

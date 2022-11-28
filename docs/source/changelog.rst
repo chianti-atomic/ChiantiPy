@@ -13,6 +13,8 @@ The free-bound continuum now includes the photoionization cross sections of Vern
 
 The free-free continuum has been correction to use the ion charge, not the nuclear charge previously used
 
+A new class MradLoss.mradLoss has been created.  It allows multiprocessing calculations of the radiative loss rate
+
 The chiantirc file can now also be place in the $HOME/.config directory
 
 

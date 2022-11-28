@@ -61,6 +61,7 @@ class radLoss(ionTrails, specTrails):
             masterlist = alist
         self.Defaults=chdata.Defaults
         self.argCheck(temperature=temperature, eDensity=eDensity, pDensity=None, em=None)
+        self.Labels = util.units(chdata.Defaults)
 
         #
         if abundance is not None:

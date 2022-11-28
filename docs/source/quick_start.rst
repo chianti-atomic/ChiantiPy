@@ -553,8 +553,11 @@ The module continuum provides the ability to calculate the free-free and free-bo
   temperature = [2.e+7, 3.e+7, 6.e+7]
   density = 1.e+9
   em = [1.e+27, 1.e+27, 1.e+27]
-  c = ch.continuum(myIon, temperature = temperature, em=em)
   wvl = 0.5 + 0.002*np.arange(4501)
+
+::
+
+  c = ch.continuum(myIon, temperature = temperature, em=em)
   c.freeFree(wvl)
   c.freeBound(wvl)
   fe25=ch.ion(myIon, temperature, density, em=em)
@@ -594,8 +597,12 @@ produces
   temperature = [3.e+6, 6.e+6]
   density = 1.e+9
   em = [2.e+27,1.e+27]
-  c = ch.continuum(myIon, temperature = temperature, em=em)
   wvl = 2. + 0.2*np.arange(701)
+
+
+::
+
+  c = ch.continuum(myIon, temperature = temperature, em=em)
   c.freeFree(wvl)
   c.freeBound(wvl)
   o8 = ch.ion(myIon, temperature, density, em=em)
@@ -634,7 +641,13 @@ The multi-ion class **bunch** [new in v0.6] inherits a number of the same method
 ::
 
   temp = 10.**(5.0+0.1*np.arange(11))
-  bnch=ch.bunch(temp, 1.e+9, wvlRange=[300.,500.], ionList=['ne_6','mg_6'], abundance='unity', em=1.e+27)
+  dens = 1.e+9
+  wvlRange = [wvl.min(),wvl.max()]
+
+
+::
+
+  bnch=ch.bunch(temp, 1.e+9, wvlRange=wvlRange, ionList=['ne_6','mg_6'], abundance='unity', em=1.e+27)
   bnch.intensityRatio(wvlRange=[395.,405.], top=7)
 
 produces and initial plot of the selected lines, a selection widget and finally a plot of the ratio
@@ -679,7 +692,10 @@ the saveData method creates a dict of all of the attributes of the bnch instance
 ::
 
   mybnch.keys()
-  mybunch['Intensity']['intensity'].shape
+
+::
+
+  mybnch['Intensity']['intensity'].shape
 
 
 with version 0.14.1, the redux class is introduced to allow the use of the pickled data inside a class that inherits such methods as intensityPlot and spectrumPlot
@@ -687,11 +703,20 @@ with version 0.14.1, the redux class is introduced to allow the use of the pickl
 ::
 
     rebnch = ch.redux(dataName, verbose=False)
+
+::
+
     rebnch.intensityPlot(index=5, wvlRange=[398., 404.])
 
 then returns the above plot
 
 A new keyword argument **keepIons** has been added in v0.6 to the bunch and the 3 spectrum classes.  It should be used with some care as it can lead to very large instances in the case of a large number of ions, temperature, or densities.
+
+::
+
+  temp = 10.**(5.0+0.2*np.arange(6))
+  dens = 1.e+9
+
 
 ::
 
@@ -701,7 +726,8 @@ A new keyword argument **keepIons** has been added in v0.6 to the bunch and the 
 
 ::
 
-  bnch2=ch.bunch(temp, 1.e+9, wvlRange=[wvl.min(),wvl.max()], elementList=['ne','mg'], keepIons=1,em=1.e+27)
+  bnch2=ch.bunch(temp, 1.e+9, wvlRange=[wvl.min(),wvl.max()], elementList=['ne','mg'], \
+    keepIons=1,em=1.e+27)
 
 ::
 
@@ -736,12 +762,15 @@ these IonInstances have all the properties of the Ion class for each of these io
 
 ::
 
-  plt.plot(wvl,bnch2.IonInstances['mg_6'].Spectrum['intensity'][6],'r',label='mg_6')
-  plt.legend(loc='upper left')
+  bnch2.spectrumPlot(integrated=True, doLabel=False)
+  plt.plot(wvl,bnch2.IonInstances['mg_6'].Spectrum['integrated'],'r',label='mg_6')
+  plt.xlim(left=398., right=404.)
+  plt.legend(loc='upper left', fontsize=14)
+
 
 produces
 
-.. image:: _static/ne6_mg6_spectrum.png
+.. image:: _static/bunch_spectrum_integrated_mg6.png
     :align:  center
 
 
@@ -1066,7 +1095,8 @@ then in an IPython notebook or qtconsole
 
 ::
 
-  s = ch.ipymspectrum(temp, dens, wvl, filter = (chfilters.gaussian,.2), em = emeasure, doContinuum=1, minAbund=1.e-5, verbose=True)
+  s = ch.ipymspectrum(temp, dens, wvl, filter = (chfilters.gaussian,.2), \
+    em = emeasure, doContinuum=1, minAbund=1.e-5, verbose=True)
 
 ::
 
@@ -1097,7 +1127,8 @@ spectrum, mspectrum and ipymspectrum can all be instantiated with the same argum
 
 ::
 
-  s = ch.ipymspectrum(temp, dens, wvl, filter = (chfilters.gaussian,.015), elementList=['fe'])
+  s = ch.ipymspectrum(temp, dens, wvl, filter = (chfilters.gaussian,.015), \
+    elementList=['fe'])
 
 ::
 
@@ -1113,7 +1144,8 @@ It is also possible to specify a selection of ions by means of the *ionList* key
 
 ::
 
-  s2 = ch.ipymspectrum(temp, dens, wvl, filter = (chfilters.gaussian,.2), em = emeasure, doContinuum=0, keepIons=1, elementList=['si'])
+  s2 = ch.ipymspectrum(temp, dens, wvl, filter = (chfilters.gaussian,.2), \
+    em = emeasure, doContinuum=0, keepIons=1, elementList=['si'])
 
 ::
 
@@ -1143,7 +1175,8 @@ Because **keepIons** has been set, the ion instances of all of the ions are main
   density = 1.e+9
   em = 1.e+27
   wvl = 1.84 + 0.0001*arange(601)
-  s4 = ch.ipymspectrum(temperature, density ,wvl, filter = (chfilters.gaussian,.0003), doContinuum=1, minAbund=1.e-5, em=em, verbose=0)
+  s4 = ch.ipymspectrum(temperature, density ,wvl, filter = (chfilters.gaussian,.0003), \
+    doContinuum=1, minAbund=1.e-5, em=em, verbose=0)
 
 ::
 
@@ -1161,19 +1194,49 @@ There are two demo notebooks, spectrum_demo.ipynb and spectrum_demo_2.ipynb in t
 Radiative loss rate
 -------------------
 
-the radiative loss rate can be calculated as a function of temperature and density:
+the radiative loss rate can be calculated as a function of temperature and density.  If all elements are included, the calculation can take some time.  So, for a shorter example:
+
 
 ::
 
-  temp = 10.**(4.+0.05*arange(81))
-  rl = ch.radLoss(temp, 1.e+4, minAbund=1.e-5)
+  temp = 10.**(4.+0.05*np.arange(81))
+  dens = 1.e+9
+  rlhhe = ch.radLoss(temp, dens, elementList=['h', 'he'])
+
+
+::
+
+  plt.figure()
+  rl.radLossPlot()
+
+produces, in 2s:
+
+.. image:: _static/radloss_hhe.png
+    :align:  center
+
+with version 0.15.0, the class mradLoss is available for doing a multiprocessor calculation
+of the radiation loss
+
+
+::
+
+  temp = 10.**(4.+0.05*np.arange(81))
+  dens = 1.e+9
+
+
+the following will calculate the radiation loss for elements with an abundance greater the 1.e-5 that of the hydrogen abundance.  In this case the default abundance file is for photospheric abundances
+
+
+::
+
+  mrl = ch.mradLoss(temp, dens, minAbund=1.e-5)
 
 
 these calculations can take some time so it is a good idea to save them
 
 ::
 
-  rl.saveData('radloss.pkl')
+  mrl.saveData('rl_phot_1m5.pkl')
 
 ::
 
@@ -1182,7 +1245,7 @@ these calculations can take some time so it is a good idea to save them
 
 produces, in 446 s:
 
-.. image:: _static/radloss.png
+.. image:: _static/rl_phot_1m5.png
     :align:  center
 
 
@@ -1207,21 +1270,45 @@ or:
   for idx, aname in enumerate(abundList):
     print('%5i  %s'%(idx, aname))
 
+to select photospheric abundances
+
+
 ::
 
-  rl2 = ch.radLoss(temp, dens, elementList=['h', 'he'], abundance=abundList[2], verbose=1)
+  myAbund = abundList[4]
+
+
+::
+
+  mrl2 = ch.radLoss(temp, dens, minAbund=1.e-5, abundance=myAbund, verbose=1)
+
+::
+
+  saveName = 'rl_coronal_1m5.pkl'
+  mrl2.saveData(saveName)
+
+::
+
+  plt.figure()
+  mrl2.radLossPlot()
+
+produces after 1550s on a rather slow 6 core processor
+
+
+.. image:: _static/rl_coronal_1m5.png
+    :align:  center
 
 
 ::
 
   plt.figure()
-  plt.loglog(temp, rl2.RadLoss['rate'], 'k', label='Total')
-  plt.loglog(temp, rl2.BoundBoundLoss, label = 'BB')
-  plt.loglog(temp, rl2.FreeFreeLoss, label = 'FF')
-  plt.loglog(temp, rl2.FreeBoundLoss, label = 'FB')
-  plt.loglog(temp, rl2.TwoPhotonLoss, label = '2P')
-  plt.xlabel(rl2.RadLoss['xlabel'], fontsize=14)
-  plt.ylabel(rl2.RadLoss['ylabel'], fontsize=14)
+  plt.loglog(temp, mrl2.RadLoss['rate'], 'k', label='Total')
+  plt.loglog(temp, mrl2.BoundBoundLoss, label = 'BB')
+  plt.loglog(temp, mrl2.FreeFreeLoss, label = 'FF')
+  plt.loglog(temp, mrl2.FreeBoundLoss, label = 'FB')
+  plt.loglog(temp, mrl2.TwoPhotonLoss, label = '2P')
+  plt.xlabel(mrl2.RadLoss['xlabel'], fontsize=14)
+  plt.ylabel(mrl2.RadLoss['ylabel'], fontsize=14)
   plt.legend(loc='lower center', fontsize=14)
   plt.tight_layout()
 
@@ -1229,7 +1316,32 @@ or:
 
   produces
 
-.. image:: _static/radloss_h_he.png
+.. image:: _static/rl_phot_tot_bb_fb_ff_2ph.png
+    :align:  center
+
+to compare photospheric and coronal radiation losses
+
+::
+
+  rlph = ch.redux(saveNamePhot)
+  rlco = ch.redux(saveNameCoronal)
+
+::
+
+  plt.figure()
+  plt.loglog(temp, rlph.RadLoss['rate'], label='Phot')
+  plt.loglog(temp, rlco.RadLoss['rate'], label='Coronal')
+  plt.ylim(bottom=1.e-23, top=2.e-21)
+  plt.xlabel(rlph.RadLoss['xlabel'], fontsize=14)
+  plt.ylabel(rlph.RadLoss['ylabel'], fontsize=14)
+  plt.legend(loc='lower center', fontsize=14)
+  plt.tight_layout()
+
+
+
+produces
+
+.. image:: _static/rl_phot_coronal_1m5.png
     :align:  center
 
 

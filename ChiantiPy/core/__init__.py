@@ -11,6 +11,7 @@ from .Mspectrum import mspectrum
 from .IpyMspectrum import ipymspectrum
 from .Continuum import continuum
 from .RadLoss import radLoss
+from .MradLoss import mradLoss
 from .Ion import ion
 from .Ioneq import ioneq
 from .Redux import redux

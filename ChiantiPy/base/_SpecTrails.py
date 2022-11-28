@@ -444,7 +444,7 @@ class specTrails(object):
             index = 0
             lineIntensity = self.Intensity['intensity'][0]
             if hasattr(self, 'Continuum'):
-                continuum = self.Continuum['intensity'][0]
+                continuum = self.Continuum['intensity']
             else:
                 continuum = np.zeros_like(lineIntensity)
             lineWvl = self.Intensity['wvl']
@@ -477,7 +477,9 @@ class specTrails(object):
             self.Message = 'No lines in this wavelength interval'
             return
         elif top is None:
-            top = lineWvl.size
+#            top = lineWvl.size
+            top = 0
+            lineWvl = []
         elif lineWvl.size > top:
             intsrt = np.argsort(lineIntensity)
             lineWvl = lineWvl[intsrt[-top:]]

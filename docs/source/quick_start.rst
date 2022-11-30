@@ -4,7 +4,7 @@ Quick Start
 
 This short tutorial will demonstrate some of the capabilities of ChiantiPy and the CHIANTI database.  It assumes that you know what the CHIANTI database provides and why you want to use it.  It is useful to begin by exploring the properties of the **ion class**, as much of ChiantiPy is based on it.  An ion such as Fe XIV is specified by the string 'fe_14', in the usual CHIANTI notation.
 
-Perhaps the easiest way is to use a jupyter-notebook or a jupyter3-notebook to load the quick start notebook file QuickStart.ipynb in the directory jupyter_notebooks.  Then, just run each cell step by step.  If you are not familiar with notebooks, then you can cut and paste the following code into a Python/IPython session.
+Perhaps the easiest way is to use a jupyter-notebook is to load the quick start notebook file QuickStart.ipynb in the directory jupyter_notebooks.  Then, just run each cell step by step.  If you are not familiar with notebooks, then you can cut and paste the following code into a Python/IPython session.
 
 N.B.:  in the time some of the plots and data were produced, there have been some changes to ChiantiPy and CHIANTI.  It is possible that you might find differences (hopefully small).
 
@@ -12,11 +12,99 @@ Bring up a Python session (using > Python -i ), or better yet, an IPython sessio
 
 ::
 
+  import os
+
+
+the following will show the XUVTOP directory
+
+::
+
+  os.environ['XUVTOP']
+
+
+::
+
+  import ChiantiPy
   import ChiantiPy.core as ch
+  import ChiantiPy.tools.filters as chfilters
+  import ChiantiPy.tools.io as chio
   import numpy as np
   import matplotlib.pyplot as plt
 
-What we will really be interested in are various properties of the Fe XIV emissivities as a function of temperature and density.  So, let's define a numpy array of temperatures
+::
+
+  matplotlib qt
+
+::
+
+  autoreload 2
+
+to see the ChiantiPy version
+
+::
+
+  ChiantiPy.__version__
+
+
+to see the Ipython version
+
+::
+
+  import IPython
+  print(' IPython version = %i.%i.%i'%(IPython.version_info[0],IPython.version_info[1],IPython.version_info[2]))
+
+It is useful to open a qtconsole where are the calculations can be easily examined
+
+::
+
+  qtconsole
+
+to see the version of the CHIANTI database
+
+::
+
+  chianti_version = chio.versionRead()
+
+::
+
+  chianti_version
+
+Setting default values
+----------------------
+
+ChiantiPy determines a number of default setting on instantiation.  To use the default values list below, it is not necssary to do anything.
+
+
+==========  ===========================  =====================
+setting     default                      possible values
+==========  ===========================  =====================
+wavelength  angstrom                     angstrom, nm, ev, kev
+flux        energy                       energy, photon
+abundfile   sun_photospheric_2015_scott  any.abund
+ioneqfile   chianti                      any.ioneq
+==========  ===========================  =====================
+
+
+to use any of the other possible values, check out the notes/setting_default_values in the documentation
+
+the defaults can be checked
+
+::
+
+  chdata.Defaults.keys()
+
+
+::
+
+  chdata.Defaults['wavelength']
+
+
+
+Level populations
+-----------------
+
+
+As a start, we will examine the various properties of the Fe XIV emissivities as a function of temperature and density.  So, let's define a numpy array of temperatures
 
 ::
 
@@ -31,8 +119,6 @@ In ChiantiPy, temperatures are currently given in degrees Kelvin and densities a
 note that eDensity is the new keyword for electron density
 
 
-Level populations
------------------
 
 ::
 
@@ -1241,9 +1327,9 @@ these calculations can take some time so it is a good idea to save them
 ::
 
   plt.figure()
-  rl.radLossPlot()
+  mrl.radLossPlot()
 
-produces, in 446 s:
+produces, produces after 250s on a 3.5 GHz 4 core processor:
 
 .. image:: _static/rl_phot_1m5.png
     :align:  center
@@ -1277,6 +1363,10 @@ to select photospheric abundances
 
   myAbund = abundList[4]
 
+::
+
+ myAbund
+
 
 ::
 
@@ -1292,7 +1382,7 @@ to select photospheric abundances
   plt.figure()
   mrl2.radLossPlot()
 
-produces after 1550s on a rather slow 6 core processor
+produces after 250s on a 3.5 GHz 4 core processor
 
 
 .. image:: _static/rl_coronal_1m5.png

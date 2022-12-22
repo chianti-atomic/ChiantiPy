@@ -501,6 +501,8 @@ def diRead(ions, filename=None):
         eaev = [float(avalue) for avalue in eacoef]
     else:
         eaev = 0.
+    # skip the  -1
+    line = input.readline()
     ref = []
     hdr = input.readlines()
     for ahdr in hdr:

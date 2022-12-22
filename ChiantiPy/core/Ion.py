@@ -518,7 +518,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             nspl = self.EaParams["nspl"][isplups]
             de = self.EaParams["de"][isplups]
             dx = 1./(float(nspl)-1.)
-            splups = self.EaParams["splups"][isplups,0:nspl]
+            splups = self.EaParams["splups"][isplups][0:nspl]
             kte = const.boltzmannEv*temperature/(const.ryd2Ev*de)
             if ttype == 1:
                 st = 1.-np.log(cups)/np.log(kte+cups)

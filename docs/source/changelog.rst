@@ -5,7 +5,7 @@ Changelog
 Changes from 0.14.1 to 0.15.0
 =============================
 
-Significant improvement have been made.  It is now possible to calculate spectral line intensities in wavelength/energy units of angstroms, nn, eV, or keV
+Significant improvement have been made.  It is now possible to calculate spectral line intensities in wavelength/energy units of angstroms, nm, eV, or keV
 
 Calculations of the continuum still require that the wavelengths are in angstroms.
 
@@ -15,7 +15,7 @@ The free-free continuum has been correction to use the ion charge, not the nucle
 
 A new class MradLoss.mradLoss has been created.  It allows multiprocessing calculations of the radiative loss rate
 
-The chiantirc file can now also be place in the $HOME/.config directory
+The chiantirc file can now also be placed in the $HOME/.config directory
 
 
 Changes from 0.14.0 to 0.14.1

@@ -167,6 +167,9 @@ class ion(ioneqOne, ionTrails, specTrails):
             if np.any(temperature) is not None:
                 self.Temperature = np.atleast_1d(temperature)
                 self.Ntemp = self.Temperature.size
+            self.IoneqAll = chdata.IoneqAll
+            self.argCheck(temperature, eDensity, pDensity, em)
+            self.ioneqOne()
             self.setupIonrec()
 
 

@@ -16,6 +16,8 @@ import ChiantiPy.Gui as chgui
 from  ChiantiPy.fortranformat import FortranRecordReader
 
 today = date.today()
+chRef = ['produced as a part of the \'CHIANTI\' atomic database for astrophysical spectroscopy', ' K. Dere (GMU) - ' + today.strftime('%Y %B %d')]
+
 
 def abundanceRead(abundancename=None, verbose=False):
     """
@@ -2222,50 +2224,51 @@ def wgfaWrite(info, outfile = None, minBranch = 1.e-5, rightDigits = 4, maxLvl1 
     print((' wgfa file name = ', wgfaname))
     if minBranch > 0.:
         info['ref'].append(' minimum branching ratio = %10.2e'%(minBranch))
-    out = open(wgfaname, 'w')
-    #ntrans = len(info['lvl1'])
-    nlvl = max(info['lvl2'])
-    totalAvalue = np.zeros(nlvl, np.float64)
-    if 'pretty1' in info:
-        pformat = '%5i%5i%15.' + str(rightDigits) + 'f%15.3e%15.3e%30s - %30s'
-    else:
-        pformat = '%5i%5i%15.' + str(rightDigits) + 'f%15.3e%15.3e'
-    for itrans, avalue in enumerate(info['avalue']):
-        # for autoionization transitions, lvl1 can be less than zero
-        if abs(info['lvl1'][itrans]) > 0 and info['lvl2'][itrans] > 0:
-            totalAvalue[info['lvl2'][itrans] -1] += avalue
+    info['ref'].extend(chRef)
+    with open(wgfaname, 'w') as outpt:
+        #ntrans = len(info['lvl1'])
+        nlvl = max(info['lvl2'])
+        totalAvalue = np.zeros(nlvl, np.float64)
+        if 'pretty1' in info:
+            pformat = '%5i%5i%15.' + str(rightDigits) + 'f%15.3e%15.3e%30s - %30s'
+        else:
+            pformat = '%5i%5i%15.' + str(rightDigits) + 'f%15.3e%15.3e'
+        for itrans, avalue in enumerate(info['avalue']):
+            # for autoionization transitions, lvl1 can be less than zero
+            if abs(info['lvl1'][itrans]) > 0 and info['lvl2'][itrans] > 0:
+                totalAvalue[info['lvl2'][itrans] -1] += avalue
 
-    for itrans, avalue in enumerate(info['avalue']):
-        if info['wvl'][itrans] == 0.:
-            branch = 1.
-        elif avalue > 0.:
-            branch = avalue/totalAvalue[info['lvl2'][itrans] -1]
-        else:
-            branch = 0.
-        test1 = branch > minBranch
-        test2 = abs(info['lvl1'][itrans]) > 0
-        test3 = info['lvl2'][itrans] > 0
-        if maxLvl1:
-            test4 = info['lvl1'][itrans] <= maxLvl1
-        else:
-            test4 = True
-        if test1 and test2 and test3 and test4:
-            if 'pretty1' in info:
-                # generally only useful with NIST data
-                if 'transType' in info:
-                    if info['transType'][itrans] != '':
-                        lbl2 = info['pretty2']+'  ' + info['transType'][itrans]
-                else:
-                    lbl2 =  info['pretty2'][itrans]
-                pstring = pformat%(info['lvl1'][itrans], info['lvl2'][itrans], info['wvl'][itrans], info['gf'][itrans], avalue, info['pretty1'][itrans].rjust(30), lbl2.ljust(30))
-                out.write(pstring+'\n')
+        for itrans, avalue in enumerate(info['avalue']):
+            if info['wvl'][itrans] == 0.:
+                branch = 1.
+            elif avalue > 0.:
+                branch = avalue/totalAvalue[info['lvl2'][itrans] -1]
             else:
-                pstring = pformat%(info['lvl1'][itrans], info['lvl2'][itrans], info['wvl'][itrans], info['gf'][itrans], avalue)
-                out.write(pstring+'\n')
-    out.write(' -1\n')
-    out.write('%filename:  ' + wgfaname + '\n')
-    for one in info['ref']:
-        out.write(one+'\n')
-    out.write(today.strftime('%Y %B %d') +'\n')
-    out.write(' -1 \n')
-    out.close()
+                branch = 0.
+            test1 = branch > minBranch
+            test2 = abs(info['lvl1'][itrans]) > 0
+            test3 = info['lvl2'][itrans] > 0
+            if maxLvl1:
+                test4 = info['lvl1'][itrans] <= maxLvl1
+            else:
+                test4 = True
+            if test1 and test2 and test3 and test4:
+                if 'pretty1' in info:
+                    # generally only useful with NIST data
+                    if 'transType' in info:
+                        if info['transType'][itrans] != '':
+                            lbl2 = info['pretty2']+'  ' + info['transType'][itrans]
+                    else:
+                        lbl2 =  info['pretty2'][itrans]
+                    pstring = pformat%(info['lvl1'][itrans], info['lvl2'][itrans], info['wvl'][itrans], info['gf'][itrans], avalue, info['pretty1'][itrans].rjust(30), lbl2.ljust(30))
+                    outpt.write(pstring+'\n')
+                else:
+                    pstring = pformat%(info['lvl1'][itrans], info['lvl2'][itrans], info['wvl'][itrans], info['gf'][itrans], avalue)
+                    outpt.write(pstring+'\n')
+        outpt.write(' -1\n')
+        outpt.write('%filename:  ' + wgfaname + '\n')
+        for one in info['ref']:
+            outpt.write(one+'\n')
+        outpt.write(today.strftime('%Y %B %d') +'\n')
+        outpt.write(' -1 \n')
+

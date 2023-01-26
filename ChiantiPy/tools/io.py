@@ -249,9 +249,9 @@ def autoRead(ions, filename=None, total=True, verbose=False):
     return Auto
 
 
-def autoWrite(info, outfile = None, minBranch = None):
+def autoWrite(info, filename = None, minBranch = None):
     """
-    Write data to a CHIANTI .wgfa file
+    Write data to a CHIANTI .wgfa style file
 
     Parameters
     ----------
@@ -270,8 +270,8 @@ def autoWrite(info, outfile = None, minBranch = None):
     """
     #
 #    gname = info['ionS']
-    if outfile:
-        autoname = outfile
+    if filename:
+        autoname = filename
     else:
         print(' output filename not specified, no file will be created')
         return
@@ -280,37 +280,41 @@ def autoWrite(info, outfile = None, minBranch = None):
         minBranch = 0.
     else:
         info['ref'].append(' minimum branching ratio = %10.2e'%(minBranch))
-    out = open(autoname, 'w')
-    #ntrans = len(info['lvl1'])
-    nlvl = max(info['lvl2'])
-    totalAvalue = np.zeros(nlvl, np.float64)
-    if 'pretty1' in info:
-        pformat = '%7i%7i%12.2e%30s - %30s'
-    else:
-        pformat = '%%7i%7i%12.2e'
-    for itrans, avalue in enumerate(info['avalue']):
-        # for autoionization transitions, lvl1 can be less than zero???
-        if abs(info['lvl1'][itrans]) > 0 and info['lvl2'][itrans] > 0:
-            totalAvalue[info['lvl2'][itrans] -1] += avalue
-
-    for itrans, avalue in enumerate(info['avalue']):
-        if avalue > 0.:
-            branch = avalue/totalAvalue[info['lvl2'][itrans] -1]
+    with open(autoname, 'w') as out:
+        #ntrans = len(info['lvl1'])
+        nlvl = max(info['lvl2'])
+        totalAvalue = np.zeros(nlvl, np.float64)
+        if 'pretty1' in info:
+            pformat = '%7i%7i%12.2e%30s - %30s'
         else:
-            branch = 0.
-        if branch > minBranch and abs(info['lvl1'][itrans]) > 0 and info['lvl2'][itrans] > 0:
-            if 'pretty1' in info:
-                lbl2 =  info['pretty2'][itrans]
-                pstring = pformat%(info['lvl1'][itrans], info['lvl2'][itrans], avalue, info['pretty1'][itrans].rjust(30), lbl2.ljust(30))
-                out.write(pstring+'\n')
+            pformat = '%%7i%7i%12.2e'
+        for itrans, avalue in enumerate(info['avalue']):
+            # for autoionization transitions, lvl1 can be less than zero???
+            if abs(info['lvl1'][itrans]) > 0 and info['lvl2'][itrans] > 0:
+                totalAvalue[info['lvl2'][itrans] -1] += avalue
+
+        for itrans, avalue in enumerate(info['avalue']):
+            if avalue > 0.:
+                branch = avalue/totalAvalue[info['lvl2'][itrans] -1]
             else:
-                pstring = pformat%(info['lvl1'][itrans], info['lvl2'][itrans], avalue)
-                out.write(pstring+'\n')
-    out.write(' -1 \n')
-    out.write('%filename:  ' + autoname + '\n')
-    for one in info['ref']:
-        out.write(one+'\n')
-    out.close()
+                branch = 0.
+            if branch > minBranch and abs(info['lvl1'][itrans]) > 0 and info['lvl2'][itrans] > 0:
+                if 'pretty1' in info:
+                    lbl2 =  info['pretty2'][itrans]
+                    pstring = pformat%(info['lvl1'][itrans], info['lvl2'][itrans], avalue, info['pretty1'][itrans].rjust(30), lbl2.ljust(30))
+                    out.write(pstring+'\n')
+                else:
+                    pstring = pformat%(info['lvl1'][itrans], info['lvl2'][itrans], avalue)
+                    out.write(pstring+'\n')
+        out.write(' -1 \n')
+        cnt = 0
+        for one in info['ref']:
+            if 'filename' in one:
+                cnt += 1
+        if cnt == 0:
+            out.write('%filename:  ' + filename + '\n')
+        for one in info['ref']:
+            out.write(one+'\n')
 
 def cireclvlRead(ions, filename=None, filetype='cilvl'):
     """
@@ -751,8 +755,10 @@ def elvlcRead(ions, filename=None, getExtended=False, verbose=False, useTh=True)
     for i in range(nlvls+1,len(s1)):
         s1a = s1[i]
         ref.append(s1a.strip())
+    newref = [aref.strip() for aref in ref if aref.strip() != '-1']
+
     info = {"lvl":lvl,"conf":conf, "term":term,'label':label, "spin":spin, "spd":spd, "l":l, "j":j,
-             'mult':mult, "ecm":ecm, 'eryd':eryd,'erydth':erydth, "ecmth":ecmth, "ref":ref,
+             'mult':mult, "ecm":ecm, 'eryd':eryd,'erydth':erydth, "ecmth":ecmth, "ref":newref,
              "pretty":pretty, 'status':status, 'filename':elvlname}
     if getExtended:
         info['extended'] = extended
@@ -838,8 +844,17 @@ def elvlcWrite(info, outfile=None, round=0, addLvl=0, includeRyd=False, includeE
         pstring += '\n'
         out.write(pstring)
     out.write(' -1\n')
-    out.write('%filename:  ' + os.path.split(elvlcName)[1] + '\n')
-    for aref in info['ref']:
+    cnt = 0
+    for one in info['ref']:
+        if 'filename' in one:
+            cnt += 1
+    if cnt == 0:
+        out.write('%filename:  ' + elvlcName + '\n')
+
+    ref = info['ref']
+    newref = [aref.strip() for aref in ref if aref.strip() != '-1']
+
+    for aref in newref:
         out.write(aref + '\n')
     out.close()
     return
@@ -2178,7 +2193,9 @@ def wgfaRead(ions, filename=None, elvlcname=0, total=False, verbose=False):
     for i in range(nwvl+1,len(s1)):
         s1a = s1[i]
         ref.append(s1a.strip())
-    Wgfa = {"lvl1":lvl1,"lvl2":lvl2,"wvl":wvl,"gf":gf,"avalue":avalue,"ref":ref, 'ionS':ions, 'filename':wgfaname}
+    newref = [aref.strip() for aref in ref if aref.strip() != '-1']
+    Wgfa = {"lvl1":lvl1, "lvl2":lvl2, "wvl":wvl, "gf":gf, "avalue":avalue, "ref":newref, 'ionS':ions,
+        'filename':wgfaname}
     if total:
         avalueLvl = [0.]*max(lvl2)
         for iwvl in range(nwvl):
@@ -2192,7 +2209,7 @@ def wgfaRead(ions, filename=None, elvlcname=0, total=False, verbose=False):
     return Wgfa
 
 
-def wgfaWrite(info, outfile = None, minBranch = 1.e-5, rightDigits = 4, maxLvl1 = None):
+def wgfaWrite(info, filename = None, minBranch = 1.e-5, rightDigits = 4, maxLvl1 = None,  comment=None):
     """
     Write data to a CHIANTI .wgfa file
 
@@ -2209,14 +2226,27 @@ def wgfaWrite(info, outfile = None, minBranch = 1.e-5, rightDigits = 4, maxLvl1 
         pretty1, descriptive text of the lower level (optional),
         pretty2, descriptive text of the upper level (optiona),
         ref, reference text, a list of strings
-    outfile : `str`
+
+    filename : `str`
+
     minBranch : `~numpy.float64`
-        The transition must have a branching ratio greater than the specified minBranchto be written to the file
+        The transition must have a branching ratio greater than the specified minBranch
+            to be written to the file.  default = 1.e-5
+
+    rightDigits :  `int`
+        the number of digits to the right of the decimal point in the wavelength
+        default = 5
+
+    maxLvl1 : `int`
+        the largest level to be written. default is None
+
+    comment :  `str`
+        add a comment to the reference section.  default = None
     """
     #
 #    gname = info['ionS']
-    if outfile:
-        wgfaname = outfile
+    if filename:
+        wgfaname = filename
     else:
         print(' output filename not specified, no file will be created')
         return
@@ -2224,6 +2254,9 @@ def wgfaWrite(info, outfile = None, minBranch = 1.e-5, rightDigits = 4, maxLvl1 
     print((' wgfa file name = ', wgfaname))
     if minBranch > 0.:
         info['ref'].append(' minimum branching ratio = %10.2e'%(minBranch))
+    if comment is not None:
+        info['ref'].append(comment)
+
     info['ref'].extend(chRef)
     with open(wgfaname, 'w') as outpt:
         #ntrans = len(info['lvl1'])
@@ -2265,9 +2298,17 @@ def wgfaWrite(info, outfile = None, minBranch = 1.e-5, rightDigits = 4, maxLvl1 
                 else:
                     pstring = pformat%(info['lvl1'][itrans], info['lvl2'][itrans], info['wvl'][itrans], info['gf'][itrans], avalue)
                     outpt.write(pstring+'\n')
-        outpt.write(' -1\n')
-        outpt.write('%filename:  ' + wgfaname + '\n')
+        outpt.write(' -1 \n')
+        # if filename in ref, do not repeat
+        cnt = 0
         for one in info['ref']:
+            if 'filename' in one:
+                cnt += 1
+        if cnt == 0:
+            outpt.write('%filename:  ' + wgfaname + '\n')
+        ref = info['ref']
+        newref = [aref.strip() for aref in ref if aref.strip() != '-1']
+        for one in newref:
             outpt.write(one+'\n')
         outpt.write(today.strftime('%Y %B %d') +'\n')
         outpt.write(' -1 \n')

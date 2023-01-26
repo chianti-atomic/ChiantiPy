@@ -137,7 +137,8 @@ class ioneq(object):
                 ioneq[:, it] = ioneq[:, it]/ionsum
             self.Ioneq = ioneq
 
-    def plot(self, stages=0, tRange=0, yr=0, oplot=False, label=1, title=1,  bw=False, semilogx = 0, verbose=0):
+    def plot(self, stages=0, tRange=0, yr=0, oplot=False, label=1, title=1,  bw=False, semilogx=0,
+        heightAdjust = 1.3,  verbose=0):
         '''
         Plots the ionization equilibria.
 
@@ -201,7 +202,8 @@ class ioneq(object):
                 jdx = np.arange(len(idx))
                 idx = int(jdx[idx].max())
             ann = const.Ionstage[iz-1]
-            plt.annotate(ann, [self.Temperature[idx], 0.7*ioneq[iz-1, idx]], ha='center')
+            plt.annotate(ann, [self.Temperature[idx], heightAdjust*ioneq[iz-1, idx]], ha='center',
+                fontsize=fs)
         for iz in stages[1:]:
             if semilogx:
                 plt.semilogx(self.Temperature, ioneq[iz-1], linestyle[0], lw=lw)
@@ -213,7 +215,8 @@ class ioneq(object):
                     jdx = np.arange(len(idx))
                     idx = int(jdx[idx].mean())
                 ann = const.Ionstage[iz-1]
-                plt.annotate(ann, [self.Temperature[idx], 0.7*ioneq[iz-1, idx]], ha='center')
+                plt.annotate(ann, [self.Temperature[idx], heightAdjust*ioneq[iz-1, idx]], ha='center',
+                    fontsize=fs)
         plt.xlabel('Temperature (K)',  fontsize=fs)
         plt.ylabel('Ion Fraction',  fontsize=fs)
         atitle = 'Chianti Ionization Equilibrium for '+const.El[self.Z-1].capitalize()
@@ -245,6 +248,7 @@ class ioneq(object):
                 print(' oplot file not understood %s'%(oplot))
         if title:
             plt.title(atitle,  fontsize=fs)
+        plt.tick_params(labelsize=fs, which='both')
         plt.tight_layout()
         plt.axis(xyr)
 

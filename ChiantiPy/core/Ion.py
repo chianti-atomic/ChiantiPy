@@ -2930,7 +2930,14 @@ class ion(ioneqOne, ionTrails, specTrails):
         >>> int_ratios = np.linspace(0.1,0.8,20)
         >>> fe12.intensityRatioInterpolate(int_ratios)
         >>> dens_values = fe12.IntensityRatioInterpolated['value']
-            
+           
+        >>> # Same setup but using a 2D array of input data
+        >>> x = 10
+        >>> y = 30
+        >>> int_ratios_map = np.random.random((x,y))
+        >>> fe12.intensityRatioInterpolate(int_ratios_map,verbose=True)
+        >>> dens_values_map = fe12.IntensityRatioInterpolated['value'].reshape((x,y))
+        
         '''
 
         # First, what variable to use
@@ -2957,7 +2964,13 @@ class ion(ioneqOne, ionTrails, specTrails):
             sy = y
         
         # If necessary, flatten the input data in order to handle N-D arrays
-        
+        if len(np.shape(data)) > 1:
+            if verbose:
+                print('Input data have dimensions:')
+                print(np.shape(data))
+                print('They will be flattened!\n')                
+            data = np.array(data).flatten() # In case the data type is list
+            
         #
         if 'lin' in scale:
             y2 = splrep(x, sy, s=0)

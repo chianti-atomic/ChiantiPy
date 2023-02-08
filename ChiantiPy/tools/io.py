@@ -191,9 +191,9 @@ def autoRead(ions, filename=None, total=True, verbose=False):
         fname = util.ion2filename(ions)
         autoname = fname+'.auto'
     #
-    input = open(autoname,'r')
-    s1 = input.readlines()
-    input.close()
+    with open(autoname,'r') as input:
+        s1 = input.readlines()
+
     nwvl = 0
     ndata = 2
     while ndata > 1:

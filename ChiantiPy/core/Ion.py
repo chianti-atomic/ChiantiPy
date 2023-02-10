@@ -2465,48 +2465,47 @@ class ion(ioneqOne, ionTrails, specTrails):
             loss = intensity.sum()
         self.BoundBoundLoss = {'rate':loss, 'temperature':self.Temperature, 'eDensity':self.EDensity}
 
-<<<<<<< Updated upstream
     def intensityRatioInterpolate(self, data, scale='lin', plot=False, verbose=False):
         '''
         Take a set of data and interpolate against the IntensityRatio.
-        
-        Given a set of intensities ratio data it correlates them to electron density 
-        values. This is done by interpolating against the curve computed from 
+
+        Given a set of intensities ratio data it correlates them to electron density
+        values. This is done by interpolating against the curve computed from
         the IntenstyRatio (dict). For the interpolation, the B-spline representation
-        is used from scipy. 
-        
+        is used from scipy.
+
         Parameters
         ----------
-        data : float or array-like 
+        data : float or array-like
             The intensities ratio data to be converted into density values.
-            
+
         scale : {'lin', 'loglog', 'logx', 'logy'}, str, default : 'lin'
-            The scale to be used for the interpolation (default 'lin' indicates linear).   
-        
+            The scale to be used for the interpolation (default 'lin' indicates linear).
+
         plot : bool, default : False
             If True the input data will be plotted on top of the IntensityRatio
             curve.
-            
+
         verbose : bool, default : False
             If True displays a message about the physical quantity that was used
-            (i.e. Temperature or Density). 
+            (i.e. Temperature or Density).
             Additionally, prints the interpolated data in pairs of data,value
             (i.e. input intensities ratio data and corresponding density values).
 
-        Returns 
+        Returns
         -------
-        
+
         Creates the attribute:
-        
-        IntensityRatioInterpolated : dict 
+
+        IntensityRatioInterpolated : dict
             Dictionary that contains the input data and the derived density values,
-            with keys 
-            
+            with keys
+
             *data* : input intensities ratio (no units)
-                
+
             *value* : electron density (:math:`\mathrm{cm^{-3}}`)
-        
-        
+
+
         Examples
         --------
         >>> import ChiantiPy.core as ch
@@ -2518,20 +2517,14 @@ class ion(ioneqOne, ionTrails, specTrails):
         >>> int_ratios = np.linspace(0.1,0.8,20)
         >>> fe12.intensityRatioInterpolate(int_ratios)
         >>> dens_values = fe12.IntensityRatioInterpolated['value']
-           
+
         >>> # Same setup but using a 2D array of input data
         >>> x = 10
         >>> y = 30
         >>> int_ratios_map = np.random.random((x,y))
         >>> fe12.intensityRatioInterpolate(int_ratios_map,verbose=True)
         >>> dens_values_map = fe12.IntensityRatioInterpolated['value'].reshape((x,y))
-        
-=======
-    def intensityRatioInterpolate(self, data, scale = 'lin', plot=0, verbose=0):
-        '''
-        to take a set of data and interpolate against the IntensityRatio
-        the scale can be one of 'lin'/'linear' [default], 'loglog', 'logx', 'logy',
->>>>>>> Stashed changes
+
         '''
 
         # First, what variable to use
@@ -2556,15 +2549,15 @@ class ion(ioneqOne, ionTrails, specTrails):
                 sy.append(y[idx])
         else:
             sy = y
-        
+
         # If necessary, flatten the input data in order to handle N-D arrays
         if len(np.shape(data)) > 1:
             if verbose:
                 print('Input data have dimensions:')
                 print(np.shape(data))
-                print('They will be flattened!\n')                
+                print('They will be flattened!\n')
             data = np.array(data).flatten() # In case the data type is list
-            
+
         #
         if 'lin' in scale:
             y2 = splrep(x, sy, s=0)

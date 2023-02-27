@@ -400,6 +400,113 @@ class maker(ionTrails,  specTrails):
             amatch['predictedLine'] = [0]*nions
         self.Match = matches
 
+
+    def matchPrint(self, filename='matchPrint.txt', sort=None, verbose=False):
+        '''
+        to print out the data for the matches to the observed lines
+        sort can be 'wvl' or 'ion', otherwise, there is no sorting done
+        does not require predicted values
+
+
+        Keyword Arguments
+        -----------------
+
+
+        filename:  `str`
+            the filename where the text should be output
+
+        sort:  `str`, can be `wvl`, `ion`, or None
+            whether the output should be sorted by `wvl` or `ion` or not
+
+        verbose : `bool`
+            if True, additional output is sent to the terminal
+
+        '''
+
+        minContribution = 0.1
+
+        cwd = os.getcwd()
+        wghtFactor = 0.
+        nMatch = len(self.Match)
+        if verbose:
+            print('nMatch:  %i'%(nMatch))
+        if sort is None:
+            sorter = range(nMatch)
+        elif sort == 'ion':
+            indexer = []
+            for amatch in self.Match:
+                ionStr = amatch['exptIon']
+                ionDict = util.convertName(ionStr)
+                Z = ionDict['Z']
+                stage = ionDict['Ion']
+                number = Z*1000 + stage
+                indexer.append(number)
+            sorter = np.argsort(indexer)
+        elif sort == 'wvl':
+            indexer = []
+            for amatch in self.Match:
+                wvlObs = amatch['obsWvl']
+                indexer.append(wvlObs)
+            sorter = np.argsort(indexer)
+
+        dash = ' -------------------------------------------------'
+
+        pformat1 = ' %5i %7s %10.3f %10.2e'
+        pformat1s = ' %5s %7s %10s %10s'
+        pformat2 = '         %s'
+        pformat3 = '        %10.3f %10.3f %10.3f %4i %4i %20s - %20s %5i %5i'
+        pformat3s = '       %10s %10s %10s %4s %4s %20s - %20s %5s %5s'
+        if filename:
+            with open(filename, 'w') as outpt:
+                print(' cwd:  %s'%(cwd))
+                outpt.write(' cwd:  %s \n'%(cwd))
+                if hasattr(self, 'MatchName'):
+                    print('matchPkl %s '%(self.MatchName))
+                    outpt.write('matchPkl %s \n'%(self.MatchName))
+                print('wghtFactor %10.3f'%(wghtFactor))
+                outpt.write('wghtFactor %10.3f \n'%(wghtFactor))
+                print(dash)
+                outpt.write(dash + '\n')
+                pstring1 = pformat1s%('iwvl', 'IonS', 'wvl', 'Int')
+                print(pstring1)
+                outpt.write(pstring1 +'\n')
+                pstring3 = pformat3s%('wvl_obs','wvl', 'diff', 'lvl1', 'lvl2', 'lower',
+                    'upper', 'lineIdx',  'predLine')
+                print(pstring3)
+                outpt.write(pstring3+'\n')
+                print(dash)
+                outpt.write(dash +'\n')
+                for iwvl in sorter:
+                    amatch = self.Match[iwvl]
+                    pstring = pformat1%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl])
+                    print(pstring)
+                    outpt.write(pstring +'\n')
+                    #
+                    # now check line contributions
+                    #
+                    for jon,  anion in enumerate(amatch['ion']):
+                        ionPrint = 0
+                        for iline, awvl in enumerate(amatch['wvl'][jon]):
+                            contrib = 1.
+                            if contrib > minContribution:
+                                if ionPrint == 0:
+                                    print(pformat2%(anion))
+                                    outpt.write(pformat2%(anion)+'\n')
+                                    ionPrint = 1
+                                dwvl = awvl - self.Wvl[iwvl]
+                                print(pformat3%(self.Wvl[iwvl], awvl, dwvl,  amatch['lvl1'][jon][iline],
+                                    amatch['lvl2'][jon][iline], amatch['pretty1'][jon][iline],
+                                    amatch['pretty2'][jon][iline].ljust(20),
+                                    amatch['lineIdx'][jon][iline], amatch['predictedLine'][jon][iline]))
+                                outpt.write(pformat3%(self.Wvl[iwvl], awvl, dwvl, amatch['lvl1'][jon][iline],
+                                    amatch['lvl2'][jon][iline], amatch['pretty1'][jon][iline],
+                                    amatch['pretty2'][jon][iline].ljust(20), amatch['lineIdx'][jon][iline],
+                                    amatch['predictedLine'][jon][iline])+'\n')
+                                print(dash)
+                                outpt.write(dash +'\n')
+                    print(dash)
+                outpt.write(dash +'\n')
+
     def argCheck(self, temperature=None, eDensity=None, pDensity='default', verbose=False):
         ''' to check the compatibility of the three arguments
         and put them into numpy arrays of atleast_1d

@@ -325,7 +325,9 @@ class maker(ionTrails,  specTrails):
 #        matches = [{'ion':[], 'wvl':[]}]*len(wvl) - it won't work this way
         matches = []
         for iwvl in range(len(self.Wvl)):
-            matches.append({'ion':[], 'wvl':[], 'lineIdx':[], 'wvldiff':[], 'lvl1':[], 'lvl2':[], 'pretty1':[], 'pretty2':[], 'predictedLine':[],'iPredictedLine':0, 'obsIntensity':self.Intensity[iwvl], 'exptIon':self.IonS[iwvl], 'obsWvl':self.Wvl[iwvl]})
+            matches.append({'ion':[], 'wvl':[], 'lineIdx':[], 'wvldiff':[], 'lvl1':[], 'lvl2':[],
+                'pretty1':[], 'pretty2':[], 'predictedLine':[],'iPredictedLine':0,
+                'obsIntensity':self.Intensity[iwvl], 'exptIon':self.IonS[iwvl], 'obsWvl':self.Wvl[iwvl]})
         # use the ionList but make sure the ions are in the database
 
         self.ionGate(elementList = self.ElementList, ionList = self.IonList, minAbund=self.MinAbund, doLines=True, doContinuum=False, verbose = verbose)
@@ -671,7 +673,7 @@ class maker(ionTrails,  specTrails):
         #
         # ---------------------------------------------------------------------
         #
-    def mgofnt(self, temperature, density, proc=6,  timeout=0.1, verbose=0):
+    def mgofnt(self, temperature, density, proc=6,  timeout=0.1, verbose=False):
         '''
         calculate the gofnt function for each of the matched lines
         this is the multiprocessing version
@@ -722,7 +724,7 @@ class maker(ionTrails,  specTrails):
                 if someIon not in ionList:
                     ionList.append(someIon)
 
-        self.ionList =ionList
+        self.ionList = ionList
 
         for iwvl in range(len(self.Match)):
             self.Match[iwvl]['intensitySum'] = np.zeros(nTempDens, 'float64')
@@ -779,7 +781,8 @@ class maker(ionTrails,  specTrails):
 
                     predictedLine = []
                     for aline in amatch['lineIdx'][kon]:
-    #                    print ' ion, lineIdx = ', anIon, aline
+#                        if verbose:
+#                            print(' ion, lineIdx = %s %5i'%(someIon, aline))
                         self.Match[iwvl]['intensitySum'] += intensity[:, aline]
                         iPredictedLine = self.Match[iwvl]['iPredictedLine']
                         predictedLine.append(iPredictedLine)
@@ -1109,6 +1112,7 @@ class maker(ionTrails,  specTrails):
         adjust is to provide an adjustment to the position of the labels
         position : one of 'both', 'right', 'left', or 'none'
         this uses the modern object interface fig, ax = plt.subplots(figsize=figsize)
+        fig, ax are in returned in the self.EmPlotOjb dict
 
         Keyword Arguments
         -----------------
@@ -1263,7 +1267,8 @@ class maker(ionTrails,  specTrails):
             ax.set_ylabel('Emission Measure (cm$^{-5}$)', fontsize=fontsize)
             ax.set_xlabel('Electron Density (cm$^{-3}$)',  fontsize=fontsize)
             fig.tight_layout()
-        return fig,  ax
+        self.EmPlotObj = {'fig':fig, 'ax':ax}
+#        return fig,  ax
         #
         # --------------------------------------------------------------------------
         #
@@ -1311,6 +1316,7 @@ class maker(ionTrails,  specTrails):
         wDiff = []
         intOverPred = []
         diffOverInt = []
+        predOverInt = []
 
         noPredIdx = []
         noPredWvl = []
@@ -1325,7 +1331,8 @@ class maker(ionTrails,  specTrails):
                 diff.append(self.Intensity[iwvl]-amatch['predicted'])
                 chi = np.abs(self.Intensity[iwvl]-amatch['predicted'])/(wghtFactor*self.Intensity[iwvl])
                 wDiff.append(chi)
-                intOverPred.append(self.Intensity[iwvl]/amatch['predicted'] - 1.)
+                intOverPred.append(self.Intensity[iwvl]/amatch['predicted'])
+                predOverInt.append(amatch['predicted']/self.Intensity[iwvl])
                 diffOverInt.append((self.Intensity[iwvl]-amatch['predicted'])/self.Intensity[iwvl])
 
             else:
@@ -1338,6 +1345,7 @@ class maker(ionTrails,  specTrails):
         diffNp = np.asarray(diff, np.float64)
         intOverPredNp = np.asarray(intOverPred, np.float64)
         diffOverIntNp = np.asarray(diffOverInt, np.float64)
+        predOverIntNp = np.asarray(predOverInt, np.float64)
 
         threeSig = 3.*diffOverIntNp.std()
 
@@ -1345,15 +1353,19 @@ class maker(ionTrails,  specTrails):
 
         self.Diff = {'diff':diffNp, 'intOverPred':intOverPredNp, 'diffOverInt':diffOverIntNp,
             'wvl':wvlDiff, 'ionS':self.IonS, '3sig':threeSig, 'poor':poor, 'noPredIdx':noPredIdx,
-            'noPredWvl':noPredWvl, 'noPredIon':noPredIon}
+            'noPredWvl':noPredWvl, 'noPredIon':noPredIon, 'predOverInt':predOverIntNp}
         #
         # -------------------------------------------------------------------------
         #
-    def diffPlot(self, title=False, loc='upper right',  fontsize=16, figsize=[7., 5.]):
+    def diffPlot(self, ratio = 'diffOverInt',  title=False, loc='upper right',  fontsize=16, figsize=[7., 5.]):
         """
 
         Parameters
         ----------
+
+        ratio:  str
+            determines which Y values to print
+            can be 'diffOverInt' (default), or 'intOverPred', or 'predOverInt'
 
         title:  bool
             whether to plot the title or not
@@ -1372,9 +1384,18 @@ class maker(ionTrails,  specTrails):
             contains the fig, ax matplotlib objects created
 
         """
+        goodRatio = ['diffOverInt',  'intOverPred', 'predOverInt']
+        ylabels = ['(Obs - Pred)/Obs',  'Int / Pred', 'Pred / Int']
+        if ratio not in goodRatio:
+            print(' ratio = %s'%(ratio))
+            print('should be set to %s  or  %s or %s'%(goodRatio[0],  goodRatio[1],  goodRatio[2]))
+            return
+        else:
+            ratioIndex = goodRatio.index(ratio)
         if hasattr(self, 'Diff'):
             wvl = self.Diff['wvl']
-            diff = self.Diff['diffOverInt']
+#            diff = self.Diff['diffOverInt']
+            diff = self.Diff[ratio]
             diffMean = diff.mean()
             diffStd = diff.std()
             fig,  ax = plt.subplots(figsize=figsize)
@@ -1387,16 +1408,17 @@ class maker(ionTrails,  specTrails):
             ax.axhline(diffMean + 3.*diffStd, color='g', lw=2, linestyle='dotted', label='3 std')
             ax.axhline(diffMean - 3.*diffStd, color='g', lw=2, linestyle='dotted')  #, label='3 std')
             ax.set_xlabel('Wavelength (\u212B)', fontsize=14)
-            ax.set_ylabel(r'(Obs - Pred)/Obs', fontsize=14)
+
+            ax.set_ylabel(ylabels[ratioIndex], fontsize=14)
             if title:
                 mytitle = 'diff Mean %10.3f  diff Std  %10.3f'%(diffMean, diffStd)
                 ax.set_title(mytitle, fontsize=fontsize)
             ax.legend(loc=loc, fontsize=12) #  bbox_to_anchor=(0.99, 1.0),
             fig.tight_layout()
-            self.DiffPlot ={'fig':fig, 'ax':ax}
+            self.DiffPlot = {'fig':fig, 'ax':ax}
         else:
             print(' the Diff attribute does not exist')
-            print(' run method diffPrint to create it')
+            print(' run method diff to create it')
         #
         # --------------------------------------------------------------------------
         #
@@ -1450,6 +1472,7 @@ class maker(ionTrails,  specTrails):
         wDiff = []
         intOverPred = []
         diffOverInt = []
+        predOverInt = []
 
         noPredIdx = []
         noPredWvl = []
@@ -1469,10 +1492,13 @@ class maker(ionTrails,  specTrails):
                 em = self.SearchData['best']['em']
                 print(' results from search')
                 print(' %5s %10s %10s %10s %10s'%('index',  'density', 'temp', 'emfit','em'))
-                print(' %5i %10.2e %10.2e %10.3f %10.2e'%(idx, dens, temp, emfit, em))
+                pformat = '%5i %10.2e %10.2e %10.3f %10.2e'
+                for idat, index in enumerate(idx):
+                    print(pformat%(index, dens[idat], temp[idat],  emfit[idat],  em[idat]))
+#                print(' %5i %10.2e %10.2e %10.3f %10.2e'%(idx, dens, temp, emfit, em))
                 outpt.write('results from search \n')
                 outpt.write(' %5s %10s %10s %10s %10s \n'%('index',  'density', 'temp', 'emfit','em'))
-                outpt.write(' %5i %10.2e %10.2e %10.3f %10.2e \n'%(idx, dens, temp, emfit, em))
+#                outpt.write(' %5i %10.2e %10.2e %10.3f %10.2e \n'%(idx, dens, temp, emfit, em))
             else:
                 emIndices = self.EmIndices
                 for emidx in emIndices:
@@ -1507,7 +1533,8 @@ class maker(ionTrails,  specTrails):
                     diff.append(self.Intensity[iwvl]-amatch['predicted'])
                     chi = np.abs(self.Intensity[iwvl]-amatch['predicted'])/(wghtFactor*self.Intensity[iwvl])
                     wDiff.append(chi)
-                    intOverPred.append(self.Intensity[iwvl]/amatch['predicted'] - 1.)
+                    intOverPred.append(self.Intensity[iwvl]/amatch['predicted'])
+                    predOverInt.append(amatch['predicted']/self.Intensity[iwvl])
                     diffOverInt.append((self.Intensity[iwvl]-amatch['predicted'])/self.Intensity[iwvl])
                     pstring = pformat1%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'], self.Intensity[iwvl]/amatch['predicted'], chi, intOverPred[-1],  diffOverInt[-1] )
                 else:
@@ -1524,6 +1551,7 @@ class maker(ionTrails,  specTrails):
 
             diffNp = np.asarray(diff, np.float64)
             intOverPredNp = np.asarray(intOverPred, np.float64)
+            predOverIntNp = np.asarray(predOverInt, np.float64)
             diffOverIntNp = np.asarray(diffOverInt, np.float64)
             wghtDiffOverIntNp = diffOverIntNp/wghtFactor
             chisq2 = (wghtDiffOverIntNp**2).sum()
@@ -1568,7 +1596,7 @@ class maker(ionTrails,  specTrails):
                 outpt.write('%5i %s %10.3f %10.3f %10.3f\n'%(i, self.IonS[i],  self.Wvl[i], np.abs(intOverPredNp)[i], diffOverIntNp[i]))
         self.Diff = {'diff':diffNp, 'intOverPred':intOverPredNp, 'diffOverInt':diffOverIntNp,
             'wvl':wvlDiff, 'ionS':self.IonS, '3sig':threeSig, 'poor':poor, 'noPredIdx':noPredIdx,
-            'noPredWvl':noPredWvl, 'noPredIon':noPredIon}
+            'noPredWvl':noPredWvl, 'noPredIon':noPredIon, 'predOverInt':predOverIntNp}
         #
         # --------------------------------------------------------------------------
         #
@@ -2091,7 +2119,7 @@ class maker(ionTrails,  specTrails):
         #
         #-----------------------------------------------------
         #
-    def search1tEmSpace(self, verbose=0):
+    def search1tEmSpace(self, verbose=False):
         ''' to find the value of chisq as a function of Em with T = best-fit
 
         Keyword Arguments
@@ -2101,7 +2129,7 @@ class maker(ionTrails,  specTrails):
             if True, additional output is sent to the terminal
 
         '''
-        self.Nparams = 2. +1.
+        self.Nparams = 2. + 1.
         if not hasattr(self, 'SearchData'):
             print(' dem has not been searched yet')
             return
@@ -2190,6 +2218,7 @@ class maker(ionTrails,  specTrails):
 
         emfit = []
         idx12 = []
+        idx = []
         searchDx12 = []
         chisq = []
         info = []
@@ -2206,6 +2235,7 @@ class maker(ionTrails,  specTrails):
         for idx1 in range(indxlimits[0], indxlimits[1], 1):
             for idx2 in range(idx1+1, indxlimits[1]+1, 1):
                 idx12.append([idx1, idx2])
+                idx.append([idx1, idx2])
                 searchDx1 = idx1 - indxlimits[0]
                 searchDx2 = idx2 - indxlimits[0] - 1
                 self.emSetIndices([idx1, idx2])
@@ -2248,7 +2278,11 @@ class maker(ionTrails,  specTrails):
                 counter += 1
         logfile.close()
         #
-        self.SearchData = {'temperature':self.Temperature,'temp1Searched':temp1Searched, 'temp2Searched':temp2Searched, 'emfit':emfit, 'em2d':em2d, 'idx12':idx12, 'searchDx12':searchDx12, 'chisq':chisq, 'minchisq':min(chisq), 'chisq2d':chisq2d, 'maskedValues':maskedValues, 'temp2d':temp2d,  'message':'this contains all the data for the 2tExpSpace', 'nparams':self.Nparams}
+        self.SearchData = {'temperature':self.Temperature,'temp1Searched':temp1Searched,
+            'temp2Searched':temp2Searched, 'emfit':emfit, 'em2d':em2d, 'idx12':idx12, 'idx':idx,
+            'searchDx12':searchDx12, 'chisq':chisq, 'minchisq':min(chisq), 'chisq2d':chisq2d,
+            'maskedValues':maskedValues, 'temp2d':temp2d,
+            'message':'this contains all the data for the 2tExpSpace', 'nparams':self.Nparams}
         #
         print('min chisq = %10.3e at %5i '%(min(chisq), np.argmin(chisq)))
         print(' # of masked values %i'%(len(maskedValues)))
@@ -2306,9 +2340,11 @@ class maker(ionTrails,  specTrails):
         dt = t2 - t1
         print(' elapsed seconds = %12.3f'%(dt.seconds))
 
-        self.SearchData['best'] = {'em':em, 'emfit':emfit[gdx[0]], 'chisq':chisq[gdx[0]], 'idx12':idx12[gdx[0]],
-        'reducedChisq':reducedChisq, 'temperature1':temperature1, 'temperature2':temperature2,
-        'density':self.Density[idx12[gdx[0]]], 'gdx':gdx, 'searchDx12':searchDx12[gdx[0]]}
+        self.SearchData['best'] = {'em':em, 'emfit':emfit[gdx[0]], 'chisq':chisq[gdx[0]],
+            'idx12':idx12[gdx[0]], 'idx':idx[gdx[0]],  'reducedChisq':reducedChisq,
+            'temperature':[temperature1, temperature2], 'temperature1':temperature1,
+            'temperature2':temperature2, 'density':self.Density[idx12[gdx[0]]],
+            'gdx':gdx, 'searchDx12':searchDx12[gdx[0]]}
         #
         # -----------------------------------------------------------
         #
@@ -2349,6 +2385,7 @@ class maker(ionTrails,  specTrails):
         nTemp = len(self.EmIndices)
         emfit = []
         idx123 = []
+        idx = []
         searchDx123 = []
         chisq = []
         maskedValues = []
@@ -2388,6 +2425,7 @@ class maker(ionTrails,  specTrails):
                         emfit.append(self.Leastsq['em'])
                         chisq.append(chisq1)
                         idx123.append([idx1, idx2, idx3])
+                        idx.append([idx1, idx2, idx3])
                         chisqNd.data[searchDx1, searchDx2, searchDx3] = chisq1
                         chisqNd.mask[searchDx1, searchDx2, searchDx3] = False
                         for it in range(nTemp):
@@ -2404,6 +2442,7 @@ class maker(ionTrails,  specTrails):
                     else:
                         emfit.append(self.Leastsq['em'])
                         idx123.append([idx1, idx2, idx3])
+                        idx.append([idx1, idx2, idx3])
                         chisq.append(chisq1)
                         maskedValues.append([idx1, idx2, idx3])
                         chisqNd.data[searchDx1, searchDx2, searchDx3] = chisq1
@@ -2422,9 +2461,11 @@ class maker(ionTrails,  specTrails):
         if log:
             logfile.close()
         #
-        self.SearchData = {'temperature':self.Temperature,'temp1Searched':temp1Searched, 'temp2Searched':temp2Searched,
-        'temp3Searched':temp3Searched, 'emfit':emfit, 'idx':idx123, 'searchDx123':searchDx123, 'chisq':chisq, 'chisqNd':chisqNd,
-        'minchiseq':min(chisq), 'tempNd':tempNd, 'emNd':emNd, 'message':'this contains all the data for the 3tExpSpace', 'nparams':self.Nparams}
+        self.SearchData = {'temperature':self.Temperature,'temp1Searched':temp1Searched,
+            'temp2Searched':temp2Searched, 'temp3Searched':temp3Searched, 'emfit':emfit, 'idx':idx123,
+            'searchDx123':searchDx123, 'chisq':chisq, 'chisqNd':chisqNd, 'minchiseq':min(chisq),
+            'tempNd':tempNd, 'emNd':emNd, 'message':'this contains all the data for the 3tExpSpace',
+            'nparams':self.Nparams}
         #
         #
         #  set things to best fit
@@ -2464,8 +2505,9 @@ class maker(ionTrails,  specTrails):
         dt = t2 - t1
         print(' elapsed seconds = %12.3f'%(dt.seconds))
 
-        self.SearchData['best'] = {'em':em,'emfit':emfit[gdx[0]], 'chisq':chisq[gdx[0]], 'reducedChisq':reducedChisq,
-            'idx':idx123[gdx[0]], 'gdx':gdx[0], 'temperature':self.Temperature[idx123[gdx[0]]], 'density':self.Density}
+        self.SearchData['best'] = {'em':em,'emfit':emfit[gdx[0]], 'chisq':chisq[gdx[0]],
+        'reducedChisq':reducedChisq, 'idx':idx123[gdx[0]], 'gdx':gdx[0],
+        'temperature':self.Temperature[idx123[gdx[0]]], 'density':self.Density}
         #
         # -----------------------------------------------------------
         #

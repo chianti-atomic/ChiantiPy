@@ -7,6 +7,7 @@ import os
 from datetime import date
 import pickle
 import configparser
+from fnmatch import fnmatch
 
 import numpy as np
 
@@ -941,14 +942,14 @@ def demRead(demName=''):
     return{'temperature':temp, 'density':dens, 'dem':dem, 'em':em, 'dt':dt,
         'ref':ref, 'filename':demFileName}
 
-def emRead(emName=''):
+def emRead(filename = None,  directory = None,  verbose=False):
     """
     Read emission measure file `emName` and return the temperatures, densities and emission measures
 
     Keyword Arguments
     -----------------
 
-    emName:  `str`
+    filename:  `str`
         the name of the emission measure file to read in the $XUVTOP/em directory
 
     Returns
@@ -959,18 +960,30 @@ def emRead(emName=''):
 
     """
     xuvtop = os.environ["XUVTOP"]
-    emdir = os.path.join(xuvtop,'em')
-    emList = os.listdir(emdir)
+
+#    emList = os.listdir(emdir)
     temp = []
     dens = []
     em = []
-    if emName:
+    if directory is not None:
+        emDir = directory
+    else:
+        emDir = os.path.join(xuvtop,'em')
+    dirList = os.listdir(emDir)
+    emList = []
+    for one in dirList:
+        if fnmatch(one,  '*.em'):
+            emList.append(one)
+    if verbose:
+        for one in emList:
+            print(one)
+    if filename:
         # a specific abundance file name has been specified
-        cnt = emName.count('.em')
+        cnt = filename.count('.em')
         if cnt == 0:
-            emName += '.em'
-    if emName in emList:
-        emFileName = os.path.join(xuvtop,'em',emName)
+            filename += '.em'
+    if filename in emList:
+        emFileName = os.path.join(emDir, filename)
     else:
         # the user will select an emission measure file
         emlabel = 'ChiantiPy - Select an emission measure file'
@@ -981,7 +994,7 @@ def emRead(emName=''):
             return 0
         else:
             emName = mypick.selectedText[0]
-            emFileName = os.path.join(xuvtop,'em',emName)
+            emFileName = os.path.join(emDir,emName)
     with open(emFileName,'r') as inpt:
         s1 = inpt.readlines()
     nlines = 0
@@ -997,7 +1010,10 @@ def emRead(emName=''):
         temp.append(float(a))
         dens.append(float(b))
         em.append(float(c))
-    ref = s1[nlines+1:]
+    ref = []
+    for aref in s1[nlines+1:]:
+        ref.append(aref.strip())
+#    ref = s1[nlines+1:]
     return{'temperature':np.asarray(temp), 'density':np.asarray(dens), 'em':np.asarray(em), 'ref':ref, 'filename':emFileName}
 
 

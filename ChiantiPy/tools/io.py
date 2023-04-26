@@ -75,7 +75,7 @@ def abundanceRead(abundancename=None, verbose=False):
         nlines += 1
     nlines -= 1
     for line in range(nlines):
-        z,ab,element = s1[line].split()
+        z,ab,element = s1[line].split()[0:3]
         abundance[int(z)-1] = float(ab)
     gz = np.nonzero(abundance)
     abs = 10.**(abundance[gz]-abundance[0])

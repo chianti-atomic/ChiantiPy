@@ -905,11 +905,12 @@ class maker(ionTrails,  specTrails):
 #            for it, em1 in enumerate(em):
 #                plt.loglog([temp[it], temp[it]], [em1/1000., em1], '-k', linewidth=2)
             plt.loglog([temp, temp], [em/1000., em], '-k', linewidth=2)
-            plt.loglog([float(self.Temperature.min()), float(self.Temperature.max())], [em, em], '-k', linewidth=2 )
+            plt.loglog([float(self.Temperature.min()), float(self.Temperature.max())], [em, em],
+                '-k', linewidth=2 )
         #
         # ---------------------------------------------------------
         #
-    def emMake(self, filename,  reference):
+    def emWrite(self, filename, directory, reference):
         """ to make a CHIANTI style emission measure file
         outName does not need the suffix .em
         reference should be a list of references
@@ -929,6 +930,7 @@ class maker(ionTrails,  specTrails):
         if '.em' not in filename:
             filename += '.em'
 #        print('writing file %s'%(outName))
+        fullFileName = os.path.join(directory,  filename)
         try:
             indices = self.EmIndices
         except:
@@ -937,7 +939,7 @@ class maker(ionTrails,  specTrails):
 #        for idx in indices:
 #            print('T %10.3e  eD  %10.3e  EM  %10.3e'%(self.Temperature[idx], self.EDensity[idx], self.Em[idx]))
 
-        with open(filename, 'w') as output:
+        with open(fullFileName, 'w') as output:
             pformat = '%15.3e%15.3e%15.3e \n'
             for idx in indices:
                 output.write(pformat%(self.Temperature[idx], self.EDensity[idx], self.Em[idx]))
@@ -1493,11 +1495,20 @@ class maker(ionTrails,  specTrails):
                 print(' results from search')
                 print(' %5s %10s %10s %10s %10s'%('index',  'density', 'temp', 'emfit','em'))
                 pformat = '%5i %10.2e %10.2e %10.3f %10.2e'
-                for idat, index in enumerate(idx):
-                    print(pformat%(index, dens[idat], temp[idat],  emfit[idat],  em[idat]))
-#                print(' %5i %10.2e %10.2e %10.3f %10.2e'%(idx, dens, temp, emfit, em))
+                wformat = '%5i %10.2e %10.2e %10.3f %10.2e \n'
                 outpt.write('results from search \n')
                 outpt.write(' %5s %10s %10s %10s %10s \n'%('index',  'density', 'temp', 'emfit','em'))
+                if type(idx) is int:
+                    # this is for the case of a 1d search
+                    idat = 0
+                    index = idx
+                    print(pformat%(index, dens, temp,  emfit,  em))
+                    outpt.write(wformat%(index, dens, temp,  emfit,  em))
+                else:
+                    for idat, index in enumerate(idx):
+                        print(pformat%(index, dens[idat], temp[idat],  emfit[idat],  em[idat]))
+                        outpt.write(wformat%(index, dens[idat], temp[idat],  emfit[idat],  em[idat]))
+#                print(' %5i %10.2e %10.2e %10.3f %10.2e'%(idx, dens, temp, emfit, em))
 #                outpt.write(' %5i %10.2e %10.2e %10.3f %10.2e \n'%(idx, dens, temp, emfit, em))
             else:
                 emIndices = self.EmIndices
@@ -2573,8 +2584,8 @@ class maker(ionTrails,  specTrails):
             logfile = open(logname, 'w')
             logfile.write('%s \n'%(self.SpecData['filename']))
         # need to make this look like search2t
-        pformat = '%5i %4i %4i %4i %4i %10.2e %10.2e %10.2e %10.2e %10.2e %10.2e %10.2e %10.2e %10.2e'
-        logformat = '%5i %4i %4i %4i %4i %4i %4i %4i %4i %10.2e %10.2e %10.2e %10.2e %10.2e %10.2e %10.2e %10.2e %10.2e\n'
+        pformat = '%5i %4i %4i %4i %4i %9.2e %9.2e %9.2e %9.2e %9.2e %9.2e %9.2e %9.2e %9.2e'
+        logformat = '%5i %4i %4i %4i %4i %4i %4i %4i %4i %9.2e %9.2e %9.2e %9.2e %9.2e %9.2e %9.2e %9.2e %9.2e\n'
         counter = 0
         for idx1 in range(indxlimits[0], indxlimits[1] - 2, 1):
             for idx2 in range(idx1+1, indxlimits[1] - 1, 1):
@@ -2748,10 +2759,17 @@ class maker(ionTrails,  specTrails):
         else:
             print('wghtfactor not available')
 
+        if hasattr(self, 'AbundanceName'):
+            matchDict['AbundanceName'] = self.AbundanceName
+        else:
+            print('AbundanceName not available')
+
         if 'XUVTOP' in self.SpecData.keys():
             matchDict['XUVTOP'] = self.SpecData['XUVTOP']
+
         if 'chiantiVersion' in self.SpecData.keys():
             matchDict['chiantiVersion'] = self.SpecData['chiantiVersion']
+
         with open(filename, 'wb') as outpt:
             pickle.dump(matchDict, outpt)
 

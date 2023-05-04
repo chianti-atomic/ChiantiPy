@@ -20,7 +20,7 @@ flux
 
 abundfile
 
-    The name of the abundance file.  Acceptable values are any of the file names in XUVTOP/abundance, such as *cosmic_1973_allen*.  The default value is *sun_photospheric_2015_scott* which includes the abundances of Scott et al., 2015, A&A, 573, A25.
+    The name of the abundance file.  Acceptable values are any of the file names in XUVTOP/abundance, such as *cosmic_1973_allen*.  The default value is *sun_photospheric_2015_scott* that includes the abundances of Scott et al., 2015, A&A, 573, A25.
 
 ioneqfile
     the name of the ionization equilibrium file.  Acceptable values are any of the file names in XUVTOP/ioneq such as *arnaud_raymond*, *arnaud_rothenflug*, or *chianti*.  The default value is *chianti* which includes the ionization equilibrium calculations of K.P. Dere, G. Del Zanna, P.R. Young, E. Landi, R Sutherland, 2019, ApJ, 241, 2 and are considered to be based on the best ionization and recombination rates currently available.

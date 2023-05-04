@@ -56,7 +56,7 @@ The gzipped *data* tar ball can be downloaded from the CHIANTI website_
 
 ::
 
-  setenv XUVTOP /data1/xuv/directory.where.the.tarball.was.placed
+  setenv XUVTOP /data1/directory.where.the.tarball.was.placed
 
 
 or on Windows:   To set the environment variable, go to Control Panel -> System -> Advanced System Properties -> Environment Variables.

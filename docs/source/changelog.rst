@@ -2,6 +2,14 @@
 Changelog
 ===========
 
+Changes from 0.15.0 to 0.15.1
+=============================
+
+The continuum.freeBound method has been corrected so that it can be used under extreme conditions and not fail.
+
+The io.abundanceRead method has been updated to work with new files in the upcoming CHIANTI 10.1 release
+
+
 Changes from 0.14.1 to 0.15.0
 =============================
 

@@ -1,4 +1,6 @@
-ChiantiPy - Version 0.12.0
+.. _chiantipy---version-0151:
+
+ChiantiPy - Version 0.15.1
 ==========================
 
 |Documentation Status| |Coverage Status| |ascl:1308.017|
@@ -33,10 +35,12 @@ The following dependencies are required to run ChiantiPy,
 -  `Matplotlib <http://matplotlib.org/>`__
 -  `ipyparallel <https://github.com/ipython/ipyparallel>`__
 
-The following two are extremely useful for running Python programs \*
-`IPython <http://ipython.org>`__ \* `Jupyter <http://jupyter.org/>`__
+The following two are extremely useful for running Python programs
 
-Optionally, if you’d like to use the GUI dialogs,
+-  `IPython <http://ipython.org>`__
+-  `Jupyter <http://jupyter.org/>`__
+
+Optionally, if you'd like to use the GUI dialogs,
 
 -  `PyQt5 <https://riverbankcomputing.com/software/pyqt/intro>`__
 
@@ -45,16 +49,18 @@ dependencies, we recommend the `Anaconda
 platform <https://www.continuum.io/downloads>`__. Next, download the
 `CHIANTI
 database <http://www.chiantidatabase.org/chianti_download.html>`__,
-version 10.0 or later. Assuming you’ve placed the CHIANTI tree in
+version 10.0 or later. Assuming you've placed the CHIANTI tree in
 ``$HOME``, set the environment variable in your ``.bashrc`` file,
 
-.. code:: shell
+.. code:: Shell
 
-   export XUVTOP=$HOME/chianti/dbase
+   export XUVTOP=$HOME/MY_CHIANTI_DIRECTORY
+
+should point to the top directory of your CHIANTI distribution
 
 Finally, clone and install the source from GitHub,
 
-.. code:: shell
+.. code:: Shell
 
    $ git clone --recursive https://github.com/chianti-atomic/ChiantiPy.git
    $ cd ChiantiPy
@@ -66,11 +72,11 @@ The release is also available on
 Usage
 -----
 
-As a quick example, we’ll calculate the populations of the top 10 levels
+As a quick example, we'll calculate the populations of the top 10 levels
 of Fe XIV as a function of temperature at constant density and plot
 them:
 
-.. code:: python
+.. code:: Python
 
    >>> import ChiantiPy.core as ch
    >>> import numpy as np

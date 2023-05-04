@@ -1017,6 +1017,9 @@ class continuum(ionTrails):
         wvl = np.asarray(wvl, np.float64)
         em = self.Em
 
+        nWvl = wvl.size
+        nTemp = temperature.size
+
 
         xlabel = self.Labels['xlabel']
         ylabel = self.Labels['spectrumYlabel']
@@ -1028,10 +1031,13 @@ class continuum(ionTrails):
             abund = self.Abundance
         else:
             abund = 1.
+
         if includeIoneq:
             ioneq = self.IoneqOne
+            goodT = [it for it in range(self.Ntemp) if self.IoneqOne[it] > 0.]
         else:
             ioneq = np.ones_like(temperature)
+            goodT = range(nTemp)
         #
         # the target ion contains the data for fblvl
         #
@@ -1090,20 +1096,9 @@ class continuum(ionTrails):
         # get revised karzas-latter Gaunt factors
         klgbfn = chdata.Klgbfn
         #
-        nWvl = wvl.size
-        nTemp = temperature.size
         #
-        #  the verner cross-section is included in this version
-#        if verner:
-#            self.vernerCross(wvl)
-#            vCross = self.VernerCross
-#            lvl1 = 1
-#        else:
-#            lvl1 = 0
-#        lvl1 = 0
+
         expfun = np.zeros((nlvls,nTemp,nWvl),np.float64)
-        mask = np.zeros((nlvls,nTemp,nWvl),np.bool_)
-        expf = np.zeros((nlvls,nTemp,nWvl), np.float64)
         fbn = np.zeros((nlvls,nTemp,nWvl),np.float64)
         fbIntensity = np.zeros((nlvls,nTemp,nWvl),np.float64)
         ratg = np.zeros((nlvls),np.float64)
@@ -1128,7 +1123,7 @@ class continuum(ionTrails):
 
 #        V1 = np.sqrt(2.)*const.planck**4*const.light**2/(4*(np.pi*const.emass*const.boltzmann)**(1.5))
         # restrict calculations to temperatures where the ionization equ. is non-zero
-#        goodT = [ it for it, anioneq in enumerate(self.IoneqOne) if anioneq > 0.]
+
 
         #  the verner yakovlev photionizaton cross sections
 
@@ -1138,34 +1133,21 @@ class continuum(ionTrails):
             ilvl = 0
             iprLvlEv = self.Ipr - const.invCm2Ev*ecm[ilvl]
             edgeLvlAng.append(const.ev2Ang/iprLvlEv)
-#            for itemp in goodT:
-#                atemp = self.Temperature[itemp]
-##                print(' verner %5i %5i  %10.2e'%(ilvl, itemp, atemp))
-#                mask[0,itemp] = 1.e+8/wvl < (self.IprCm - ecm[0])
-#                fbn[0, itemp] = 1.e-8*V1*atemp**(-1.5) \
-#                    *np.exp((iprLvlErg - 1.e+8*const.planck*const.light/wvl)/(const.boltzmann*atemp)) \
-#                    *(1.e-8/wvl)**5*ratg[0]*self.VernerCross
-##                expfun[0, itemp] = np.exp((iprLvlErg - 1.e+8*const.planck*const.light/wvl)/
-##                    (const.boltzmann*atemp))
-##                fbn[0, itemp] = (const.planck*const.light/(1.e-8*wvl))**5 \
-##                    *const.verner*ratg[0]*expfun[0,itemp]*vCross/atemp**1.5
-#                fbIntensity[0,itemp] = abund*ioneq[itemp]*em[itemp]*fbn[0,  itemp]
 
-            for itemp,  atemp  in enumerate(temperature):
-                mask[0,itemp] = 1.e+8/wvl < (self.IprCm - ecm[0])
-                expf[0,itemp] = np.exp((iprLvlErg - 1.e+8*const.planck*const.light/wvl)/(const.boltzmann*atemp))
+            for itemp in  goodT:
+                atemp = temperature[itemp]
+
+                xponent = (iprLvlErg - hnu)/(const.boltzmann*atemp)
+                expfun[0, itemp] = np.where(xponent <= 0.,  np.exp(xponent),  0.)
+
+                c1 = const.verner*ratg[0]*expfun[0,itemp]*self.VernerCross/atemp**1.5
+
                 if self.Defaults['flux'] == 'energy':
-                    fbn[0,itemp] = (const.planck*const.light/(1.e-8*wvl))**5 \
-                        *const.verner*ratg[0]*expf[0,itemp]*self.VernerCross/atemp**1.5
+                    fbn[0,itemp] = (const.planck*const.light/(1.e-8*wvl))**5*c1
                 elif self.Defaults['flux'] == 'photon':
-                    fbn[0,itemp] = (const.planck*const.light/(1.e-8*wvl))**4 \
-                        *const.verner*ratg[0]*expf[0,itemp]*self.VernerCross/atemp**1.5
-#                fbIntensity[0, itemp] = abund*em[itemp]*ioneq[itemp]*fbn[ilvl, itemp]
-                fbIntensity[0, itemp] = em[itemp]*fbn[ilvl, itemp]
-#                if includeIoneq:
-#                    fbIntensity[0, itemp] *= ioneq[itemp]
-#            if includeAbund:
-#                fbIntensity *= abund
+                    fbn[0,itemp] = (const.planck*const.light/(1.e-8*wvl))**4*c1
+
+                fbIntensity[ilvl, itemp] = em[itemp]*fbn[ilvl, itemp]
 
         else:
             lvl1 = 0
@@ -1185,32 +1167,18 @@ class continuum(ionTrails):
             # scaled energy is relative to the ionization potential
 
             scaledE = hnuEv/self.Ipr
-            badLong = hnuEv < iprLvlEv
-            if verbose:
-                print(' %i nWvl  %i badlong.sum %i'%(ilvl, nWvl,  badLong.sum()))
-            if badLong.sum() < nWvl:
-                tck = splrep(np.log(pe), np.log(gf),  s=0)
-                gflog = splev(np.log(scaledE), tck,  der=0,  ext=3)
-                mygf[ilvl] = np.exp(gflog)
-                mygf[ilvl][badLong] = 0.
-#                if verbose:
-#                    print(' ilvl %i   mygf.max() %10.2e'%(ilvl, np.max(mygf[ilvl])))
-                ratg[ilvl] = float(multr[ilvl])/float(mult[0]) # ratio of statistical weights
 
-            for itemp,  atemp  in enumerate(temperature):
-#                    atemp = self.Temperature[itemp]
-#                    print(' kl %5i %5i  %10.2e'%(ilvl, itemp, atemp))
-                # this test if not really needed
-#                    if ioneq[itemp] > 0.:
-                expfun = np.exp((iprLvlErg - hnu)/(const.boltzmann*atemp))
-                expfunIsnan = np.isnan(expfun)
-                expfunIsinf = np.isinf(expfun)
-                if expfunIsnan.sum() > 0:
-                    print('%i some of expfun are nan %i'%(itemp, expfunIsnan.sum()))
-                    expfun[expfunIsnan] = 0.
-                elif expfunIsinf.sum() > 0:
-                    print('%i some of expfun are inf %i'%(itemp, expfunIsinf.sum()))
-                    expfun[expfunIsinf] = 0.
+            tck = splrep(np.log(pe), np.log(gf),  s=0)
+            gflog = splev(np.log(scaledE), tck,  der=0,  ext=3)
+            mygf[ilvl] = np.where(hnuEv >= iprLvlEv, np.exp(gflog),  0.)
+
+            ratg[ilvl] = float(multr[ilvl])/float(mult[0]) # ratio of statistical weights
+
+            for itemp in  goodT:
+                atemp = temperature[itemp]
+
+                xponent = (iprLvlErg - hnu)/(const.boltzmann*atemp)
+                expfun = np.where(xponent <= 0.,  np.exp(xponent),  0.)
 
                 if self.Defaults['flux'] == 'energy':
                     fbn[ilvl, itemp] = K0*hnu**2*expfun*iprLvlErg**2*ratg[ilvl]*mygf[ilvl]  \
@@ -1219,52 +1187,21 @@ class continuum(ionTrails):
                     fbn[ilvl, itemp] = K0*hnu*expfun*iprLvlErg**2*ratg[ilvl]*mygf[ilvl]  \
                         /(atemp**(1.5)*float(pqn[ilvl]))
 
-                fbnIsNan = np.isnan(fbn[ilvl, itemp])
-                fbnIsInf = np.isinf(fbn[ilvl, itemp])
 
-                if fbnIsNan.sum() > 0:
-                    print('%s  %i some fbn are Nan %i'%(self.IonStr, itemp, fbnIsNan.sum()))
-                    fbn[ilvl, itemp,  fbnIsNan] = 0.
-                elif fbnIsInf.sum() > 0:
-                    print('%s %i some fbn are Inf %i'%(self.IonStr, itemp, fbnIsInf.sum()))
-                    fbn[ilvl, itemp,  fbnIsInf] = 0.
-                mask[ilvl,itemp] = 1.e+8/wvl < (self.IprCm - ecm[ilvl])
-#                fbIntensity[ilvl, itemp] = abund*em[itemp]*ioneq[itemp]*fbn[ilvl, itemp]
                 fbIntensity[ilvl, itemp] = em[itemp]*fbn[ilvl, itemp]
-#                if includeIoneq:
-#                    fbIntensity[ilvl, itemp] *= ioneq[itemp]
-#            if includeAbund:
-#                fbIntensity *= abund
-        fbTest = fbIntensity.sum(axis=0)
-        fbTest *= self.Abundance
 
-        for itemp, one in enumerate(self.IoneqOne):
-            fbTest[itemp] *= one
+        fb = fbIntensity.sum(axis=0)
 
-        fbTestisNan = np.isnan(fbTest)
-        fbTestisInf = np.isinf(fbTest)
-        if fbTestisNan.sum() > 0:
-            print('fb has some Nans %i'%(fbTestisNan.sum()))
-        if fbTestisInf.sum() > 0:
-            print('fb has some Infs %i'%(fbTestisInf.sum()))
-        fbmask = np.logical_and(fbTestisNan,  fbTestisInf)
+        if includeAbund:
+            fb *= abund
 
-        fb = np.ma.masked_array(fbTest,   mask=fbmask)
-#        fb = np.ma.array(fbIntensity.shape)
-#        fb = np.ma.array(fbIntensity.sum(axis=0))
-#        fb *= abund
-#        for itemp in enumerate(temperature):
-#            fb[itemp] *= ioneq[itemp]
-#        fb_mask = fb <= 0. or fb == np.inf
-#        fb.data = fbIntensity.sum(axis=0)
-#        fb_mask = np.where(fb.data is np.nan,  1,  0)
-#        fb.mask = fb_mask
-        fb.fill_value = 0.
+        if includeIoneq:
+            for itemp, one in enumerate(self.IoneqOne):
+                fb[itemp] *= one
         #
         self.FreeBound = {'intensity':fb.squeeze(), 'temperature':temperature,'wvl':wvl, 'em':em, \
             'abund':abund, 'ioneq':ioneq, 'gf':mygf, 'edgeLvlAng':edgeLvlAng,  'fbn':fbn.squeeze(),
             'xlabel':xlabel, 'ylabel':ylabel}
-
 
 
     def vernerCross(self, wvl):

@@ -185,6 +185,7 @@ def emPlot(matchDict, vs='T', loc='upper right', fs=10,  adjust=None, position='
             plt.legend(loc=loc, fontsize=fs)
         plt.ylabel('Emission Measure (cm$^{-5}$)', fontsize=14)
         plt.xlabel('Electron Density (cm$^{-3}$)',  fontsize=14)
+        plt.tight_layout()
     #
     #-----------------------------------------------------
     #
@@ -619,6 +620,8 @@ class maker(ionTrails,  specTrails):
         self.ionList = ionList
         for iwvl in range(len(self.Match)):
             self.Match[iwvl]['intensitySum'] = np.zeros(nTempDens, 'float64')
+        if verbose:
+            print('getting intensities for %i ions'%(len(ionList)))
         for someIon in ionList:
             # already know this ion is needed
             #if verbose:
@@ -725,6 +728,9 @@ class maker(ionTrails,  specTrails):
                     ionList.append(someIon)
 
         self.ionList = ionList
+
+        if verbose:
+            print('getting intensities for %i ions'%(len(ionList)))
 
         for iwvl in range(len(self.Match)):
             self.Match[iwvl]['intensitySum'] = np.zeros(nTempDens, 'float64')
@@ -1220,11 +1226,11 @@ class maker(ionTrails,  specTrails):
                         ax.text(lblx2, lbly2, wvlstr.strip())
                         ax.text(lblx1, lbly1, wvlstr.strip())
                 else:
-                    print(' len of match[idx]wvl   %i'%(len(match[idx]['wvl'])))
-                    if len(match[idx]['wvl']) != 0:
-                        print('no values for idx = %5i wvl = %8.2f'%(idx, match[idx]['wvl']))
-                        print(' nonzed = %i'%(nonzed.sum()))
-                        print('intensity = %10.2e'%(match[idx]['intensity']))
+                    print('idx:  %5i'%(idx))
+#                    print(' len of match[idx]wvl   %i'%(len(match[idx]['obsWvl'])))
+                    print('no values for idx = %5i %s  wvl = %8.2f'%(idx, match[idx]['exptIon'], match[idx]['obsWvl']))
+                    print(' nonzed = %i'%(nonzed.sum()))
+#                    print('intensity = %10.2e'%(match[idx]['intensity']))
             if legend:
                 ax.legend(loc=loc, fontsize=fontsize)
             ax.set_ylabel('Emission Measure (cm$^{-5}$)', fontsize=fontsize)

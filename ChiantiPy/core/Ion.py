@@ -217,7 +217,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         scupsfile = fileName + '.scups'
 #        cilvlfile = fileName + '.cilvl'
 #        reclvlfile = fileName + '.reclvl'
-        rrlvlfile = fileName + '.rrlvl'
+        rrlvlfile = fileName
         autofile = fileName + '.auto'
         drParamsFile = fileName + '.drparams'
         rrParamsFile = fileName + '.rrparams'
@@ -244,8 +244,8 @@ class ion(ioneqOne, ionTrails, specTrails):
 #            nlvlList.append(nReclvl)
 #        else:
 #            self.Nreclvl = 0
-        if os.path.isfile(rrlvlfile):
-            self.Rrlvl = io.cireclvlRead(self.IonStr, filetype='rrlvl')
+        if os.path.isfile(rrlvlfile + '.rrlvl'):
+            self.Rrlvl = io.cireclvlRead('', filename = rrlvlfile, filetype='rrlvl')
             self.Nrrlvl = len(self.Rrlvl['lvl1'])
             nRrlvl = max(self.Rrlvl['lvl2'])
             self.Nrrlvl = nRrlvl

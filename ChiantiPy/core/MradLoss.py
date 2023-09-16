@@ -18,8 +18,7 @@ import ChiantiPy.tools.mputil as mputil
 
 
 class mradLoss(ionTrails, specTrails):
-    '''
-    Calculate the radiative emission loss rate as a function of temperature and density.
+    """    Calculate the radiative emission loss rate as a function of temperature and density.
 
     this is the multiprocessing version of radloss
 
@@ -84,7 +83,7 @@ class mradLoss(ionTrails, specTrails):
     verbose:  `bool`
         verbose:  whether to allow certain print statements
 
-    '''
+    """
     def __init__(self, temperature, eDensity, elementList=None, ionList = None, minAbund=None,
         doContinuum=True, doLines=True, abundance=None, verbose=0, allLines=1,  proc=4):
 

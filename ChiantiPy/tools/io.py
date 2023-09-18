@@ -766,6 +766,142 @@ def elvlcRead(ions, filename=None, getExtended=False, verbose=False, useTh=True)
     return info
 
 
+def elvlcReadLatex(ions, filename=None, getExtended=False, getLatex=False, verbose=False, useTh=True):
+    """
+    Reads the new format elvlc files.
+
+    Parameters
+    ----------
+    ions : `str`
+        Ion, e.g. 'c_5' for C V
+    filename : `str`, optional
+        Custom filename, will override that specified by `ions`
+    getExtended : `bool`
+    verbose : `bool`
+    useTh : `bool`
+        If True, the theoretical values (ecmth and erydth) are inserted when
+        an energy value for ecm or eryd is zero(=unknown)
+    """
+    #
+    #
+    '%7i%30s%5s%5i%5s%5.1f%15.3f%15.3f \n'
+    #
+    header_line = FortranRecordReader('i7,a30,a5,i5,a5,f5.1,2f15.3')
+#    elvlcFormat  = FortranFormat(fstring)
+    #
+    #
+    if filename:
+        elvlname = filename
+        bname = os.path.basename(filename)
+        ions = bname.split('.')[0]
+    else:
+        fname = util.ion2filename(ions)
+        elvlname = fname+'.elvlc'
+    if not os.path.isfile(elvlname):
+        print((' elvlc file does not exist:  %s'%(elvlname)))
+        return {'status':0}
+    status = 1
+    input = open(elvlname,'r')
+    s1 = input.readlines()
+    input.close()
+    nlvls = 0
+    ndata = 2
+    while ndata > 1:
+        s1a = s1[nlvls][:-1]
+        s2 = s1a.split()
+        ndata = len(s2)
+        nlvls = nlvls+1
+    nlvls -= 1
+    if verbose:
+        print((' nlvls = %i'%(nlvls)))
+    lvl = [0]*nlvls
+    conf  =  [0]*nlvls
+    term = [0]*nlvls
+    label = [0]*nlvls
+    spin = [0]*nlvls
+    spd = [0]*nlvls
+    l = ['']*nlvls
+    j = [0.]*nlvls
+    mult = [0.]*nlvls
+    ecm = [0]*nlvls
+    ecmth = [0]*nlvls
+    pretty = [0]*nlvls
+    latex = [0]*nlvls
+    if getExtended:
+        extended = [' ']*nlvls
+    for i in range(0,nlvls):
+        if verbose:
+            print((s1[i][0:115]))
+#        inpt = FortranLine(s1[i][0:115],elvlcFormat)
+        inpt = header_line.read(s1[i][0:115])
+        lvl[i] = inpt[0]
+        term[i] = inpt[1].strip()
+        label[i] = inpt[2]
+        spin[i] = inpt[3]
+        spd[i] = inpt[4].strip()
+        l[i] = const.Spd.index(spd[i])
+        j[i] = inpt[5]
+        mult[i] = 2.*inpt[5] + 1.
+        ecm[i] = inpt[6]
+        ecmth[i] = inpt[7]
+        if ecm[i] < 0.:
+            if useTh:
+                ecm[i] = ecmth[i]
+        stuff = term[i].strip() + ' %1i%1s%3.1f'%( spin[i], spd[i], j[i])
+        pretty[i] = stuff.strip()
+        if getLatex:
+            lstuff = term[i]
+            if ' ' in lstuff:
+                lterm = lstuff.split(' ')
+            elif '.' in lstuff:
+                lterm = lstuff.split('.')
+            else:
+                lterm = [term[i]]
+#            latex[i] = term[i]
+            latex1 = lterm
+            lterm = []
+            for aterm in latex1:
+#                print(aterm[-1:])
+                subterm = aterm[-1:]
+                if subterm.isalpha():
+                    lterm.append(aterm)
+                if subterm.isnumeric():
+                    lterm.append(aterm[:-1])
+                    lterm[-1]  += '$^%s$'%(subterm)
+            x = ''
+            for one in lterm:
+                x += one + ' '
+            y = x.strip()
+
+            sup = '$^%1i$'%(spin[-1])
+            spinstr = '%10.1f'%(spin[-1])
+            sspinstr = spinstr.strip()
+            sub = '$_{%s}$'%(sspinstr)
+            latex[i] = y + ' ' + sup + spd[i] + sub
+
+        if getExtended:
+            cnt = s1[i].count(',')
+            if cnt > 0:
+                idx = s1[i].index(',')
+                extended[i] = s1[i][idx+1:]
+    eryd = [ecm[i]*const.invCm2ryd if ecm[i] >= 0. else -1. for i in range(nlvls)]
+    erydth = [ecmth[i]*const.invCm2ryd if ecmth[i] >= 0. else -1. for i in range(nlvls)]
+    ref = []
+    # this should skip the last '-1' in the file
+    for i in range(nlvls+1,len(s1)):
+        s1a = s1[i]
+        ref.append(s1a.strip())
+    newref = [aref.strip() for aref in ref if aref.strip() != '-1']
+
+    info = {"lvl":lvl,"conf":conf, "term":term,'label':label, "spin":spin, "spd":spd, "l":l, "j":j,
+             'mult':mult, "ecm":ecm, 'eryd':eryd,'erydth':erydth, "ecmth":ecmth, "ref":newref,
+             "pretty":pretty, 'status':status, 'filename':elvlname}
+    if getExtended:
+        info['extended'] = extended
+    if getLatex:
+        info['latex'] = latex
+    return info
+
 def elvlcWrite(info, outfile=None, round=0, addLvl=0, includeRyd=False, includeEv=False):
     '''
     Write Chianti data to .elvlc file.

@@ -662,7 +662,8 @@ def eaRead(ions, filename=None):
                 ,"nspl":nspl,"splups":splups,"ref":ref}
 
 
-def elvlcRead(ions, filename=None, getExtended=False, verbose=False, useTh=True):
+
+def elvlcRead(ions, filename=None, getExtended=False, getLatex=False, verbose=False, useTh=True):
     """
     Reads the new format elvlc files.
 
@@ -673,7 +674,11 @@ def elvlcRead(ions, filename=None, getExtended=False, verbose=False, useTh=True)
     filename : `str`, optional
         Custom filename, will override that specified by `ions`
     getExtended : `bool`
+        get energy levels in columns beyond the theoretical energy
+    getLatex :  `bool`
+        get energy level descriptions in latex markup
     verbose : `bool`
+        print out the elvlc information
     useTh : `bool`
         If True, the theoretical values (ecmth and erydth) are inserted when
         an energy value for ecm or eryd is zero(=unknown)
@@ -710,6 +715,9 @@ def elvlcRead(ions, filename=None, getExtended=False, verbose=False, useTh=True)
     nlvls -= 1
     if verbose:
         print((' nlvls = %i'%(nlvls)))
+        pformat = '%7s%30s%5s%5s%5s%15s%15s'
+        print(pformat%('lvl'.ljust(7), 'term'.ljust(30), 'spin ', ' L'.ljust(5), 'j   ', 'Eobs ',  'Eth '))
+
     lvl = [0]*nlvls
     conf  =  [0]*nlvls
     term = [0]*nlvls
@@ -722,116 +730,14 @@ def elvlcRead(ions, filename=None, getExtended=False, verbose=False, useTh=True)
     ecm = [0]*nlvls
     ecmth = [0]*nlvls
     pretty = [0]*nlvls
+    if getLatex:
+        latex = [0]*nlvls
     if getExtended:
         extended = [' ']*nlvls
     for i in range(0,nlvls):
         if verbose:
-            print((s1[i][0:115]))
-#        inpt = FortranLine(s1[i][0:115],elvlcFormat)
-        inpt = header_line.read(s1[i][0:115])
-        lvl[i] = inpt[0]
-        term[i] = inpt[1].strip()
-        label[i] = inpt[2]
-        spin[i] = inpt[3]
-        spd[i] = inpt[4].strip()
-        l[i] = const.Spd.index(spd[i])
-        j[i] = inpt[5]
-        mult[i] = 2.*inpt[5] + 1.
-        ecm[i] = inpt[6]
-        ecmth[i] = inpt[7]
-        if ecm[i] < 0.:
-            if useTh:
-                ecm[i] = ecmth[i]
-        stuff = term[i].strip() + ' %1i%1s%3.1f'%( spin[i], spd[i], j[i])
-        pretty[i] = stuff.strip()
-        if getExtended:
-            cnt = s1[i].count(',')
-            if cnt > 0:
-                idx = s1[i].index(',')
-                extended[i] = s1[i][idx+1:]
-    eryd = [ecm[i]*const.invCm2ryd if ecm[i] >= 0. else -1. for i in range(nlvls)]
-    erydth = [ecmth[i]*const.invCm2ryd if ecmth[i] >= 0. else -1. for i in range(nlvls)]
-    ref = []
-    # this should skip the last '-1' in the file
-    for i in range(nlvls+1,len(s1)):
-        s1a = s1[i]
-        ref.append(s1a.strip())
-    newref = [aref.strip() for aref in ref if aref.strip() != '-1']
-
-    info = {"lvl":lvl,"conf":conf, "term":term,'label':label, "spin":spin, "spd":spd, "l":l, "j":j,
-             'mult':mult, "ecm":ecm, 'eryd':eryd,'erydth':erydth, "ecmth":ecmth, "ref":newref,
-             "pretty":pretty, 'status':status, 'filename':elvlname}
-    if getExtended:
-        info['extended'] = extended
-    return info
-
-
-def elvlcReadLatex(ions, filename=None, getExtended=False, getLatex=False, verbose=False, useTh=True):
-    """
-    Reads the new format elvlc files.
-
-    Parameters
-    ----------
-    ions : `str`
-        Ion, e.g. 'c_5' for C V
-    filename : `str`, optional
-        Custom filename, will override that specified by `ions`
-    getExtended : `bool`
-    verbose : `bool`
-    useTh : `bool`
-        If True, the theoretical values (ecmth and erydth) are inserted when
-        an energy value for ecm or eryd is zero(=unknown)
-    """
-    #
-    #
-    '%7i%30s%5s%5i%5s%5.1f%15.3f%15.3f \n'
-    #
-    header_line = FortranRecordReader('i7,a30,a5,i5,a5,f5.1,2f15.3')
-#    elvlcFormat  = FortranFormat(fstring)
-    #
-    #
-    if filename:
-        elvlname = filename
-        bname = os.path.basename(filename)
-        ions = bname.split('.')[0]
-    else:
-        fname = util.ion2filename(ions)
-        elvlname = fname+'.elvlc'
-    if not os.path.isfile(elvlname):
-        print((' elvlc file does not exist:  %s'%(elvlname)))
-        return {'status':0}
-    status = 1
-    input = open(elvlname,'r')
-    s1 = input.readlines()
-    input.close()
-    nlvls = 0
-    ndata = 2
-    while ndata > 1:
-        s1a = s1[nlvls][:-1]
-        s2 = s1a.split()
-        ndata = len(s2)
-        nlvls = nlvls+1
-    nlvls -= 1
-    if verbose:
-        print((' nlvls = %i'%(nlvls)))
-    lvl = [0]*nlvls
-    conf  =  [0]*nlvls
-    term = [0]*nlvls
-    label = [0]*nlvls
-    spin = [0]*nlvls
-    spd = [0]*nlvls
-    l = ['']*nlvls
-    j = [0.]*nlvls
-    mult = [0.]*nlvls
-    ecm = [0]*nlvls
-    ecmth = [0]*nlvls
-    pretty = [0]*nlvls
-    latex = [0]*nlvls
-    if getExtended:
-        extended = [' ']*nlvls
-    for i in range(0,nlvls):
-        if verbose:
-            print((s1[i][0:115]))
+#            print((s1[i][0:115].strip()))
+            print((s1[i].strip()))
 #        inpt = FortranLine(s1[i][0:115],elvlcFormat)
         inpt = header_line.read(s1[i][0:115])
         lvl[i] = inpt[0]
@@ -868,16 +774,18 @@ def elvlcReadLatex(ions, filename=None, getExtended=False, getLatex=False, verbo
                 if subterm.isnumeric():
                     lterm.append(aterm[:-1])
                     lterm[-1]  += '$^%s$'%(subterm)
-            x = ''
+            myTerm = ''
             for one in lterm:
-                x += one + ' '
-            y = x.strip()
+                myTerm += one + ' '
+#            y = x.strip()
 
-            sup = '$^%1i$'%(spin[-1])
-            spinstr = '%10.1f'%(spin[-1])
-            sspinstr = spinstr.strip()
-            sub = '$_{%s}$'%(sspinstr)
-            latex[i] = y + ' ' + sup + spd[i] + sub
+            sup = '$^%1i$'%(spin[i])
+#            spinstr = '%10.1f'%(spin[i])
+#            sspinstr = spinstr.strip()
+            jstr = '%5.1f'%(j[i])
+
+            sub = '$_{%s}$'%(jstr.strip())
+            latex[i] = myTerm.strip() + ' ' + sup + spd[i] + sub.strip()
 
         if getExtended:
             cnt = s1[i].count(',')
@@ -2240,7 +2148,7 @@ def versionRead():
     return versionStr.strip()
 
 
-def wgfaRead(ions, filename=None, elvlcname=0, total=False, verbose=False):
+def wgfaRead(ions, filename=None, elvlcname=0, total=False, getLatex = False, verbose=False):
     """
     Read CHIANTI data from a .wgfa file.
 
@@ -2259,6 +2167,9 @@ def wgfaRead(ions, filename=None, elvlcname=0, total=False, verbose=False):
         keys of 'Wgfa' dict
     total : `bool`
         Return the summed level 2 avalue data in 'Wgfa'
+    getLatex : `bool`
+        retrieve the level descriptions in latex markup returned in the 'latex1' and 'latex2'
+        keys of the `Wgfa` dict
     verbose : `bool`
 
     Returns
@@ -2277,18 +2188,18 @@ def wgfaRead(ions, filename=None, elvlcname=0, total=False, verbose=False):
         if not elvlcname:
             elvlcname = os.path.splitext(wgfaname)[0] + '.elvlc'
             if os.path.isfile(elvlcname):
-                elvlc = elvlcRead('', elvlcname)
+                elvlc = elvlcRead('', elvlcname, getLatex = getLatex)
             else:
                 elvlc = 0
         else:
-            elvlc = elvlcRead('',elvlcname)
+            elvlc = elvlcRead('',elvlcname, getLatex = getLatex)
 
     else:
         fname = util.ion2filename(ions)
         wgfaname = fname+'.wgfa'
         elvlcname = fname + '.elvlc'
         if os.path.isfile(elvlcname):
-            elvlc = elvlcRead('', elvlcname)
+            elvlc = elvlcRead('', elvlcname, getLatex = getLatex)
         else:
             elvlc = 0
     if verbose:
@@ -2319,26 +2230,41 @@ def wgfaRead(ions, filename=None, elvlcname=0, total=False, verbose=False):
         pretty1  =  ['']*nwvl
         pretty2  =  ['']*nwvl
     #
+    if getLatex:
+        latex1  =  ['']*nwvl
+        latex2  =  ['']*nwvl
     if verbose:
         print((' nwvl  =  %10i'%(nwvl)))
     #
     wgfaFormat = '(2i5,f15.3,2e15.3)'
     header_line = FortranRecordReader(wgfaFormat)
-    for ivl in range(nwvl):
-        if verbose:
-            print(' index %5i  %s'%(ivl, s1[ivl]))
+    if verbose:
+        print('%5s %5s %5s %12s %10s %10s'%('index', 'lvl1',  'lvl2', 'wvl(A)', 'gf ', 'A-value'))
+    for ilvl in range(nwvl):
+#        if verbose:
+#            print('%5i  %s'%(ilvl, s1[ilvl].strip()))
+#            print(s1[ilvl].strip())
+#            print(' index %5i'%(ilvl))  # + s1[ilvl].split())
 #        inpt=FortranLine(s1[ivl],wgfaFormat)
-        inpt = header_line.read(s1[ivl])
-        lvl1[ivl] = inpt[0]
-        lvl2[ivl] = inpt[1]
-        wvl[ivl] = inpt[2]
-        gf[ivl] = inpt[3]
-        avalue[ivl] = inpt[4]
+        inpt = header_line.read(s1[ilvl])
+        lvl1[ilvl] = inpt[0]
+        lvl2[ilvl] = inpt[1]
+        wvl[ilvl] = inpt[2]
+        gf[ilvl] = inpt[3]
+        avalue[ilvl] = inpt[4]
+        if verbose:
+            print('%5i %5i %5i %12.2f %10.2e %10.2e'%(ilvl,  lvl1[ilvl],  lvl2[ilvl],  wvl[ilvl],
+                gf[ilvl],  avalue[ilvl]))
         if elvlc:
             idx1 = elvlc['lvl'].index(inpt[0])
             idx2 = elvlc['lvl'].index(inpt[1])
-            pretty1[ivl] = elvlc['pretty'][idx1]
-            pretty2[ivl] = elvlc['pretty'][idx2]
+            pretty1[ilvl] = elvlc['pretty'][idx1]
+            pretty2[ilvl] = elvlc['pretty'][idx2]
+        if getLatex:
+            idx1 = elvlc['lvl'].index(inpt[0])
+            idx2 = elvlc['lvl'].index(inpt[1])
+            latex1[ilvl] = elvlc['latex'][idx1]
+            latex2[ilvl] = elvlc['latex'][idx2]
 
     ref = []
     # should skip the last '-1' in the file
@@ -2357,7 +2283,11 @@ def wgfaRead(ions, filename=None, elvlcname=0, total=False, verbose=False):
     if elvlc:
         Wgfa['pretty1'] = pretty1
         Wgfa['pretty2'] = pretty2
-    #
+
+    if getLatex:
+        Wgfa['latex1'] = latex1
+        Wgfa['latex2'] = latex2
+     #
     return Wgfa
 
 

@@ -83,7 +83,7 @@ El = ['h','he','li','be','b','c','n','o','f','ne','na', \
     'v','cr','mn','fe','co','ni','cu','zn',\
     'ga','ge','as','se','br','kr']
 Ionstage = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII','XIII', \
-    'XIV','XV','XVI','XVII','XVIII','XIX','XX','XXI',' XXII','XXIII','XXIV', \
+    'XIV','XV','XVI','XVII','XVIII','XIX','XX','XXI','XXII','XXIII','XXIV', \
     'XXV','XXVI','XXVII','XXVIII','XXIX','XXX','XXXI','XXXII','XXXIII','XXXIV', \
     'XXXV','XXXVI','XXXVII']
 Spd = ['S', 'P', 'D', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'O', 'Q', 'R', 'T', 'U', 'V', 'W', \

@@ -771,7 +771,7 @@ class maker(ionTrails,  specTrails):
         for ijk in range(ionWorkerQSize):
             out = ionDoneQ.get()
             someIon = out[0]
-            print('processing ion = %s'%(someIon))
+            print('ion %i out of %i processing ion = %s'%(ijk + 1, ionWorkerQSize, someIon))
             self.Finished.append(someIon)
             intensity = out[1]['intensity']
 
@@ -1327,8 +1327,8 @@ class maker(ionTrails,  specTrails):
         predOverInt = []
 
         noPredIdx = []
-        noPredWvl = []
-        noPredIon = []
+#        noPredWvl = []
+#        noPredIon = []
 
 
 
@@ -1347,8 +1347,8 @@ class maker(ionTrails,  specTrails):
                 if verbose:
                     print(' no prediction wvl:  %8.2f ion:  %s'%(amatch['obsWvl'], amatch['ionS']))
                 noPredIdx.append(iwvl)
-                noPredWvl.append(self.Match[iwvl]['wvl'])
-                noPredIon.append(self.Match[iwvl]['ions'])
+#                noPredWvl.append(self.Match[iwvl]['wvl'])
+#                noPredIon.append(self.Match[iwvl]['ions'])
 
         diffNp = np.asarray(diff, np.float64)
         intOverPredNp = np.asarray(intOverPred, np.float64)
@@ -1361,7 +1361,8 @@ class maker(ionTrails,  specTrails):
 
         self.Diff = {'diff':diffNp, 'intOverPred':intOverPredNp, 'diffOverInt':diffOverIntNp,
             'wvl':wvlDiff, 'ionS':self.IonS, '3sig':threeSig, 'poor':poor, 'noPredIdx':noPredIdx,
-            'noPredWvl':noPredWvl, 'noPredIon':noPredIon, 'predOverInt':predOverIntNp}
+            'predOverInt':predOverIntNp}
+        #'noPredWvl':noPredWvl, 'noPredIon':noPredIon,
         #
         # -------------------------------------------------------------------------
         #
@@ -1483,8 +1484,8 @@ class maker(ionTrails,  specTrails):
         predOverInt = []
 
         noPredIdx = []
-        noPredWvl = []
-        noPredIon = []
+#        noPredWvl = []
+#        noPredIon = []
 
         dash = ' -------------------------------------------------'
         pformat1 = ' %5i %7s %10.3f %10.2e %10.2e %10.3f %10.3f %10.3f %10.3f'
@@ -1557,8 +1558,8 @@ class maker(ionTrails,  specTrails):
                 else:
                     pstring = pformat1a%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'])
                     noPredIdx.append(iwvl)
-                    noPredWvl.append(self.Match[iwvl]['wvl'])
-                    noPredIon.append(self.Match[iwvl]['ions'])
+#                    noPredWvl.append(self.Match[iwvl]['wvl'])
+#                    noPredIon.append(self.Match[iwvl]['ions'])
 
                 print(pstring)
                 outpt.write(pstring+'\n')
@@ -1613,7 +1614,8 @@ class maker(ionTrails,  specTrails):
                 outpt.write('%5i %s %10.3f %10.3f %10.3f\n'%(i, self.IonS[i],  self.Wvl[i], np.abs(intOverPredNp)[i], diffOverIntNp[i]))
         self.Diff = {'diff':diffNp, 'intOverPred':intOverPredNp, 'diffOverInt':diffOverIntNp,
             'wvl':wvlDiff, 'ionS':self.IonS, '3sig':threeSig, 'poor':poor, 'noPredIdx':noPredIdx,
-            'noPredWvl':noPredWvl, 'noPredIon':noPredIon, 'predOverInt':predOverIntNp}
+            'predOverInt':predOverIntNp}
+        # 'noPredWvl':noPredWvl, 'noPredIon':noPredIon,
         #
         # --------------------------------------------------------------------------
         #

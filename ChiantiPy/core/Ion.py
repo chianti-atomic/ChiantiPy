@@ -1072,8 +1072,8 @@ class ion(ioneqOne, ionTrails, specTrails):
         for example, do .spectrum( .... label = 'test1')
         and do          .spectrum( ....  label = 'test2')
         then will get self.Spectrum.keys() = test1, test2 and
-        self.Spectrum['test1'] = {'intensity':aspectrum,  'wvl':wavelength, 'filter':useFilter.__name__,
-            'filterWidth':useFactor}
+        self.Spectrum['test1'] = {'intensity':aspectrum,  'wvl':wavelength, \
+            'filter':useFilter.__name__, 'filterWidth':useFactor}
 
         Notes
         ------

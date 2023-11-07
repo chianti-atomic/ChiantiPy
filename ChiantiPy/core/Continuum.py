@@ -11,6 +11,7 @@ from scipy import special
 from scipy.ndimage import map_coordinates
 #import matplotlib.pyplot as plt
 #import ChiantiPy.core as ch
+from .Ion import ion as chion
 from .Ioneq import ioneq
 from ChiantiPy.base import ionTrails
 import ChiantiPy.tools.data as chdata
@@ -71,6 +72,7 @@ class continuum(ionTrails):
     .. [107] Rybicki and Lightman, 1979, Radiative Processes in Astrophysics,
             `(Wiley-VCH) <http://adsabs.harvard.edu/abs/1986rpa..book.....R>`_
     .. [108] Gronenschild, E.H.B.M. and Mewe, R., 1978, A&AS, `32, 283 <http://adsabs.harvard.edu/abs/1978A%26AS...32..283G>`_
+    .. [109] Mao, J., Kaastra, J., Badlell, N., 2017, A&A,  A&A, 599, A10 _
     """
 
     def __init__(self, ionStr,  temperature, abundance=None, em=None, verbose=0):
@@ -405,92 +407,55 @@ class continuum(ionTrails):
 
     def freeBoundLossMao(self,  includeAbund=False,  includeIoneq=False):
         """
-        to calculate the radiative loss rate from the parameters of
+        to calculate the radiative loss rate from the parameters of [109]_
         Mao J., Kaastra J., Badnell N.R.
         <Astron. Astrophys. 599, A10 (2017)>=2017A&A...599A..10M
 
         """
-        pars = io.maoParsRead()
+        if self.Defaults['wavelength'] != 'angstrom':
+            print(' the continuum can only be calculated for wavelengths in angstroms')
+            return
+
+        xlabel =  self.Labels['radlossTlabel']
+        ylabel = self.Labels['radlossYlabel']
+
         nameDict = util.convertName(self.IonStr)
-        Z = nameDict['Z']
-        Iso = nameDict['iso']
-        ionIndex = 1000*(Iso+1) + Z
-#        print(' %s  Z %i  Iso %i'%(self.IonStr, Z,  Iso))
-        Index = []
-        for iso,  z in zip(pars['seq'], pars['z']):
-            Index.append(1000*(iso) + z)
-        idx = Index.index(ionIndex)
+        fblfFilename = nameDict['filename'] + '.fblf'
+        if os.path.isfile(fblfFilename):
+            if not hasattr(self, 'Fblf'):
+                self.Fblf = io.fblfRead(self.IonStr)
+            myIon = chion(self.IonStr, self.Temperature, setup = False)
+            myIon.setupIonrec()
+            myIon.rrRate()
+        else:
+            self.FreeBoundLoss = {'errorMessage':'there is no fblf file for this ion %s'%(self.IonStr)}
+            return
         #
-        abund = self.Abundance
-        ioneq = self.IoneqOne
+        if includeAbund:
+            abund = self.Abundance
+        else:
+            abund = 1.
+        if includeIoneq:
+            ioneq = self.IoneqOne
+        else:
+            ioneq = 1.
         em = self.Em
         temp = self.Temperature
         tev = const.boltzmannEv*self.Temperature
-        a0 = pars['a0'][idx]
-        a1 = pars['a1'][idx]
-        a2 = pars['a2'][idx]
-        b0 = pars['b0'][idx]
-        b1 = pars['b1'][idx]
-        b2 = pars['b2'][idx]
-        c0 = pars['c0'][idx]
-#        print('a0:  %10.2e b0:  %10.2e  c0:  %10.2e'%(a0,  b0, c0))
-#        print('a0:  %10.2e a1:  %10.2e  a2:  %10.2e'%(a0,  a1, a2))
-#        print('b0:  %10.2e b1:  %10.2e  b2:  %10.2e'%(b0,  b1, b2))
-#        print('c0:  %10.2e'%(c0))
+        a0 = self.Fblf['a0']
+        a1 = self.Fblf['a1']
+        a2 = self.Fblf['a2']
+        b0 = self.Fblf['b0']
+        b1 = self.Fblf['b1']
+        b2 = self.Fblf['b2']
+        c0 = self.Fblf['c0']
         f1 = a0*tev**(-b0 -c0*np.log(tev))
         f2 = (1. + a2*tev**(-b2))/(1. +a1*tev**(-b1))
-        RrRate = self.rrRate()
-        Lev = em*ioneq*abund*f1*f2*tev*RrRate['rate']
-        Lerg = em*ioneq*abund*f1*f2*const.boltzmann*temp*RrRate['rate']
-        Lryd = em*ioneq*abund*f1*f2*(tev/const.ryd2Ev)*RrRate['rate']
-        self.FreeBoundLossMao = {'f':f1*f2, 'LeV':Lev, 'Lerg':Lerg, 'Lryd':Lryd, 'rrRate':RrRate['rate'], 'temp':temp, 'tev':tev, 'abund':abund, 'ioneq':ioneq, 'em':em}
-
-    def rrRate(self):
-        """
-        Provide the radiative recombination rate coefficient as a function of temperature (K).
-        a revised copy of the Ion method
-        """
-        if hasattr(self, 'Temperature'):
-            temperature = self.Temperature
-        else:
-            print(' temperature is not defined in rrRate')
-            return
-
-        rrparamsfile = util.ion2filename(self.IonStr) + '.rrparams'
-        if hasattr(self, 'RrParams'):
-            rrparams = self.RrParams
-        elif os.path.isfile(rrparamsfile):
-            self.RrParams = io.rrRead(self.IonStr)
-            rrparams = self.RrParams
-        else:
-            self.RrRate = {'temperature':temperature, 'rate':np.zeros_like(temperature)}
-            return
-
-        if rrparams['rrtype'] == 1:
-            a = rrparams['params'][3]
-            b = rrparams['params'][4]
-            t0 = rrparams['params'][5]
-            t1 = rrparams['params'][6]
-            rate = a/(np.sqrt(temperature/t0)*(1.+np.sqrt(temperature/t0))**(1.-b)*(1.+np.sqrt(temperature/t1))**(1.+b))
-            return {'temperature':temperature, 'rate':rate}
-        elif rrparams['rrtype'] == 2:
-            a = rrparams['params'][3]
-            b = rrparams['params'][4]
-            t0 = rrparams['params'][5]
-            t1 = rrparams['params'][6]
-            c = rrparams['params'][7]
-            t2 = rrparams['params'][8]
-            b += c*np.exp(-t2/temperature)
-            rate = a/(np.sqrt(temperature/t0)*(1.+np.sqrt(temperature/t0))**(1.-b)*(1.+np.sqrt(temperature/t1))**(1.+b))
-            return {'temperature':temperature, 'rate':rate}
-        elif rrparams['rrtype'] == 3:
-            a = rrparams['params'][2]
-            b = rrparams['params'][3]
-            rate = a/(temperature/1.e+4)**b
-            return {'temperature':temperature, 'rate':rate}
-        else:
-            return {'temperature':temperature, 'rate':np.zeros_like(temperature)}
-
+#        Lev = em*ioneq*abund*f1*f2*tev*myIon.RrRate['rate']
+        fbLoss = em*ioneq*abund*f1*f2*const.boltzmann*temp*myIon.RrRate['rate']*em
+#        Lryd = em*ioneq*abund*f1*f2*(tev/const.ryd2Ev)*myIon.RrRate['rate']
+        self.FreeBoundLoss = {'rate':fbLoss, 'temperature':temp, 'em':em, 'abund':abund, 'ioneq':ioneq,
+            'xlabel':xlabel, 'ylabel':ylabel, 'f':f1*f2, 'tev':tev, 'method':'mao'}
 
     def mewe_gaunt_factor(self, **kwargs):
         """
@@ -727,8 +692,8 @@ class continuum(ionTrails):
         fbkl = em*ioneq*abund*K1*K2*K4*gfIntAllSum/np.sqrt(temperature)
         fbLoss += fbkl
 
-        self.FreeBoundLoss = {'rate':fbLoss, 'fbkl':fbkl, 'temperature':temperature,
-            'xlabel':xlabel, 'ylabel':ylabel}
+        self.FreeBoundLoss = {'rate':fbLoss, 'temperature':temperature, 'em':em, 'abund':abund,
+            'ioneq':ioneq, 'xlabel':xlabel, 'ylabel':ylabel, 'method':'verner_kl'}
 
 
     def freeBoundRate(self, verner=True, verbose=False):
@@ -990,7 +955,9 @@ class continuum(ionTrails):
     def freeBound(self, wvl, includeAbund = True, includeIoneq = True, verner=True, verbose=False):
         """
         Calculates the free-bound (radiative recombination) continuum emissivity of an ion.
-        Provides emissivity in units of ergs :math:`\mathrm{cm}^{-2}` :math:`\mathrm{s}^{-1}` :math:`\mathrm{str}^{-1}` :math:`\mathrm{\AA}^{-1}` for an individual ion.  If includeAbund is set,
+        Provides emissivity in units of ergs :math:`\mathrm{cm}^{-2}` :math:`\mathrm{s}^{-1}`
+            :math:`\mathrm{str}^{-1}` :math:`\mathrm{\u212B}^{-1}` for an individual ion.
+            If includeAbund is set,
         the abundance is included.  If includeIoneq is set, the ionization equililibrium for the given
         ion is included
 

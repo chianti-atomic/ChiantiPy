@@ -955,9 +955,9 @@ class continuum(ionTrails):
     def freeBound(self, wvl, includeAbund = True, includeIoneq = True, verner=True, verbose=False):
         """
         Calculates the free-bound (radiative recombination) continuum emissivity of an ion.
-        Provides emissivity in units of ergs :math:`\mathrm{cm}^{-2}` :math:`\mathrm{s}^{-1}`
+        Provides emissivity in units of ergs :math:`\mathrm{cm}^{-2}` :math:`\mathrm{s}^{-1}` \
             :math:`\mathrm{str}^{-1}` :math:`\mathrm{\u212B}^{-1}` for an individual ion.
-            If includeAbund is set,
+        If includeAbund is set,
         the abundance is included.  If includeIoneq is set, the ionization equililibrium for the given
         ion is included
 

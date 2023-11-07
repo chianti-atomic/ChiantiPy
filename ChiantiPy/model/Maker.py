@@ -16,7 +16,8 @@ import ChiantiPy.tools.io as io
 import ChiantiPy.tools.util as util
 import ChiantiPy.tools.data as chdata
 import ChiantiPy.Gui as chGui
-from ChiantiPy.base import ionTrails, specTrails    #
+from ChiantiPy.base import ionTrails, specTrails
+    #
     # --------------------------------------------------------------------------
     #
 def doDemGofntQ(inQueue, outQueue):

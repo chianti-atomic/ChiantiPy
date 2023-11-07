@@ -810,7 +810,7 @@ def elvlcRead(ions, filename=None, getExtended=False, getLatex=False, verbose=Fa
         info['latex'] = latex
     return info
 
-def elvlcWrite(info, outfile=None, round=0, addLvl=0, includeRyd=False, includeEv=False):
+def elvlcWrite(info, outfile=None, round=0, addLvl=0, includeRyd=False, includeEv=False, verbose=False):
     '''
     Write Chianti data to .elvlc file.
 
@@ -880,12 +880,14 @@ def elvlcWrite(info, outfile=None, round=0, addLvl=0, includeRyd=False, includeE
     for i,  aterm in enumerate(info['term']):
         thisTerm = aterm.ljust(29)
         thisLabel = info['label'][i].ljust(4)
-        pstring = pformat%(i+1+addLvl, thisTerm, thisLabel, info['spin'][i], info['spd'][i],info['j'][i],
-            np.round(info['ecm'][i], round), np.round(info['ecmth'][i], round))
+        pstring = pformat%(i+1+addLvl, thisTerm, thisLabel, info['spin'][i], info['spd'][i],
+            info['j'][i], np.round(info['ecm'][i], round), np.round(info['ecmth'][i], round))
         if includeRyd:
-             pstring += ' , %15.8f , %15.8f'%(info['eryd'][i], info['erydth'][i])
+            pstring += ' , %15.8f , %15.8f'%(info['eryd'][i], info['erydth'][i])
         if includeEv:
-             pstring += ' , %15.8f , %15.8f'%(info['eV'][i], info['eVth'][i])
+            pstring += ' , %15.8f , %15.8f'%(info['eV'][i], info['eVth'][i])
+        if verbose:
+            print(pstring)
         pstring += '\n'
         out.write(pstring)
     out.write(' -1\n')
@@ -1060,6 +1062,34 @@ def emRead(filename = None,  directory = None,  verbose=False):
 #    ref = s1[nlines+1:]
     return{'temperature':np.asarray(temp), 'density':np.asarray(dens), 'em':np.asarray(em), 'ref':ref, 'filename':emFileName}
 
+def fblfRead(ions, filename=None, verbose=False):
+    """Read the .fbparams file to return the parameters to calculate the
+    fb factor of Mao, Kaastra, Badnell Astron. Astrophys. 599, A10 (2017)
+
+    Parameters
+    ----------
+    ions : `str`
+        Ion, e.g. 'c_5' for C V
+    filename : `str`, optional
+        Custom filename, will override that specified by `ions`
+
+    """
+    fstring = '7f10.3'
+    header_line = FortranRecordReader(fstring)
+
+    if filename:
+        fbparamsName = filename
+        bname = os.path.basename(filename)
+        ions = bname.split('.')[0]
+    else:
+        fname = util.convertName(ions)['filename']
+        fbparamsName = fname + '.fblf'
+    if os.path.exists(fbparamsName):
+        with  open(fbparamsName,'r') as inpt:
+            s1 = inpt.readlines()
+    a0, a1, a2, b0,  b1,  b2, c0 = header_line.read(s1[1])
+
+    return {'a0':a0, 'a1':a1, 'a2':a2, 'b0':b0, 'b1':b1, 'b2':b2, 'c0':c0}
 
 def fblvlRead(ions, filename=None, verbose=False):
     """

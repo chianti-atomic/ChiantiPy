@@ -1356,12 +1356,13 @@ class maker(ionTrails,  specTrails):
         diffOverIntNp = np.asarray(diffOverInt, np.float64)
         predOverIntNp = np.asarray(predOverInt, np.float64)
 
-        threeSig = 3.*diffOverIntNp.std()
+        sig = diffOverIntNp.std()
+        threeSig = 3.*sig
 
         poor = np.abs(diffOverIntNp) > threeSig
 
         self.Diff = {'diff':diffNp, 'intOverPred':intOverPredNp, 'diffOverInt':diffOverIntNp,
-            'wvl':wvlDiff, 'ionS':self.IonS, '3sig':threeSig, 'poor':poor, 'noPredIdx':noPredIdx,
+            'wvl':wvlDiff, 'ionS':self.IonS, 'std':sig, '3sig':threeSig, 'poor':poor, 'noPredIdx':noPredIdx,
             'predOverInt':predOverIntNp}
         #'noPredWvl':noPredWvl, 'noPredIon':noPredIon,
         #

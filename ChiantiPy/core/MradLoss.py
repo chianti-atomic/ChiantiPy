@@ -41,7 +41,7 @@ class mradLoss(ionTrails, specTrails):
 
     Setting em will multiply the spectrum at each temperature by the value of em.
 
-    em [for emission measure], can be a float or an array of the same length as the
+    em (for emission measure), can be a float or an array of the same length as the
     temperature/density.
 
     abundance: to select a particular set of abundances, set abundance to the name of a

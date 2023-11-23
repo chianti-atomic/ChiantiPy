@@ -1615,8 +1615,8 @@ class maker(ionTrails,  specTrails):
                 print('%5i %s %10.3f %10.3f %10.3f'%(i, self.IonS[i],  self.Wvl[i], np.abs(intOverPredNp)[i],  diffOverIntNp[i]))
                 outpt.write('%5i %s %10.3f %10.3f %10.3f\n'%(i, self.IonS[i],  self.Wvl[i], np.abs(intOverPredNp)[i], diffOverIntNp[i]))
         self.Diff = {'diff':diffNp, 'intOverPred':intOverPredNp, 'diffOverInt':diffOverIntNp,
-            'wvl':wvlDiff, 'ionS':self.IonS, '3sig':threeSig, 'poor':poor, 'noPredIdx':noPredIdx,
-            'predOverInt':predOverIntNp}
+            'wvl':wvlDiff, 'ionS':self.IonS, 'std':onestd, '3sig':threeSig, 'poor':poor,
+            'noPredIdx':noPredIdx, 'predOverInt':predOverIntNp}
         # 'noPredWvl':noPredWvl, 'noPredIon':noPredIon,
         #
         # --------------------------------------------------------------------------

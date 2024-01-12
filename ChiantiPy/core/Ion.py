@@ -964,26 +964,32 @@ class ion(ioneqOne, ionTrails, specTrails):
             exRate = np.zeros((nscups,ntemp),np.float64)
             dexRate = np.zeros((nscups,ntemp),np.float64)
         deAll = []
+        lvl1 = []
+        lvl2 = []
         for iscups in range(nscups):
             if prot:
                 # for proton rates
-                l1 = self.Psplups["lvl1"][iscups]-1
+                lvl1.append(self.Psplups["lvl1"][iscups])
+                l1 = self.Psplups["lvl1"][iscups] - 1
                 l1idx = self.Elvlc['lvl'].index(self.Psplups['lvl1'][iscups])
-                l2 = self.Psplups["lvl2"][iscups]-1
+                lvl2.append(self.Psplups["lvl2"][iscups])
+                l2 = self.Psplups["lvl2"][iscups] - 1
                 l2idx = self.Elvlc['lvl'].index(self.Psplups['lvl2'][iscups])
                 ttype = self.Psplups["ttype"][iscups]
                 cups = self.Psplups["cups"][iscups]
                 nspl = self.Psplups["nspl"][iscups]
-                dx = 1./(float(nspl)-1.)
+                dx = 1./(float(nspl) - 1.)
                 xs = dx*np.arange(nspl)
                 scups = self.Psplups["splups"][iscups]
                 de = elvlc[l2idx]-elvlc[l1idx]
                 kte = const.boltzmann*temp/(de*const.ryd2erg)
             else:
                 # electron collisional excitation or dielectronic excitation
-                l1 = self.Scups["lvl1"][iscups]-1
+                lvl1.append(self.Scups["lvl1"][iscups])
+                l1 = self.Scups["lvl1"][iscups] - 1
                 l1idx = self.Elvlc['lvl'].index(self.Scups['lvl1'][iscups])
-                l2 = self.Scups["lvl2"][iscups]-1
+                lvl2.append(self.Scups["lvl2"][iscups])
+                l2 = self.Scups["lvl2"][iscups] - 1
                 l2idx = self.Elvlc['lvl'].index(self.Scups['lvl2'][iscups])
                 ttype = self.Scups["ttype"][iscups]
                 cups = self.Scups["cups"][iscups]
@@ -1049,10 +1055,10 @@ class ion(ioneqOne, ionTrails, specTrails):
 
         ups=np.where(ups > 0.,ups,0.)
         if prot == 1:
-            self.PUpsilon = {'upsilon':ups, 'temperature':temperature,
+            self.PUpsilon = {'lvl1':lvl1, 'lvl2':lvl2, 'upsilon':ups, 'temperature':temperature,
                                 'exRate':exRate, 'dexRate':dexRate}
         else:
-            self.Upsilon = {'upsilon':ups, 'temperature':temperature,
+            self.Upsilon = {'lvl1':lvl1, 'lvl2':lvl2,'upsilon':ups, 'temperature':temperature,
                             'exRate':exRate, 'dexRate':dexRate, 'de':deAll}
 
     def spectrum(self, wavelength, filter=(chfilters.gaussianR,1000.), label=0, allLines=1):

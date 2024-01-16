@@ -1455,9 +1455,9 @@ def ioneqRead(ioneqName='', minIoneq=1.e-20, verbose=False):
     #
     with open(ioneqFileName,'r') as input:
         s1 = input.readlines()
-    ntemp,nele = s1[0].split()
+    ntemp, nele = s1[0].split()
     if verbose:
-        print((' ntemp, nele = %5i %5i'%(ntemp, nele)))
+        print(' ntemp, nele = %5i %5i'%(int(ntemp), int(nele)))
     nTemperature = int(ntemp)
     nElement = int(nele)
     #
@@ -1472,6 +1472,8 @@ def ioneqRead(ioneqName='', minIoneq=1.e-20, verbose=False):
         idx = aline.find('-1')
         nlines += 1
     nlines -= 1
+    if verbose:
+        print('nlines:  %i'%(nlines))
     #
     #
     header_lineq = FortranRecordReader('2i3,'+str(nTemperature)+'e10.2')

@@ -1,8 +1,9 @@
 """
 Ionization equilibrium class
 """
+import os
 import numpy as np
-import matplotlib as mpl
+#import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 
@@ -13,6 +14,77 @@ import ChiantiPy.tools.data as chdata
 
 from .Ion import ion
 
+def ioneqMake(filename, directory = None, temperature = None,  reference = None, verbose = False):
+    """a function  to create a chianit .ioneq style ionization equilibrium
+    Parameters
+    ----------
+
+    filename:  `str`
+        the name of the file to be created - should end in .ioneq
+
+    directory: `str`
+        the directory where the file will be placed.  If it is None, the the file
+        will be placed in the uses home directory.
+
+    temperature:  `array-like`
+        the temperatures at which the ionization equilibrium will be calculated
+        the default value is None and the temperature will be 101 values exponentially
+        spaced between 10^4 and 10^9 K
+
+    reference:  `list` of `str`
+        a list of references to be added to tail of file.
+        such as ['file created by me', 'today']
+
+    verbose:  `bool`
+        if True, prints out information, the default is False
+    """
+    if directory is None:
+        fullFilename = os.path.join(os.environ['HOME'], filename)
+    else:
+        if os.path.isdir(directory):
+            fullFilename = os.path.join(directory,  filename)
+        else:
+            print('the specified directory:  %s does not exist'%(directory))
+            print('putting file in HOME directory %s'%(os.environ['HOME']))
+            fullFilename = os.path.join(os.environ['HOME'])
+    nIons = 30
+    z = range(1,  nIons)
+
+    if temperature is None:
+        nT =  50*2 + 1
+        temperature = np.logspace(4., 9., nT)
+        logTemp = np.log10(temperature)
+    else:
+        logTemp = np.log10(temperature)
+        nT = logTemp.size
+
+    with open(fullFilename, 'w') as outpt:
+        outpt.write('%i %i \n'%(nT, nIons))
+        pstring = ''
+        for atemp in logTemp:
+            pstring += '%6.2f'%(atemp)
+        pstring += '\n'
+        outpt.write(pstring)
+        for z in range(1, nIons):
+            anioneq = ioneq(z)
+            anioneq.calculate(temperature)
+            for istage in range(anioneq.Ioneq.shape[0]):
+                pstring = '%3i%3i'%(z, istage + 1)
+                for one in anioneq.Ioneq[istage]:
+                    if one > 1.e-20:
+                        pstring += '%10.3e'%(one)
+                    else:
+                        pstring += '%10.3e'%(0.)
+                pstring += '\n'
+                outpt.write(pstring)
+        outpt.write(' -1 \n')
+        if reference is None:
+            outpt.write('filename:  %s \n'%(fullFilename))
+            outpt.write('created by ChiantiPy.Ioneq.ioneqMake \n')
+        else:
+            for one in reference:
+                outpt.write(one+'\n''')
+        outpt.write(' -1 \n')
 
 class ioneq(object):
     """
@@ -138,7 +210,7 @@ class ioneq(object):
             self.Ioneq = ioneq
 
     def plot(self, stages=0, tRange=0, yr=0, oplot=False, label=1, title=1,  bw=False, semilogx=0,
-        heightAdjust = 1.3,  verbose=0):
+        heightAdjust = 1.3,  verbose=False):
         '''
         Plots the ionization equilibria.
 

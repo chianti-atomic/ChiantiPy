@@ -149,7 +149,7 @@ class spectrum(ionTrails, specTrails):
         self.Wavelength = np.asarray(wavelength,  np.float64)
         self.WvlRange = np.asarray([self.Wavelength.min(),  self.Wavelength.max()],  np.float64)
         #
-        self.argCheck(temperature=temperature, eDensity=eDensity, pDensity=None,  em=em,  verbose=verbose)
+        self.argCheck(temperature=temperature, eDensity=eDensity, pDensity=None,  em=em)
 
         nTempDens = self.NTempDens
 
@@ -191,7 +191,7 @@ class spectrum(ionTrails, specTrails):
         self.Finished = []
         #
         self.ionGate(elementList = elementList, ionList = ionList, minAbund=minAbund, doLines=doLines,
-            doContinuum=doContinuum, verbose = verbose)
+            doContinuum=doContinuum)
         #
         for akey in sorted(self.Todo.keys()):
             zStuff = util.convertName(akey)

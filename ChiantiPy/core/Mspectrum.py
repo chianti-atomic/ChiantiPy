@@ -113,8 +113,8 @@ class mspectrum(ionTrails, specTrails):
         verbose:  whether to allow certain print statements
     '''
     def __init__(self, temperature, eDensity, wavelength, filter=(chfilters.gaussianR, 1000.), label=0,
-        elementList = None, ionList = None, minAbund=None, keepIons=0, abundance=None,  doLines=1,
-        doContinuum=1, allLines = 1, em=None,  proc=3, verbose = 0,  timeout=0.1):
+        elementList = None, ionList = None, minAbund=None, keepIons=0, abundance=None,  doLines=True,
+        doContinuum=True, allLines = True, em=None,  proc=3, verbose = False,  timeout=0.1):
         #
         wavelength = np.atleast_1d(wavelength)
         if wavelength.size < 2:
@@ -193,7 +193,7 @@ class mspectrum(ionTrails, specTrails):
         #
 
         self.ionGate(elementList = elementList, ionList = ionList, minAbund=minAbund, doLines=doLines,
-            doContinuum=doContinuum, verbose = 0)
+            doContinuum=doContinuum, verbose = False)
 #        print(' \n in mspectrum \n')
 #        for one in self.Todo.keys():
 #            print(' %s  %s'%(one, self.Todo[one]))
@@ -217,6 +217,11 @@ class mspectrum(ionTrails, specTrails):
         ffWorkerQSize = ffWorkerQ.qsize()
         fbWorkerQSize = fbWorkerQ.qsize()
         ionWorkerQSize = ionWorkerQ.qsize()
+
+        nCores = mp.cpu_count()
+        proc = min(proc,  nCores)
+        if verbose:
+            print('# of processors/cores = %i'%(proc))
         if doContinuum:
             ffProcesses = []
             for i in range(proc):
@@ -256,8 +261,6 @@ class mspectrum(ionTrails, specTrails):
         #
         if doLines:
             ionProcesses = []
-            if ionWorkerQSize < proc:
-                proc = ionWorkerQSize
             for i in range(proc):
                 p = mp.Process(target=mputil.doIonQ, args=(ionWorkerQ, ionDoneQ))
                 p.start()

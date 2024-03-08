@@ -116,7 +116,7 @@ def emPlot(matchDict, vs='T', loc='upper right', fs=10,  adjust=None, position='
         else:
             ntemp = temp.size
         if ntemp > 1:
-            em = np.zeros((nInt, ntemp), 'float64')
+            em = np.zeros((nInt, ntemp), np.float64)
             xvar = temp
         for idx in range(nInt):
             nonzed = match[idx]['intensitySum'] > 0.
@@ -157,7 +157,7 @@ def emPlot(matchDict, vs='T', loc='upper right', fs=10,  adjust=None, position='
         else:
             ndens = len(dens)
         if ndens > 1:
-            em = np.zeros((nInt, ndens), 'float64')
+            em = np.zeros((nInt, ndens), np.float64)
             xvar = dens
         for idx in range(nInt):
             nonzed = match[idx]['intensitySum'] > 0.
@@ -616,11 +616,11 @@ class maker(ionTrails,  specTrails):
             nPredictedLines = 0
             for awvl in amatch['wvl']:
                 nPredictedLines +=  len(awvl)
-            self.Match[iwvl]['intensity'] = np.zeros((nPredictedLines,  nTempDens), 'float64')
+            self.Match[iwvl]['intensity'] = np.zeros((nPredictedLines,  nTempDens), np.float64)
 
         self.ionList = ionList
         for iwvl in range(len(self.Match)):
-            self.Match[iwvl]['intensitySum'] = np.zeros(nTempDens, 'float64')
+            self.Match[iwvl]['intensitySum'] = np.zeros(nTempDens, np.float64)
         if verbose:
             print('getting intensities for %i ions'%(len(ionList)))
         for someIon in ionList:
@@ -640,7 +640,7 @@ class maker(ionTrails,  specTrails):
 #                    nTempDens = intensity.shape[0]
     #            print(' nTempDens = ', nTempDens)
                 for iwvl, amatch in enumerate(self.Match):
-    #                self.Match[iwvl]['intensitySum'] = np.zeros(nTempDens, 'float64')
+    #                self.Match[iwvl]['intensitySum'] = np.zeros(nTempDens, np.float64)
                     #  this is data for each line
                     if someIon in amatch['ion']:
                         kon = amatch['ion'].index(someIon)
@@ -719,7 +719,7 @@ class maker(ionTrails,  specTrails):
             nPredictedLines = 0
             for awvl in amatch['wvl']:
                 nPredictedLines +=  len(awvl)
-            self.Match[iwvl]['intensity'] = np.zeros((nPredictedLines,  nTempDens), 'float64')
+            self.Match[iwvl]['intensity'] = np.zeros((nPredictedLines,  nTempDens), np.float64)
 
         ionList = []
         for iwvl, amatch in enumerate(self.Match):
@@ -734,7 +734,7 @@ class maker(ionTrails,  specTrails):
             print('getting intensities for %i ions'%(len(ionList)))
 
         for iwvl in range(len(self.Match)):
-            self.Match[iwvl]['intensitySum'] = np.zeros(nTempDens, 'float64')
+            self.Match[iwvl]['intensitySum'] = np.zeros(nTempDens, np.float64)
         #
         #  ion multiprocessing setup
         #
@@ -777,7 +777,7 @@ class maker(ionTrails,  specTrails):
             intensity = out[1]['intensity']
 
             for iwvl, amatch in enumerate(self.Match):
-#                self.Match[iwvl]['intensitySum'] = np.zeros(nTempDens, 'float64')
+#                self.Match[iwvl]['intensitySum'] = np.zeros(nTempDens, np.float64)
                 #  this is data for each line
                 if someIon in amatch['ion']:
                     kon = amatch['ion'].index(someIon)
@@ -1034,7 +1034,7 @@ class maker(ionTrails,  specTrails):
                 ntemp = temp.size
 #                ntemp = match[0]['intensity'].shape[0]
             if ntemp > 1:
-                em = np.zeros((nInt, ntemp), 'float64')
+                em = np.zeros((nInt, ntemp), np.float64)
                 xvar = temp/tscale
             for idx in range(nInt):
                 nonzed = match[idx]['intensitySum'] > 0.
@@ -1078,7 +1078,7 @@ class maker(ionTrails,  specTrails):
             else:
                 ndens = len(dens)
             if ndens > 1:
-                em = np.zeros((nInt, ndens), 'float64')
+                em = np.zeros((nInt, ndens), np.float64)
                 xvar = dens
             for idx in range(nInt):
                 nonzed = match[idx]['intensitySum'] > 0.
@@ -1198,7 +1198,7 @@ class maker(ionTrails,  specTrails):
                 ntemp = temp.size
 #                ntemp = match[0]['intensity'].shape[0]
             if ntemp > 1:
-                em = np.zeros((nInt, ntemp), 'float64')
+                em = np.zeros((nInt, ntemp), np.float64)
                 xvar = temp/tscale
             for idx in range(nInt):
                 nonzed = match[idx]['intensitySum'] > 0.
@@ -1243,7 +1243,7 @@ class maker(ionTrails,  specTrails):
             else:
                 ndens = len(dens)
             if ndens > 1:
-                em = np.zeros((nInt, ndens), 'float64')
+                em = np.zeros((nInt, ndens), np.float64)
                 xvar = dens
             for idx in range(nInt):
                 nonzed = match[idx]['intensitySum'] > 0.
@@ -1877,7 +1877,7 @@ class maker(ionTrails,  specTrails):
         '''
         self.predict()
         nwvl = len(self.Match)
-        weightedDiff = np.zeros(nwvl, 'float64')
+        weightedDiff = np.zeros(nwvl, np.float64)
         for iwvl, amatch in enumerate(self.Match):
             if amatch['predicted'] > 0.:
                 msk = False
@@ -2001,7 +2001,7 @@ class maker(ionTrails,  specTrails):
 
         see if this can be replaced by fitFunct1t or fitNt
         '''
-        out = optimize.leastsq(self.fitFunc1t, np.asarray(initialValue, 'float64'), full_output=1, maxfev=maxfev)
+        out = optimize.leastsq(self.fitFunc1t, np.asarray(initialValue, np.float64), full_output=1, maxfev=maxfev)
         self.Leastsq = {'em':out[0], 'cov':out[1], 'info':out[2], 'message':out[3], 'ier':out[4]}
         #
         # -------------------------------------------------------------
@@ -2023,7 +2023,7 @@ class maker(ionTrails,  specTrails):
             maxfev:  `int`
                 not sure it is needed
         '''
-        out = optimize.leastsq(self.fitFuncNt, np.asarray(initialValue, 'float64'), full_output=1, maxfev=maxfev)
+        out = optimize.leastsq(self.fitFuncNt, np.asarray(initialValue, np.float64), full_output=1, maxfev=maxfev)
         self.Leastsq = {'em':out[0], 'cov':out[1], 'info':out[2], 'message':out[3], 'ier':out[4]}
         #
         # -----------------------------------------------------------
@@ -2074,10 +2074,10 @@ class maker(ionTrails,  specTrails):
         maskedValues = []
 
 
-        densSearched = np.asarray(self.EDensity[indxlimits[0]:indxlimits[1] + 1], 'float64')
+        densSearched = np.asarray(self.EDensity[indxlimits[0]:indxlimits[1] + 1], np.float64)
         msk = np.ma.make_mask(np.ones((self.NTempDens)))
-        chisq1d = np.ma.array(np.zeros((self.NTempDens), 'float64'), mask=msk)
-        em1d = np.ma.array(np.zeros((self.NTempDens), 'float64'), mask=msk)
+        chisq1d = np.ma.array(np.zeros((self.NTempDens), np.float64), mask=msk)
+        em1d = np.ma.array(np.zeros((self.NTempDens), np.float64), mask=msk)
         if log:
             logname = 'search1d.raw'
             logfile = open(logname, 'w')
@@ -2137,9 +2137,7 @@ class maker(ionTrails,  specTrails):
         t2 = datetime.now()
         dt = t2 - t1
         print(' elapsed seconds = %12.3f'%(dt.seconds))
-        #
-        #-----------------------------------------------------
-        #
+
     def search1tEmSpace(self, verbose=False):
         ''' to find the value of chisq as a function of Em with T = best-fit
 
@@ -2177,7 +2175,7 @@ class maker(ionTrails,  specTrails):
                     print('msk=1  %5i %12.3e %12.2e %12.2e '%(idx, anEm, em1, chisq1))
 
         #
-        emChisq = np.asarray(emChisq, 'float64')
+        emChisq = np.asarray(emChisq, np.float64)
 #        chisq1sig = emChisq.min()*np.ones_like(emChisq) + 2.3
 #        good1sig = emChisq < emChisq.min() + 2.3
         print('min Em chisq = %10.3e'%(emChisq.min()))
@@ -2187,23 +2185,165 @@ class maker(ionTrails,  specTrails):
         #
         #-----------------------------------------------------
         #
-    def search2tSpace(self, initial, indxlimits=None, verbose=0, log=0, maxfev=0):
+    def search1tSpace(self, initialEM, indexLimits=None, logname=None, verbose=False, maxfev=0):
+        '''conduct a brute force search of 2 temperature space and find the
+        best fit
+
+        Parameters
+        ----------
+
+        initialEm:  `float`
+            the initial trial value for the log10 emission measure
+
+
+        Keyword Arguments
+        -----------------
+
+       indexLimits:  2 dimensional array type
+            the lower an upper limits of the temperature to be searched
+            the default is None and them the whole temperature array is searched
+
+        logname:  `str`
+            the name of the file were the search log is written
+            the default is None and no log will be written
+
+        verbose:  `bool`
+            if True, additional output is sent to the terminal
+
+        '''
+        self.Nparams = 2. + 1.
+#        if not hasattr(self, 'SearchData'):
+#            print(' dem has not been searched yet')
+#            return
+        if self.Nobs <= 2.:
+            print(' the number of observables %10.1f is less than the number of parameters %10.1f'%(self.Nobs, 2.*2.))
+            return
+
+        emfit = []
+        idx12 = []
+        idx = []
+        searchDx = []
+        chisq = []
+        info = []
+        maskedValues = []
+#
+        nTemp = len(self.Temperature)
+
+        if indexLimits is None:
+            tempSearched = self.Temperature
+        else:
+            tempSearched = self.Temperature[indexLimits[0]:indexLimits[1]]
+
+        chisq1d = np.ma.array(np.zeros(tempSearched.size), np.float64, mask=True)
+        temp1d = np.zeros((tempSearched.size), np.float64)
+        em1d = np.ma.array(np.zeros((tempSearched.size), np.float64), mask=True)
+
+        if logname is not None:
+            log = True
+            with open(logname, 'w') as logfile:
+                logfile.write('%s \n'%(self.SpecData['filename']))
+
+                for idx1 in range(indexLimits[0], indexLimits[1], 1):
+                    idx.append(idx1)
+                    searchDx.append(idx1)
+                    temp1d[idx1] = self.Temperature[idx1]
+                    self.emSetIndices([idx1])
+                    self.fitNt(initialEM, maxfev=maxfev)
+                    self.emSetIndices([idx1])
+                    self.fitNt(initialEM, maxfev=maxfev)
+                    chisq1,  msk1 = self.getChisq()
+                    chisq.append(chisq1)
+                    if not msk1:
+                        emfit.append(self.Leastsq['em'])
+                        em1d.data[idx1] = self.Leastsq['em']
+                        em1d.mask[idx1] = False
+                        chisq1d.data[idx1] = chisq1
+                        chisq1d.mask[idx1] = False
+        #                for it in range(nTemp):
+        #                    em1d.data[it, searchDx1, searchDx2] = self.Leastsq['em'][it]
+        #                    em1d.mask[it, searchDx1, searchDx2] = False
+        #                info.append(self.Leastsq['info'])
+                        if log:
+                            logformat = '%4i %10.2e %10.2e %10.2e \n'
+                            logfile.write(logformat%(idx1, self.Temperature[idx1],
+                                self.Leastsq['em'], chisq[-1]))
+                    else:
+                        maskedValues.append(idx1)
+                        chisq1d.data[idx1] = chisq1
+                        chisq1d.mask[idx1] = True
+                        emfit.append(-1.)
+                        em1d.data[idx1] = -1.
+                        em1d.mask[idx1] = True
+
+        mindx = int(np.argmin(chisq1d))
+
+        minChisq = chisq1d[mindx]
+
+        self.SearchData = {'temperature':self.Temperature, 'tempSearched':tempSearched,'idx':idx,
+            'chisq':chisq, 'minChisq':minChisq,
+            'maskedValues':maskedValues, 'chisq1d':chisq1d, 'emfit':emfit, 'em1d':em1d,
+            'message':'this contains all the data for the 1tExpSpace', 'nparams':self.Nparams}
+
+        self.SearchData['best'] = {'minChisq':minChisq, 'emfit':emfit[mindx], 'em':10.**(emfit[mindx]),
+            'temperature':temp1d[mindx], 'idx':mindx, 'density':self.EDensity[mindx]}
+
+#        self.SearchData = {'temperature':self.Temperature,'temp1Searched':temp1Searched,
+#            'temp2Searched':temp2Searched, 'emfit':emfit, 'em2d':em2d, 'idx12':idx12, 'idx':idx,
+#            'searchDx12':searchDx12, 'chisq':chisq, 'minchisq':min(chisq), 'chisq2d':chisq2d,
+#            'maskedValues':maskedValues, 'temp2d':temp2d,
+#            'message':'this contains all the data for the 2tExpSpace', 'nparams':self.Nparams}
+
+#        self.SearchData['best'] = {'em':em, 'emfit':emfit[gdx[0]], 'chisq':chisq[gdx[0]],
+#            'idx12':idx12[gdx[0]], 'idx':idx[gdx[0]],  'reducedChisq':reducedChisq,
+#            'temperature':[temperature1, temperature2], 'temperature1':temperature1,
+#            'temperature2':temperature2, 'density':self.Density[idx12[gdx[0]]],
+#            'gdx':gdx, 'searchDx12':searchDx12[gdx[0]]}
+
+#        emChisq = []
+#        emfitSpace = self.SearchData['best']['emfit'] + np.linspace(-0.1,0.1,400) #*np.logspace(-3.,1.,21)   #n
+#        emSpace = 10.**(emfitSpace)
+#        self.emSetIndices(self.SearchData['best']['idx'])
+#        if verbose:
+#            print(' %5i  %10.2e'%(self.SearchData['best']['idx'], self.SearchData['best']['temperature']))
+#            print(' emfit %12.2e   em %12.2e '%(self.SearchData['best']['emfit'],self.SearchData['best']['em'] ))
+#        for idx,  anEm in enumerate(emfitSpace):
+#            #kpd
+#            self.emSet(anEm)
+#            chisq1,  msk1 = self.getChisq()
+#            if not msk1:
+#                emChisq.append(chisq1)
+#                em1 = np.log10(anEm)
+#                if verbose:
+#                    print(' %5i %12.3e %12.2e %12.2e '%(idx, anEm, em1, chisq1))
+#            else:
+#                    print('msk=1  %5i %12.3e %12.2e %12.2e '%(idx, anEm, em1, chisq1))
+#
+#        #
+#        emChisq = np.asarray(emChisq, np.float64)
+##        chisq1sig = emChisq.min()*np.ones_like(emChisq) + 2.3
+##        good1sig = emChisq < emChisq.min() + 2.3
+#        print('min Em chisq = %10.3e'%(emChisq.min()))
+##        em1sig = [emSpace[good1sig].min(), emSpace[good1sig].max()]
+#        #  will take care of confidence limits outside
+#        self.SearchData['EmError'] = {'em':emSpace, 'emfit':emfitSpace, 'chisq':emChisq, 'idx':self.SearchData['best']['idx'], 'temperature':self.Temperature[self.SearchData['best']['idx']], 'nparams':self.Nparams}
+
+    def search2tSpace(self, initialEM, indexLimits=None, verbose=False, log=False, maxfev=0):
         '''
         to conduct a brute force search of 2 temperature space and find the
         best fit
-        indxlimits give the range of indices to fit over
+        indexLimits give the range of indices to fit over
 
 
         Parameters
         ----------
 
-        initial:  `list`
-            the initial trial values (2) for the log10 emission measure
+        initialEM:  `list`
+            the initialEM trial values (2) for the log10 emission measure
 
         Keyword Arguments
         -----------------
 
-        indxlimits:  `list`, None
+        indexLimits:  `list`, None
             the range of indices of the density array to search
             if None is specified, the whole range is searched
 
@@ -2219,11 +2359,11 @@ class maker(ionTrails,  specTrails):
         if self.Nobs <= 2.*2.:
             print(' the number of observables %10.2e is less than the number of parameters %10.1f'%(self.Nobs, 2.*2.))
             return
-        if indxlimits == None:
+        if indexLimits == None:
             if not hasattr(self, 'MinIndex'):
                 self.findMinMaxIndices()
-            indxlimits = [self.MinIndex, self.MaxIndex]
-        print('indxlimits = %5i %5i '%(indxlimits[0], indxlimits[1]))
+            indexLimits = [self.MinIndex, self.MaxIndex]
+        print('indexLimits = %5i %5i '%(indexLimits[0], indexLimits[1]))
         nTemp = len(self.EmIndices)
         if log:
             logname = 'search2t.raw'
@@ -2232,8 +2372,8 @@ class maker(ionTrails,  specTrails):
 #        pformat = '%5i %4i %4i %4i %10.2e %10.2e %10.2e %10.2e %10.2e %10.2e %10.2e'
         logformat = '%5i %4i %4i %4i %4i %10.2e %10.2e %10.2e %10.2e %10.2e \n'
 
-        temp1Searched = self.Temperature[indxlimits[0]:indxlimits[1]]
-        temp2Searched = self.Temperature[indxlimits[0]+1:indxlimits[1]+1]
+        temp1Searched = self.Temperature[indexLimits[0]:indexLimits[1]]
+        temp2Searched = self.Temperature[indexLimits[0]+1:indexLimits[1]+1]
 
         print('temp1Searched.size, temp2Searched.size %5i %5i'%(temp1Searched.size, temp2Searched.size))
 
@@ -2247,22 +2387,22 @@ class maker(ionTrails,  specTrails):
 #        msk = np.ma.make_mask(np.ones((temp1Searched.size, temp2Searched.size)))
 #        msk2 = np.ma.make_mask(np.ones((temp1Searched.size, temp2Searched.size, 2)))
 
-        chisq2d = np.ma.array(np.zeros((temp1Searched.size, temp2Searched.size), 'float64'), mask=True)
-        temp2d = np.zeros((nTemp, temp1Searched.size, temp2Searched.size), 'float64')
-        em2d = np.ma.array(np.zeros((nTemp, temp1Searched.size, temp2Searched.size), 'float64'), mask=True)
-#        emNd = np.ma.array(np.zeros((nTemp, temp1Searched.size, temp2Searched.size, temp3Searched.size), 'float64'), mask=True)
+        chisq2d = np.ma.array(np.zeros((temp1Searched.size, temp2Searched.size), np.float64), mask=True)
+        temp2d = np.zeros((nTemp, temp1Searched.size, temp2Searched.size), np.float64)
+        em2d = np.ma.array(np.zeros((nTemp, temp1Searched.size, temp2Searched.size), np.float64), mask=True)
+#        emNd = np.ma.array(np.zeros((nTemp, temp1Searched.size, temp2Searched.size, temp3Searched.size), np.float64), mask=True)
 
         counter = 0
-        for idx1 in range(indxlimits[0], indxlimits[1], 1):
-            for idx2 in range(idx1+1, indxlimits[1]+1, 1):
+        for idx1 in range(indexLimits[0], indexLimits[1], 1):
+            for idx2 in range(idx1+1, indexLimits[1]+1, 1):
                 idx12.append([idx1, idx2])
                 idx.append([idx1, idx2])
-                searchDx1 = idx1 - indxlimits[0]
-                searchDx2 = idx2 - indxlimits[0] - 1
+                searchDx1 = idx1 - indexLimits[0]
+                searchDx2 = idx2 - indexLimits[0] - 1
                 self.emSetIndices([idx1, idx2])
-                self.fitNt(initial, maxfev=maxfev)
+                self.fitNt(initialEM, maxfev=maxfev)
                 self.emSetIndices([idx1, idx2])
-                self.fitNt(initial, maxfev=maxfev)
+                self.fitNt(initialEM, maxfev=maxfev)
                 # if there is no solution for one of the em values, it is set to a negative no.
 #                gtz = self.Leastsq['em'] > 0.
                 chisq1,  msk1 = self.getChisq()
@@ -2330,7 +2470,7 @@ class maker(ionTrails,  specTrails):
 #        self.em2texp(emfit[gdx[0]])
         print('indices of minimum after search =  %i %i'%(idx12[gdx[0]][0], idx12[gdx[0]][1] ))
         # gives 90% confidence for 4 parameters
-#        chisq1sig = min(chisq)*np.ones_like(chisq2d, 'float64') + 7.779
+#        chisq1sig = min(chisq)*np.ones_like(chisq2d, np.float64) + 7.779
 #        good1sig = chisq2d < min(chisq) + 7.779
 #        temp1sig1 = temp2d[good1sig, 0]
 #        temp2sig1 = temp2d[good1sig, 1]
@@ -2369,7 +2509,7 @@ class maker(ionTrails,  specTrails):
         #
         # -----------------------------------------------------------
         #
-    def search3tSpace(self, initial, indxlimits=None, verbose=0, log=0):
+    def search3tSpace(self, initialEM, indexLimits=None, verbose=0, log=0):
         '''
         to conduct a brute force search of 3 temperature space and find the
         best fit
@@ -2377,14 +2517,14 @@ class maker(ionTrails,  specTrails):
         Parameters
         ----------
 
-        initial:  `list`
-            the initial trial values (3) for the log10 emission measure
+        initialEM:  `list`
+            the initialEM trial values (3) for the log10 emission measure
 
 
         Keyword Arguments
         -----------------
 
-        indxlimits:  `list`, None
+        indexLimits:  `list`, None
             the range of indices of the density array to search
             if None is specified, the whole range is searched
 
@@ -2398,11 +2538,11 @@ class maker(ionTrails,  specTrails):
         self.Nparams = 6. + 1.
         t1=datetime.now()
 
-        if indxlimits == None:
+        if indexLimits == None:
             if not hasattr(self, 'MinIndex'):
                 self.findMinMaxIndices()
-            indxlimits = [self.MinIndex, self.MaxIndex]
-        print('indxlimits = %5i %5i '%(indxlimits[0], indxlimits[1]))
+            indexLimits = [self.MinIndex, self.MaxIndex]
+        print('indexLimits = %5i %5i '%(indexLimits[0], indexLimits[1]))
         nTemp = len(self.EmIndices)
         emfit = []
         idx123 = []
@@ -2410,15 +2550,15 @@ class maker(ionTrails,  specTrails):
         searchDx123 = []
         chisq = []
         maskedValues = []
-        temp1Searched = self.Temperature[indxlimits[0]:indxlimits[1]-1]
-        temp2Searched = self.Temperature[indxlimits[0]+1:indxlimits[1]]
-        temp3Searched = self.Temperature[indxlimits[0]+2:indxlimits[1]+1]
+        temp1Searched = self.Temperature[indexLimits[0]:indexLimits[1]-1]
+        temp2Searched = self.Temperature[indexLimits[0]+1:indexLimits[1]]
+        temp3Searched = self.Temperature[indexLimits[0]+2:indexLimits[1]+1]
 
 #        msk  = np.ma.make_mask(np.ones((temp1Searched.size, temp2Searched.size, temp3Searched.size)))
 #        msk2 = np.ma.make_mask(np.ones((temp1Searched.size, temp2Searched.size, temp3Searched.size, 3)))
-        chisqNd = np.ma.array(np.zeros((temp1Searched.size, temp2Searched.size, temp3Searched.size), 'float64'), mask=True)
-        tempNd = np.array(np.zeros((nTemp, temp1Searched.size, temp2Searched.size, temp3Searched.size), 'float64'))
-        emNd = np.ma.array(np.zeros((nTemp, temp1Searched.size, temp2Searched.size, temp3Searched.size), 'float64'), mask=True)
+        chisqNd = np.ma.array(np.zeros((temp1Searched.size, temp2Searched.size, temp3Searched.size), np.float64), mask=True)
+        tempNd = np.array(np.zeros((nTemp, temp1Searched.size, temp2Searched.size, temp3Searched.size), np.float64))
+        emNd = np.ma.array(np.zeros((nTemp, temp1Searched.size, temp2Searched.size, temp3Searched.size), np.float64), mask=True)
 
         if log:
             logname = 'search3t.raw'
@@ -2428,16 +2568,16 @@ class maker(ionTrails,  specTrails):
         pformat = '%5i %4i %4i %4i %10.2e %10.2e %10.2e %10.2e %10.2e %10.2e %10.2e'
         logformat = '%5i %4i %4i %4i %4i %4i %4i %10.2e %10.2e %10.2e %10.2e %10.2e %10.2e %10.2e \n'
         counter = 0
-        for idx1 in range(indxlimits[0], indxlimits[1] - 1, 1):
-            for idx2 in range(idx1+1, indxlimits[1], 1):
-                for idx3 in range(idx2+1, indxlimits[1] + 1, 1):
+        for idx1 in range(indexLimits[0], indexLimits[1] - 1, 1):
+            for idx2 in range(idx1+1, indexLimits[1], 1):
+                for idx3 in range(idx2+1, indexLimits[1] + 1, 1):
                     self.emSetIndices([idx1, idx2, idx3])
-                    self.fitNt(initial)
+                    self.fitNt(initialEM)
         # need to make this look like search 2t
                     chisq1,  msk1 = self.getChisq()
-                    searchDx1 = idx1 - indxlimits[0]
-                    searchDx2 = idx2 - indxlimits[0] - 1
-                    searchDx3 = idx3 - indxlimits[0] - 2
+                    searchDx1 = idx1 - indexLimits[0]
+                    searchDx2 = idx2 - indexLimits[0] - 1
+                    searchDx3 = idx3 - indexLimits[0] - 2
                     searchDx123.append([searchDx1, searchDx2, searchDx3])
                     tempNd[0, searchDx1, searchDx2, searchDx3] = temp1Searched[searchDx1]
                     tempNd[1, searchDx1, searchDx2, searchDx3] = temp2Searched[searchDx2]
@@ -2505,7 +2645,7 @@ class maker(ionTrails,  specTrails):
                 for one in gdx:
                     pstring += '  %10i'%(one)
         # 90% confidence for 6 parameters
-#        chisq1sig = min(chisq)*np.ones_like(chisqNd, 'float64') + 10.645
+#        chisq1sig = min(chisq)*np.ones_like(chisqNd, np.float64) + 10.645
 #        good1sig = chisqNd < min(chisq) + 10.645
 
         self.emSetIndices(idx123[gdx[0]])
@@ -2532,7 +2672,7 @@ class maker(ionTrails,  specTrails):
         #
         # -----------------------------------------------------------
         #
-    def search4tSpace(self, initial, indxlimits=None, verbose=0, log=0):
+    def search4tSpace(self, initialEM, indexLimits=None, verbose=0, log=0):
         '''
         to conduct a brute force search of 4 temperature space and find the
         best fit
@@ -2542,14 +2682,14 @@ class maker(ionTrails,  specTrails):
         Parameters
         ----------
 
-        initial:  `list`
-            the initial trial values (4) for the log10 emission measure
+        initialEM:  `list`
+            the initialEM trial values (4) for the log10 emission measure
 
 
         Keyword Arguments
         -----------------
 
-        indxlimits:  `list`, None
+        indexLimits:  `list`, None
             the range of indices of the density array to search
             if None is specified, the whole range is searched
 
@@ -2562,21 +2702,21 @@ class maker(ionTrails,  specTrails):
         '''
         self.Nparams = 8. + 1.
         t1 = datetime.now()
-        if indxlimits == None:
+        if indexLimits == None:
             if not hasattr(self, 'MinIndex'):
                 self.findMinMaxIndices()
-            indxlimits = [self.MinIndex, self.MaxIndex]
-        print('indxlimits = %5i %5i '%(indxlimits[0], indxlimits[1]))
+            indexLimits = [self.MinIndex, self.MaxIndex]
+        print('indexLimits = %5i %5i '%(indexLimits[0], indexLimits[1]))
         nTemp = len(self.EmIndices)
         emfit = []
         idx123 = []
         searchDx123 = []
         chisq = []
         maskedValues = []
-        temp1Searched = self.Temperature[indxlimits[0]:indxlimits[1]-2]
-        temp2Searched = self.Temperature[indxlimits[0]+1:indxlimits[1]-1]
-        temp3Searched = self.Temperature[indxlimits[0]+2:indxlimits[1]]
-        temp4Searched = self.Temperature[indxlimits[0]+3:indxlimits[1]+1]
+        temp1Searched = self.Temperature[indexLimits[0]:indexLimits[1]-2]
+        temp2Searched = self.Temperature[indexLimits[0]+1:indexLimits[1]-1]
+        temp3Searched = self.Temperature[indexLimits[0]+2:indexLimits[1]]
+        temp4Searched = self.Temperature[indexLimits[0]+3:indexLimits[1]+1]
 
         temp1Size = temp1Searched.size
         temp2Size = temp2Searched.size
@@ -2585,9 +2725,9 @@ class maker(ionTrails,  specTrails):
 
 #        msk  = np.ma.make_mask(np.ones((temp1Searched.size, temp2Searched.size, temp3Searched.size)))
 #        msk2 = np.ma.make_mask(np.ones((temp1Searched.size, temp2Searched.size, temp3Searched.size, 3)))
-        chisqNd = np.ma.array(np.zeros((temp1Size, temp2Size, temp3Size, temp4Size), 'float64'), mask=True)
-        tempNd = np.array(np.zeros((4, temp1Size, temp2Size, temp3Size, temp4Size), 'float64'))
-        emNd = np.ma.array(np.zeros((4, temp1Size, temp2Size, temp3Size, temp4Size), 'float64'), mask=True)
+        chisqNd = np.ma.array(np.zeros((temp1Size, temp2Size, temp3Size, temp4Size), np.float64), mask=True)
+        tempNd = np.array(np.zeros((4, temp1Size, temp2Size, temp3Size, temp4Size), np.float64))
+        emNd = np.ma.array(np.zeros((4, temp1Size, temp2Size, temp3Size, temp4Size), np.float64), mask=True)
 
         if log:
             logname = 'search4t.raw'
@@ -2597,18 +2737,18 @@ class maker(ionTrails,  specTrails):
         pformat = '%5i %4i %4i %4i %4i %9.2e %9.2e %9.2e %9.2e %9.2e %9.2e %9.2e %9.2e %9.2e'
         logformat = '%5i %4i %4i %4i %4i %4i %4i %4i %4i %9.2e %9.2e %9.2e %9.2e %9.2e %9.2e %9.2e %9.2e %9.2e\n'
         counter = 0
-        for idx1 in range(indxlimits[0], indxlimits[1] - 2, 1):
-            for idx2 in range(idx1+1, indxlimits[1] - 1, 1):
-                for idx3 in range(idx2+2, indxlimits[1], 1):
-                    for idx4 in range(idx3+3, indxlimits[1] + 1, 1):
+        for idx1 in range(indexLimits[0], indexLimits[1] - 2, 1):
+            for idx2 in range(idx1+1, indexLimits[1] - 1, 1):
+                for idx3 in range(idx2+2, indexLimits[1], 1):
+                    for idx4 in range(idx3+3, indexLimits[1] + 1, 1):
                         self.emSetIndices([idx1, idx2, idx3, idx4])
-                        self.fitNt(initial)
+                        self.fitNt(initialEM)
             # need to make this look like search 2t
                         chisq1,  msk1 = self.getChisq()
-                        searchDx1 = idx1 - indxlimits[0]
-                        searchDx2 = idx2 - indxlimits[0] - 1
-                        searchDx3 = idx3 - indxlimits[0] - 2
-                        searchDx4 = idx4 - indxlimits[0] - 3
+                        searchDx1 = idx1 - indexLimits[0]
+                        searchDx2 = idx2 - indexLimits[0] - 1
+                        searchDx3 = idx3 - indexLimits[0] - 2
+                        searchDx4 = idx4 - indexLimits[0] - 3
                         searchDx123.append([searchDx1, searchDx2, searchDx3, searchDx4])
                         tempNd[0, searchDx1, searchDx2, searchDx3, searchDx4] = temp1Searched[searchDx1]
                         tempNd[1, searchDx1, searchDx2, searchDx3, searchDx4] = temp2Searched[searchDx2]
@@ -2669,7 +2809,7 @@ class maker(ionTrails,  specTrails):
                 for one in gdx:
                     pstring += '  %10i'%(one)
         # 90% confidence for 6 parameters
-#        chisq1sig = min(chisq)*np.ones_like(chisqNd, 'float64') + 13.36
+#        chisq1sig = min(chisq)*np.ones_like(chisqNd, np.float64) + 13.36
 #        good1sig = chisqNd < min(chisq) + 13.36
 
         self.emSetIndices(idx123[gdx[0]])

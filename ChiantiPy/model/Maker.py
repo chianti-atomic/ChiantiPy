@@ -2885,8 +2885,9 @@ class maker(ionTrails,  specTrails):
             the filename where the text should be output
 
         """
-        matchDict={'match':self.Match, 'Temperature':self.Temperature, 'EDensity':self.EDensity, 'Ndens':self.Ndens,
-            'Ntemp':self.Ntemp, 'NTempDens':self.NTempDens, 'MinAbund':self.MinAbund}
+        matchDict={'match':self.Match, 'Temperature':self.Temperature, 'EDensity':self.EDensity,
+            'Ndens':self.Ndens, 'Ntemp':self.Ntemp, 'NTempDens':self.NTempDens, 'MinAbund':self.MinAbund,
+            'SpecData':self.SpecData}
         if hasattr(self, 'EmIndices'):
             matchDict['EmIndices'] = self.EmIndices
 

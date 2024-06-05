@@ -207,29 +207,30 @@ class maker(ionTrails,  specTrails):
     -----------------
 
     temperature: `float`, `list`, `ndarray`
-        the temperature(s) in K
+        the temperature(s) in K, default is None
 
     eDensity: float, ndarray
-        eDensity: electron density in :math:`\mathrm{cm^{-3}}`
+        eDensity: electron density in :math:`\mathrm{cm^{-3}}`, default is None
 
     elementList :  list
-        a list of elements, such as fe, to be searched
+        a list of elements, such as fe, to be searched, default = []
 
     ionList :  list
-        a list of ions, such as fe_14, to be searched
+        a list of ions, such as fe_14, to be searched, default = []
 
     allLines : bool
-        if true, unobserved lines in CHIANTI are included in the search
+        if true, unobserved lines in CHIANTI are included in the search, default = False
 
     abundanceName : str
-        the name of the elemental abundance file to be used,
+        the name of the elemental abundance file to be used, the defaul t is None
         if not set, the default abundance file is used
 
     minAbund : float
-        sets the minimum abundance for an element to be included in the search
+        sets the minimum abundance for an element to be included in the search,
+        default = 10. to include all elements
 
     verbose : bool
-        if True, additional output is sent to the terminal
+        if True, additional output is sent to the terminal, default is False
 
     '''
     def __init__(self, specData, temperature=None, eDensity=None, elementList=[], ionList=[],
@@ -833,7 +834,7 @@ class maker(ionTrails,  specTrails):
         #
         # --------------------------------------------------------
         #
-    def emSetIndices(self, indices, add=0.,  verbose=0):
+    def emSetIndices(self, indices, add=1.,  verbose=0):
         '''
         to set the indices of the N temperature/density EM distribution
         can increase the number of paramaters if additional parameters have been used
@@ -957,7 +958,8 @@ class maker(ionTrails,  specTrails):
         #
         # ---------------------------------------------------------
         #
-    def emPlot(self, vs='T', loc='upper right', fs=10,  adjust=None, position='both', label = True, legend = True, fontsize=16, tscale=1.,   verbose=True):
+    def emPlot(self, vs='T', loc='upper right', fs=10,  adjust=None, position='both', label = True,
+        legend = True, fontsize=16, tscale=1., verbose=True):
         '''
         to plot line intensities divided by gofnt
         adjust is to provide an adjustment to the position of the labels
@@ -973,29 +975,30 @@ class maker(ionTrails,  specTrails):
             matplotlib argument for plt.legend
 
         fs:  `int`
-            the fontsize for the legend
+            the fontsize for the legend, default = 10
 
         adjust:  `list`
             a list of multiplicative adjustments to the labels to the plot lines
-            must be the same length as the number of lines
+            must be the same length as the number of lines, default = None
 
         position:  `str`
-            where the labels to the lines should be placed, `both` for both ends, `left` for the left size only, 'right' for the right side only, or None for no labels
+            where the labels to the lines should be placed, `both` for both ends, `left` for the left
+            size only, 'right' for the right side only, or None for no labels, default is 'both'
 
         label:  `bool`
-            whether to apply
+            whether to apply, default = True
 
         legend:  `bool`
-            whether to include a matplotlib legend
+            whether to include a matplotlib legend, default =True
 
         fontsize:  `int`
-            fontsize for the matplotlib xlabel and ylabel
+            fontsize for the matplotlib xlabel and ylabel, default=16
 
         tscale:  `float`
-            scale the temperature by dividing by tscale
+            scale the temperature by dividing by tscale, default = 1.
 
         verbose : `bool`
-            if True, additional output is sent to the terminal
+            if True, additional output is sent to the terminal, default = True
 
        '''
         match = self.Match
@@ -1114,7 +1117,8 @@ class maker(ionTrails,  specTrails):
         #
         # ---------------------------------------------------------
         #
-    def emPlotObj(self, vs='T', loc='upper right', fs=10,  adjust=None, position='both', label=True, legend = True, fontsize=16, figsize=[7., 5.], tscale=1.,  verbose=True):
+    def emPlotObj(self, vs='T', loc='upper right', fs=10,  adjust=None, position='both', label=True,
+        legend = True, fontsize=16, figsize=[7., 5.], tscale=1.,  verbose=True):
         '''
         the emPlot using the object oriented version of matplotlib - a figure and axis objects are returned
         to plot line intensities divided by gofnt
@@ -1130,35 +1134,36 @@ class maker(ionTrails,  specTrails):
             whether to plot the emission measure vs temperature or density
 
         loc:  `str`
-            matplotlib argument for plt.legend
+            matplotlib argument for plt.legend, default = 'upper right'
 
         fs:  `int`
-            the fontsize for the legend
+            the fontsize for the legend, default = 10
 
         adjust:  `list`
             a list of multiplicative adjustments to the labels to the plot lines
-            must be the same length as the number of lines
+            must be the same length as the number of lines, default = None
 
         position:  `str`
-            where the labels to the lines should be placed, `both` for both ends, `left` for the left size only, 'right' for the right side only, or None for no labels
+            where the labels to the lines should be placed, `both` for both ends, `left` for the left size only, 'right' for the right side only, or None for no labels, default = 'both'
 
         label:  `bool`
-            whether to apply
+            whether to apply, default = True
 
         legend:  `bool`
-            whether to include a matplotlib legend
+            whether to include a matplotlib legend, default = True
 
         fontsize:  `int`
-            fontsize for the matplotlib xlabel and ylabel
+            fontsize for the matplotlib xlabel and ylabel, default = 16
 
         figsize:  two element `list` or `ndarray`
-            sets the figure size when using matplotlib subplots to initiate the object style plotting
+            sets the figure size when using matplotlib subplots to initiate the object style plotting,
+            default = [7., 5.]
 
         tscale:  `float`
-            scale the temperature by dividing by tscale
+            scale the temperature by dividing by tscale, default = 1.
 
         verbose : `bool`
-            if True, additional output is sent to the terminal
+            if True, additional output is sent to the terminal, default = True
 
         '''
         match = self.Match
@@ -1604,6 +1609,9 @@ class maker(ionTrails,  specTrails):
             outpt.write('           Chisq = %10.3f \n'%(chisq))
             outpt.write('Normalized Chisq = %10.3f chisq/(nobs) \n'%(normChisq))
             outpt.write('Reduced Chisq    = %10.3f chisq/(nobs - nparams)\n'%(chisq/(nMatch - self.Nparams)))
+            better = np.sqrt(chisq/(nMatch - self.Nparams))*self.WghtFactor
+            outpt.write('current wghtFactor is:  %10.3f  better:  %10.3f \n'%(self.WghtFactor, better))
+            print('current wghtFactor is:  %10.3f  better:  %10.3f'%(self.WghtFactor, better))
             poor = np.abs(diffOverIntNp) > threeSig
 #            idx = np.arange(nMatch)
 #            pdx = idx[poor]

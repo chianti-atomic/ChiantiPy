@@ -38,7 +38,7 @@ def doDemGofntQ(inQueue, outQueue):
     #
     # ---------------------------------------------------------
     #
-def emPlot(matchDict, vs='T', loc='upper right', fs=10,  adjust=None, position='both', legend = True,  verbose=0):
+def emPlot(matchDict, vs='T', loc='upper right', fs=10, lw=2,  adjust=None, position='both', legend = True,  verbose=0):
     '''
     to plot line intensities divided by gofnt
     adjust is to provide an adjustment to the position of the labels
@@ -57,12 +57,16 @@ def emPlot(matchDict, vs='T', loc='upper right', fs=10,  adjust=None, position='
     fs:  `int`
         the fontsize for the legend
 
+    lw:  `int`
+            set the line width of the plot, default = 2
+
     adjust:  `list`
         a list of multiplicative adjustments to the labels to the plot lines
         must be the same length as the number of lines
 
     position:  `str`
-        where the labels to the lines should be placed, `both` for both ends, `left` for the left size only, 'right' for the right side only, or None for no labels
+        where the labels to the lines should be placed, `both` for both ends, `left` for the left size
+            only, 'right' for the right side only, or None for no labels
 
     label:  `bool`
         whether to apply
@@ -125,7 +129,7 @@ def emPlot(matchDict, vs='T', loc='upper right', fs=10,  adjust=None, position='
             if realgood.sum() > 0 and match[idx]['obsIntensity'] > 0.:
                 wvlstr = ' %6.2f'%(match[idx]['obsWvl'])
                 em[idx][realgood] = match[idx]['obsIntensity']/match[idx]['intensitySum'][realgood]
-                plt.loglog(xvar[realgood], em[idx][realgood], lw=2, label = wvlstr)
+                plt.loglog(xvar[realgood], em[idx][realgood], lw=lw, label = wvlstr)
                 if ntemp > 1:
 #                    lblx = match[idx]['tmax']
                     lblx1 = temp[realgood][0]
@@ -166,7 +170,7 @@ def emPlot(matchDict, vs='T', loc='upper right', fs=10,  adjust=None, position='
             if realgood.sum() > 0 and match[idx]['obsIntensity'] > 0.:
                 wvlstr = ' %5.1f'%(match[idx]['obsWvl'])
                 em[idx][realgood] = match[idx]['obsIntensity']/match[idx]['intensitySum'][realgood]
-                plt.loglog(xvar[realgood], em[idx][realgood], lw=2, label=wvlstr)
+                plt.loglog(xvar[realgood], em[idx][realgood], lw=lw, label=wvlstr)
                 print(' %i  %5.1f'%(idx, match[idx]['obsWvl']))
                 lblx = dens
                 lbly = em[idx][realgood]*1.05
@@ -958,7 +962,7 @@ class maker(ionTrails,  specTrails):
         #
         # ---------------------------------------------------------
         #
-    def emPlot(self, vs='T', loc='upper right', fs=10,  adjust=None, position='both', label = True,
+    def emPlot(self, vs='T', loc='upper right', fs=10, lw = 2,  adjust=None, position='both', label = True,
         legend = True, fontsize=16, tscale=1., verbose=True):
         '''
         to plot line intensities divided by gofnt
@@ -976,6 +980,9 @@ class maker(ionTrails,  specTrails):
 
         fs:  `int`
             the fontsize for the legend, default = 10
+
+        lw:  `int`
+            set the line width of the plot, default = 2
 
         adjust:  `list`
             a list of multiplicative adjustments to the labels to the plot lines
@@ -1117,7 +1124,7 @@ class maker(ionTrails,  specTrails):
         #
         # ---------------------------------------------------------
         #
-    def emPlotObj(self, vs='T', loc='upper right', fs=10,  adjust=None, position='both', label=True,
+    def emPlotObj(self, vs='T', loc='upper right', fs=10, lw=2, adjust=None, position='both', label=True,
         legend = True, fontsize=16, figsize=[7., 5.], tscale=1.,  verbose=True):
         '''
         the emPlot using the object oriented version of matplotlib - a figure and axis objects are returned
@@ -1138,6 +1145,9 @@ class maker(ionTrails,  specTrails):
 
         fs:  `int`
             the fontsize for the legend, default = 10
+
+        lw:  `int`
+            set the line width of the plot, default = 2
 
         adjust:  `list`
             a list of multiplicative adjustments to the labels to the plot lines
@@ -1213,9 +1223,9 @@ class maker(ionTrails,  specTrails):
                     wvlstr = ' %5.1f'%(match[idx]['obsWvl'])
                     em[idx][realgood] = match[idx]['obsIntensity']/match[idx]['intensitySum'][realgood]
                     if label:
-                        ax.loglog(xvar[realgood], em[idx][realgood], lw=2, label = wvlstr)
+                        ax.loglog(xvar[realgood], em[idx][realgood], lw=lw, label = wvlstr)
                     else:
-                        ax.loglog(xvar[realgood], em[idx][realgood], lw=2)
+                        ax.loglog(xvar[realgood], em[idx][realgood], lw=lw)
                     if ntemp > 1:
                         lblx1 = temp[realgood][0]
                         lblx2 = temp[realgood][-1]
@@ -1258,9 +1268,9 @@ class maker(ionTrails,  specTrails):
                     wvlstr = ' %5.1f'%(match[idx]['obsWvl'])
                     em[idx][realgood] = match[idx]['obsIntensity']/match[idx]['intensitySum'][realgood]
                     if label:
-                        ax.loglog(xvar[realgood], em[idx][realgood], lw=2, label=wvlstr)
+                        ax.loglog(xvar[realgood], em[idx][realgood], lw=lw, label=wvlstr)
                     else:
-                        ax.loglog(xvar[realgood], em[idx][realgood], lw=2)
+                        ax.loglog(xvar[realgood], em[idx][realgood], lw=lw)
                     print(' %i  %5.1f'%(idx, match[idx]['obsWvl']))
                     lblx = dens
                     lbly = em[idx][realgood]*1.05

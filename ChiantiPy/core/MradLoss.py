@@ -1,5 +1,4 @@
 from datetime import datetime
-import copy
 import multiprocessing as mp
 
 import numpy as np
@@ -9,7 +8,6 @@ np.seterr(over='ignore')
 #from .Continuum import continuum
 #from .Ion import ion
 import ChiantiPy.tools.data as chdata
-import ChiantiPy.tools.constants as const
 import ChiantiPy.tools.util as util
 import ChiantiPy.tools.io as chio
 from ChiantiPy.base import specTrails

@@ -8,7 +8,6 @@ import pickle
 import numpy as np
 import matplotlib.pyplot as plt
 
-import ChiantiPy.tools.filters as chfilters
 import ChiantiPy.tools.util as util
 import ChiantiPy.tools.io as chio
 import ChiantiPy.tools.data as chdata

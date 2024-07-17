@@ -1,5 +1,4 @@
 import numpy as np
-import ChiantiPy.tools.io as io
 import ChiantiPy.tools.data as chdata
 from scipy.interpolate import splev, splrep
 

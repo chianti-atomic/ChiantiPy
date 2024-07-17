@@ -1,4 +1,3 @@
-import os.path
 import copy
 from datetime import datetime
 
@@ -9,7 +8,6 @@ import ChiantiPy.tools.data as chdata
 import ChiantiPy.tools.util as util
 import ChiantiPy.tools.io as chio
 import ChiantiPy.tools.filters as chfilters
-import ChiantiPy.Gui as chGui
 from ChiantiPy.base import ionTrails
 from ChiantiPy.base import specTrails
 

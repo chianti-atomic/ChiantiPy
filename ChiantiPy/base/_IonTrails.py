@@ -639,14 +639,16 @@ class ionTrails(object):
                 print('no lines in wavelength ranges specified ')
                 return
         else:
-            igvl=range(len(wvl))
-        nlines=len(igvl)
-        igvl=np.take(igvl,wvl[igvl].argsort())
+            igvl = range(len(wvl))
+        nlines = len(igvl)
+        igvl = np.take(igvl,wvl[igvl].argsort())
 
         if top > nlines:
-            top=nlines
+            top = nlines
 
         intensity = self.Intensity['intensity']
+        p1 = self.Intensity['pretty1']
+        p2 = self.Intensity['pretty2']
         maxIntens = np.zeros(nlines,np.float64)
         for iline in range(nlines):
             maxIntens[iline] = intensity[:, igvl[iline]].max()
@@ -654,10 +656,10 @@ class ionTrails(object):
             if maxIntens[iline]==maxIntens.max():
                 maxAll=intensity[:, igvl[iline]]
 
-        igvlsort=np.take(igvl,np.argsort(maxIntens))
-        topLines=igvlsort[-top:]
-        maxWvl='%5.3f' % wvl[topLines[-1]]
-        topLines=topLines[wvl[topLines].argsort()]
+        igvlsort = np.take(igvl,np.argsort(maxIntens))
+        topLines = igvlsort[-top:]
+        maxWvl = '%5.3f' % wvl[topLines[-1]]
+        topLines = topLines[wvl[topLines].argsort()]
 #        print(' maxWvl = %s'%(maxWvl))
 
         # need to make sure there are no negative values before plotting
@@ -668,7 +670,7 @@ class ionTrails(object):
 
         ylabel='Intensity relative to '+maxWvl
 
-        if ndens==1 and ntemp==1:
+        if ndens == 1 and ntemp == 1:
             print(' only a single temperature and eDensity')
             return
         elif ndens == 1:
@@ -737,6 +739,8 @@ class ionTrails(object):
                 else:
                     text = '%s '%(ionS[tline]) + alabel
                 plt.text(xvalues[ixvalue], intensity[ixvalue, tline]/maxAll[ixvalue], text)
+
+            print(alabel + ' %s - %s'%(p1[tline], p2[tline]))
 #        print(' ymin:  %10.2e  ymax:  %10.2e'%(ymin, ymax))
         if ndens == 1:
             plt.xlim(xvalues.min(),xvalues.max())
@@ -784,7 +788,7 @@ class ionTrails(object):
                 elif self.Defaults['wavelength'] == 'kev':
                     alabel = '%10.3f'%(wvl[itop])
 
-
+#            alabel += '%s'%(p2[itop])
 #            if ionNum == 1:
 #                selectTags.append(str(wvl[itop]))
 #            else:

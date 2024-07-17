@@ -6,7 +6,6 @@ import numpy as np
 
 import ChiantiPy.tools.data as chdata
 import ChiantiPy.tools.util as util
-import ChiantiPy.tools.constants as const
 import ChiantiPy.tools.filters as chfilters
 import ChiantiPy.tools.io as chio
 from ChiantiPy.base import ionTrails

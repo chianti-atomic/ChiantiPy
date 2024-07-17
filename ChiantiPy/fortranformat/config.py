@@ -1,5 +1,4 @@
 import sys
-import os
 
 # Should all edit descriptor values be returned even if they were not
 # written to?

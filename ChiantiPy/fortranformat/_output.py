@@ -1,5 +1,4 @@
 import math
-import itertools
 import sys
 IS_PYTHON3 = sys.version_info[0] >= 3
 

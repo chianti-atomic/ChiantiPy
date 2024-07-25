@@ -90,7 +90,7 @@ class mradLoss(ionTrails, specTrails):
         masterlist = chdata.MasterList
         # use the ionList but make sure the ions are in the database
 
-        setupIntensity = False
+        # setupIntensity = False
         #
         self.Defaults = chdata.Defaults
         self.Labels = util.units(chdata.Defaults)
@@ -234,14 +234,14 @@ class mradLoss(ionTrails, specTrails):
         #                p.join()
                     p.join(timeout=timeout)
             #
-            for ijk in range(ionWorkerQSize):
+            for _ in range(ionWorkerQSize):
                 out = ionDoneQ.get()
                 ionS = out[0]
                 if verbose:
                     print(' collecting ion calculation for %s'%(ionS))
                 thisIon = out[1]
                 thisRadLoss = thisIon.BoundBoundLoss
-                if not 'errorMessage' in sorted(thisRadLoss.keys()):
+                if 'errorMessage' not in sorted(thisRadLoss.keys()):
                     self.Finished.append(ionS)
                     boundBoundLoss += thisRadLoss['rate']
 #                    if setupIntensity:

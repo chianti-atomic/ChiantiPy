@@ -629,8 +629,8 @@ class continuum(ionTrails):
         K2 = 1./(2.*const.emass*const.light**2)
 
         #  \frac{1}{h c} (\frac{1}{2 m_e})^{1/2} (\frac{1}{\pi k})^{3/2}
-        K3 = (1./(const.planck*const.light))*(1./(np.sqrt(2.*const.emass)))*(1./(np.pi*const.boltzmann)**1.5)
-        K0 = 1.e-8*K1*K2*K3
+        # K3 = (1./(const.planck*const.light))*(1./(np.sqrt(2.*const.emass)))*(1./(np.pi*const.boltzmann)**1.5)
+        # K0 = 1.e-8*K1*K2*K3
 #        K_4 = \frac{1}{\pi} (\frac{1}{2 \pi m_e k})^{1/2}
         K4 = (1./np.pi)*(1./(np.sqrt(2.*np.pi*const.emass*const.boltzmann)))
 
@@ -807,7 +807,7 @@ class continuum(ionTrails):
 #        expfun = np.zeros((nlvls,nTemp,nWvl),np.float64)
 #        mask = np.zeros((nlvls,nTemp,nWvl),np.bool_)
         fbn = np.zeros((nlvls,nTemp,nWvl),np.float64)
-        fbIntensity = np.zeros((nlvls,nTemp,nWvl),np.float64)
+        # fbIntensity = np.zeros((nlvls,nTemp,nWvl),np.float64)
         ratg = np.zeros((nlvls),np.float64)
 #        mygf = np.zeros((nlvls), np.float64)
 #        ratg[0] = float(multr[0])/float(mult[0])

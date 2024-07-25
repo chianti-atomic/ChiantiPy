@@ -48,7 +48,7 @@ class blackStar:
         """
         print((' distance %10.2e  energy '%(energy)))
         bb = blackbody(self.Temperature, energy)
-        out = const.pi*(self.Radius/distance)**2*bb['photons']
+        # out = const.pi*(self.Radius/distance)**2*bb['photons']
         self.Incident = bb
 
 

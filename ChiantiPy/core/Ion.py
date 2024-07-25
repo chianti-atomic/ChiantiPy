@@ -1126,7 +1126,7 @@ class ion(ioneqOne, ionTrails, specTrails):
 
 
         aspectrum = np.zeros((self.NTempDens, wavelength.size), np.float64)
-        if not 'errorMessage' in self.Intensity.keys():
+        if 'errorMessage' not in self.Intensity.keys():
             idx = util.between(self.Intensity['wvl'], wvlRange)
             if len(idx) == 0:
 #                    print(' no lines in wavelength range %12.2f - %12.2f'%(wavelength.min(), wavelength.max()))
@@ -1278,7 +1278,7 @@ class ion(ioneqOne, ionTrails, specTrails):
 #        cc = const.collision*self.EDensity
         #
         # (4 pi a0^2)^(3/2) = 6.6011e-24 (Badnell et al, 2003, A&A 406, 1151
-        coef1 = 6.6011e-24*(const.hartree/(2.*const.boltzmann*self.Temperature))**1.5
+        # coef1 = 6.6011e-24*(const.hartree/(2.*const.boltzmann*self.Temperature))**1.5
         coef2 = (const.planck)**3/(2.*const.pi*const.emass*const.boltzmann*self.Temperature)**1.5
 
         #
@@ -1312,8 +1312,8 @@ class ion(ioneqOne, ionTrails, specTrails):
         higherPop = []
         for itemp in range(self.NTempDens):
             popmat = np.copy(rad)
-            temp = self.Temperature[itemp]
-            dens = self.EDensity[itemp]
+            # temp = self.Temperature[itemp]
+            # dens = self.EDensity[itemp]
 
             for iscups in range(nscups):
                 l1 = self.Scups["lvl1"][iscups]-1
@@ -1345,7 +1345,7 @@ class ion(ioneqOne, ionTrails, specTrails):
                         self.rrlvlDescale()
                         # only include rr from ground level
                     for itrans in rrLvlIdx:
-                        lvl1 = rrlvl['lvl1'][itrans]-1
+                        # lvl1 = rrlvl['lvl1'][itrans]-1
                         lvl2 = rrlvl['lvl2'][itrans]-1
                         popmat[lvl2+ci, -1] += self.EDensity[itemp]*self.RrlvlRate['rate'][itrans, itemp]
                         popmat[-1, -1] -= self.EDensity[itemp]*self.RrlvlRate['rate'][itrans,itemp]
@@ -1358,7 +1358,7 @@ class ion(ioneqOne, ionTrails, specTrails):
                         l1 = self.Auto['lvl1'][i] - 1
                         l2 = self.Auto['lvl2'][i] - 1
                         autoLvl2.append(l2)
-                        upperIdx = higher.Elvlc['lvl'].index(self.Auto['lvl1'][i])
+                        # upperIdx = higher.Elvlc['lvl'].index(self.Auto['lvl1'][i])
                         gUpper = float(higher.Elvlc['mult'][l1])
                         gLower = float(self.Elvlc['mult'][l2])
 
@@ -1766,7 +1766,7 @@ class ion(ioneqOne, ionTrails, specTrails):
 #            pretty2 = np.asarray(self.Wgfa['pretty2'])
 
         try:
-            ntempden,nlvls = pop.shape
+            ntempden, _ = pop.shape
             em = np.zeros((nwvl, ntempden),np.float64)
         except:
             ntempden = 1
@@ -2944,10 +2944,10 @@ class ion(ioneqOne, ionTrails, specTrails):
             else:
                 eDensity = self.EDensity
             if self.Temperature.size == 1:
-                temperature = np.repeat(self.Temperature, nTempDens)
+                # temperature = np.repeat(self.Temperature, nTempDens)
                 thisIoneq = np.repeat(thisIoneq, nTempDens)
-            else:
-                temperature = self.Temperature
+            # else:
+            #     temperature = self.Temperature
 #            else:
 #                rate = np.zeros(nWvl, np.float64)
 #                eDensity = self.EDensity

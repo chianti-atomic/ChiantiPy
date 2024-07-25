@@ -278,7 +278,7 @@ class ionTrails(object):
         obs = intens['obs']
         avalue = intens['avalue']
 
-        em = self.Em
+        # em = self.Em
 
 
         if wvlRange is None and wvlRanges is None:
@@ -333,7 +333,7 @@ class ionTrails(object):
             intensity = intensity/intensity[:top].max()
 
         idx = np.argsort(wvl)
-        fmt1 = '%5s %5s %5s %25s - %-25s %12s %12s %12s %3s'
+        # fmt1 = '%5s %5s %5s %25s - %-25s %12s %12s %12s %3s'
         fmt = '%5s %5i %5i %25s - %-25s %12.' + str(rightDigits) + \
             'f %12.2e %12.2e %1s'
         fmtTitle = '%5s %5s %5s %25s - %25s %12s %12s %12s %1s'

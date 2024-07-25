@@ -62,7 +62,7 @@ def output(eds, reversion_eds, values):
             else:
                 ed = get_ed.next()
         else:
-            if reversion_contains_output_ed == True:
+            if reversion_contains_output_ed:
                 # take from reversion edit descriptors if there is a value
                 # requiring output still
                 while True:
@@ -601,7 +601,7 @@ def _compose_l_string(w, state, val):
     except ValueError:
         raise ValueError("cannot convert '%s' to a boolean" % str(val))
     # single t or f
-    if val == True:
+    if val:
         sub_string = 'T'
     else:
         sub_string = 'F'
@@ -612,7 +612,7 @@ def _compose_l_string(w, state, val):
 
 def _compose_i_string(w, m, state, val):
     # f77 spec 13.5.9.1 covers integer editing 
-    null_field = False
+    # null_field = False
     # be pythonic in what values to accept, if it looks like an integer, then
     # so be it
     try:
@@ -640,7 +640,7 @@ def _compose_i_string(w, m, state, val):
 
 def _get_sign(val, incl_plus):
     if val >= 0:
-        if incl_plus == True:
+        if incl_plus:
             return '+'
         else:
             return ''

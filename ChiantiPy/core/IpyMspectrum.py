@@ -197,7 +197,7 @@ class ipymspectrum(ionTrails, specTrails):
                         print(thisFb['errorMessage'])
             elif calcType == 'line':
                 thisIon = out[2]
-                if not 'errorMessage' in sorted(thisIon.Intensity.keys()):
+                if 'errorMessage' not in sorted(thisIon.Intensity.keys()):
                     if keepIons:
                         self.IonInstances[ionS] = thisIon
                     thisIntensity = thisIon.Intensity

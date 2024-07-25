@@ -111,7 +111,7 @@ def emPlot(matchDict, vs='T', loc='upper right', fs=10, lw=2,  adjust=None, posi
     if adjust is None:
         adjust = np.ones(nInt, np.float64)
 #        print(' nInt = %5i'%(nInt))
-    if not 'intensity' in match[0]:
+    if 'intensity' not in match[0]:
         print(' must run mgofnt or gofnt first')
         return
     elif vs == 'T':
@@ -1034,7 +1034,7 @@ class maker(ionTrails,  specTrails):
         if adjust is None:
             adjust = np.ones(nInt, np.float64)
     #        print(' nInt = %5i'%(nInt))
-        if not 'intensity' in match[0]:
+        if 'intensity' not in match[0]:
             print(' must run mgofnt or gofnt first')
             return
         elif vs == 'T':
@@ -1202,7 +1202,7 @@ class maker(ionTrails,  specTrails):
         if adjust is None:
             adjust = np.ones(nInt, np.float64)
     #        print(' nInt = %5i'%(nInt))
-        if not 'intensity' in match[0]:
+        if 'intensity' not in match[0]:
             print(' must run mgofnt or gofnt first')
             return
         elif vs == 'T':
@@ -1705,7 +1705,7 @@ class maker(ionTrails,  specTrails):
 
         dash = ' -------------------------------------------------'
         # for cases where no predicted intensity
-        pformatNone = ' %5i %7s %10.3f'
+        # pformatNone = ' %5i %7s %10.3f'
         pformat1 = ' %5i %7s %10.3f %10.2e %10.2e %10.3f %10.3f'
         pformat1s = ' %5s %7s %10s %10s %10s %10s %10s'
         pformat2 = '         %s'
@@ -2238,14 +2238,14 @@ class maker(ionTrails,  specTrails):
             return
 
         emfit = []
-        idx12 = []
+        # idx12 = []
         idx = []
         searchDx = []
         chisq = []
-        info = []
+        # info = []
         maskedValues = []
 #
-        nTemp = len(self.Temperature)
+        # nTemp = len(self.Temperature)
 
         if indexLimits is None:
             tempSearched = self.Temperature

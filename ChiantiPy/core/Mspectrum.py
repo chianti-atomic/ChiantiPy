@@ -277,7 +277,7 @@ class mspectrum(ionTrails, specTrails):
                     print(' collecting ion calculation for %s'%(ionS))
                 thisIon = out[1]
                 thisIntensity = thisIon.Intensity
-                if not 'errorMessage' in sorted(thisIntensity.keys()):
+                if 'errorMessage' not in sorted(thisIntensity.keys()):
                     self.Finished.append(ionS)
                     if keepIons:
                         self.IonInstances[ionS] = copy.deepcopy(thisIon)
@@ -289,7 +289,7 @@ class mspectrum(ionTrails, specTrails):
                         setupIntensity = True
                         self.Intensity  = thisIntensity
                     #
-                    if not 'errorMessage' in sorted(thisIon.Spectrum.keys()):
+                    if 'errorMessage' not in sorted(thisIon.Spectrum.keys()):
                         lineSpectrum += thisIon.Spectrum['intensity']
                    # check for two-photon emission
                     if len(out) == 3:

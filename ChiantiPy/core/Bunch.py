@@ -280,7 +280,7 @@ class bunch(ionTrails, specTrails):
             for akey in sorted(self.IonInstances.keys()):
                 if verbose:
                     print( ' trying ion = %s'%(akey))
-                if not 'errorMessage' in sorted(self.IonInstances[akey].Intensity.keys()):
+                if 'errorMessage' not in sorted(self.IonInstances[akey].Intensity.keys()):
                     if verbose:
                         print(' doing convolve on ion %s '%(akey))
                     self.IonInstances[akey].spectrum(wavelength, filter)

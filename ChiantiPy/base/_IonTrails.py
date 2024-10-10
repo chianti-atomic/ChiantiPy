@@ -17,7 +17,7 @@ class ionTrails(object):
     Base class for `ChiantiPy.core.ion` and `ChiantiPy.core.spectrum`
     """
 
-    def argCheck(self, temperature=None, eDensity=None, pDensity='default', em = None,  verbose=0):
+    def argCheck(self, temperature=None, eDensity=None, pDensity='default', em = None,  verbose=False):
         ''' to check the compatibility of the three arguments
         and put them into numpy arrays of atleast_1d
         and create attributes to the object
@@ -104,30 +104,30 @@ class ionTrails(object):
         to 'energy', the intensity is given by,
 
         .. math::
-           I = \Delta E_{ij}n_jA_{ij}\mathrm{Ab}\\frac{1}{N_e}
-           \\frac{N(X^{+m})}{N(X)}\mathrm{EM},
+           I = \\Delta E_{ij}n_jA_{ij}\\mathrm{Ab}\\frac{1}{N_e}
+           \\frac{N(X^{+m})}{N(X)}\\mathrm{EM},
 
-        in units of ergs cm\ :sup:`-2` s\ :sup:`-1` sr\ :sup:`-1`. If 'flux' is set to 'photon',
+        in units of ergs cm\\ :sup:`-2` s\\ :sup:`-1` sr \\ :sup:`-1`. If 'flux' is set to 'photon',
 
         .. math::
-           I = n_jA_{ij}\mathrm{Ab}\\frac{1}{N_e}\\frac{N(X^{+m})}{N(X)}
-           \mathrm{EM},
+           I = n_jA_{ij}\\mathrm{Ab}\\frac{1}{N_e}\\frac{N(X^{+m})}{N(X)}
+           \\mathrm{EM},
 
         where,
 
-        - :math:`\Delta E_{ij}` is the transition energy (ergs)
+        - :math:`\\Delta E_{ij}` is the transition energy (ergs)
         - :math:`n_j` is  the fractions of ions in level :math:`j`
         - :math:`A_{ij}` is the Einstein coefficient for spontaneous emission
-          from level :math:`j` to level :math:`i` (in s\ :sup:`-1`)
-        - :math:`\mathrm{Ab}` is the abundance of the specified element
+          from level :math:`j` to level :math:`i` (in s\\ :sup:`-1`)
+        - :math:`\\mathrm{Ab}` is the abundance of the specified element
           relative to hydrogen
-        - :math:`N_e` is the electron density (in cm\ :sup:`-3`)
+        - :math:`N_e` is the electron density (in cm\\ :sup:`-3`)
         - :math:`N(X^{+m})/N(X)` is the fractional ionization of ion as a
           function of temperature
-        - :math:`\mathrm{EM}` is the emission measure integrated along the
-          line-of-sight, :math:`\int\mathrm{d}l\,N_eN_H` (cm\ :sup:`-5`) where
+        - :math:`\\mathrm{EM}` is the emission measure integrated along the
+          line-of-sight, :math:`\\int\\mathrm{d}l\\,N_eN_H` (cm\\ :sup:`-5`) where
           :math:`N_H` is the density of hydrogen (neutral + ionized)
-          (cm\ :sup:`-3`)
+          (cm\\ :sup:`-3`)
 
         Note that if `relative` is set, the line intensity is relative to the
         strongest line and so the output will be unitless.
@@ -200,65 +200,65 @@ class ionTrails(object):
                 index = 0
             intensity = self.Intensity['intensity'][index]
             print('using index = %5i specifying temperature = %10.2e, eDensity =  %10.2e'%(index, temperature[index], eDensity[index]))
-            dstr = ' -  Density = %10.2e (cm$^{-3}$)' %(eDensity[index])
-            tstr = ' -  T = %10.2e (K)' %(temperature[index])
+            #dstr = ' -  Density = %10.2e (cm$^{-3}$)' %(eDensity[index])
+            #tstr = ' -  T = %10.2e (K)' %(temperature[index])
         elif ndens == 1 and ntemp > 1:
             if integrated:
                 intensity=self.Intensity['integrated']
                 print('using integated/summed intensities')
-                tstr=' -  integrated/summed intensities \n'
-                dstr='   Density between %10.2e and %10.2e (cm$^{-3}$)'%(eDensity[0],  eDensity[-1])
+                #tstr=' -  integrated/summed intensities \n'
+                #dstr='   Density between %10.2e and %10.2e (cm$^{-3}$)'%(eDensity[0],  eDensity[-1])
             elif index is None:
                 index = ntemp//2
                 print('using index = %5i specifying temperature =  %10.2e'%(index, temperature[index]))
                 self.Message = 'using index = %5i specifying temperature =  %10.2e'%(index, temperature[index])
                 intensity=self.Intensity['intensity'][index]
-                tstr=' -  T = %10.2e (K)' % temperature[index]
-                dstr=' -  Density = %10.2e (cm$^{-3}$)' % eDensity[index]
+                #tstr=' -  T = %10.2e (K)' % temperature[index]
+                #dstr=' -  Density = %10.2e (cm$^{-3}$)' % eDensity[index]
             else:
                 print('using index = %5i specifying temperature =  %10.2e'%(index, temperature[index]))
                 self.Message = 'using index = %5i specifying temperature =  %10.2e'%(index, temperature[index])
                 intensity=self.Intensity['intensity'][index]
-                tstr=' -  T = %10.2e (K)' % temperature[index]
-                dstr=' -  Density = %10.2e (cm$^{-3}$)' % eDensity[index]
+                #tstr=' -  T = %10.2e (K)' % temperature[index]
+                #dstr=' -  Density = %10.2e (cm$^{-3}$)' % eDensity[index]
         elif ndens > 1 and ntemp == 1:
             if integrated:
                 intensity=self.Intensity['integrated']
                 print('using integated/summed intensities')
-                tstr=' -  integrated/summed intensities \n'
-                dstr='   Density between %10.2e and %10.2e (cm$^{-3}$)'%(eDensity[0],  eDensity[-1])
+                #tstr=' -  integrated/summed intensities \n'
+                #dstr='   Density between %10.2e and %10.2e (cm$^{-3}$)'%(eDensity[0],  eDensity[-1])
             elif index is None:
                 index = ntemp//2
                 print('using index =%5i specifying eDensity = %10.2e'%(index, eDensity[index]))
                 self.Message = 'using index =%5i specifying eDensity = %10.2e'%(index, eDensity[index])
                 intensity = self.Intensity['intensity'][index]
-                dstr=' -  Density = %10.2e (cm$^{-3}$)' % eDensity[index]
-                tstr=' -  T = %10.2e (K)' % temperature[index]
+                #dstr=' -  Density = %10.2e (cm$^{-3}$)' % eDensity[index]
+                #tstr=' -  T = %10.2e (K)' % temperature[index]
             else:
                 print('using index = %5i specifying temperature =  %10.2e'%(index, temperature[index]))
                 self.Message = 'using index = %5i specifying temperature =  %10.2e'%(index, temperature[index])
                 intensity=self.Intensity['intensity'][index]
-                tstr=' -  T = %10.2e (K)' % temperature[index]
-                dstr=' -  Density = %10.2e (cm$^{-3}$)' % eDensity[index]
+                #tstr=' -  T = %10.2e (K)' % temperature[index]
+                #dstr=' -  Density = %10.2e (cm$^{-3}$)' % eDensity[index]
 
         elif ndens > 1 and ntemp > 1:
             if integrated:
                 intensity=self.Intensity['integrated']
                 print('using integated/summed intensities')
-                tstr=' -  integrated/summed intensities \n'
-                dstr='   Density between %10.2e and %10.2e (cm$^{-3}$)'%(eDensity[0],  eDensity[-1])
+                #tstr=' -  integrated/summed intensities \n'
+                #dstr='   Density between %10.2e and %10.2e (cm$^{-3}$)'%(eDensity[0],  eDensity[-1])
             elif index is None:
                 index = ntemp//2
                 print('using index = %5i specifying temperature = %10.2e, eDensity =  %10.2e'%(index, temperature[index], eDensity[index]))
                 self.Message = 'using index = %5i specifying temperature = %10.2e, eDensity =  %10.2e'%(index, temperature[index], eDensity[index])
                 intensity = self.Intensity['intensity'][index]
-                dstr=' -  Density = %10.2e (cm$^{-3}$)' % eDensity[index]
-                tstr=' -  T = %10.2e (K)' % temperature[index]
+                #dstr=' -  Density = %10.2e (cm$^{-3}$)' % eDensity[index]
+                #tstr=' -  T = %10.2e (K)' % temperature[index]
             else:
                 intensity = self.Intensity['intensity'][index]
                 print('using index = %5i specifying temperature = %10.2e, eDensity =  %10.2e'%(index, temperature[index], eDensity[index]))
-                dstr=' Density = %10.2e (cm$^{-3}$)' % eDensity[index]
-                tstr=' T = %10.2e (K)' % temperature[index]
+                #dstr=' Density = %10.2e (cm$^{-3}$)' % eDensity[index]
+                #tstr=' T = %10.2e (K)' % temperature[index]
 
         wvlIndex = util.between(wvl, wvlRange)
 
@@ -518,10 +518,10 @@ class ionTrails(object):
 
         # must follow setting top
         plt.figure()
-        ylabel = self.Intensity['ylabel']
+        #ylabel = self.Intensity['ylabel']
         if relative:
             intensity = intensity/intensity[-1]
-            ylabel = ' Relative Intensity'
+            #ylabel = ' Relative Intensity'
 
         ymin = 10.**(np.log10(intensity[0].min()).round(0)-0.5 )
         plt.ion()
@@ -678,19 +678,19 @@ class ionTrails(object):
             xvalues=self.Temperature
             outTemperature=self.Temperature
             outDensity = self.EDensity
-            desc_str=' Density = %10.2e (cm$^{-3}$)' % self.EDensity[0]
+            #desc_str=' Density = %10.2e (cm$^{-3}$)' % self.EDensity[0]
         elif ntemp == 1:
             xvalues=self.EDensity
             outTemperature = self.Temperature
             outDensity=self.EDensity
             xlbl='Electron Density (cm$^{-3}$)'
-            desc_str=' Temp = %10.2e (K)' % self.Temperature[0]
+            #desc_str=' Temp = %10.2e (K)' % self.Temperature[0]
         else:
             outTemperature=self.Temperature
             outDensity=self.EDensity
             xlbl='Temperature (K)'
             xvalues=self.Temperature
-            desc_str=' Variable Density'
+            #desc_str=' Variable Density'
         # put all actual plotting here
         plt.ion()
         #  maxAll is an array

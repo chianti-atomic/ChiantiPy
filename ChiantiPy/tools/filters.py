@@ -3,6 +3,7 @@ Line profile filters for creating synthetic spectra.
 """
 
 import numpy as np
+from scipy.special import voigt_profile
 
 
 def gaussianR(wvl, wvl0, factor=1000.):
@@ -23,7 +24,7 @@ def gaussianR(wvl, wvl0, factor=1000.):
     return np.exp(-0.5*((wvl - wvl0)/std)**2)/(np.sqrt(2.*np.pi)*std)
 
 
-def gaussian(wvl, wvl0, factor=1.):
+def gaussian(wvl, wvl0, factor = 1.):
     """
     A gaussian filter
 
@@ -42,7 +43,7 @@ def gaussian(wvl, wvl0, factor=1.):
     return np.exp(-0.5*((wvl - wvl0)/factor)**2)/(np.sqrt(2.*np.pi)*factor)
 
 
-def boxcar(wvl, wvl0, factor=None):
+def boxcar(wvl, wvl0, factor = None):
     """
     Box-car filter
 
@@ -71,7 +72,7 @@ def boxcar(wvl, wvl0, factor=None):
 
 
 
-def lorentz(wvl, wvl0, factor=1.):
+def lorentz(wvl, wvl0, factor = 1.):
     """
     Lorentz profile filter with the exception that all factors are in wavelength units
     rather than frequency as the lorentz profile is usually defined.
@@ -89,7 +90,7 @@ def lorentz(wvl, wvl0, factor=1.):
     the FWHM is 2*gamma
 
     .. math::
-        L = \\frac{1}{\pi \gamma} \\frac{ \gamma^2}{(\lambda - \lambda_0)^2 + \gamma^2}
+        L = \\frac{1}{\\pi \\gamma} \\frac{ \\gamma^2}{(\\lambda - \\lambda_0)^2 + \\gamma^2}
 
     """
     wvl = np.asarray(wvl)
@@ -116,9 +117,9 @@ def moffat(wvl, wvl0, factor=2.5):
     moffat = 1./(1.+((wvl - wvl0)/0.0275)**2)**factor
     return moffat/(dwvl*moffat.sum())
 
-def voigt(wvl, wvl0, factor=(0.5, 1.)):
-    ''' pseudo-Voigt filter
-    the sum of a Gaussian and a Lorentzian
+def voigt(wvl, wvl0, factor = (None, None)):
+    '''
+    voigt profile from scipy.special.voigt_profile
 
     Parameters
     ----------
@@ -127,14 +128,17 @@ def voigt(wvl, wvl0, factor=(0.5, 1.)):
     wvl0 : `~numpy.float64`
         Wavelength the filter is centered on.
     factor: array-type
-        contains the following 2 parameters
-    A : `~numpy.float64`
-        relative size of gaussian and lorentz components
-        must be between 0. and 1. but this is not currently checked
-    sigma:  `~numpy.float64`
-        the gaussian width of the gaussian profile (the standard deviation)
-        also creates the lorentz component with the same fwhm
+        contains the following 3 parameters
+    dispersion:  float or `~numpy.ndarray`
+        need to create a normalized voigt profile default is 1.0
+    sigma:  `~numpy.ndarray` of same shape as wvl, default value is 2.e-4
+        the gaussian width of the gaussian component
+    gamma:  `~numpy.ndarray` of the same shape as wvl, default value is 5.e-4
+        the fwhm of the Lorentz profile
     '''
-    A = factor[0]
-    sigma = factor[1]
-    return A*gaussian(wvl, wvl0, sigma) + (1.-A)*lorentz(wvl, wvl0, sigma)
+
+#    dispersion = factor[0]
+    sigma = factor[0]
+    gamma = factor[1]
+
+    return voigt_profile(wvl - wvl0, sigma,  gamma)

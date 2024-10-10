@@ -1061,7 +1061,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             self.Upsilon = {'lvl1':lvl1, 'lvl2':lvl2,'upsilon':ups, 'temperature':temperature,
                             'exRate':exRate, 'dexRate':dexRate, 'de':deAll}
 
-    def spectrum(self, wavelength, filter=(chfilters.gaussianR,1000.), label=0, allLines=1):
+    def spectrum(self, wavelength, filter = (chfilters.gaussianR, 1000.), label = False, allLines = False):
         """
         Calculates the line emission spectrum for the specified ion.
 

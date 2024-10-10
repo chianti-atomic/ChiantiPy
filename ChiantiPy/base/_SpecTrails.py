@@ -29,7 +29,7 @@ class specTrails(object):
         # ---------------------------------------------------------------------------
         #
     def ionGate(self, elementList = None, ionList = None, minAbund=None, doLines=1, doContinuum=1,
-        doWvlTest=1, doIoneqTest=1, includeDiel=False,  verbose=0):
+        doWvlTest=1, doIoneqTest=1, includeDiel=False,  verbose=False):
         '''
         creates a list of ions for free-free, free-bound, and line intensity calculations
         if doing the radiative losses, accept all wavelength -> doWvlTest=0

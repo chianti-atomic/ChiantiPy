@@ -86,7 +86,7 @@ class spectrum(ionTrails, specTrails):
         the temperature(s) in K
 
     eDensity: float, ndarray
-        eDensity: electron density in :math:`\mathrm{cm^{-3}}`
+        eDensity: electron density in :math:`\\mathrm{cm^{-3}}`
 
     wavelength:  `list` or `ndarray`
         wavelength:  array of  wavelengths, generally in Angstroms
@@ -126,7 +126,7 @@ class spectrum(ionTrails, specTrails):
 
     '''
     def __init__(self, temperature, eDensity, wavelength, filter=(chfilters.gaussianR, 1000.), label=None,
-        elementList = None, ionList = None, minAbund=None, doLines=1, doContinuum=1, em=None, keepIons=0,
+        elementList = None, ionList = None, minAbund=None, doLines = True, doContinuum = True, em=None, keepIons=0,
         abundance=None, verbose=0, allLines=1):
         #
         self.Defaults=chdata.Defaults
@@ -159,7 +159,7 @@ class spectrum(ionTrails, specTrails):
         ylabel = self.Labels['spectrumYlabel']
 
         if np.array_equal(self.Em, np.ones_like(self.Em)):
-            ylabel += '($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
+            ylabel += '($\\int\\,$ N$_e\\,$N$_H\\,$d${\\it l}$)$^{-1}$'
         #
         if abundance is not None:
             ab = chio.abundanceRead(abundance)
@@ -201,7 +201,6 @@ class spectrum(ionTrails, specTrails):
             abundance = self.Abundance[Z - 1]
             if verbose:
                 print(' %5i %5s abundance = %10.2e '%(Z, const.El[Z-1],  abundance))
-            if verbose:
                 print(' doing ion %s for the following processes %s'%(akey, self.Todo[akey]))
             if 'ff' in self.Todo[akey]:
                 if verbose:
@@ -247,9 +246,13 @@ class spectrum(ionTrails, specTrails):
                     if verbose:
                         print(thisIon.Intensity['errorMessage'])
                 # get 2 photon emission for H and He sequences
-                if (Z - ionstage) in [0, 1] and not dielectronic:
-                    thisIon.twoPhoton(wavelength)
-                    twoPhoton += thisIon.TwoPhoton['intensity'].squeeze()
+                if doContinuum:
+                    print(self.Todo[akey])
+                    if (Z - ionstage) in [0, 1] and not dielectronic:
+                        thisIon.twoPhoton(wavelength)
+                        twoPhoton += thisIon.TwoPhoton['intensity'].squeeze()
+                        if verbose:
+                            print(' doing two photon')
 
         self.FreeFree = {'wavelength':wavelength, 'intensity':freeFree.squeeze()}
         self.FreeBound = {'wavelength':wavelength, 'intensity':freeBound.squeeze()}

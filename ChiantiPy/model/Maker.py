@@ -214,7 +214,7 @@ class maker(ionTrails,  specTrails):
         the temperature(s) in K, default is None
 
     eDensity: float, ndarray
-        eDensity: electron density in :math:`\mathrm{cm^{-3}}`, default is None
+        eDensity: electron density in :math:`\\mathrm{cm^{-3}}`, default is None
 
     elementList :  list
         a list of elements, such as fe, to be searched, default = []
@@ -527,10 +527,10 @@ class maker(ionTrails,  specTrails):
             the temperature(s) in K
 
         eDensity: float, ndarray
-            eDensity: electron density in :math:`\mathrm{cm^{-3}}`
+            eDensity: electron density in :math:`\\mathrm{cm^{-3}}`
 
         pDensity: `str`, `float`, `ndarray`
-            pDensity: proton density in :math:`\mathrm{cm^{-3}}` defaults to 'default'
+            pDensity: proton density in :math:`\\mathrm{cm^{-3}}` defaults to 'default'
 
         verbose : `bool`
             if True, additional output is sent to the terminal
@@ -595,7 +595,7 @@ class maker(ionTrails,  specTrails):
             the temperature(s) in K
 
         density: `float`, `list`, `ndarray`
-            density: electron density in :math:`\mathrm{cm^{-3}}`
+            density: electron density in :math:`\\mathrm{cm^{-3}}`
 
 
         '''
@@ -695,7 +695,7 @@ class maker(ionTrails,  specTrails):
             the temperature(s) in K
 
         density: `float`, `list`, `ndarray`
-            density: electron density in :math:`\mathrm{cm^{-3}}`
+            density: electron density in :math:`\\mathrm{cm^{-3}}`
 
         Keyword Arguments
         -----------------
@@ -757,8 +757,8 @@ class maker(ionTrails,  specTrails):
         #
         ionWorkerQSize = ionWorkerQ.qsize()
         ionProcesses = []
-        if ionWorkerQSize < proc:
-            nproc = ionWorkerQSize
+#        if ionWorkerQSize < proc:
+#            nproc = ionWorkerQSize
         for i in range(proc):
             p = mp.Process(target=doDemGofntQ, args=(ionWorkerQ, ionDoneQ))
             p.start()

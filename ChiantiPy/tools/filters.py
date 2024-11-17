@@ -117,6 +117,29 @@ def moffat(wvl, wvl0, factor=2.5):
     moffat = 1./(1.+((wvl - wvl0)/0.0275)**2)**factor
     return moffat/(dwvl*moffat.sum())
 
+def psvoigt(wvl, wvl0, factor=(0.5, 1.)):
+    ''' pseudo-Voigt filter
+    the sum of a Gaussian and a Lorentzian
+
+    Parameters
+    ----------
+    wvl : `~numpy.ndarray`
+        Wavelength array
+    wvl0 : `~numpy.float64`
+        Wavelength the filter is centered on.
+    factor: array-type
+        contains the following 2 parameters
+    A : `~numpy.float64`
+        relative size of gaussian and lorentz components
+        must be between 0. and 1. but this is not currently checked
+    sigma:  `~numpy.float64`
+        the gaussian width of the gaussian profile (the standard deviation)
+        also creates the lorentz component with the same fwhm
+    '''
+    A = factor[0]
+    sigma = factor[1]
+    return A*gaussian(wvl, wvl0, sigma) + (1.-A)*lorentz(wvl, wvl0, sigma)
+
 def voigt(wvl, wvl0, factor = (None, None)):
     '''
     voigt profile from scipy.special.voigt_profile

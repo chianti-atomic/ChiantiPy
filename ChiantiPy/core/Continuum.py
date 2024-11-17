@@ -38,9 +38,9 @@ class continuum(ionTrails):
         Elemental abundance relative to Hydrogen or name of CHIANTI abundance file,
         without the '.abund' suffix, e.g. 'sun_photospheric_1998_grevesse'.
     em : array-like, optional
-        Line-of-sight emission measure (:math:`\int\mathrm{d}l\,n_en_H`), in units of
-        :math:`\mathrm{cm}^{-5}`, or the volumetric emission measure (:math:`\int\mathrm{d}V\,n_en_H`)
-        in units of :math:`\mathrm{cm}^{-3}`.
+        Line-of-sight emission measure (:math:`\\int\\mathrm{d}l\\,n_en_H`), in units of
+        :math:`\\mathrm{cm}^{-5}`, or the volumetric emission measure (:math:`\\int\\mathrm{d}V\\,n_en_H`)
+        in units of :math:`\\mathrm{cm}^{-3}`.
     verbose : `bool`
         if True, prints additional info to the console
 
@@ -131,13 +131,13 @@ class continuum(ionTrails):
         constant in terms of the fine structure constant :math:`\\alpha`,
 
         .. math::
-           \\frac{dW}{dtdV} = \\frac{4\\alpha^3h^2}{3\pi^2m_e}\left(\\frac{2\pi k_B}{3m_e}\\right)^{1/2}Z^2T^{1/2}\\bar{g}_B
+           \\frac{dW}{dtdV} = \\frac{4\\alpha^3h^2}{3\\pi^2m_e}\\left(\\frac{2\\pi k_B}{3m_e}\\right)^{1/2}Z^2T^{1/2}\\bar{g}_B
 
         where where :math:`Z` is the nuclear charge, :math:`T` is the electron temperature, and
         :math:`\\bar{g}_{B}` is the wavelength-averaged and velocity-averaged Gaunt factor. The
         Gaunt factor is calculated using the methods of [103]_. Note that this expression for the
         loss rate is just the integral over wavelength of Eq. 5.14a of [107]_, the free-free emission, and
-        is expressed in units of erg :math:`\mathrm{cm}^3\,\mathrm{s}^{-1}`.
+        is expressed in units of erg :math:`\\mathrm{cm}^3\\,\\mathrm{s}^{-1}`.
 
         """
         # interpolate wavelength-averaged K&L gaunt factors
@@ -164,11 +164,11 @@ class continuum(ionTrails):
         the `FreeFree` attribute.  The dict has the keywords `intensity`, `wvl`, `temperature`, `em`.
 
         The free-free emission for the given ion is calculated according Eq. 5.14a of [107]_,
-        substituting :math:`\\nu=c/\lambda`, dividing by the solid angle, and writing the numerical
+        substituting :math:`\\nu=c/\\lambda`, dividing by the solid angle, and writing the numerical
         constant in terms of the fine structure constant :math:`\\alpha`,
 
         .. math::
-           \\frac{dW}{dtdVd\lambda} = \\frac{c}{3m_e}\left(\\frac{\\alpha h}{\pi}\\right)^3\left(\\frac{2\pi}{3m_ek_B}\\right)^{1/2}\\frac{Z^2}{\lambda^2T^{1/2}}\exp{\left(-\\frac{hc}{\lambda k_BT}\\right)}\\bar{g}_{ff},
+           \\frac{dW}{dtdVd\\lambda} = \\frac{c}{3m_e}\\left(\\frac{\\alpha h}{\\pi}\\right)^3\\left(\\frac{2\\pi}{3m_ek_B}\\right)^{1/2}\\frac{Z^2}{\\lambda^2T^{1/2}}\\exp{\\left(-\\frac{hc}{\\lambda k_BT}\\right)}\\bar{g}_{ff},
 
         where :math:`Z` is the nuclear charge, :math:`T` is the electron temperature in K, and
         :math:`\\bar{g}_{ff}` is the velocity-averaged Gaunt factor. The Gaunt factor is estimated
@@ -176,9 +176,9 @@ class continuum(ionTrails):
         `itoh_gaunt_factor` and `sutherland_gaunt_factor` for more details.
 
         The free-free emission is in units of erg
-        :math:`\mathrm{cm}^3\mathrm{s}^{-1}\mathrm{\mathring{A}}^{-1}\mathrm{str}^{-1}`. If the emission
-        measure has been set, the units will be multiplied by :math:`\mathrm{cm}^{-5}` or
-        :math:`\mathrm{cm}^{-3}`, depending on whether it is the line-of-sight or volumetric
+        :math:`\\mathrm{cm}^3\\mathrm{s}^{-1}\\mathrm{\\mathring{A}}^{-1}\\mathrm{str}^{-1}`. If the emission
+        measure has been set, the units will be multiplied by :math:`\\mathrm{cm}^{-5}` or
+        :math:`\\mathrm{cm}^{-3}`, depending on whether it is the line-of-sight or volumetric
         emission measure, respectively.
 
         Parameters
@@ -200,7 +200,7 @@ class continuum(ionTrails):
         ylabel = self.Labels['spectrumYlabel']
 
         if np.array_equal(self.Em, np.ones_like(self.Em)):
-            ylabel += '($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
+            ylabel += '($\\int\\,$ N$_e\\,$N$_H\\,$d${\\it l}$)$^{-1}$'
 
         wavelength = np.atleast_1d(wavelength)
         # define the numerical prefactor
@@ -240,13 +240,13 @@ class continuum(ionTrails):
         constant in terms of the fine structure constant :math:`\\alpha`,
 
         .. math::
-           \\frac{dW}{dtdV} = \\frac{4\\alpha^3h^2}{3\pi^2m_e}\left(\\frac{2\pi k_B}{3m_e}\\right)^{1/2}Z^2T^{1/2}\\bar{g}_B
+           \\frac{dW}{dtdV} = \\frac{4\\alpha^3h^2}{3\\pi^2m_e}\\left(\\frac{2\\pi k_B}{3m_e}\\right)^{1/2}Z^2T^{1/2}\\bar{g}_B
 
         where where :math:`Z` is the ion charge, :math:`T` is the electron temperature, and
         :math:`\\bar{g}_{B}` is the wavelength-averaged and velocity-averaged Gaunt factor. The
         Gaunt factor is calculated using the methods of [103]_. Note that this expression for the
         loss rate is just the integral over wavelength of Eq. 5.14a of [103]_, the free-free emission, and
-        is expressed in units of erg :math:`\mathrm{cm}^3\,\mathrm{s}^{-1}`.
+        is expressed in units of erg :math:`\\mathrm{cm}^3\\,\\mathrm{s}^{-1}`.
 
         """
         # interpolate wavelength-averaged  gaunt factors of Sutherland
@@ -277,17 +277,17 @@ class continuum(ionTrails):
         An analytic fitting formulae for the relativistic Gaunt factor is given by Eq. 4 of [104]_,
 
         .. math::
-           g_{Z} = \sum^{10}_{i,j=0}a_{ij}t^iU^j
+           g_{Z} = \\sum^{10}_{i,j=0}a_{ij}t^iU^j
 
         where,
 
         .. math::
-           t = \\frac{1}{1.25}(\log_{10}{T} - 7.25),\\
-           U = \\frac{1}{2.5}(\log_{10}{u} + 1.5),
+           t = \\frac{1}{1.25}(\\log_{10}{T} - 7.25),\\
+           U = \\frac{1}{2.5}(\\log_{10}{u} + 1.5),
 
-        :math:`u=hc/\lambda k_BT`, and :math:`a_{ij}` are the fitting coefficients and are read
+        :math:`u=hc/\\lambda k_BT`, and :math:`a_{ij}` are the fitting coefficients and are read
         in using `ChiantiPy.tools.io.itohRead` and are given in Table 4 of [104]_. These values
-        are valid for :math:`6<\log_{10}(T)< 8.5` and :math:`-4<\log_{10}(u)<1`.
+        are valid for :math:`6<\\log_{10}(T)< 8.5` and :math:`-4<\\log_{10}(u)<1`.
 
         See Also
         --------
@@ -322,7 +322,7 @@ class continuum(ionTrails):
         Calculates the free-free gaunt factor calculations of [101]_.
 
         The Gaunt factors of [101]_ are read in using `ChiantiPy.tools.io.gffRead`
-        as a function of :math:`u` and :math:`\gamma^2`. The data are interpolated
+        as a function of :math:`u` and :math:`\\gamma^2`. The data are interpolated
         to the appropriate wavelength and temperature values using
         `~scipy.ndimage.map_coordinates`.
 
@@ -353,12 +353,12 @@ class continuum(ionTrails):
         .. math::
            \\frac{dW}{dtdV} = C_{ff}\\frac{k}{hc}T^{1/2}G_{fb},
 
-        in units of erg :math:`\mathrm{cm}^3\,\mathrm{s}^{-1}` where :math:`G_{fb}` is the free-bound Gaunt factor as
+        in units of erg :math:`\\mathrm{cm}^3\\,\\mathrm{s}^{-1}` where :math:`G_{fb}` is the free-bound Gaunt factor as
         given by Eq. 15 of [106]_ (see `mewe_gaunt_factor` for more details) and :math:`C_{ff}` is the numerical constant
         as given in Eq. 4 of [108]_ and can be written in terms of the fine structure constant :math:`\\alpha`,
 
         .. math::
-           C_{ff}\\frac{k}{hc} = \\frac{8}{3}\left(\\frac{\pi}{6}\\right)^{1/2}\\frac{h^2\\alpha^3}{\pi^2}\\frac{k_B}{m_e^{3/2}} \\approx 1.43\\times10^{-27}
+           C_{ff}\\frac{k}{hc} = \\frac{8}{3}\\left(\\frac{\\pi}{6}\\right)^{1/2}\\frac{h^2\\alpha^3}{\\pi^2}\\frac{k_B}{m_e^{3/2}} \\approx 1.43\\times10^{-27}
 
         """
         # Calculate Gaunt factor according to Mewe
@@ -381,12 +381,12 @@ class continuum(ionTrails):
         .. math::
            \\frac{dW}{dtdV} = C_{ff}\\frac{k}{hc}T^{1/2}G_{fb},
 
-        in units of erg :math:`\mathrm{cm}^3\,\mathrm{s}^{-1}` where :math:`G_{fb}` is the free-bound Gaunt factor as
+        in units of erg :math:`\\mathrm{cm}^3\\,\\mathrm{s}^{-1}` where :math:`G_{fb}` is the free-bound Gaunt factor as
         given by Eq. 15 of [106]_ (see `mewe_gaunt_factor` for more details) and :math:`C_{ff}` is the numerical constant
         as given in Eq. 4 of [108]_ and can be written in terms of the fine structure constant :math:`\\alpha`,
 
         .. math::
-           C_{ff}\\frac{k}{hc} = \\frac{8}{3}\left(\\frac{\pi}{6}\\right)^{1/2}\\frac{h^2\\alpha^3}{\pi^2}\\frac{k_B}{m_e^{3/2}} \\approx 1.43\\times10^{-27}
+           C_{ff}\\frac{k}{hc} = \\frac{8}{3}\\left(\\frac{\\pi}{6}\\right)^{1/2}\\frac{h^2\\alpha^3}{\\pi^2}\\frac{k_B}{m_e^{3/2}} \\approx 1.43\\times10^{-27}
 
         """
         nameDict = util.convertName(self.IonStr)
@@ -466,15 +466,15 @@ class continuum(ionTrails):
         .. math::
            G_{fb}^{Z,z} = \\frac{E_H}{k_BT}\\mathrm{Ab}(Z)\\frac{N(Z,z)}{N(Z)}f(Z,z,n)
 
-        where :math:`E_H` is the ground-state potential of H, :math:`\mathrm{Ab}(Z)` is the
+        where :math:`E_H` is the ground-state potential of H, :math:`\\mathrm{Ab}(Z)` is the
         elemental abundance, :math:`\\frac{N(Z,z)}{N(Z)}` is the fractional ionization, and
         :math:`f(Z,z,n)` is given by Eq. 10 and is approximated by Eq 16 as,
 
         .. math::
-           f(Z,z,n) \\approx f_2(Z,z,n_0) = 0.9\\frac{\zeta_0z_0^4}{n_0^5}\exp{\left(\\frac{E_Hz_0^2}{n_0^2k_BT}\\right)} + 0.42\\frac{z^4}{n_0^{3/2}}\exp{\left(\\frac{E_Hz^2}{(n_0 + 1)^2k_BT}\\right)}
+           f(Z,z,n) \\approx f_2(Z,z,n_0) = 0.9\\frac{\\zeta_0z_0^4}{n_0^5}\\exp{\\left(\\frac{E_Hz_0^2}{n_0^2k_BT}\\right)} + 0.42\\frac{z^4}{n_0^{3/2}}\\exp{\\left(\\frac{E_Hz^2}{(n_0 + 1)^2k_BT}\\right)}
 
         where :math:`n_0` is the principal quantum number, :math:`z_0` is the effective charge (see Eq. 7 of [106]_),
-        and :math:`\zeta_0` is the number of vacancies in the 0th shell and is given in Table 1 of [106]_.
+        and :math:`\\zeta_0` is the number of vacancies in the 0th shell and is given in Table 1 of [106]_.
         Here it is calculated in the same manner as in `fb_rad_loss.pro <http://www.chiantidatabase.org/idl/continuum/fb_rad_loss.pro>`_
         of the CHIANTI IDL library. Note that in the expression for :math:`G_{fb}`, we have not included
         the :math:`N_H/n_e` factor.
@@ -623,15 +623,15 @@ class continuum(ionTrails):
 
         nTemp = temperature.size
         # constants for free bound
-        # K_1 = 1.726 \times 10^{-28} = \frac{2^4 h e^2 }{3 \sqrt 3 m_e c}
+        # K_1 = 1.726 \times 10^{-28} = \frac{2^4 h e^2 }{3 \\sqrt 3 m_e c}
         K1 = 2.**4*const.planck*const.q**2/(3.*np.sqrt(3.)*const.emass*const.light)
         # K_2 = 6.107 \times 10^5 = \frac{1}{ 2 m_e c^2 }
         K2 = 1./(2.*const.emass*const.light**2)
 
-        #  \frac{1}{h c} (\frac{1}{2 m_e})^{1/2} (\frac{1}{\pi k})^{3/2}
+        #  \frac{1}{h c} (\frac{1}{2 m_e})^{1/2} (\frac{1}{\\pi k})^{3/2}
         # K3 = (1./(const.planck*const.light))*(1./(np.sqrt(2.*const.emass)))*(1./(np.pi*const.boltzmann)**1.5)
         # K0 = 1.e-8*K1*K2*K3
-#        K_4 = \frac{1}{\pi} (\frac{1}{2 \pi m_e k})^{1/2}
+#        K_4 = \frac{1}{\\pi} (\frac{1}{2 \\pi m_e k})^{1/2}
         K4 = (1./np.pi)*(1./(np.sqrt(2.*np.pi*const.emass*const.boltzmann)))
 
         fbLoss = np.zeros((nTemp),np.float64)
@@ -699,7 +699,7 @@ class continuum(ionTrails):
     def freeBoundRate(self, verner=True, verbose=False):
         """
         Calculates the free-bound (radiative recombination) rate of an ion.
-        Provides emissivity in units of ergs :math:`\mathrm{cm}^{-2}` :math:`\mathrm{s}^{-1}` :math:`\mathrm{str}^{-1}` :math:`\mathrm{\AA}^{-1}` for an individual ion.  If includeAbund is set,
+        Provides emissivity in units of ergs :math:`\\mathrm{cm}^{-2}` :math:`\\mathrm{s}^{-1}` :math:`\\mathrm{str}^{-1}` :math:`\\mathrm{\\AA}^{-1}` for an individual ion.  If includeAbund is set,
         the abundance is included.  If includeIoneq is set, the ionization equililibrium for the given
         ion is included
         This method is only for the purposes of testing.
@@ -731,7 +731,7 @@ class continuum(ionTrails):
         ylabel = self.Labels['rateYlabel']
 
 #        if np.array_equal(self.Em, np.ones_like(self.Em)):
-#            ylabel += '($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
+#            ylabel += '($\\int\\,$ N$_e\\,$N$_H\\,$d${\\it l}$)$^{-1}$'
 
 
         #
@@ -822,12 +822,12 @@ class continuum(ionTrails):
             ratg[ilvl] = float(multr[ilvl])/float(mult[0]) # ratio of statistical weights
 
         # constants for free bound
-        # K_1 = 1.726 \times 10^{-28} = \frac{2^4 h e^2 }{3 \sqrt 3 m_e c}
+        # K_1 = 1.726 \times 10^{-28} = \frac{2^4 h e^2 }{3 \\sqrt 3 m_e c}
         K1 = 2.**4*const.planck*const.q**2/(3.*np.sqrt(3.)*const.emass*const.light)
         # K_2 = 6.107 \times 10^5 = \frac{1}{ 2 m_e c^2 }
         K2 = 1./(2.*const.emass*const.light**2)
 
-        #  \frac{1}{h c} (\frac{1}{2 m_e})^{1/2} (\frac{1}{\pi k})^{3/2}
+        #  \frac{1}{h c} (\frac{1}{2 m_e})^{1/2} (\frac{1}{\\pi k})^{3/2}
 #        K3 = (1./(const.planck*const.light))*(1./(np.sqrt(2.*const.emass)))*(
 #            1./(np.pi*const.boltzmann)**1.5)
         K5 = np.sqrt(8./(np.pi*const.emass*const.boltzmann))
@@ -955,8 +955,8 @@ class continuum(ionTrails):
     def freeBound(self, wvl, includeAbund = True, includeIoneq = True, verner=True, verbose=False):
         """
         Calculates the free-bound (radiative recombination) continuum emissivity of an ion.
-        Provides emissivity in units of ergs :math:`\mathrm{cm}^{-2}` :math:`\mathrm{s}^{-1}` \
-            :math:`\mathrm{str}^{-1}` :math:`\mathrm{\u212B}^{-1}` for an individual ion.
+        Provides emissivity in units of ergs :math:`\\mathrm{cm}^{-2}` :math:`\\mathrm{s}^{-1}` \
+            :math:`\\mathrm{str}^{-1}` :math:`\\mathrm{\u212B}^{-1}` for an individual ion.
         If includeAbund is set,
         the abundance is included.  If includeIoneq is set, the ionization equililibrium for the given
         ion is included
@@ -992,7 +992,7 @@ class continuum(ionTrails):
         ylabel = self.Labels['spectrumYlabel']
 
         if np.array_equal(self.Em, np.ones_like(self.Em)):
-            ylabel += '($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
+            ylabel += '($\\int\\,$ N$_e\\,$N$_H\\,$d${\\it l}$)$^{-1}$'
 
         if includeAbund:
             abund = self.Abundance
@@ -1079,12 +1079,12 @@ class continuum(ionTrails):
         hnuEv = const.ev2Ang/wvl
 
         # constants for free bound
-        # K_1 = 1.726 \times 10^{-28} = \frac{2^4 h e^2 }{3 \sqrt 3 m_e c}
+        # K_1 = 1.726 \times 10^{-28} = \frac{2^4 h e^2 }{3 \\sqrt 3 m_e c}
         K1 = 2.**4*const.planck*const.q**2/(3.*np.sqrt(3.)*const.emass*const.light)
         # K_2 = 6.107 \times 10^5 = \frac{1}{ 2 m_e c^2 }
         K2 = 1./(2.*const.emass*const.light**2)
 
-        #  \frac{1}{h c} (\frac{1}{2 m_e})^{1/2} (\frac{1}{\pi k})^{3/2}
+        #  \frac{1}{h c} (\frac{1}{2 m_e})^{1/2} (\frac{1}{\\pi k})^{3/2}
         K3 = (1./(const.planck*const.light))*(1./(np.sqrt(2.*const.emass)))*(1./(np.pi*const.boltzmann)**1.5)
         K0 = 1.e-8*K1*K2*K3
 
@@ -1176,15 +1176,15 @@ class continuum(ionTrails):
         Calculates the photoionization cross-section using data from [102]_ for
         transitions to the ground state.
 
-        The photoionization cross-section can be expressed as :math:`\sigma_i^{fb}=F(E/E_0)` where
+        The photoionization cross-section can be expressed as :math:`\\sigma_i^{fb}=F(E/E_0)` where
         :math:`F` is an analytic fitting formula given by Eq. 1 of [102]_,
 
         .. math::
-           F(y) = ((y-1)^2 + y_w^2)y^{-Q}(1 + \sqrt{y/y_a})^{-P},
+           F(y) = ((y-1)^2 + y_w^2)y^{-Q}(1 + \\sqrt{y/y_a})^{-P},
 
         where :math:`E` is the photon energy, :math:`n` is the principal quantum number,
         :math:`l` is the orbital quantum number, :math:`Q = 5.5 + l - 0.5P`, and
-        :math:`\sigma_0,E_0,y_w,y_a,P` are fitting paramters. These can be read in using
+        :math:`\\sigma_0,E_0,y_w,y_a,P` are fitting paramters. These can be read in using
         `ChiantiPy.tools.io.vernerRead`.
 
         Parameters:

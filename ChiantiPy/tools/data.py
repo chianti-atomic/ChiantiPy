@@ -4,9 +4,9 @@ Module for collecting various top-level Chianti data
 Descriptions for `keywordArgs`:
 
 - `temperature` : temperature (in K)
-- `eDensity` : electron density (in :math:`\mathrm{cm}^{-3}`)
-- `hDensity` : hydrogen density (in :math:`\mathrm{cm}^{-3}`)
-- `pDensity` : proton density (in :math:`\mathrm{cm}^{-3}`)
+- `eDensity` : electron density (in :math:r`\\mathrm{cm}^{-3}`)
+- `hDensity` : hydrogen density (in :math:r`\\mathrm{cm}^{-3}`)
+- `pDensity` : proton density (in :math:r`\\mathrm{cm}^{-3}`)
 - `radTemperature` : radiation temperature of central source (in K)
 - `rStar` : distance of the plasma from the source (in units of the source's radius)
 - `distance` : distance from the central source

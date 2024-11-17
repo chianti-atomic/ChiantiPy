@@ -37,9 +37,9 @@ class ion(ioneqOne, ionTrails, specTrails):
     temperature : `float` , `tuple`, `list`, `~numpy.ndarray`, optional
         Temperature array (Kelvin)
     eDensity : `float` , `tuple`, `list`, or `~numpy.ndarray`, optional
-        Electron density array (:math:`\mathrm{cm^{-3}}` )
+        Electron density array (:math:r`\\mathrm{cm^{-3}}` )
     pDensity : `float`, `tuple`, `list` or `~numpy.ndarray`, optional
-        Proton density (:math:`\mathrm{cm}^{-3}` )
+        Proton density (:math:r`\\mathrm{cm}^{-3}` )
     radTemperature : `float` or `~numpy.ndarray`, optional
         Radiation black-body temperature (in Kelvin)
     rStar : `float` or `~numpy.ndarray`, optional
@@ -52,9 +52,9 @@ class ion(ioneqOne, ionTrails, specTrails):
         attributes of the selected ion
     em : `float` or `~numpy.ndarray`, optional
         Emission Measure, for the line-of-sight emission measure
-        (:math:`\mathrm{\int \, n_e \, n_H \, dl}`)
-        (:math:`\mathrm{cm}^{-5}`.), for the volumetric emission measure
-        :math:`\mathrm{\int \, n_e \, n_H \, dV}` (:math:`\mathrm{cm^{-3}}`).
+        (:math:r`\\mathrm{\\int \\, n_e \\, n_H \\, dl}`)
+        (:math:r`\\mathrm{cm}^{-5}`.), for the volumetric emission measure
+        :math:r`\\mathrm{\\int \\, n_e \\, n_H \\, dV}` (:math:r`\\mathrm{cm^{-3}}`).
 
     Attributes
     ----------
@@ -1109,7 +1109,7 @@ class ion(ioneqOne, ionTrails, specTrails):
 
         # unicode character for angstrom is \u212B
 #        if self.Em.max() == 1.:
-#            ylabel = 'erg cm$^{-2}$ s$^{-1}$ sr$^{-1}$ \u212B$^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
+#            ylabel = 'erg cm$^{-2}$ s$^{-1}$ sr$^{-1}$ \u212B$^{-1}$ ($\\int\\,$ N$_e\\,$N$_H\\,$d${\\it l}$)$^{-1}$'
 #        else:
 #            ylabel = 'erg cm$^{-2}$ s$^{-1}$ sr$^{-1}$ \u212B$^{-1}$'
 
@@ -1117,7 +1117,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         ylabel = self.Labels['spectrumYlabel']
 
         if np.array_equal(self.Em, np.ones_like(self.Em)):
-            ylabel += '($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
+            ylabel += '($\\int\\,$ N$_e\\,$N$_H\\,$d${\\it l}$)$^{-1}$'
 
 #        if self.Defaults['wavelength'] == 'angstrom':
 #            xlabel = 'Wavelength (\u212B)'
@@ -1191,9 +1191,9 @@ class ion(ioneqOne, ionTrails, specTrails):
             protonDensity = self.PDensity
             print(' proton density not specified, set to \"default\" ')
         #
-        if hasattr(self, 'RadTemperature') and hasattr(self, 'RStar'):
-            radTemperature = self.RadTemperature
-            rStar = self.RStar
+#        if hasattr(self, 'RadTemperature') and hasattr(self, 'RStar'):
+#            radTemperature = self.RadTemperature
+#            rStar = self.RStar
         rec = 0
         ci = 0
         if self.Nrrlvl or self.Nauto:
@@ -1208,7 +1208,7 @@ class ion(ioneqOne, ionTrails, specTrails):
                 rrlvlRate = self.RrlvlRate
             else:
                 self.rrlvlDescale('rrlvl')
-                rrlvlRate = self.RrlvlRate
+#                rrlvlRate = self.RrlvlRate
             rrLvlIdx =[i for i,lvl1 in enumerate(self.Rrlvl['lvl1']) if lvl1 == 1]
             self.RrLvlIdx = rrLvlIdx
         temperature = self.Temperature
@@ -1270,7 +1270,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             pdexRate = self.PUpsilon['dexRate']
 
 
-        temp = self.Temperature
+#        temp = self.Temperature
         ntemp = self.Ntemp
         eDensity = self.EDensity
         ndens = self.Ndens
@@ -1838,8 +1838,8 @@ class ion(ioneqOne, ionTrails, specTrails):
         ntemp = self.Ntemp
         #
         if ndens == 1 and ntemp == 1:
-            dstr = ' -  Density = %10.2e (cm$^{-3}$)' %(eDensity)
-            tstr = ' -  T = %10.2e (K)' %(temperature)
+#            dstr = ' -  Density = %10.2e (cm$^{-3}$)' %(eDensity)
+#            tstr = ' -  T = %10.2e (K)' %(temperature)
             index = 0
         elif ndens == 1 and ntemp > 1:
             if index is None:
@@ -2362,7 +2362,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         ylabel = self.Labels['intensityYlabel']
 
         if np.array_equal(self.Em, np.ones_like(self.Em)):
-            ylabel += '($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
+            ylabel += '($\\int\\,$ N$_e\\,$N$_H\\,$d${\\it l}$)$^{-1}$'
 
         if hasattr(self, 'Abundance'):
             ab = self.Abundance
@@ -2422,11 +2422,11 @@ class ion(ioneqOne, ionTrails, specTrails):
 
         BoundBoundLoss : `dict` with the keys below.
 
-            *rate* : the radiative loss rate (:math:`\mathrm{erg \, cm^{-3}} \, \mathrm{s}^{-1}`) per unit emission measure.
+            *rate* : the radiative loss rate (:math:r`\\mathrm{erg \\, cm^{-3}} \\, \\mathrm{s}^{-1}`) per unit emission measure.
 
             *temperature* : (K).
 
-            *eDensity* : electron density (:math:`\mathrm{cm^{-3}}`)
+            *eDensity* : electron density (:math:r`\\mathrm{cm^{-3}}`)
 
 
         """
@@ -2509,7 +2509,7 @@ class ion(ioneqOne, ionTrails, specTrails):
 
             *data* : input intensities ratio (no units)
 
-            *value* : electron density (:math:`\mathrm{cm^{-3}}`)
+            *value* : electron density (:math:r`\\mathrm{cm^{-3}}`)
 
 
         Examples
@@ -2819,7 +2819,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         ylabel = self.Labels['emissYlabel']
 
         if np.array_equal(self.Em, np.ones_like(self.Em)):
-            ylabel += '($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
+            ylabel += r'($\\int\\,$ N$_e\\,$N$_H\\,$d${\\it l}$)$^{-1}$'
 
         wvl = np.array(wvl, np.float64)
         nWvl = wvl.size
@@ -2837,13 +2837,14 @@ class ion(ioneqOne, ionTrails, specTrails):
                 nTempDens = max(self.Temperature.size, self.EDensity.size)
             if nTempDens > 1:
                 emiss = np.zeros((nTempDens, nWvl), np.float64)
-                if self.EDensity.size == 1:
-                    eDensity = np.repeat(self.EDensity, nTempDens)
-                else:
-                    eDensity = self.EDensity
+#                if self.EDensity.size == 1:
+#                    eDensity = np.repeat(self.EDensity, nTempDens)
+#                else:
+#                    pass
+#                    eDensity = self.EDensity
             else:
                 emiss = np.zeros(nWvl, np.float64)
-                eDensity = self.EDensity
+#                eDensity = self.EDensity
             if self.Z == self.Ion:
                 # H seq
                 l1 = 1-1
@@ -2907,7 +2908,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         ylabel = self.Labels['spectrumYlabel']
 
         if np.array_equal(self.Em, np.ones_like(self.Em)):
-            ylabel += '($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
+            ylabel += r'($\\int\\,$ N$_e\\,$N$_H\\,$d${\\it l}$)$^{-1}$'
 
         wvl = np.array(wvl, np.float64)
         #

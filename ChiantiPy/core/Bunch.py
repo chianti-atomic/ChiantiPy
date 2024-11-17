@@ -67,7 +67,7 @@ class bunch(ionTrails, specTrails):
         the temperature(s) in K
 
     eDensity: float, ndarray
-        eDensity: electron density in :math:`\mathrm{cm^{-3}}`
+        eDensity: electron density in :math:`\\mathrm{cm^{-3}}`
 
     wvlRange:  2 element `list` or `ndarray`
         wvlRange:  range of wavelengths to consider, generally in angstroms
@@ -159,7 +159,7 @@ class bunch(ionTrails, specTrails):
         ylabel = self.Labels['intensityYlabel']
 
         if np.array_equal(self.Em, np.ones_like(self.Em)):
-            ylabel += '($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
+            ylabel += r'($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
 
 #        nonzed = abundAll > 0.
 #        minAbundAll = abundAll[nonzed].min()
@@ -256,7 +256,7 @@ class bunch(ionTrails, specTrails):
 
         # unicode character for angstrom is \u212B
         if self.Em.max() == 1.:
-            ylabel = self.Labels['spectrumYlabel'] + ' ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
+            ylabel = self.Labels['spectrumYlabel'] + r' ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
         else:
             ylabel = self.Labels['spectrumYlabel']
 

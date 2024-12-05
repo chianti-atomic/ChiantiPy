@@ -32,13 +32,18 @@ export XUVTOP=$HOME/MY_CHIANTI_DIRECTORY
 ```
 should point to the top directory of your CHIANTI distribution
 
-Finally, clone and install the source from GitHub,
+The release is also available on [PyPI](https://pypi.org/project/ChiantiPy/)
+
+```Shell
+$ python3 -m pip install ChiantiPy
+```
+
+Or, clone and install the source from GitHub,
 ```Shell
 $ git clone --recursive https://github.com/chianti-atomic/ChiantiPy.git
 $ cd ChiantiPy
 $ python setup.py install
 ```
-The release is also available on [PyPI](https://pypi.org/project/ChiantiPy/)
 
 ## Usage
 As a quick example, we'll calculate the populations of the top 10 levels of Fe XIV as a function of temperature at constant density and plot them:

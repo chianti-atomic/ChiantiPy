@@ -164,7 +164,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         else:
             if verbose and (self.IonStr not in chdata.MasterList):
                 print(' ion %s not in masterlist, just various attributes, ionization, recombination rates'%(self.IonStr))
-            if np.any(temperature) is not None:
+            if temperature is not None:
                 self.Temperature = np.atleast_1d(temperature)
                 self.Ntemp = self.Temperature.size
                 self.IoneqAll = chdata.IoneqAll

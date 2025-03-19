@@ -152,8 +152,6 @@ def voigt(wvl, wvl0, factor = (None, None)):
         Wavelength the filter is centered on.
     factor: array-type
         contains the following 3 parameters
-    dispersion:  float or `~numpy.ndarray`
-        need to create a normalized voigt profile default is 1.0
     sigma:  `~numpy.ndarray` of same shape as wvl, default value is 2.e-4
         the gaussian width of the gaussian component
     gamma:  `~numpy.ndarray` of the same shape as wvl, default value is 5.e-4

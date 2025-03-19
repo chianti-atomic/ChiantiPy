@@ -711,6 +711,9 @@ class ion(ioneqOne, ionTrails, specTrails):
     def rrRate(self):
         """
         Provide the radiative recombination rate coefficient as a function of temperature (K).
+
+        scales the rates in the Rrlvl attribute and creates the
+        RrlvlRate attribute containing the level resolved rates
         """
         if hasattr(self, 'Temperature'):
             temperature = self.Temperature

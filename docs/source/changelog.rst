@@ -2,6 +2,13 @@
 Changelog
 ===========
 
+Changes from 0.15.1 to 0.15.2
+=============================
+
+Ioneq.ioneqMake is a new function for calculating the low-density ionization equilibrium for a specified set of temperatures. It is describe in the updated documentation.
+
+The util.filters.voigt function now uses the Scipy voigt function.
+
 Changes from 0.15.0 to 0.15.1
 =============================
 

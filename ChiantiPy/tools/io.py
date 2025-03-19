@@ -39,9 +39,10 @@ def abundanceRead(abundancename=None, verbose=False):
     xuvtop = os.environ["XUVTOP"]
     abundDir = os.path.join(xuvtop,'abundance')
     abundList = os.listdir(abundDir)
-    if abundancename:
-        if os.path.isfile(abundancename):
-            abundanceFileName = abundancename
+    fullAbundancename = os.path.join(abundDir,  abundancename)
+    if abundancename is not None:
+        if os.path.isfile(fullAbundancename):
+            abundanceFileName = fullAbundancename
             # a specific abundance file name has been specified
         else:
             cnt = abundancename.count('.abund')
@@ -1431,6 +1432,9 @@ def ioneqRead(ioneqName='', minIoneq=1.e-20, verbose=False):
     {'ioneqname','ioneqAll','ioneqTemperature','ioneqRef'} : `dict`
         Ionization equilibrium values and the reference to the literature
     """
+
+    if '.ioneq' in ioneqName:
+        ioneqName = ioneqName.replace('.ioneq',  '')
     dir = os.environ["XUVTOP"]
     ioneqdir = os.path.join(dir,'ioneq')
     ioneqInfo = util.findFileTypes(ioneqdir, type = '*.ioneq')

@@ -329,7 +329,7 @@ This is pretty crowded and we are only interested in Fe XIV (fe_14), so
 ::
 
   plt.figure()
-  fe.plot(stages=[13,14,15],tRange=[1.e+6, 6.e+6], yr = [1.e-2, 0.4])
+  fe.plot(stages=[13, 14, 15], tRange=[1.e+6, 6.e+6], yr = [1.e-2, 0.4])
   plt.tight_layout()
 
 produces a plot of the ionization equilibria of Fe XIII, XIV and XV over a limited temperature range (tRange) and vertical range (yr)
@@ -337,6 +337,36 @@ produces a plot of the ionization equilibria of Fe XIII, XIV and XV over a limit
 .. image::  _static/fe_13_14_15_ioneq.png
 
 from this it is clear that Fe XIV (fe_14) is formed at temperatures near :math:`2 \times 10^6` K
+
+
+Calculating a New Ionization Equilibrium
+----------------------------------------
+
+The ionization equilibrium file in the CHIANTI distribution (chianti.ioneq) is calculated in the low-density limit for 121 temperatures between 1.e+4 and 1.e+9 K.  For example, if you are interested in temperatures below :math:`10^4` K, it is possible to use the ioneqMake functions.
+
+::
+
+  temp = np.logspace(3.5, , 5.0, 16)
+  filename = 'my.ioneq'
+  directory = os.path.join(os.environ[$XUVTOP], 'ioneq')
+  reference = ['myself', '2025']
+  ch.Ioneq.ioneqMake(temperature = temp, filename = filename, directory = directory, reference = reference)
+
+places a new ionization equilibrium file ( my.ioneq ) is placed in the standard CHIANTI directory for ionization equilibrium.  The only required keyword argument is the filename.  If the directory is not specified, the new ioneq file is placed in your home directory.  This calculates the ionization equilibrium for all ions from H through Zn.
+
+So, with the new ioneq file, it can be plotted as just above:
+
+::
+
+  plt.figure()
+  fe = ch.ioneq(6)
+  fe.load('my.ioneq')
+  fe.plot(tRange = [3.e+3, 1.e+5])
+
+yielding:
+
+.. image::  _static/myioneq.png
+
 
 Intensity Ratios
 ----------------

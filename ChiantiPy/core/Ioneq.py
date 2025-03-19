@@ -209,8 +209,8 @@ class ioneq(object):
                 ioneq[:, it] = ioneq[:, it]/ionsum
             self.Ioneq = ioneq
 
-    def plot(self, stages=0, tRange=0, yr=0, oplot=False, label=1, title=1,  bw=False, semilogx=0,
-        heightAdjust = 1.3,  verbose=False):
+    def plot(self, stages = None, tRange = None, yr = None, oplot=False, label=True, title=True,  bw=False, \
+        semilogx = False, heightAdjust = 0.7,  verbose = False):
         '''
         Plots the ionization equilibria.
 
@@ -219,7 +219,7 @@ class ioneq(object):
         tRange = temperature range, yr = ion fraction range
 
         for overplotting:
-        oplot="ioneqfilename" such as 'mazzotta'
+        oplot = "ioneqfilename" such as 'mazzotta'
         or if oplot=True or oplot=1 and a widget will come up so that a file can be selected.
         bw, if True, the plot is made in black and white
         '''
@@ -241,6 +241,17 @@ class ioneq(object):
             print(' must first load or calculate and ionization equilibrium')
             return
 
+        if stages is None:
+            stages = range(1, self.Z + 2)
+        elif min(stages) < 1 or max(stages) > self.Z+1:
+            stages = range(1, self.Z + 2)  #  spectroscopic notation
+
+        if tRange is None:
+            tRange = [self.Temperature.min(), self.Temperature.max()]
+
+        if yr is None:
+            yr = [0.01, 1.1]
+
         if bw:
             linestyle = ['k-','k--', 'k-.', 'k:']
 #            plt.rcParams['font.size'] = 16.
@@ -252,14 +263,6 @@ class ioneq(object):
             fs = 14
             lw = 2
         #
-        if not stages:
-            stages = range(1, self.Z+2)
-        elif min(stages) < 1 or max(stages) > self.Z+1:
-            stages = range(1, self.Z+2)  #  spectroscopic notation
-        if not tRange:
-            tRange = [self.Temperature.min(), self.Temperature.max()]
-        if not yr:
-            yr = [0.01, 1.1]
         xyr = list(tRange)
         xyr.extend(list(yr))
         #
@@ -268,6 +271,7 @@ class ioneq(object):
             plt.semilogx(self.Temperature, ioneq[iz-1], linestyle[0], lw=lw)
         else:
             plt.loglog(self.Temperature, ioneq[iz-1], linestyle[0], lw=lw)
+
         if label:
             idx = self.Ioneq[iz-1] == self.Ioneq[iz-1].max()
             if idx.sum() > 1:
@@ -276,6 +280,7 @@ class ioneq(object):
             ann = const.Ionstage[iz-1]
             plt.annotate(ann, [self.Temperature[idx], heightAdjust*ioneq[iz-1, idx]], ha='center',
                 fontsize=fs)
+
         for iz in stages[1:]:
             if semilogx:
                 plt.semilogx(self.Temperature, ioneq[iz-1], linestyle[0], lw=lw)
@@ -287,11 +292,19 @@ class ioneq(object):
                     jdx = np.arange(len(idx))
                     idx = int(jdx[idx].mean())
                 ann = const.Ionstage[iz-1]
-                plt.annotate(ann, [self.Temperature[idx], heightAdjust*ioneq[iz-1, idx]], ha='center',
+
+                tst1 = self.Temperature[idx] > tRange[0]
+                tst2 = self.Temperature[idx] < tRange[1]
+                tst = np.logical_and(tst1,  tst2)
+                if tst:
+                    plt.annotate(ann, [self.Temperature[idx], heightAdjust*ioneq[iz-1, idx]], ha='center',
                     fontsize=fs)
+#                    print('iz:  %i  T: %8.2e %3.1f'%(iz, self.Temperature[idx], ioneq[iz-1, idx]))
+
         plt.xlabel('Temperature (K)',  fontsize=fs)
         plt.ylabel('Ion Fraction',  fontsize=fs)
-        atitle = 'Chianti Ionization Equilibrium for '+const.El[self.Z-1].capitalize()
+        aname = self.IoneqName.replace('.ioneq',  '')
+        atitle = '%s Ionization Equilibrium for '%(aname)+const.El[self.Z-1].capitalize()
         #
         if oplot:
             if isinstance(oplot,int):

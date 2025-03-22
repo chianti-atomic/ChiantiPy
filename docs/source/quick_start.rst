@@ -145,6 +145,55 @@ Classes and function of ChiantiPy start with lower case letters.  Data/attribute
   fe14.spectrum() creates fe14.Spectrum contain the line and continuum spectrum information
 
 
+Attributes of an ion
+--------------------
+
+It is possible to find some of the properties of an ion by examining its attributes
+
+::
+
+  fe12 = ch.ion('fe_12', setup = False)
+
+a list of attributes can be found using dir(), but this is kind of messy.  A list is provided below
+
+
+* AbundAll
+* Abundance
+* Defaults
+* Dielectronic
+* FIP
+* FileName
+* GrndLevels
+* HigherName
+* Ion
+* IonStr
+* Ip
+* Iso
+* Labels
+* RStar
+* RadTemperature
+* Spectroscopic
+* Z
+
+::
+
+  print('nuclear charge:  %i'%(fe12.Z))
+
+nuclear charge:  26
+
+::
+
+  print('ionization potential   %6.2f  eV'%(fe12.Ip))
+
+ionization potential   330.79  eV
+
+::
+
+  print('isoelectronic sequence %i, the number of electrons'%(fe12.Iso))
+
+isoelectronic sequence 15, the number of electrons
+
+
 
 Spectral Line Intensities
 -------------------------

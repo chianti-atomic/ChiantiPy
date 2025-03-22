@@ -1493,7 +1493,8 @@ def ioneqRead(ioneqName='', minIoneq=1.e-20, verbose=False):
     for one in s1[nlines+1:]:
         ioneqRef.append(one[:-1])  # gets rid of the \n
     del s1
-    return {'ioneqname':ioneqName,'ioneqAll':ioneqAll,'ioneqTemperature':ioneqTemperature,'ioneqRef':ioneqRef}
+    ioneqname = os.path.split(ioneqFileName)[1]
+    return {'ioneqname':ioneqname,'ioneqAll':ioneqAll,'ioneqTemperature':ioneqTemperature,'ioneqRef':ioneqRef}
 
 
 def ipRead(verbose=False):

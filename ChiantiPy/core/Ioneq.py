@@ -7,8 +7,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-import ChiantiPy.tools.util as util
-import ChiantiPy.tools.io as io
+from ChiantiPy.tools import  util
+from ChiantiPy.tools import  io
 import ChiantiPy.tools.constants as const
 import ChiantiPy.tools.data as chdata
 

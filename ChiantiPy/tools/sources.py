@@ -4,7 +4,7 @@ Blackbody temperature calculations
 
 import numpy as np
 
-import ChiantiPy.tools.constants as const
+from ChiantiPy.tools import constants as const
 
 class blackStar:
     """
@@ -44,7 +44,8 @@ class blackStar:
 
         Notes
         -----
-        This function returns the photon distribution instead of the distribution times the cross-sectional area. Is this correct? Why is the incident photon distribution calculated at all?
+        This function returns the photon distribution instead of the distribution times the
+        cross-sectional area. Is this correct? Why is the incident photon distribution calculated at all?
         """
         print((' distance %10.2e  energy '%(energy)))
         bb = blackbody(self.Temperature, energy)
@@ -54,7 +55,9 @@ class blackStar:
 
 def blackbody(temperature, variable, hnu=1):
     """
-    Calculate the blackbody photon distribution as a function of energy (`hnu` = 1) or as a function of wavelength (`hnu` = 0) in units of  :math:`\mathrm{photons}\,\mathrm{cm}^{-2}\,\mathrm{s}^{-1}\,\mathrm{str}^{-1}\,\mathrm{erg}^{-1}`
+    Calculate the blackbody photon distribution as a function of energy (`hnu` = 1) or\
+    as a function of wavelength (`hnu` = 0) in units of
+    :math:`\mathrm{photons}\,\mathrm{cm}^{-2}\,\mathrm{s}^{-1}\,\mathrm{str}^{-1}\,\mathrm{erg}^{-1}`
 
     Parameters
     ----------
@@ -63,7 +66,8 @@ def blackbody(temperature, variable, hnu=1):
     variable : `~numpy.ndarray`
         Either energy (in erg) or wavelength (in angstrom)
     hnu : `int`
-        If 1, calculate distribution as a function of energy. Otherwise, calculate it as a function of wavelength
+        If 1, calculate distribution as a function of energy. Otherwise, calculate it as
+        a function of wavelength
 
     Returns
     -------

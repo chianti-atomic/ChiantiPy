@@ -6,7 +6,6 @@ import numpy as np
 #import matplotlib as mpl
 import matplotlib.pyplot as plt
 
-
 from ChiantiPy.tools import  util
 from ChiantiPy.tools import  io
 import ChiantiPy.tools.constants as const

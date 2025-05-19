@@ -746,7 +746,8 @@ class ion(ioneqOne, ionTrails, specTrails):
             c = rrparams['params'][7]
             t2 = rrparams['params'][8]
             b += c*np.exp(-t2/temperature)
-            rate = a/(np.sqrt(temperature/t0)*(1.+np.sqrt(temperature/t0))**(1.-b)*(1.+np.sqrt(temperature/t1))**(1.+b))
+            rate = a/(np.sqrt(temperature/t0)*(1. + np.sqrt(temperature/t0))**(1. - b)*(1. +
+                np.sqrt(temperature/t1))**(1. + b))
             self.RrRate={'temperature':temperature, 'rate':rate}
         elif rrparams['rrtype'] == 3:
             a = rrparams['params'][2]

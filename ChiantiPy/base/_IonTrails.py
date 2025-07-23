@@ -78,7 +78,7 @@ class ionTrails(object):
 
     def intensityList(self, index=None, wvlRange=None, wvlRanges=None, top=10, integrated=False,
         relative=0, outFile=0, rightDigits=4):
-        """
+        r"""
         List the line intensities. Checks to see if there is an existing Intensity attribute.
         If it exists, then those values are used.
         Otherwise, the `intensity` method is called.
@@ -104,30 +104,28 @@ class ionTrails(object):
         to 'energy', the intensity is given by,
 
         .. math::
-           I = \\Delta E_{ij}n_jA_{ij}\\mathrm{Ab}\\frac{1}{N_e}
-           \\frac{N(X^{+m})}{N(X)}\\mathrm{EM},
+           I = \Delta E_{ij}n_jA_{ij}\mathrm{Ab}\frac{1}{N_e}\frac{N(X^{+m})}{N(X)}\mathrm{EM},
 
-        in units of ergs cm\\ :sup:`-2` s\\ :sup:`-1` sr \\ :sup:`-1`. If 'flux' is set to 'photon',
+        in units of ergs cm\ :sup:`-2` s\ :sup:`-1` sr \ :sup:`-1`. If 'flux' is set to 'photon',
 
         .. math::
-           I = n_jA_{ij}\\mathrm{Ab}\\frac{1}{N_e}\\frac{N(X^{+m})}{N(X)}
-           \\mathrm{EM},
+           I = n_jA_{ij}\mathrm{Ab}\frac{1}{N_e}\frac{N(X^{+m})}{N(X)}\mathrm{EM},
 
         where,
 
-        - :math:`\\Delta E_{ij}` is the transition energy (ergs)
+        - :math:`\Delta E_{ij}` is the transition energy (ergs)
         - :math:`n_j` is  the fractions of ions in level :math:`j`
         - :math:`A_{ij}` is the Einstein coefficient for spontaneous emission
-          from level :math:`j` to level :math:`i` (in s\\ :sup:`-1`)
-        - :math:`\\mathrm{Ab}` is the abundance of the specified element
+          from level :math:`j` to level :math:`i` (in s\ :sup:`-1`)
+        - :math:`\mathrm{Ab}` is the abundance of the specified element
           relative to hydrogen
-        - :math:`N_e` is the electron density (in cm\\ :sup:`-3`)
+        - :math:`N_e` is the electron density (in cm\ :sup:`-3`)
         - :math:`N(X^{+m})/N(X)` is the fractional ionization of ion as a
           function of temperature
-        - :math:`\\mathrm{EM}` is the emission measure integrated along the
-          line-of-sight, :math:`\\int\\mathrm{d}l\\,N_eN_H` (cm\\ :sup:`-5`) where
+        - :math:`\mathrm{EM}` is the emission measure integrated along the
+          line-of-sight, :math:`\int\mathrm{d}l\,N_eN_H` (cm\ :sup:`-5`) where
           :math:`N_H` is the density of hydrogen (neutral + ionized)
-          (cm\\ :sup:`-3`)
+          (cm\ :sup:`-3`)
 
         Note that if `relative` is set, the line intensity is relative to the
         strongest line and so the output will be unitless.

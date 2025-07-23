@@ -363,7 +363,7 @@ def el2z(els):
 
 
 def qrp(z,u):
-    """
+    r"""
     Calculate :math:`Q_R^{\prime}(Z,u)`, where :math:`u=\epsilon/I` is the impact electron energy in threshold units, from Eq. 2.12 of [4]_.
 
     Parameters

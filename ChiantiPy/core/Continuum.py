@@ -21,7 +21,7 @@ import ChiantiPy.tools.constants as const
 
 
 class continuum(ionTrails):
-    """
+    r"""
     The top level class for continuum calculations. Includes methods for the calculation of the
     free-free and free-bound continua.
 
@@ -38,9 +38,9 @@ class continuum(ionTrails):
         Elemental abundance relative to Hydrogen or name of CHIANTI abundance file,
         without the '.abund' suffix, e.g. 'sun_photospheric_1998_grevesse'.
     em : array-like, optional
-        Line-of-sight emission measure (:math:`\\int\\mathrm{d}l\\,n_en_H`), in units of
-        :math:`\\mathrm{cm}^{-5}`, or the volumetric emission measure (:math:`\\int\\mathrm{d}V\\,n_en_H`)
-        in units of :math:`\\mathrm{cm}^{-3}`.
+        Line-of-sight emission measure (:math:`\int\mathrm{d}l\,n_en_H`), in units of
+        :math:`\mathrm{cm}^{-5}`, or the volumetric emission measure (:math:`\int\mathrm{d}V\,n_en_H`)
+        in units of :math:`\mathrm{cm}^{-3}`.
     verbose : `bool`
         if True, prints additional info to the console
 
@@ -123,21 +123,21 @@ class continuum(ionTrails):
         self.ioneqOne()
 
     def free_free_loss(self,  includeAbund=True, includeIoneq=True, **kwargs):
-        """
+        r"""
         Calculate the free-free energy loss rate of an ion. The result is returned to the
         `free_free_loss` attribute.
 
         The free-free radiative loss rate is given by Eq. 5.15a of [107]_. Writing the numerical
-        constant in terms of the fine structure constant :math:`\\alpha`,
+        constant in terms of the fine structure constant :math:`\alpha`,
 
         .. math::
-           \\frac{dW}{dtdV} = \\frac{4\\alpha^3h^2}{3\\pi^2m_e}\\left(\\frac{2\\pi k_B}{3m_e}\\right)^{1/2}Z^2T^{1/2}\\bar{g}_B
+           \frac{dW}{dtdV} = \frac{4\alpha^3h^2}{3\pi^2m_e}\left(\frac{2\pi k_B}{3m_e}\right)^{1/2}Z^2T^{1/2}\bar{g}_B
 
         where where :math:`Z` is the nuclear charge, :math:`T` is the electron temperature, and
         :math:`\\bar{g}_{B}` is the wavelength-averaged and velocity-averaged Gaunt factor. The
         Gaunt factor is calculated using the methods of [103]_. Note that this expression for the
         loss rate is just the integral over wavelength of Eq. 5.14a of [107]_, the free-free emission, and
-        is expressed in units of erg :math:`\\mathrm{cm}^3\\,\\mathrm{s}^{-1}`.
+        is expressed in units of erg :math:`\mathrm{cm}^3\,\mathrm{s}^{-1}`.
 
         """
         # interpolate wavelength-averaged K&L gaunt factors
@@ -159,7 +159,7 @@ class continuum(ionTrails):
         self.FreeFreeLoss = prefactor*(self.Zion**2)*np.sqrt(self.Temperature)*gaunt_factor
 
     def freeFree(self, wavelength, includeAbund=True, includeIoneq=True, **kwargs):
-        """
+        r"""
         Calculates the free-free emission for a single ion. The result is returned as a dict to
         the `FreeFree` attribute.  The dict has the keywords `intensity`, `wvl`, `temperature`, `em`.
 
@@ -168,17 +168,17 @@ class continuum(ionTrails):
         constant in terms of the fine structure constant :math:`\\alpha`,
 
         .. math::
-           \\frac{dW}{dtdVd\\lambda} = \\frac{c}{3m_e}\\left(\\frac{\\alpha h}{\\pi}\\right)^3\\left(\\frac{2\\pi}{3m_ek_B}\\right)^{1/2}\\frac{Z^2}{\\lambda^2T^{1/2}}\\exp{\\left(-\\frac{hc}{\\lambda k_BT}\\right)}\\bar{g}_{ff},
+           \frac{dW}{dtdVd\\lambda} = \frac{c}{3m_e}\left(\frac{\alpha h}{\pi}\right)^3\left(\frac{2\pi}{3m_ek_B}\right)^{1/2}\frac{Z^2}{\lambda^2T^{1/2}}\exp{\left(-\frac{hc}{\lambda k_BT}\right)}\bar{g}_{ff},
 
         where :math:`Z` is the nuclear charge, :math:`T` is the electron temperature in K, and
-        :math:`\\bar{g}_{ff}` is the velocity-averaged Gaunt factor. The Gaunt factor is estimated
+        :math:`\bar{g}_{ff}` is the velocity-averaged Gaunt factor. The Gaunt factor is estimated
         using the methods of [104]_ and [101]_, depending on the temperature and energy regime. See
         `itoh_gaunt_factor` and `sutherland_gaunt_factor` for more details.
 
         The free-free emission is in units of erg
-        :math:`\\mathrm{cm}^3\\mathrm{s}^{-1}\\mathrm{\\mathring{A}}^{-1}\\mathrm{str}^{-1}`. If the emission
-        measure has been set, the units will be multiplied by :math:`\\mathrm{cm}^{-5}` or
-        :math:`\\mathrm{cm}^{-3}`, depending on whether it is the line-of-sight or volumetric
+        :math:`\mathrm{cm}^3\mathrm{s}^{-1}\mathrm{\mathring{A}}^{-1}\mathrm{str}^{-1}`. If the emission
+        measure has been set, the units will be multiplied by :math:`\mathrm{cm}^{-5}` or
+        :math:`\mathrm{cm}^{-3}`, depending on whether it is the line-of-sight or volumetric
         emission measure, respectively.
 
         Parameters

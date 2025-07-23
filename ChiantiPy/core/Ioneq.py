@@ -14,26 +14,23 @@ import ChiantiPy.tools.data as chdata
 from .Ion import ion
 
 def ioneqMake(filename, directory = None, temperature = None,  reference = None, verbose = False):
-    """a function  to create a chianit .ioneq style ionization equilibrium
+    """
+    A function to create a chianti .ioneq style ionization equilibrium
+
     Parameters
     ----------
-
     filename:  `str`
         the name of the file to be created - should end in .ioneq
-
     directory: `str`
         the directory where the file will be placed.  If it is None, the the file
         will be placed in the uses home directory.
-
     temperature:  `array-like`
         the temperatures at which the ionization equilibrium will be calculated
         the default value is None and the temperature will be 101 values exponentially
         spaced between 10^4 and 10^9 K
-
     reference:  `list` of `str`
         a list of references to be added to tail of file.
         such as ['file created by me', 'today']
-
     verbose:  `bool`
         if True, prints out information, the default is False
     """

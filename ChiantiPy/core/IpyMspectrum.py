@@ -101,7 +101,7 @@ class ipymspectrum(ionTrails, specTrails):
         ylabel = self.Labels['spectrumYlabel']
 
         if np.array_equal(self.Em, np.ones_like(self.Em)):
-            ylabel += '($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
+            ylabel += r'($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
         #
         self.AllLines = allLines
         #

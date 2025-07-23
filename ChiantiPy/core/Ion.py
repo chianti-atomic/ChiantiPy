@@ -26,7 +26,7 @@ heseqLvl2 = [-1,3,-1,-1,-1,3,6,6,-1,6,6,6,6,6,3,5,3,5,3,5,-1,5,-1,5,-1,5,-1,5,-1
 
 
 class ion(ioneqOne, ionTrails, specTrails):
-    """
+    r"""
     The top level class for performing spectral calculations for an ion in the
     CHIANTI database.
 
@@ -37,9 +37,9 @@ class ion(ioneqOne, ionTrails, specTrails):
     temperature : `float` , `tuple`, `list`, `~numpy.ndarray`, optional
         Temperature array (Kelvin)
     eDensity : `float` , `tuple`, `list`, or `~numpy.ndarray`, optional
-        Electron density array (:math:r`\\mathrm{cm^{-3}}` )
+        Electron density array (:math:`\mathrm{cm^{-3}}` )
     pDensity : `float`, `tuple`, `list` or `~numpy.ndarray`, optional
-        Proton density (:math:r`\\mathrm{cm}^{-3}` )
+        Proton density (:math:`\mathrm{cm}^{-3}` )
     radTemperature : `float` or `~numpy.ndarray`, optional
         Radiation black-body temperature (in Kelvin)
     rStar : `float` or `~numpy.ndarray`, optional
@@ -52,9 +52,9 @@ class ion(ioneqOne, ionTrails, specTrails):
         attributes of the selected ion
     em : `float` or `~numpy.ndarray`, optional
         Emission Measure, for the line-of-sight emission measure
-        (:math:r`\\mathrm{\\int \\, n_e \\, n_H \\, dl}`)
-        (:math:r`\\mathrm{cm}^{-5}`.), for the volumetric emission measure
-        :math:r`\\mathrm{\\int \\, n_e \\, n_H \\, dV}` (:math:r`\\mathrm{cm^{-3}}`).
+        (:math:`\mathrm{\int \, n_e \, n_H \, dl}`)
+        (:math:`\mathrm{cm}^{-5}`.), for the volumetric emission measure
+        :math:`\mathrm{\int \, n_e \, n_H \, dV}` (:math:`\mathrm{cm^{-3}}`).
 
     Attributes
     ----------

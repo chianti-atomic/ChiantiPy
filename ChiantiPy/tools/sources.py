@@ -54,7 +54,7 @@ class blackStar:
 
 
 def blackbody(temperature, variable, hnu=1):
-    """
+    r"""
     Calculate the blackbody photon distribution as a function of energy (`hnu` = 1) or\
     as a function of wavelength (`hnu` = 0) in units of
     :math:`\mathrm{photons}\,\mathrm{cm}^{-2}\,\mathrm{s}^{-1}\,\mathrm{str}^{-1}\,\mathrm{erg}^{-1}`

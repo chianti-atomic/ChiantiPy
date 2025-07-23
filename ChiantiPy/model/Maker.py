@@ -198,58 +198,35 @@ class maker(ionTrails,  specTrails):
     '''
     a class matching observed lines to lines in the CHIANTI database
 
-
     Parameters
     ----------
-    specData : dict
+    specData : `dict`
         contains the following keys
         intensity - a list of observed line intensities
         wvlObs - a list of observed wavelengths, usually in Angstroms
         dwvl the expected wavelength different between the observed wvl and CHIANTI
-
-    Keyword Arguments
-    -----------------
-
     temperature: `float`, `list`, `ndarray`
         the temperature(s) in K, default is None
-
     eDensity: float, ndarray
         eDensity: electron density in :math:`\\mathrm{cm^{-3}}`, default is None
-
     elementList :  list
         a list of elements, such as fe, to be searched, default = []
-
     ionList :  list
         a list of ions, such as fe_14, to be searched, default = []
-
     allLines : bool
         if true, unobserved lines in CHIANTI are included in the search, default = False
-
     abundanceName : str
         the name of the elemental abundance file to be used, the defaul t is None
         if not set, the default abundance file is used
-
     minAbund : float
         sets the minimum abundance for an element to be included in the search,
         default = 10. to include all elements
-
     verbose : bool
         if True, additional output is sent to the terminal, default is False
-
     '''
+
     def __init__(self, specData, temperature=None, eDensity=None, elementList=[], ionList=[],
         allLines=False, abundanceName = None, minAbund=10., wghtFactor=None,  verbose=False):
-        '''
-        input a list of wavelengths and a wavelength difference
-        find a list of predicted spectral lines for each wavelength
-        all = 0 -> only previously observed wavelengths are used
-        dwvl = wavelength difference between CHIANTI and the observed lines
-            if == 0 then use use that in the observed data
-
-        '''
-        #
-        # --------------------------------------------------------------------------------
-        #
         if temperature is not None:
             self.Temperature = np.array(temperature, np.float64)
         if eDensity is not None:
@@ -314,16 +291,15 @@ class maker(ionTrails,  specTrails):
         #
 
     def makeMatch(self,  verbose=False):
-        """ to match the CHIANTI lines with the input specdata
-        uses ionTrails.ionGate to sort through ions
+        """
+        Match the CHIANTI lines with the input specdata
+    
+        Uses ionTrails.ionGate to sort through ions
 
-
-        Keyword Arguments
-        -----------------
-
+        Parameters
+        ----------
         verbose : `bool`
             if True, additional output is sent to the terminal
-
         """
 
         if 'intensity' in self.SpecData.keys():
@@ -416,20 +392,14 @@ class maker(ionTrails,  specTrails):
         sort can be 'wvl' or 'ion', otherwise, there is no sorting done
         does not require predicted values
 
-
-        Keyword Arguments
-        -----------------
-
-
+        Parameters
+        ----------
         filename:  `str`
             the filename where the text should be output
-
         sort:  `str`, can be `wvl`, `ion`, or None
             whether the output should be sorted by `wvl` or `ion` or not
-
         verbose : `bool`
             if True, additional output is sent to the terminal
-
         '''
 
         minContribution = 0.1
@@ -517,24 +487,20 @@ class maker(ionTrails,  specTrails):
                 outpt.write(dash +'\n')
 
     def argCheck(self, temperature=None, eDensity=None, pDensity='default', verbose=False):
-        ''' to check the compatibility of the three arguments
+        r'''
+        to check the compatibility of the three arguments
         and put them into numpy arrays of atleast_1d
 
-        Keyword Arguments
-        -----------------
-
+        Parameters
+        ----------
         temperature: `float`, `list`, `ndarray`
             the temperature(s) in K
-
         eDensity: float, ndarray
-            eDensity: electron density in :math:`\\mathrm{cm^{-3}}`
-
+            electron density in :math:`\mathrm{cm^{-3}}`
         pDensity: `str`, `float`, `ndarray`
-            pDensity: proton density in :math:`\\mathrm{cm^{-3}}` defaults to 'default'
-
+            proton density in :math:`\mathrm{cm^{-3}}` defaults to 'default'
         verbose : `bool`
             if True, additional output is sent to the terminal
-
         '''
         if temperature is not None:
             self.Temperature = np.atleast_1d(temperature)
@@ -584,20 +550,16 @@ class maker(ionTrails,  specTrails):
         # -----------------------------------------------------------------
         #
     def gofnt(self, temperature, density, verbose=1):
-        '''
+        r'''
         calculate the gofnt function for each of the matched lines
         do each ion only once
 
         Parameters
-        -----------------
-
+        ----------
         temperature: `float`, `list`, `ndarray`
             the temperature(s) in K
-
         density: `float`, `list`, `ndarray`
-            density: electron density in :math:`\\mathrm{cm^{-3}}`
-
-
+            electron density in :math:`\mathrm{cm^{-3}}`
         '''
         t1 = datetime.now()
         self.XUVTOP = os.environ['XUVTOP']
@@ -689,23 +651,15 @@ class maker(ionTrails,  specTrails):
         does each ion only once
 
         Parameters
-        -----------------
-
+        ----------
         temperature: `float`, `list`, `ndarray`
             the temperature(s) in K
-
         density: `float`, `list`, `ndarray`
             density: electron density in :math:`\\mathrm{cm^{-3}}`
-
-        Keyword Arguments
-        -----------------
-
         proc:  `int`
             the number of cores to be used
-
         timeout:  'float'
             may not actually be necessary
-
         verbose : `bool`
             if True, additional output is sent to the terminal
 
@@ -843,23 +797,14 @@ class maker(ionTrails,  specTrails):
         to set the indices of the N temperature/density EM distribution
         can increase the number of paramaters if additional parameters have been used
 
-
         Parameters
         ----------
-
         indices:  `list`, `ndarray`
             the indices of the temperature/density arrays for which a set of intensities will be predicted
-
-
-        Keyword Arguments
-        -----------------
-
         add:  `float`
             to increase the number of parameters used in the calculation of the reduced chi-squared
-
         verbose : `bool`
             if True, additional output is sent to the terminal
-
         '''
         if hasattr(self, 'Temperature'):
             self.EmIndices = np.atleast_1d(indices)
@@ -877,13 +822,10 @@ class maker(ionTrails,  specTrails):
         '''
         sets the EM values for a N temperature EM distribution
 
-
         Parameters
         ----------
-
         value:  `list`, `ndarray`
             the values of the emission measure to be used when the intensities are predicted
-
         '''
         emValue = np.atleast_1d(value)
         if hasattr(self, 'EmIndices') and emValue.size == self.EmIndices.size:
@@ -927,17 +869,12 @@ class maker(ionTrails,  specTrails):
         outName does not need the suffix .em
         reference should be a list of references
 
-
         Parameters
         ----------
-
         filename:  `str`
             the name of the em file to be produced
-
         reference:  `list`
             a list of strings providing a reference at the end of the em file
-
-
         """
         if '.em' not in filename:
             filename += '.em'
@@ -969,44 +906,32 @@ class maker(ionTrails,  specTrails):
         adjust is to provide an adjustment to the position of the labels
         position : one of 'both', 'right', 'left', or 'none'
 
-        Keyword Arguments
-        -----------------
-
+        Parameters
+        ----------
         vs: `str`, either 'T', or 'D'
             whether to plot the emission measure vs temperature or density
-
         loc:  `str`
             matplotlib argument for plt.legend
-
         fs:  `int`
             the fontsize for the legend, default = 10
-
         lw:  `int`
             set the line width of the plot, default = 2
-
         adjust:  `list`
             a list of multiplicative adjustments to the labels to the plot lines
             must be the same length as the number of lines, default = None
-
         position:  `str`
             where the labels to the lines should be placed, `both` for both ends, `left` for the left
             size only, 'right' for the right side only, or None for no labels, default is 'both'
-
         label:  `bool`
             whether to apply, default = True
-
         legend:  `bool`
             whether to include a matplotlib legend, default =True
-
         fontsize:  `int`
             fontsize for the matplotlib xlabel and ylabel, default=16
-
         tscale:  `float`
             scale the temperature by dividing by tscale, default = 1.
-
         verbose : `bool`
             if True, additional output is sent to the terminal, default = True
-
        '''
         match = self.Match
         temp = self.Temperature
@@ -1134,47 +1059,34 @@ class maker(ionTrails,  specTrails):
         this uses the modern object interface fig, ax = plt.subplots(figsize=figsize)
         fig, ax are in returned in the self.EmPlotOjb dict
 
-        Keyword Arguments
-        -----------------
-
+        Parameters
+        ----------
         vs: `str`, either 'T', or 'D'
             whether to plot the emission measure vs temperature or density
-
         loc:  `str`
             matplotlib argument for plt.legend, default = 'upper right'
-
         fs:  `int`
             the fontsize for the legend, default = 10
-
         lw:  `int`
             set the line width of the plot, default = 2
-
         adjust:  `list`
             a list of multiplicative adjustments to the labels to the plot lines
             must be the same length as the number of lines, default = None
-
         position:  `str`
             where the labels to the lines should be placed, `both` for both ends, `left` for the left size only, 'right' for the right side only, or None for no labels, default = 'both'
-
         label:  `bool`
             whether to apply, default = True
-
         legend:  `bool`
             whether to include a matplotlib legend, default = True
-
         fontsize:  `int`
             fontsize for the matplotlib xlabel and ylabel, default = 16
-
         figsize:  two element `list` or `ndarray`
             sets the figure size when using matplotlib subplots to initiate the object style plotting,
             default = [7., 5.]
-
         tscale:  `float`
             scale the temperature by dividing by tscale, default = 1.
-
         verbose : `bool`
             if True, additional output is sent to the terminal, default = True
-
         '''
         match = self.Match
         temp = self.Temperature
@@ -2204,30 +2116,21 @@ class maker(ionTrails,  specTrails):
         #-----------------------------------------------------
         #
     def search1tSpace(self, initialEM, indexLimits=None, logname=None, verbose=False, maxfev=0):
-        '''conduct a brute force search of 2 temperature space and find the
-        best fit
+        '''
+        conduct a brute force search of 2 temperature space and find the best fit
 
         Parameters
         ----------
-
         initialEm:  `float`
             the initial trial value for the log10 emission measure
-
-
-        Keyword Arguments
-        -----------------
-
-       indexLimits:  2 dimensional array type
+        indexLimits:  2 dimensional array type
             the lower an upper limits of the temperature to be searched
             the default is None and them the whole temperature array is searched
-
         logname:  `str`
             the name of the file were the search log is written
             the default is None and no log will be written
-
         verbose:  `bool`
             if True, additional output is sent to the terminal
-
         '''
         self.Nparams = 2. + 1.
 #        if not hasattr(self, 'SearchData'):

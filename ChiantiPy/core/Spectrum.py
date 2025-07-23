@@ -81,49 +81,35 @@ class spectrum(ionTrails, specTrails):
 
     Parameters
     --------------
-
     temperature: `float`, `list`, `ndarray`
         the temperature(s) in K
-
     eDensity: float, ndarray
-        eDensity: electron density in :math:`\\mathrm{cm^{-3}}`
-
+        electron density in :math:`\\mathrm{cm^{-3}}`
     wavelength:  `list` or `ndarray`
-        wavelength:  array of  wavelengths, generally in Angstroms
-
+        array of  wavelengths, generally in Angstroms
     elementList:  `list`
-        elementList:  list of elements to include, such as 'fe', 'ne', 's'
-
+        list of elements to include, such as 'fe', 'ne', 's'
     ionList:  `list`
-        ionList:  list of ions to include, such as 'fe_16', 'ne_10'
-
+        list of ions to include, such as 'fe_16', 'ne_10'
     minAbund:  `float`
-        minAbund:  minimum abundance (relative to H) to include
-
-    doLines:  `bool1
-        doLines: if true, line intensities are calculated
-
+        minimum abundance (relative to H) to include
+    doLines:  `bool`
+        if true, line intensities are calculated
     doContinuum:  `bool`
-        doContinuum:  if true, continuum intensities are calculated only if wavelengths are in angstroms
-
+        if true, continuum intensities are calculated only if wavelengths are in angstroms
     keepIons:  `bool`
-        keepIons:  keep the ion instances used in the calculation
-            should be used with caution otherwise the bunch instance
-            can become quite large
-
+        keep the ion instances used in the calculation
+        should be used with caution otherwise the bunch instance
+        can become quite large
     em:  `float`, `list`, `ndarray`
-        em:  the emission measure
-
+        the emission measure
     abundance:  `str`
-        abuncance:  the file name of the abuncance set to be used
-            must be one in the $XUVTOP/abund directory
-
+        the file name of the abuncance set to be used
+        must be one in the $XUVTOP/abund directory
     allLInes:  `bool`
-        allLines:  whether or not to include unobserved lines
-
+        whether or not to include unobserved lines
     verbose:  `bool`
-        verbose:  whether to allow certain print statements
-
+        whether to allow certain print statements
     '''
     def __init__(self, temperature, eDensity, wavelength, filter=(chfilters.gaussianR, 1000.), label=None,
         elementList = None, ionList = None, minAbund=None, doLines = True, doContinuum = True, em=None, keepIons=0,

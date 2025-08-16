@@ -1,16 +1,28 @@
-version:  2
+version: 2
 
 build:
-  os:  ubuntu-22.04
+  os: ubuntu-lts-latest
   tools:
-    python:  "3.10"
+    python: "mambaforge-latest"
+  jobs:
+    post_checkout:
+      - git fetch --unshallow || true
+    pre_install:
+      - git update-index --assume-unchanged .rtd-environment.yml docs/source/conf.py
+
+conda:
+  environment: .rtd-environment.yml
 
 sphinx:
-  configuration:  docs/source/conf.py
+  builder: html
+  configuration: docs/source/conf.py
+  fail_on_warning: false
+
+formats:
+  - htmlzip
 
 # Optionally declare the Python requirements required to build your docs
 python:
    install:
-   - requirements: docs/requirements.txt
-   - method: pip
-     path: .
+   - requirements: requirements.txt
+   - method: setuptools

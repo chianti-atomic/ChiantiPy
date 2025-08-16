@@ -13,7 +13,7 @@ from ChiantiPy.base import specTrails
 
 
 class bunch(ionTrails, specTrails):
-    '''
+    r'''
     Calculate the emission line spectrum as a function of temperature and density.
 
     'bunch' is very similar to 'spectrum' except that continuum is not calculated and
@@ -67,7 +67,7 @@ class bunch(ionTrails, specTrails):
         the temperature(s) in K
 
     eDensity: float, ndarray
-        eDensity: electron density in :math:`\\mathrm{cm^{-3}}`
+        eDensity: electron density in :math:`\mathrm{cm^{-3}}`
 
     wvlRange:  2 element `list` or `ndarray`
         wvlRange:  range of wavelengths to consider, generally in angstroms

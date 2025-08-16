@@ -16,70 +16,47 @@ import ChiantiPy.tools.mputil as mputil
 
 
 class mradLoss(ionTrails, specTrails):
-    """    Calculate the radiative emission loss rate as a function of temperature and density.
+    r"""
+    Calculate the radiative emission loss rate as a function of temperature and density.
 
-    this is the multiprocessing version of radloss
+    This is the multiprocessing version of radloss. It includes elemental abundances or
+    ionization equilibria. Temperature and density can be arrays but, unless the size of
+    either is one (1), the two must have the same size
 
-    includes elemental abundances or ionization equilibria
-
-    temperature and density can be arrays but, unless the size of either is one (1),
-    the two must have the same size
-
-
-    A selection of ions can be make with ionList containing the names of
-    the desired lines in Chianti notation,
-    i.e. C VI = c_6
-
-    a minimum abundance can be specified so that the calculation can be speeded up by excluding
+    A minimum abundance can be specified so that the calculation can be speeded up by excluding
     elements with a low abundance. With solar photospheric abundances
 
-    setting minAbund = 1.e-4 will include H, He, C, O, Ne
-    setting minAbund = 2.e-5 adds  N, Mg, Si, S, Fe
-    setting minAbund = 1.e-6 adds  Na, Al, Ar, Ca, Ni
-
-    Setting em will multiply the spectrum at each temperature by the value of em.
-
-    em (for emission measure), can be a float or an array of the same length as the
-    temperature/density.
-
-    abundance: to select a particular set of abundances, set abundance to the name of a
-        CHIANTI abundance file, without the '.abund' suffix, e.g. 'sun_photospheric_1998_grevesse'
-        If set to a blank (''), a gui selection menu will popup and allow the
-        selection of an set of abundances
+    - setting minAbund = 1.e-4 will include H, He, C, O, Ne
+    - setting minAbund = 2.e-5 adds  N, Mg, Si, S, Fe
+    - setting minAbund = 1.e-6 adds  Na, Al, Ar, Ca, Ni
 
     Parameters
     --------------
-
     temperature: `float`, `list`, `ndarray`
         the temperature(s) in K
-
     eDensity: float, ndarray
-        eDensity: electron density in :math:`\mathrm{cm^{-3}}`
-
+        electron density in :math:`\mathrm{cm^{-3}}`
     elementList:  `list`
-        elementList:  list of elements to include, such as 'fe', 'ne', 's'
-
+        list of elements to include, such as 'fe', 'ne', 's'
     ionList:  `list`
-        ionList:  list of ions to include, such as 'fe_16', 'ne_10'
-
+        list of ions to include, such as 'fe_16', 'ne_10'
     minAbund:  `float`
-        minAbund:  minimum abundance (relative to H) to include
-
-    doLines:  `bool1
-        doLines: if true, line intensities are calculated
-
+        minimum abundance (relative to H) to include
+    doLines:  `bool`
+        if true, line intensities are calculated
     doContinuum:  `bool`
-        doContinuum:  if true, continuum intensities are calculated only if wavelengths are in angstroms
-
+        if true, continuum intensities are calculated only if wavelengths are in angstroms
     abundance:  `str`
-        abuncance:  the file name of the abuncance set to be used
-            must be one in the $XUVTOP/abund directory
-
+        the file name of the abuncance set to be used
+        must be one in the $XUVTOP/abund directory
+        to select a particular set of abundances, set abundance to the name of a
+        CHIANTI abundance file, without the '.abund' suffix, e.g. 'sun_photospheric_1998_grevesse'
+        If set to a blank (''), a gui selection menu will popup and allow the
+        selection of an set of abundances
     allLInes:  `bool`
-        allLines:  whether or not to include unobserved lines
-
+        whether or not to include unobserved lines
     verbose:  `bool`
-        verbose:  whether to allow certain print statements
+        whether to allow certain print statements
 
     """
     def __init__(self, temperature, eDensity, elementList=None, ionList = None, minAbund=None,

@@ -14,102 +14,68 @@ import ChiantiPy.tools.mputil as mputil
 
 
 class mspectrum(ionTrails, specTrails):
-    ''' this is the multiprocessing version of spectrum
-    set proc to the desired number of processors, default=3
+    r''' 
+    Calculate the emission spectrum as a function of temperature and density in parallel.
 
-    Calculate the emission spectrum as a function of temperature and density.
-
-    temperature and density can be arrays but, unless the size of either is one (1),
-    the two must have the same size
-
-    the returned spectrum will be convolved with a filter of the specified width on the
-    specified wavelength array
-
-    the default filter is gaussianR with a resolving power of 100.  Other filters,
-    such as gaussian, box and lorentz, are available in chianti.filters.  When using the box filter,
-    the width should equal the wavelength interval to keep the units of the continuum and line
-    spectrum the same.
-
-    A selection of elements can be make with elementList a list containing the names of elements
-    that are desired to be included, e.g., ['fe','ni']
-
-    A selection of ions can be make with ionList containing the names of
-    the desired lines in Chianti notation, i.e. C VI = c_6
-
-    Both elementList and ionList can not be specified at the same time
-
-    a minimum abundance can be specified so that the calculation can be speeded up by excluding
+    A minimum abundance can be specified so that the calculation can be speeded up by excluding
     elements with a low abundance. With solar photospheric abundances -
 
-    setting minAbund = 1.e-4 will include H, He, C, O, Ne
-    setting minAbund = 2.e-5 adds  N, Mg, Si, S, Fe
-    setting minAbund = 1.e-6 adds  Na, Al, Ar, Ca, Ni
+    - setting minAbund = 1.e-4 will include H, He, C, O, Ne
+    - setting minAbund = 2.e-5 adds  N, Mg, Si, S, Fe
+    - setting minAbund = 1.e-6 adds  Na, Al, Ar, Ca, Ni
 
-    Setting em will multiply the spectrum at each temperature by the value of em.
-
-    em [for emission measure], can be a float or an array of the same length as the
-    temperature/density.
-
-    allLines = 1 will include lines with either theoretical or observed wavelengths.  allLines=0 will
-    include only those lines with observed wavelengths
-
-    proc, the number of processors to use
-
-    timeout,   a small but non-zero value seems to be necessary
-    keepIons:  set this to keep the ion instances that have been calculated in a dictionary
-    self.IonInstances with the keywords being the CHIANTI-style ion names
-
-    abundance: to select a particular set of abundances, set abundance to the name of a
-    CHIANTI abundance file, without the '.abund' suffix, e.g. 'sun_photospheric_1998_grevesse'
-
-    If set to a blank (''), a gui selection menu will popup and allow the selection of an
-    set of abundances
+    When using the box filter, the width should equal the wavelength interval to keep the units
+    of the continuum and line spectrum the same.
 
     Parameters
     --------------
-
     temperature: `float`, `list`, `ndarray`
-        the temperature(s) in K
-
-    eDensity: float, ndarray
-        eDensity: electron density in :math:`\mathrm{cm^{-3}}`
-
+        the temperature(s) in K. Must have the same size as ``eDensity`` unless it is a scalar.
+    eDensity: `float`, ndarray
+        electron density in :math:`\mathrm{cm^{-3}}`. Must have the same size as
+        ``temperature`` unless it is a scalar.
     wavelength:  `list` or `ndarray`
-        wavelength:  array of  wavelengths, generally in Angstroms
-
+        array of  wavelengths, generally in Angstroms
+    filter: `tuple`
+        The filter to convolve the spectrum with and the resolving power.
+        The returned spectrum will be convolved with a filter of the specified width on the
+        specified wavelength array the default filter is gaussianR with a resolving power of 100.
+        Other filters, such as gaussian, box and lorentz, are available in `ChiantiPy.tools.filters`.
     elementList:  `list`
-        elementList:  list of elements to include, such as 'fe', 'ne', 's'
-
+        list of elements to include, such as 'fe', 'ne', 's'
+        Cannot be specified at the same time as ``ionList``
     ionList:  `list`
-        ionList:  list of ions to include, such as 'fe_16', 'ne_10'
-
+        list of ions to include, such as 'fe_16', 'ne_10'
+        Cannot be specified at the same time as ``elementList``
     minAbund:  `float`
-        minAbund:  minimum abundance (relative to H) to include
-
-    doLines:  `bool1
-        doLines: if true, line intensities are calculated
-
+        minimum abundance (relative to H) to include
+    doLines:  `bool`
+        if true, line intensities are calculated
     doContinuum:  `bool`
-        doContinuum:  if true, continuum intensities are calculated only if wavelengths are in angstroms
-
+        if true, continuum intensities are calculated only if wavelengths are in angstroms
     keepIons:  `bool`
-        keepIons:  keep the ion instances used in the calculation
-            should be used with caution otherwise the bunch instance
-            can become quite large
-
+        keep the ion instances used in the calculation should be used with caution otherwise
+        the bunch instance can become quite large. set this to keep the ion instances that have
+        been calculated in a dictionary self.IonInstances with the keywords being the CHIANTI-style ion names
     em:  `float`, `list`, `ndarray`
-        em:  the emission measure - the integral of the electron density times the hydrogen density
-        along the line of sight
-
+        the emission measure - the integral of the electron density times the hydrogen density
+        along the line of sight. can be a float or an array of the same length as the
+        temperature/density. Setting em will multiply the spectrum at each temperature by the value of em.
     abundance:  `str`
-        abuncance:  the file name of the abuncance set to be used
-            must be one in the $XUVTOP/abund directory
-
+        the file name of the abuncance set to be used; must be one in the $XUVTOP/abund directory
+        to select a particular set of abundances, set abundance to the name of a
+        CHIANTI abundance file, without the '.abund' suffix, e.g. 'sun_photospheric_1998_grevesse'
+        If set to a blank (''), a gui selection menu will popup and allow the selection of an
+        set of abundances
     allLInes:  `bool`
-        allLines:  whether or not to include unobserved lines
-
+        whether or not to include unobserved lines. allLines = 1 will include lines with either
+        theoretical or observed wavelengths.  allLines=0 will include only those lines with observed wavelengths
+    proc: `int`
+        the number of processors to use. Defaults to 3.
     verbose:  `bool`
-        verbose:  whether to allow certain print statements
+        whether to allow certain print statements
+    timeout: `float`
+        A small but non-zero value seems to be necessary
     '''
     def __init__(self, temperature, eDensity, wavelength, filter=(chfilters.gaussianR, 1000.), label=0,
         elementList = None, ionList = None, minAbund=None, keepIons=0, abundance=None,  doLines=True,
@@ -141,7 +107,7 @@ class mspectrum(ionTrails, specTrails):
         ylabel = self.Labels['spectrumYlabel']
 
         if np.array_equal(self.Em, np.ones_like(self.Em)):
-            ylabel += '($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
+            ylabel += r'($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
         #
         #
         self.AllLines = allLines

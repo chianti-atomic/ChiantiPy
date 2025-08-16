@@ -1,0 +1,7 @@
+name: rtd_chiantipy
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - pip
+  - graphviz!=2.42.*,!=2.43.*

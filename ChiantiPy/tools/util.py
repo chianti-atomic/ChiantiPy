@@ -747,10 +747,13 @@ def scale_bt(evin,omega,f,ev1):
     btomega = omega/(np.log(u)-1.+np.exp(1.))
     return [bte,btomega]
 
-def descale_bti_rate(btTemperature, btRate, ip,  f=2.0):
+def descale_bti_rate(inDict, ip,  f=2.0, verbose = False):
     """
-    Apply ionization descaling of [7]_, a Burgess-Tully type scaling to bt scaled ionization rates and
-    temperatures.  The result is to return a temperature array and a ionization rate array.
+    Apply ionization descaling of [7]_, a Burgess-Tully type scaling to bt scaled ionization
+    rates and temperatures.  The result is to return a temperature array and an
+    ionization rate array.
+
+    this function is not actually used by ChiantiPy
 
     Parameters
     ----------
@@ -763,9 +766,24 @@ def descale_bti_rate(btTemperature, btRate, ip,  f=2.0):
     f :  `float` (optional)
         the scaling parameter, 1.7 generally works well
     """
-    temperature = (ip/const.boltzmannEv)*(np.exp(np.log(f/(1.-btTemperature))) - f)
-    rate = (1./np.sqrt(btTemperature))*ip**(-1.5)*exp1(1./btTemperature)*btRate
-    return {'temperature':temperature, 'rate':rate}
+    if verbose:
+        print('temperature min:  %10.2e  max:  %10.2e'%(inDict['temperature'].min(),
+            inDict['temperature'].max()))
+
+    rT = inDict['temperature']*const.boltzmannEv/ip
+    x = 1. - np.log(f)/np.log(rT + f)
+    if verbose:
+        print('rT min:  %10.2e  max:  %10.2e'%(rT.min(),  rT.max()))
+
+    temperature = (ip/const.boltzmannEv) *   (np.exp(np.log(f)   /(1. - x)) - f)
+#   t1          = (ip/chconst.boltzmannEv) * (np.exp(np.log(bt_f)/(1. -  x)) - bt_f)
+    if verbose:
+        print('temperature min:  %10.2e  max:  %10.2e'%(temperature.min(), temperature.max()))
+    rate = (1./np.sqrt(rT)) *ip**(-1.5) * exp1(1./rT)*inDict['btRate']
+#   r1   = (1./np.sqrt(rt)) * (1./np.power(ip, 1.5)) * exp1(1./rt) * rho
+    inDict['temperature'] = temperature
+    inDict['rate'] = rate
+    return
 
 def scale_bt_rate(inDict, ip, f=2.0):
     """
@@ -789,9 +807,15 @@ def scale_bt_rate(inDict, ip, f=2.0):
     `btTemperature` and `btRate` keys are added to `inDict`
     """
     if ('temperature' and 'rate') in inDict.keys():
+
         rT = inDict['temperature']*const.boltzmannEv/ip
-        btTemperature = 1. - np.log(f)/np.log(rT + f)
-        btRate = np.sqrt(rT)*inDict['rate']*ip**1.5/(exp1(1./rT))
+
+        btTemperature = 1. - np.log(f)/np.log(rT + f)  # scaled temperature x
+#        x            = 1. - np.log(bt_f)/np.log(rT + bt_f)
+
+        btRate = np.sqrt(rT) * inDict['rate'] * ip**1.5/  (exp1(1./rT))
+#        rho =   np.sqrt(rT) * np.power(ip, 1.5) * r0 /  exp1(1./rt)
+
         inDict['btTemperature'] = btTemperature
         inDict['btRate'] = btRate
         inDict['ip'] = ip

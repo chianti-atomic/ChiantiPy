@@ -287,11 +287,14 @@ class maker(ionTrails,  specTrails):
         self.Nions = len(self.IonSet)
         self.Dwvl = specData['dwvl']
         wvl = specData['wvl0']
+        self.Wvl = specData['wvl0']
         try:
-            self.WvlRange = [min(wvl)-max(self.Dwvl), max(wvl)+max(self.Dwvl)]
+            # allows the ability to set dwvl for each line
+            self.WvlRange = [min(wvl) - max(self.Dwvl), max(wvl) + max(self.Dwvl)]
         except:
             if not hasattr(self, 'WvlRange'):
                 print(' need to set WvlRange attribute')
+                print('wvl min:  %10.2f  wvl max %10.2f'%(wvl.min(),  wvl.max()))
                 return
         reduceNobs = 0.
         for anion in self.IonSet:
@@ -337,7 +340,8 @@ class maker(ionTrails,  specTrails):
                 'obsIntensity':self.Intensity[iwvl], 'exptIon':self.IonS[iwvl], 'obsWvl':self.Wvl[iwvl]})
         # use the ionList but make sure the ions are in the database
 
-        self.ionGate(elementList = self.ElementList, ionList = self.IonList, minAbund=self.MinAbund, doLines=True, doContinuum=False, verbose = verbose)
+        self.ionGate(elementList = self.ElementList, ionList = self.IonList,
+            minAbund=self.MinAbund, doLines=True, doContinuum=False, verbose = verbose)
 
         allLines = self.AllLines
         mlInfo = self.MlInfo
@@ -1206,7 +1210,7 @@ class maker(ionTrails,  specTrails):
             print(' must run mgofnt or gofnt first')
             return
         elif vs == 'T':
-            fig,  ax = plt.subplots(figsize=figsize)
+            fig,  ax = plt.subplots(figsize=figsize, tight_layout = True)
             if temp[0] == temp[-1]:
                 ntemp = 1
             else:
@@ -1252,7 +1256,7 @@ class maker(ionTrails,  specTrails):
             ax.set_ylabel('Emission Measure (cm$^{-5}$)', fontsize=fontsize)
             ax.set_xlabel('Temperature (K)',  fontsize=fontsize)
         elif vs != 'T':
-            fig,  ax = plt.subplots(figsize=figsize)
+            fig,  ax = plt.subplots(figsize=figsize, tight_layout = True)
             if dens[0] == dens[-1]:
                 ndens = 1
             else:

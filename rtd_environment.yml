@@ -1,10 +1,11 @@
 name: chiantipy
 dependencies:
-  - python=3.6
-  - astropy
-  - numpy=1.14
+  - python>=3.6
+  - numpy>=1.14
   - scipy
   - matplotlib
   - ipython
   - ipyparallel
   - sphinx_rtd_theme
+  - roman
+  - pyQt5

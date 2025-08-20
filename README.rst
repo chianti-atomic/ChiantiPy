@@ -1,6 +1,6 @@
-.. _chiantipy---version-0151:
+.. _chiantipy---version-0152:
 
-ChiantiPy - Version 0.15.1
+ChiantiPy - Version 0.15.2
 ==========================
 
 |Documentation Status| |Coverage Status| |ascl:1308.017|
@@ -28,21 +28,21 @@ Installation
 
 The following dependencies are required to run ChiantiPy,
 
--  `Python3 <https://www.python.org/>`__ (Python 3 is now required as of
-   version 0.8.0)
--  `Numpy <http://www.numpy.org/>`__
--  `Scipy <https://www.scipy.org/>`__
--  `Matplotlib <http://matplotlib.org/>`__
--  `ipyparallel <https://github.com/ipython/ipyparallel>`__
+- `Python3 <https://www.python.org/>`__ (Python 3 is now required as of
+  version 0.8.0)
+- `Numpy <http://www.numpy.org/>`__
+- `Scipy <https://www.scipy.org/>`__
+- `Matplotlib <http://matplotlib.org/>`__
+- `ipyparallel <https://github.com/ipython/ipyparallel>`__
 
 The following two are extremely useful for running Python programs
 
--  `IPython <http://ipython.org>`__
--  `Jupyter <http://jupyter.org/>`__
+- `IPython <http://ipython.org>`__
+- `Jupyter <http://jupyter.org/>`__
 
 Optionally, if you'd like to use the GUI dialogs,
 
--  `PyQt5 <https://riverbankcomputing.com/software/pyqt/intro>`__
+- `PyQt5 <https://riverbankcomputing.com/software/pyqt/intro>`__
 
 If you are not familiar with installing Python and the needed
 dependencies, we recommend the `Anaconda
@@ -58,16 +58,20 @@ version 10.0 or later. Assuming you've placed the CHIANTI tree in
 
 should point to the top directory of your CHIANTI distribution
 
-Finally, clone and install the source from GitHub,
+The release is also available on
+`PyPI <https://pypi.org/project/ChiantiPy/>`__
+
+.. code:: Shell
+
+   $ python3 -m pip install ChiantiPy
+
+Or, clone and install the source from GitHub,
 
 .. code:: Shell
 
    $ git clone --recursive https://github.com/chianti-atomic/ChiantiPy.git
    $ cd ChiantiPy
    $ python setup.py install
-
-The release is also available on
-`PyPI <https://pypi.org/project/ChiantiPy/>`__
 
 Usage
 -----
@@ -92,11 +96,13 @@ Help
 For more information about installing and using either ChiantiPy or the
 CHIANTI atomic database, check out the following links:
 
--  `ChiantiPy Documentation on
-   ReadTheDocs <https://chiantipy.readthedocs.io/>`__
--  `Chianti Google Mailing
-   List <https://groups.google.com/forum/#!forum/chianti>`__
--  `CHIANTI Atomic Database Webpage <http://www.chiantidatabase.org/>`__
+- `ChiantiPy Documentation on
+  ReadTheDocs <https://chiantipy.readthedocs.io/>`__
+- `ChiantiPy Documentation on
+  ChiantiPy.github.io <https://chianti-atomic.github.io/>`__
+- `Chianti Google Mailing
+  List <https://groups.google.com/forum/#!forum/chianti>`__
+- `CHIANTI Atomic Database Webpage <http://www.chiantidatabase.org/>`__
 
 .. |Documentation Status| image:: http://readthedocs.org/projects/chiantipy/badge/?version=latest
    :target: http://chiantipy.readthedocs.io/en/latest/?badge=latest

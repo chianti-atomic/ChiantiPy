@@ -19,3 +19,42 @@ in api/index need to make link to ChiantiPy_logo to read ../_static/...
     can do this with text_replace
 
 
+read the docs requires the following files:
+
+.readthedocs.yaml  looks OK
+
+    version:  2
+
+    build:
+    os:  ubuntu-24.04
+    tools:
+        python:  "3.10"
+
+    sphinx:
+    configuration:  docs/source/conf.py
+
+    # Optionally declare the Python requirements required to build your docs
+    python:
+    install:
+    - requirements: docs/requirements.txt
+    - method: pip
+        path: .
+
+    need:  docs/source/conf.py   have
+
+    need:  docs/requirements.txt  have
+
+need README.rst   have:  converted from README.md with pandoc
+
+pyproject.toml
+
+    [build-system]
+    requires = [
+        "setuptools>=42",
+        "wheel"
+    ]
+    build-backend = "setuptools.build_meta"
+
+docs/source/conf.py   have
+
+docs/source/index.rst have

@@ -1004,20 +1004,20 @@ class ion(ioneqOne, ionTrails, specTrails):
                 kte = const.boltzmann*temp/(de*const.ryd2erg)
             der=0
             if ttype == 1:
-                st = 1.-np.log(cups)/np.log(kte+cups)
-                y2 = splrep(xs,scups,s=0)
-                sups = splev(st,y2,der=der)
-                ups[iscups] = sups*np.log(kte+np.exp(1.))
+                st = 1. - np.log(cups)/np.log(kte+cups)
+                y2 = splrep(xs, scups,s=0)
+                sups = splev(st, y2, der=der)
+                ups[iscups] = sups*np.log(kte + np.e)
             if ttype == 2:
                 st = kte/(kte+cups)
-                y2 = splrep(xs,scups,s = 0)
-                sups = splev(st,y2,der = der)
+                y2 = splrep(xs, scups, s = 0)
+                sups = splev(st, y2, der = der)
                 ups[iscups] = sups
             if ttype == 3:
                 st = kte/(kte+cups)
-                y2 = splrep(xs,scups,s = 0)
-                sups = splev(st,y2,der=der)
-                ups[iscups] = sups/(kte+1.)
+                y2 = splrep(xs, scups, s = 0)
+                sups = splev(st, y2, der=der)
+                ups[iscups] = sups/(kte + 1.)
             if ttype == 4:
                 st = 1.-np.log(cups)/np.log(kte+cups)
                 y2 = splrep(xs,scups,s = 0)

@@ -14,7 +14,7 @@ import ChiantiPy.tools.data as chdata
 from .Ion import ion
 
 def ioneqMake(filename, directory = None, temperature = None,  reference = None, verbose = False):
-    """a function  to create a chianit .ioneq style ionization equilibrium
+    """a function  to create a chianti .ioneq style ionization equilibrium
     Parameters
     ----------
 
@@ -208,10 +208,12 @@ class ioneq(object):
                 ioneq[:, it] = ioneq[:, it]/ionsum
             self.Ioneq = ioneq
 
-    def plot(self, stages = None, tRange = None, yr = None, oplot=False, label=True, title=True,  bw=False, \
+    def plotObj(self, stages = None, tRange = None, yr = None, oplot=False, label=True, title=True,  bw=False, \
         semilogx = False, heightAdjust = 0.7,  verbose = False):
         '''
         Plots the ionization equilibria.
+
+        this version creates plt.subplots objects where the fig and ax are returned
 
         self.plot(tRange=None, yr=None, oplot=False)
         stages = sequence of ions to be plotted, neutral == 1, fully stripped == Z+1
@@ -262,14 +264,15 @@ class ioneq(object):
             fs = 14
             lw = 2
         #
-        xyr = list(tRange)
-        xyr.extend(list(yr))
+        xrange = list(tRange)
+        yrange = yr
         #
+        fig, ax = plt.subplots(tight_layout = True)
         iz = stages[0]
         if semilogx:
-            plt.semilogx(self.Temperature, ioneq[iz-1], linestyle[0], lw=lw)
+            ax.semilogx(self.Temperature, ioneq[iz-1], linestyle[0], lw=lw)
         else:
-            plt.loglog(self.Temperature, ioneq[iz-1], linestyle[0], lw=lw)
+            ax.loglog(self.Temperature, ioneq[iz-1], linestyle[0], lw=lw)
 
         if label:
             idx = self.Ioneq[iz-1] == self.Ioneq[iz-1].max()
@@ -277,14 +280,14 @@ class ioneq(object):
                 jdx = np.arange(len(idx))
                 idx = int(jdx[idx].max())
             ann = const.Ionstage[iz-1]
-            plt.annotate(ann, [self.Temperature[idx], heightAdjust*ioneq[iz-1, idx]], ha='center',
+            ax.annotate(ann, [self.Temperature[idx], heightAdjust*ioneq[iz-1, idx]], ha='center',
                 fontsize=fs)
 
         for iz in stages[1:]:
             if semilogx:
-                plt.semilogx(self.Temperature, ioneq[iz-1], linestyle[0], lw=lw)
+                ax.semilogx(self.Temperature, ioneq[iz-1], linestyle[0], lw=lw)
             else:
-                plt.loglog(self.Temperature, ioneq[iz-1], linestyle[0], lw=lw)
+                ax.loglog(self.Temperature, ioneq[iz-1], linestyle[0], lw=lw)
             if label:
                 idx = ioneq[iz-1] == ioneq[iz-1].max()
                 if idx.sum() > 1:
@@ -296,12 +299,12 @@ class ioneq(object):
                 tst2 = self.Temperature[idx] < tRange[1]
                 tst = np.logical_and(tst1,  tst2)
                 if tst:
-                    plt.annotate(ann, [self.Temperature[idx], heightAdjust*ioneq[iz-1, idx]], ha='center',
+                    ax.annotate(ann, [self.Temperature[idx], heightAdjust*ioneq[iz-1, idx]], ha='center',
                     fontsize=fs)
 #                    print('iz:  %i  T: %8.2e %3.1f'%(iz, self.Temperature[idx], ioneq[iz-1, idx]))
 
-        plt.xlabel('Temperature (K)',  fontsize=fs)
-        plt.ylabel('Ion Fraction',  fontsize=fs)
+        ax.set_xlabel('Temperature (K)',  fontsize=fs)
+        ax.set_ylabel('Ion Fraction',  fontsize=fs)
         aname = self.IoneqName.replace('.ioneq',  '')
         atitle = '%s Ionization Equilibrium for '%(aname)+const.El[self.Z-1].capitalize()
         #
@@ -313,13 +316,13 @@ class ioneq(object):
                     atitle += '  & '+ result['ioneqname'].replace('.ioneq', '')
                     atitle += ' '+linestyle[0]
                     for iz in stages:
-                        plt.plot(result['ioneqTemperature'], result['ioneqAll'][self.Z-1, iz-1],linestyle[1], lw=lw)
+                        ax.plot(result['ioneqTemperature'], result['ioneqAll'][self.Z-1, iz-1],linestyle[1], lw=lw)
             elif type(oplot) == type('string'):
                 atitle += '  & ' + oplot
                 result = io.ioneqRead(ioneqName=oplot)
                 if result != False:
                     for iz in stages:
-                        plt.plot(result['ioneqTemperature'], result['ioneqAll'][self.Z-1, iz-1],linestyle[1], lw=lw)
+                        ax.plot(result['ioneqTemperature'], result['ioneqAll'][self.Z-1, iz-1],linestyle[1], lw=lw)
             elif type(oplot) == type([]):
                 for iplot in range(len(oplot)):
                     result = io.ioneqRead(ioneqName=oplot[iplot])
@@ -327,14 +330,15 @@ class ioneq(object):
                     if result != False:
                         atitle += '  & '+oplot[iplot]+' '+linestyle[iplot%3]
                         for iz in stages:
-                            plt.plot(result['ioneqTemperature'], result['ioneqAll'][self.Z-1, iz-1],linestyle[1], lw=lw)
+                            ax.plot(result['ioneqTemperature'], result['ioneqAll'][self.Z-1, iz-1],linestyle[1], lw=lw)
             else:
                 print(' oplot file not understood %s'%(oplot))
         if title:
-            plt.title(atitle,  fontsize=fs)
-        plt.tick_params(labelsize=fs, which='both')
-        plt.tight_layout()
-        plt.axis(xyr)
+            ax.set_title(atitle,  fontsize=fs)
+        ax.tick_params(labelsize=fs, which='both')
+        ax.set_xlim(left = xrange[0],  right = xrange[1])
+        ax.set_ylim(bottom = yrange[0], top = yrange[1])
+        self.IoneqPlotObj = {'fig':fig, 'ax':ax}
 
     def plotRatio(self, stageN, stageD, tRange=0, yr=0, label=1, title=1,  bw=0, semilogx = 1, verbose=0):
         '''

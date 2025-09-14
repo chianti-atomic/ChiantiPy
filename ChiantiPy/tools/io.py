@@ -877,7 +877,11 @@ def elvlcWrite(info, outfile=None, round=0, addLvl=0, includeRyd=False, includeE
         info['eVth'] = [x*const.invCm2Ev if x >= 0. else  -1. for x in info['ecmth']]
    #
     out = open(elvlcName, 'w')
-    pformat = '%7i%30s%5s%5i%5s%5.1f%15.3f%15.3f'
+#    pformat = '%7i%30s%5s%5i%5s%5.1f%15.3f%15.3f'
+    pformat = '%7i%30s%5s%5i%5s%5.1f'
+    pformat += '%' + '15.%if'%(round)
+    pformat += '%' + '15.%if'%(round)
+
     for i,  aterm in enumerate(info['term']):
         thisTerm = aterm.ljust(29)
         thisLabel = info['label'][i].ljust(4)

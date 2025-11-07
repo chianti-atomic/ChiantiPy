@@ -864,11 +864,12 @@ class ionTrails(object):
         self.IntensityRatio={'ratio':numIntens/denIntens,'desc':desc,
                 'temperature':outTemperature,'eDensity':outDensity,'filename':intensityRatioFileName, 'numIdx':num_idx, 'denIdx':den_idx}
 
-    def intensityRatioSave(self,outFile=0):
+    def intensityRatioSave(self,outFile=False):
         """
         Save the intensity ratio to a file.
 
-        The intensity ratio as a function to temperature and eDensity is saved to an asciii file. Descriptive information is included at the top of the file.
+        The intensity ratio as a function to temperature and eDensity is saved to an asciii file.
+        Descriptive information is included at the top of the file.
 
         Parameters
         ----------

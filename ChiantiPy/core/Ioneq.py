@@ -124,6 +124,7 @@ class ioneq(object):
         ionization and recombination rates.
         """
         self.Temperature = np.array(temperature, np.float64)
+        self.IoneqName = 'calculated'
         if self.Temperature.size == 1:
             print(' temperature must be an array')
             return

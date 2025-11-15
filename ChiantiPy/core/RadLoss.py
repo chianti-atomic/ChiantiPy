@@ -174,12 +174,11 @@ class radLoss(ionTrails, specTrails):
             if True, a title is applied to the plot.  The default is for no title
 
         '''
-        fontsize = 16
         temp = self.RadLoss['temperature']
         rate = self.RadLoss['rate']
         plt.loglog(temp, rate,  'k',  lw=2)
-        plt.xlabel(self.RadLoss['xlabel'],fontsize=fontsize)
-        plt.ylabel(self.RadLoss['ylabel'],fontsize=fontsize)
+        plt.xlabel(self.RadLoss['xlabel'])
+        plt.ylabel(self.RadLoss['ylabel'])
         plt.xlim(left = temp.min(),  right = temp.max())
         if doTitle:
             if hasattr(self, 'AbundanceName'):
@@ -188,5 +187,5 @@ class radLoss(ionTrails, specTrails):
                 title += ' minAbund = %10.2e'%(self.MinAbund)
             if self.EDensity.size == 1:
                 title += ', density = %10.2e'%(self.EDensity)
-            plt.title(title, fontsize=fontsize)
+            plt.title(title)
         plt.tight_layout()

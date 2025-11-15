@@ -1462,8 +1462,8 @@ class ion(ioneqOne, ionTrails, specTrails):
 
 
 
-    def popPlot(self, top=10, levels=[], scale=0, plotFile=0, outFile=0, pub=0, addTitle=None,
-        addLegend=True):
+    def popPlot(self, top=10, levels=[], scale=False, plotFile=False, outFile=None, addTitle=False,
+        addLegend=True,  pub = False):
         """
         Plots populations vs temperature or eDensity.
 
@@ -1474,15 +1474,11 @@ class ion(ioneqOne, ionTrails, specTrails):
         if scale is set, then the population, if plotted vs. density, is divided by density -
         only useful if plotting level populations vs density
 
-        if pub is set, the want publication plots (bw, lw=2).
-
         if addLegend is set, a matplotlib legend is added
+
+        if pub is set, the plotting is better for publication
         """
 
-        if pub:
-            fontsize = 16
-        else:
-            fontsize = 14
 
         if hasattr(self, 'Population'):
             temperature = self.Population["temperature"]
@@ -1506,8 +1502,8 @@ class ion(ioneqOne, ionTrails, specTrails):
                 y = [minPop, spop[-itop], spop[-itop], minPop]
                 plt.semilogy(x, y, 'k')
             plt.axis([0, max(idx[-top:])+1, minPop, 1.])
-            plt.xlabel('Level', fontsize=fontsize)
-            plt.ylabel('Population', fontsize=fontsize)
+            plt.xlabel('Level')
+            plt.ylabel('Population')
             return
 
         # find the top most populated levels
@@ -1565,14 +1561,14 @@ class ion(ioneqOne, ionTrails, specTrails):
                     for itemp in range(start,ntemp,ntemp//skip):
                         plt.text(temperature[itemp],pop[itemp,lvl-1],str(lvl))
             xlabel = 'Temperature (K)'
-            plt.xlabel(xlabel,fontsize=fontsize)
-            plt.ylabel(ylabel,fontsize=fontsize)
+            plt.xlabel(xlabel)
+            plt.ylabel(ylabel)
             if addTitle is None:
                 dstr = ' -  Density = %10.2e (cm$^{-3}$)' % eDensity[0]
             else:
                 dstr = ' -  Density = %10.2e (cm$^{-3}$) %s' %(eDensity[0], addTitle)
 
-            plt.title(title+dstr,fontsize=fontsize)
+            plt.title(title+dstr)
             plt.xlim(temperature.min(),temperature.max())
             if doTop:
                 plt.ylim(ymin,1.2)
@@ -1623,13 +1619,13 @@ class ion(ioneqOne, ionTrails, specTrails):
                     start = divmod(lvl, len(newdens))[1] + ndens - good.sum()
                     for idens in range(start,ndens,ndens//skip):
                         plt.text(eDensity[idens],pop[idens, lvl-1],str(lvl))
-            plt.xlabel(xlabel,fontsize=fontsize)
-            plt.ylabel(ylabel,fontsize=fontsize)
+            plt.xlabel(xlabel)
+            plt.ylabel(ylabel)
             if addTitle is None:
                 tstr = ' -  T = %10.2e (K)' % temperature[0]
             else:
                 tstr = ' -  T = %10.2e (K) %s' % (temperature[0] , addTitle)
-            plt.title(title+tstr,fontsize=fontsize)
+            plt.title(title+tstr)
             plt.xlim(eDensity[eDensity.nonzero()].min(),eDensity.max())
             if doTop:
                 plt.ylim(ymin,1.2)
@@ -1682,14 +1678,14 @@ class ion(ioneqOne, ionTrails, specTrails):
                     for itemp in range(start,ntemp,ntemp//skip):
                         plt.text(temperature[itemp],pop[itemp,lvl-1],str(lvl))
             xlabel = 'Temperature (K)'
-            plt.xlabel(xlabel,fontsize=fontsize)
-            plt.ylabel(ylabel,fontsize=fontsize)
+            plt.xlabel(xlabel)
+            plt.ylabel(ylabel)
             plt.axis([temperature.min(),temperature.max(), ymin, 1.2])
-            plt.text(0.1, 0.5,title, horizontalalignment='center', verticalalignment='center', fontsize=fontsize,  transform = ax.transAxes)
-            #
+            plt.text(0.1, 0.5,title, horizontalalignment='center', verticalalignment='center',  transform = ax.transAxes)
+
             ax2 = plt.twiny()
             xlabel = r'Electron Density (cm$^{-3}$)'
-            plt.xlabel(xlabel, fontsize=fontsize)
+            plt.xlabel(xlabel)
             plt.loglog(eDensity,pop[:,toplvl[0]], visible=False)
             ax2.xaxis.tick_top()
         plt.tight_layout()
@@ -1973,7 +1969,6 @@ class ion(ioneqOne, ionTrails, specTrails):
 
         normalize = 1 specifies whether to normalize to strongest line, default = 0'''
         #
-        fs = 14
         title = self.Spectroscopic
         #
         if hasattr(self, 'Emiss'):
@@ -2070,9 +2065,9 @@ class ion(ioneqOne, ionTrails, specTrails):
             else:
                 yy = [ymin/10., emiss[idx]]
                 plt.semilogy(xx, yy)
-        plt.xlabel(xlabel, fontsize=fs)
-        plt.ylabel(ylabel, fontsize=fs)
-        plt.title(title+tstr+dstr, fontsize=fs)
+        plt.xlabel(xlabel)
+        plt.ylabel(ylabel)
+        plt.title(title+tstr+dstr)
         plt.tight_layout()
         if wvlRange:
             plt.axis([wvlRange[0], wvlRange[1], 0., 1.1*emiss.max()])
@@ -2100,7 +2095,6 @@ class ion(ioneqOne, ionTrails, specTrails):
             # new values of temperature or eDensity
             self.emiss()
             em = self.Emiss
-        fontsize = 14
         eDensity = self.EDensity
         temperature = self.Temperature
         ntemp = temperature.size
@@ -2231,20 +2225,20 @@ class ion(ioneqOne, ionTrails, specTrails):
 #                plt.text(xvalues[ixvalue],emiss[tline,ixvalue]/maxAll[ixvalue],str(wvl[tline]))
                 plt.text(xvalues[ixvalue],emiss[tline,ixvalue]/maxAll[ixvalue],alabel)
         plt.xlim(xvalues.min(),xvalues.max())
-        plt.xlabel(xlabel,fontsize=fontsize)
-        plt.ylabel(ylabel,fontsize=fontsize)
+        plt.xlabel(xlabel)
+        plt.ylabel(ylabel)
         if ndens == ntemp and ntemp > 1:
-            plt.text(0.07, 0.5,title, horizontalalignment='left', verticalalignment='center', fontsize=fontsize,  transform = ax.transAxes)
-            #
+            plt.text(0.07, 0.5,title, horizontalalignment='left', verticalalignment='center',  transform = ax.transAxes)
+
             ax2 = plt.twiny()
             xlabelDen = r'Electron Density (cm$^{-3}$)'
-            plt.xlabel(xlabelDen, fontsize=fontsize)
+            plt.xlabel(xlabelDen)
             plt.loglog(eDensity,emiss[topLines[top-1]]/maxAll, visible=False)
             ax2.xaxis.tick_top()
             plt.ylim(ymin/1.2, 1.2*ymax)
         else:
             plt.ylim(ymin/1.2, 1.2*ymax)
-            plt.title(title+desc_str,fontsize=fontsize)
+            plt.title(title+desc_str)
         plt.tight_layout()
         plt.draw()
         #  need time to let matplotlib finish plotting
@@ -2296,27 +2290,24 @@ class ion(ioneqOne, ionTrails, specTrails):
         ax = plt.subplot(111)
         plt.loglog(xvalues,numEmiss/denEmiss)
         plt.xlim(xvalues.min(),xvalues.max())
-        plt.xlabel(xlabel,fontsize=fontsize)
-        plt.ylabel('Emissivity Ratio ('+self.Defaults['flux']+')',fontsize=fontsize)
+        plt.xlabel(xlabel)
+        plt.ylabel('Emissivity Ratio ('+self.Defaults['flux']+')')
         desc = ''
         for aline in num_idx:
             desc += ' ' + selectTags[aline]
-#            desc += ' ' + str(wvl[topLines[aline]])
         desc += ' / '
         for aline in den_idx:
             desc += ' ' + selectTags[aline]
-#            desc += ' ' + str(wvl[topLines[aline]])
         if ndens == ntemp and ntemp > 1:
-            plt.text(0.07, 0.5,desc, horizontalalignment='left', verticalalignment='center', fontsize=fontsize,  transform = ax.transAxes)
-            #
+            plt.text(0.07, 0.5,desc, horizontalalignment='left', verticalalignment='center', transform = ax.transAxes)
+
             ax2 = plt.twiny()
             xlabelDen = r'Electron Density (cm$^{-3}$)'
-            plt.xlabel(xlabelDen, fontsize=fontsize)
+            plt.xlabel(xlabelDen)
             plt.loglog(eDensity,numEmiss/denEmiss, visible=False)
             ax2.xaxis.tick_top()
         else:
-#            plt.ylim(ymin, ymax)
-            plt.title(desc,fontsize=fontsize)
+            plt.title(desc)
         plt.tight_layout()
         #
         intensityRatioFileName = self.IonStr
@@ -2647,7 +2638,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         if not hasattr(self, 'Abundance'):
             self.Abundance = io.abundanceRead()
 
-        fontsize = 14
+
         emiss = em["emiss"]
         wvl = em["wvl"]
         pretty1 = em['pretty1']
@@ -2739,18 +2730,19 @@ class ion(ioneqOne, ionTrails, specTrails):
                     plt.text(xvalues[ixvalue],emiss[tline,ixvalue]/maxAll[ixvalue],str(wvl[tline]))
             plt.xlim(xvalues.min(),xvalues.max())
             plt.ylim(ymin, ymax)
-            plt.xlabel(xlabel,fontsize=fontsize)
-            plt.ylabel(ylabel,fontsize=fontsize)
+            plt.xlabel(xlabel)
+            plt.ylabel(ylabel)
             if ndens == ntemp and ntemp > 1:
-                plt.text(0.07, 0.5,title, horizontalalignment='left', verticalalignment='center', fontsize=fontsize,  transform = ax.transAxes)
+                plt.text(0.07, 0.5,title, horizontalalignment='left', verticalalignment='center',  transform = ax.transAxes)
+
                 ax2 = plt.twiny()
                 xlabelDen = r'Electron Density (cm$^{-3}$)'
-                plt.xlabel(xlabelDen, fontsize=fontsize)
+                plt.xlabel(xlabelDen)
                 plt.loglog(eDensity,emiss[topLines[top-1]]/maxAll, visible=False)
                 ax2.xaxis.tick_top()
             else:
                 plt.ylim(ymin, ymax)
-                plt.title(title+desc_str,fontsize=fontsize)
+                plt.title(title+desc_str)
             plt.draw()
             time.sleep(0.5)
         wvlChoices = []
@@ -2789,8 +2781,8 @@ class ion(ioneqOne, ionTrails, specTrails):
         if plot:
             plt.loglog(xvalues,gofnt)
             plt.xlim(xvalues.min(),xvalues.max())
-            plt.xlabel(xlabel,fontsize=fontsize)
-            plt.ylabel('Gofnt',fontsize=fontsize)
+            plt.xlabel(xlabel)
+            plt.ylabel('Gofnt')
             newTitle = '%s'%(self.Spectroscopic) + '%12.3f %4i - %4i %s - %s'%(wvl[g_line[0]], lvl1[g_line[0]], lvl2[g_line[0]], pretty1[g_line[0]], pretty2[g_line[0]])
             if len(g_line) > 1:
                 newTitle += '\n'
@@ -2799,13 +2791,14 @@ class ion(ioneqOne, ionTrails, specTrails):
                 if igl != g_line[-1]:
                     newTitle += '\n'
             if ndens == ntemp and ntemp > 1:
-                plt.text(0.07, 0.5,newTitle, horizontalalignment='left', verticalalignment='center', fontsize=fontsize,  transform = ax.transAxes)
+                plt.text(0.07, 0.5,newTitle, horizontalalignment='left', verticalalignment='center',  transform = ax.transAxes)
+
                 ax2 = plt.twiny()
-                plt.xlabel(xlabelDen, fontsize=fontsize)
+                plt.xlabel(xlabelDen)
                 plt.loglog(eDensity,gofnt, visible=False)
                 ax2.xaxis.tick_top()
             else:
-                plt.title(newTitle, fontsize=fontsize)
+                plt.title(newTitle)
             self.Gofnt['transition'] = newTitle
             self.Gofnt['xlabel'] = xlabel
             self.Gofnt['ylabel'] = ylabel

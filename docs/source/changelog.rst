@@ -2,6 +2,14 @@
 Changelog
 ===========
 
+Changes from 0.15.2 to 0.15.3
+=============================
+
+Various plotting parameters are now controlled by setting mpl.rcParams
+
+Previouslyl, some, such as font sizes, had been hard-wired internally
+
+
 Changes from 0.15.1 to 0.15.2
 =============================
 

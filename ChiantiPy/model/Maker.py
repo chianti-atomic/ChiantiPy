@@ -38,7 +38,7 @@ def doDemGofntQ(inQueue, outQueue):
     #
     # ---------------------------------------------------------
     #
-def emPlot(matchDict, vs='T', loc='upper right', fs=10, lw=2,  adjust=None, position='both', legend = True,  verbose=0):
+def emPlot(matchDict, vs='T', loc='upper right', lw=2,  adjust=None, position='both', legend = True, verbose=False):
     '''
     to plot line intensities divided by gofnt
     adjust is to provide an adjustment to the position of the labels
@@ -53,9 +53,6 @@ def emPlot(matchDict, vs='T', loc='upper right', fs=10, lw=2,  adjust=None, posi
 
     loc:  `str`
         matplotlib argument for plt.legend
-
-    fs:  `int`
-        the fontsize for the legend
 
     lw:  `int`
             set the line width of the plot, default = 2
@@ -73,9 +70,6 @@ def emPlot(matchDict, vs='T', loc='upper right', fs=10, lw=2,  adjust=None, posi
 
     legend:  `bool`
         whether to include a matplotlib legend
-
-    fontsize:  `int`
-        fontsize for the matplotlib xlabel and ylabel
 
     tscale:  `float`
         scale the temperature by dividing by tscale
@@ -152,9 +146,9 @@ def emPlot(matchDict, vs='T', loc='upper right', fs=10, lw=2,  adjust=None, posi
                 print(' nonzed = %i'%(nonzed.sum()))
                 print('intensity = %10.2e'%(match[idx]['intensity']))
         if legend:
-            plt.legend(loc=loc, fontsize=fs)
-        plt.ylabel('Emission Measure (cm$^{-5}$)', fontsize=14)
-        plt.xlabel('Temperature (K)',  fontsize=14)
+            plt.legend(loc=loc)
+        plt.ylabel('Emission Measure (cm$^{-5}$)')
+        plt.xlabel('Temperature (K)')
     elif vs != 'T':
         if dens[0] == dens[-1]:
             ndens = 1
@@ -187,9 +181,9 @@ def emPlot(matchDict, vs='T', loc='upper right', fs=10, lw=2,  adjust=None, posi
                 print(' nonzed = %i'%(nonzed.sum()))
                 print('intensity = %10.2e'%(match[idx]['obsIntensity']))
         if legend:
-            plt.legend(loc=loc, fontsize=fs)
-        plt.ylabel('Emission Measure (cm$^{-5}$)', fontsize=14)
-        plt.xlabel('Electron Density (cm$^{-3}$)',  fontsize=14)
+            plt.legend(loc=loc)
+        plt.ylabel('Emission Measure (cm$^{-5}$)')
+        plt.xlabel('Electron Density (cm$^{-3}$)')
         plt.tight_layout()
     #
     #-----------------------------------------------------
@@ -966,8 +960,8 @@ class maker(ionTrails,  specTrails):
         #
         # ---------------------------------------------------------
         #
-    def emPlot(self, vs='T', loc='upper right', fs=10, lw = 2,  adjust=None, position='both', label = True,
-        legend = True, fontsize=16, tscale=1., verbose=True):
+    def emPlot(self, vs='T', loc='upper right', lw = 2,  adjust=None, position='both', label = True,
+        legend = True, tscale=1., verbose=True):
         '''
         to plot line intensities divided by gofnt
         adjust is to provide an adjustment to the position of the labels
@@ -981,9 +975,6 @@ class maker(ionTrails,  specTrails):
 
         loc:  `str`
             matplotlib argument for plt.legend
-
-        fs:  `int`
-            the fontsize for the legend, default = 10
 
         lw:  `int`
             set the line width of the plot, default = 2
@@ -1001,9 +992,6 @@ class maker(ionTrails,  specTrails):
 
         legend:  `bool`
             whether to include a matplotlib legend, default =True
-
-        fontsize:  `int`
-            fontsize for the matplotlib xlabel and ylabel, default=16
 
         tscale:  `float`
             scale the temperature by dividing by tscale, default = 1.
@@ -1083,9 +1071,9 @@ class maker(ionTrails,  specTrails):
                         print(' nonzed = %i'%(nonzed.sum()))
                         print('intensity = %10.2e'%(match[idx]['intensity']))
             if legend:
-                plt.legend(loc=loc, fontsize=fontsize)
-            plt.ylabel('Emission Measure (cm$^{-5}$)', fontsize=fontsize)
-            plt.xlabel('Temperature (K)',  fontsize=fontsize)
+                plt.legend(loc=loc)
+            plt.ylabel('Emission Measure (cm$^{-5}$)')
+            plt.xlabel('Temperature (K)')
         elif vs != 'T':
             if dens[0] == dens[-1]:
                 ndens = 1
@@ -1109,27 +1097,27 @@ class maker(ionTrails,  specTrails):
                     lblx = dens
                     lbly = em[idx][realgood]*1.05
                     if hpos[idx] =='b':
-                        plt.text(lblx[0], lbly[0]*adjust[idx], wvlstr.strip(), fontsize=14)
-                        plt.text(lblx[-1], lbly[-1]*adjust[idx], wvlstr.strip(), horizontalalignment='right', fontsize=14)
+                        plt.text(lblx[0], lbly[0]*adjust[idx], wvlstr.strip())
+                        plt.text(lblx[-1], lbly[-1]*adjust[idx], wvlstr.strip(), horizontalalignment='right')
                     elif hpos[idx] == 'r':
-                        plt.text(lblx[-1], lbly[-1]*adjust[idx], wvlstr.strip(), horizontalalignment='right', fontsize=14)
+                        plt.text(lblx[-1], lbly[-1]*adjust[idx], wvlstr.strip(), horizontalalignment='right')
                     elif hpos[idx] == 'l':
-                        plt.text(lblx[0], lbly[0]*adjust[idx], wvlstr.strip(), fontsize=14)
+                        plt.text(lblx[0], lbly[0]*adjust[idx], wvlstr.strip())
 
                 else:
                     print('no values for idx = %5i wvl = %8.2f'%(idx, match[idx]['wvl']))
                     print(' nonzed = %i'%(nonzed.sum()))
                     print('intensity = %10.2e'%(match[idx]['obsIntensity']))
             if legend:
-                plt.legend(loc=loc, fontsize=fs)
-            plt.ylabel('Emission Measure (cm$^{-5}$)', fontsize=fontsize)
-            plt.xlabel('Electron Density (cm$^{-3}$)',  fontsize=fontsize)
+                plt.legend(loc=loc)
+            plt.ylabel('Emission Measure (cm$^{-5}$)')
+            plt.xlabel('Electron Density (cm$^{-3}$)')
             plt.tight_layout()
         #
         # ---------------------------------------------------------
         #
-    def emPlotObj(self, vs='T', loc='upper right', fs=10, lw=2, adjust=None, position='both', label=True,
-        legend = True, fontsize=16, figsize=[7., 5.], tscale=1.,  verbose=True):
+    def emPlotObj(self, vs='T', loc='upper right', lw=2, adjust=None, position='both', label=True,
+        legend = True, figsize=[7., 5.], tscale=1.,  verbose=True):
         '''
         the emPlot using the object oriented version of matplotlib - a figure and axis objects are returned
         to plot line intensities divided by gofnt
@@ -1147,9 +1135,6 @@ class maker(ionTrails,  specTrails):
         loc:  `str`
             matplotlib argument for plt.legend, default = 'upper right'
 
-        fs:  `int`
-            the fontsize for the legend, default = 10
-
         lw:  `int`
             set the line width of the plot, default = 2
 
@@ -1165,9 +1150,6 @@ class maker(ionTrails,  specTrails):
 
         legend:  `bool`
             whether to include a matplotlib legend, default = True
-
-        fontsize:  `int`
-            fontsize for the matplotlib xlabel and ylabel, default = 16
 
         figsize:  two element `list` or `ndarray`
             sets the figure size when using matplotlib subplots to initiate the object style plotting,
@@ -1252,9 +1234,9 @@ class maker(ionTrails,  specTrails):
                     print(' nonzed = %i'%(nonzed.sum()))
 #                    print('intensity = %10.2e'%(match[idx]['intensity']))
             if legend:
-                ax.legend(loc=loc, fontsize=fontsize)
-            ax.set_ylabel('Emission Measure (cm$^{-5}$)', fontsize=fontsize)
-            ax.set_xlabel('Temperature (K)',  fontsize=fontsize)
+                ax.legend(loc=loc)
+            ax.set_ylabel('Emission Measure (cm$^{-5}$)')
+            ax.set_xlabel('Temperature (K)')
         elif vs != 'T':
             fig,  ax = plt.subplots(figsize=figsize, tight_layout = True)
             if dens[0] == dens[-1]:
@@ -1279,21 +1261,21 @@ class maker(ionTrails,  specTrails):
                     lblx = dens
                     lbly = em[idx][realgood]*1.05
                     if hpos[idx] =='b':
-                        ax.text(lblx[0], lbly[0]*adjust[idx], wvlstr.strip(), fontsize=14)
-                        ax.text(lblx[-1], lbly[-1]*adjust[idx], wvlstr.strip(), horizontalalignment='right', fontsize=14)
+                        ax.text(lblx[0], lbly[0]*adjust[idx], wvlstr.strip())
+                        ax.text(lblx[-1], lbly[-1]*adjust[idx], wvlstr.strip(), horizontalalignment='right')
                     elif hpos[idx] == 'r':
-                        ax.text(lblx[-1], lbly[-1]*adjust[idx], wvlstr.strip(), horizontalalignment='right', fontsize=14)
+                        ax.text(lblx[-1], lbly[-1]*adjust[idx], wvlstr.strip(), horizontalalignment='right')
                     elif hpos[idx] == 'l':
-                        ax.text(lblx[0], lbly[0]*adjust[idx], wvlstr.strip(), fontsize=14)
+                        ax.text(lblx[0], lbly[0]*adjust[idx], wvlstr.strip())
 
                 else:
                     print('no values for idx = %5i wvl = %8.2f'%(idx, match[idx]['wvl']))
                     print(' nonzed = %i'%(nonzed.sum()))
                     print('intensity = %10.2e'%(match[idx]['obsIntensity']))
             if legend:
-                ax.legend(loc=loc, fontsize=fs)
-            ax.set_ylabel('Emission Measure (cm$^{-5}$)', fontsize=fontsize)
-            ax.set_xlabel('Electron Density (cm$^{-3}$)',  fontsize=fontsize)
+                ax.legend(loc=loc)
+            ax.set_ylabel('Emission Measure (cm$^{-5}$)')
+            ax.set_xlabel('Electron Density (cm$^{-3}$)')
             fig.tight_layout()
         self.EmPlotObj = {'fig':fig, 'ax':ax}
 #        return fig,  ax
@@ -1387,7 +1369,7 @@ class maker(ionTrails,  specTrails):
         #
         # -------------------------------------------------------------------------
         #
-    def diffPlot(self, ratio = 'diffOverInt',  title=False, loc='upper right',  fontsize=16, figsize=[7., 5.]):
+    def diffPlot(self, ratio = 'diffOverInt',  title=False, loc='upper right', figsize=[7., 5.]):
         """
 
         Parameters
@@ -1399,9 +1381,6 @@ class maker(ionTrails,  specTrails):
 
         title:  bool
             whether to plot the title or not
-
-        fontsize:  int
-            fontsize for matplotlib plots
 
         figsize:  2d list, ndarray
             the figure size for the plot
@@ -1437,13 +1416,13 @@ class maker(ionTrails,  specTrails):
             ax.axhline(diffMean - 2.*diffStd, color='b', lw=2, linestyle='dotted')  #, label='2 std')
             ax.axhline(diffMean + 3.*diffStd, color='g', lw=2, linestyle='dotted', label='3 std')
             ax.axhline(diffMean - 3.*diffStd, color='g', lw=2, linestyle='dotted')  #, label='3 std')
-            ax.set_xlabel('Wavelength (\u212B)', fontsize=14)
+            ax.set_xlabel('Wavelength (\u212B)')
 
-            ax.set_ylabel(ylabels[ratioIndex], fontsize=14)
+            ax.set_ylabel(ylabels[ratioIndex])
             if title:
                 mytitle = 'diff Mean %10.3f  diff Std  %10.3f'%(diffMean, diffStd)
-                ax.set_title(mytitle, fontsize=fontsize)
-            ax.legend(loc=loc, fontsize=12) #  bbox_to_anchor=(0.99, 1.0),
+                ax.set_title(mytitle)
+            ax.legend(loc=loc)   #  bbox_to_anchor=(0.99, 1.0),
             fig.tight_layout()
             self.DiffPlot = {'fig':fig, 'ax':ax}
         else:

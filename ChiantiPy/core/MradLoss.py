@@ -328,16 +328,14 @@ class mradLoss(ionTrails, specTrails):
         '''
         to plot the radiative losses vs temperature
         '''
-        fontsize = 16
         temp = self.RadLoss['temperature']
         rate = self.RadLoss['rate']
         plt.loglog(temp, rate)
-#        plt.ylabel(r'erg  s$^{-1}$  ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$',fontsize=fontsize)
-        plt.xlabel(self.RadLoss['xlabel'],fontsize=fontsize)
-        plt.ylabel(self.RadLoss['ylabel'],fontsize=fontsize)
+        plt.xlabel(self.RadLoss['xlabel'])
+        plt.ylabel(self.RadLoss['ylabel'])
         if title:
             title = 'Radiative loss rate,  minAbund = %10.2e'%(self.MinAbund)
             if self.EDensity.size == 1:
                 title += ', density = %10.2e'%(self.EDensity)
-            plt.title(title, fontsize=fontsize)
+            plt.title(title)
         plt.tight_layout()

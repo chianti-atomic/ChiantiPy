@@ -14,7 +14,7 @@ from scipy.special import exp1
 import ChiantiPy.tools.constants as const
 
 
-def between(array,limits):
+def between(array, limits):
     """
     Find the indices of `array` corresponding to values in the range given by `limits`
 
@@ -31,10 +31,8 @@ def between(array,limits):
     """
     array = np.asarray(array)
     nlines = len(array)
-#    hi = np.where(array >= limits[0],range(1,nlines+1),0)
-#    lo = np.where(array <= limits[1],range(1,nlines+1),0)
-    hi = np.where(array >= limits[0],list(range(1,nlines+1)),0)
-    lo = np.where(array <= limits[1],list(range(1,nlines+1)),0)
+    hi = np.where(array >= limits[0], list(range(1,nlines+1)), 0)
+    lo = np.where(array <= limits[1], list(range(1,nlines+1)), 0)
 
     hilo = hi&lo
     out = [a -1  for a in hilo if a > 0]

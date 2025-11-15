@@ -200,65 +200,45 @@ class ionTrails(object):
                 index = 0
             intensity = self.Intensity['intensity'][index]
             print('using index = %5i specifying temperature = %10.2e, eDensity =  %10.2e'%(index, temperature[index], eDensity[index]))
-            #dstr = ' -  Density = %10.2e (cm$^{-3}$)' %(eDensity[index])
-            #tstr = ' -  T = %10.2e (K)' %(temperature[index])
         elif ndens == 1 and ntemp > 1:
             if integrated:
                 intensity=self.Intensity['integrated']
                 print('using integated/summed intensities')
-                #tstr=' -  integrated/summed intensities \n'
-                #dstr='   Density between %10.2e and %10.2e (cm$^{-3}$)'%(eDensity[0],  eDensity[-1])
             elif index is None:
                 index = ntemp//2
                 print('using index = %5i specifying temperature =  %10.2e'%(index, temperature[index]))
                 self.Message = 'using index = %5i specifying temperature =  %10.2e'%(index, temperature[index])
                 intensity=self.Intensity['intensity'][index]
-                #tstr=' -  T = %10.2e (K)' % temperature[index]
-                #dstr=' -  Density = %10.2e (cm$^{-3}$)' % eDensity[index]
             else:
                 print('using index = %5i specifying temperature =  %10.2e'%(index, temperature[index]))
                 self.Message = 'using index = %5i specifying temperature =  %10.2e'%(index, temperature[index])
                 intensity=self.Intensity['intensity'][index]
-                #tstr=' -  T = %10.2e (K)' % temperature[index]
-                #dstr=' -  Density = %10.2e (cm$^{-3}$)' % eDensity[index]
         elif ndens > 1 and ntemp == 1:
             if integrated:
                 intensity=self.Intensity['integrated']
                 print('using integated/summed intensities')
-                #tstr=' -  integrated/summed intensities \n'
-                #dstr='   Density between %10.2e and %10.2e (cm$^{-3}$)'%(eDensity[0],  eDensity[-1])
             elif index is None:
                 index = ntemp//2
                 print('using index =%5i specifying eDensity = %10.2e'%(index, eDensity[index]))
                 self.Message = 'using index =%5i specifying eDensity = %10.2e'%(index, eDensity[index])
                 intensity = self.Intensity['intensity'][index]
-                #dstr=' -  Density = %10.2e (cm$^{-3}$)' % eDensity[index]
-                #tstr=' -  T = %10.2e (K)' % temperature[index]
             else:
                 print('using index = %5i specifying temperature =  %10.2e'%(index, temperature[index]))
                 self.Message = 'using index = %5i specifying temperature =  %10.2e'%(index, temperature[index])
                 intensity=self.Intensity['intensity'][index]
-                #tstr=' -  T = %10.2e (K)' % temperature[index]
-                #dstr=' -  Density = %10.2e (cm$^{-3}$)' % eDensity[index]
 
         elif ndens > 1 and ntemp > 1:
             if integrated:
                 intensity=self.Intensity['integrated']
                 print('using integated/summed intensities')
-                #tstr=' -  integrated/summed intensities \n'
-                #dstr='   Density between %10.2e and %10.2e (cm$^{-3}$)'%(eDensity[0],  eDensity[-1])
             elif index is None:
                 index = ntemp//2
                 print('using index = %5i specifying temperature = %10.2e, eDensity =  %10.2e'%(index, temperature[index], eDensity[index]))
                 self.Message = 'using index = %5i specifying temperature = %10.2e, eDensity =  %10.2e'%(index, temperature[index], eDensity[index])
                 intensity = self.Intensity['intensity'][index]
-                #dstr=' -  Density = %10.2e (cm$^{-3}$)' % eDensity[index]
-                #tstr=' -  T = %10.2e (K)' % temperature[index]
             else:
                 intensity = self.Intensity['intensity'][index]
                 print('using index = %5i specifying temperature = %10.2e, eDensity =  %10.2e'%(index, temperature[index], eDensity[index]))
-                #dstr=' Density = %10.2e (cm$^{-3}$)' % eDensity[index]
-                #tstr=' T = %10.2e (K)' % temperature[index]
 
         wvlIndex = util.between(wvl, wvlRange)
 
@@ -268,8 +248,6 @@ class ionTrails(object):
         if 'errorMessage' in intens.keys():
             print(' errorMessage:  %s'%(intens['errorMessage']))
             return
-#        intensity = intens['intensity']
-        ionS = intens['ionS']
         wvl = intens['wvl']
         lvl1 = intens['lvl1']
         lvl2 = intens['lvl2']
@@ -340,7 +318,7 @@ class ionTrails(object):
         print('   ')
         print(' ------------------------------------------')
         print('   ')
-#        print(fmt1%('Ion','lvl1','lvl2','lower','upper','Wvl(A)','Intensity','A value','Obs'))
+
         title = fmtTitle%('Ion', 'lvl1', 'lvl2', 'lower', 'upper', self.Labels['listXlabel'],
             'Intensity', 'A value', 'Obs')
         print(title)
@@ -364,7 +342,7 @@ class ionTrails(object):
 
 
     def intensityPlot(self, wvlRange=None, index=None, top=10, integrated=False,  linLog='lin',
-        relative=False, doLabel=True, doTitle=True, lw=1,  verbose=False, plotFile=0, em=0):
+        relative=False, doLabel=True, doTitle=True, lw=1,  verbose=False, plotFile=False, em=None):
         """
         Plot the line intensities. Uses `Intensity` if it already exists. If
         not, calls the `intensity` method.
@@ -546,17 +524,16 @@ class ionTrails(object):
                         rotation='vertical')
 
         if isinstance(self.Intensity['xlabel'], np.ndarray):
-            plt.xlabel(self.Intensity['xlabel'][0], fontsize=14)
+            plt.xlabel(self.Intensity['xlabel'][0])
         elif isinstance(self.Intensity['xlabel'], str):
-            plt.xlabel(self.Intensity['xlabel'], fontsize=14)
+            plt.xlabel(self.Intensity['xlabel'])
 
         if isinstance(self.Intensity['ylabel'], np.ndarray):
-            plt.ylabel(self.Intensity['ylabel'][0], fontsize=14)
+            plt.ylabel(self.Intensity['ylabel'][0])
         elif isinstance(self.Intensity['ylabel'], str):
-            plt.ylabel(self.Intensity['ylabel'], fontsize=14)
-#        plt.ylabel(ylabel, fontsize=14)
+            plt.ylabel(self.Intensity['ylabel'])
         if doTitle:
-            plt.title(title + tstr + dstr, fontsize=14)
+            plt.title(title + tstr + dstr)
         if linLog == 'lin':
             if doLabel:
                 plt.axis([wvlRange[0], wvlRange[1], 0., 1.5*intensity.max()])
@@ -606,7 +583,7 @@ class ionTrails(object):
                 print(' intensities not calculated and emiss() is unable to calculate them')
                 print(' perhaps the temperature and/or eDensity are not set')
                 return
-        fontsize=14
+
         eDensity = self.EDensity
         temperature = self.Temperature
         ntemp = temperature.size
@@ -744,13 +721,13 @@ class ionTrails(object):
 #        print(' ymin:  %10.2e  ymax:  %10.2e'%(ymin, ymax))
         if ndens == 1:
             plt.xlim(xvalues.min(),xvalues.max())
-            plt.xlabel(xlbl,fontsize=fontsize)
-            plt.ylabel(ylabel,fontsize=fontsize)
+            plt.xlabel(xlbl)
+            plt.ylabel(ylabel)
             plt.ylim(ymin/1.2, 1.2*ymax)
         elif ntemp == 1:
             ax2 = plt.twiny()
             xlblDen=r'Electron Density (cm$^{-3}$)'
-            plt.xlabel(xlblDen, fontsize=fontsize)
+            plt.xlabel(xlblDen)
             plt.loglog(eDensity,intensity[:, topLines[top-1]]/maxAll, visible=False)
             ax2.xaxis.tick_top()
             plt.ylim(ymin/1.2, 1.2*ymax)
@@ -758,9 +735,6 @@ class ionTrails(object):
             plt.ylim(ymin/1.2, 1.2*ymax)
         plt.tight_layout()
         plt.draw()
-        #  need time to let matplotlib finish plotting
-#        time.sleep(0.5)
-        # get line selection
         selectTags = []
 
 
@@ -788,16 +762,7 @@ class ionTrails(object):
                 elif self.Defaults['wavelength'] == 'kev':
                     alabel = '%10.3f'%(wvl[itop])
 
-#            alabel += '%s'%(p2[itop])
-#            if ionNum == 1:
-#                selectTags.append(str(wvl[itop]))
-#            else:
-#                selectTags.append(ionS[itop]+ ' '+ str(wvl[itop]))
             selectTags.append(alabel)
-#            if ionNum == 1:
-#                selectTags.append(alabel)
-#            else:
-#                selectTags.append(ionS[itop]+ ' '+ alabel)
         numden = chGui.gui.choice2Dialog(selectTags)
 
         # num_idx and den_idx are tuples
@@ -824,38 +789,29 @@ class ionTrails(object):
 #        plt.loglog(xvalues,numIntens/denIntens)
         plt.semilogx(xvalues,numIntens/denIntens)
         plt.xlim(xvalues.min(),xvalues.max())
-        plt.xlabel(xlbl,fontsize=fontsize)
-        plt.ylabel('Ratio ('+self.Defaults['flux']+')',fontsize=fontsize)
+        plt.xlabel(xlbl)
+        plt.ylabel('Ratio ('+self.Defaults['flux']+')')
         if ionNum == 1:
 #            desc = ionS[0]
             desc = ''
         else:
             desc = ''
         for aline in num_idx:
-#            if ionNum == 1:
-#                desc += ' %s'%(selectTags[aline]) #str(wvl[topLines[aline]])
-#            else:
-#                desc += ' ' + ionS[topLines[aline]] + ' ' + str(wvl[topLines[aline]])
             desc += selectTags[aline]
         desc += ' / '
         for aline in den_idx:
-#            if ionNum == 1:
-#                desc += ' %s'%(selectTags[aline]) #str(wvl[topLines[aline]])
-#            else:
-#                desc += ' ' + ionS[topLines[aline]] + ' ' + str(wvl[topLines[aline]])
             desc += selectTags[aline]
 
         if ndens == ntemp and ntemp > 1:
-            plt.text(0.07, 0.5,desc, horizontalalignment='left', verticalalignment='center', fontsize=fontsize,  transform = ax.transAxes)
-            #
+            plt.text(0.07, 0.5,desc, horizontalalignment='left', verticalalignment='center',  transform = ax.transAxes)
             ax2 = plt.twiny()
             xlblDen=r'Electron Density (cm$^{-3}$)'
-            plt.xlabel(xlblDen, fontsize=fontsize)
+            plt.xlabel(xlblDen)
             plt.loglog(eDensity,numIntens/denIntens, visible=False)
             ax2.xaxis.tick_top()
         else:
             if doTitle:
-                plt.title(desc,fontsize=fontsize)
+                plt.title(desc)
         plt.tight_layout()
 
         cnt = desc.count(' ')

@@ -20,14 +20,6 @@ class specTrails(object):
     """
 
 
-#    def __init__(self, temperature, density):
-#        self.Temperature = temperature
-#        self.EDensity = density
-#        self.AbundanceName = chdata.Defaults['abundfile']
-#        self.AbundAll = chdata.Abundance[self.AbundanceName]['abundance']
-#        #
-        # ---------------------------------------------------------------------------
-        #
     def ionGate(self, elementList = None, ionList = None, minAbund=None, doLines=1, doContinuum=1,
         doWvlTest=1, doIoneqTest=1, includeDiel=False,  verbose=False):
         '''
@@ -174,9 +166,7 @@ class specTrails(object):
 
                 if doWvlTest:
                     wvlTestMin = wvlRange[0] <= wmax
-#                    print(' wvlRange[0] %10.2e <= wmax %10.2e'%(wvlRange[0],  wmax))
                     wvlTestMax = wvlRange[1] >= wmin
-#                    print(' wvlRange[1] %10.2e >= wmin %10.2e'%(wvlRange[1],  wmin))
                 else:
                     wvlTestMin = 1
                     wvlTestMax = 1
@@ -393,18 +383,7 @@ class specTrails(object):
             if set to None, all lines are plotted
 
         '''
-        fs = 14
-        #  fontsize for labels:
-        lfs = 12
         plt.figure()
-#        mask = self.Em > 1.
-#
-#        if mask.sum() == 0:
-#            self.Ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$ ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
-#        else:
-#            self.Ylabel = r'erg cm$^{-2}$ s$^{-1}$ sr$^{-1} \AA^{-1}$'
-        #
-#        self.Xlabel = 'Wavelength ('+self.Defaults['wavelength'].capitalize() +')'
         #
         if hasattr(self, 'Spectroscopic'):
             title1 = self.Spectroscopic
@@ -518,10 +497,10 @@ class specTrails(object):
                 elif 'wvl' in sorted(self.Spectrum.keys()):
                     plt.plot(self.Spectrum['wvl'], spectrum)
                 title = title1 + ' Temperature = %10.2e K for index = %3i'%(self.Temperature[index],  index)
-        plt.xlabel(self.Spectrum['xlabel'],  fontsize=fs)
-        plt.ylabel(self.Spectrum['ylabel'],  fontsize=fs)
+        plt.xlabel(self.Spectrum['xlabel'])
+        plt.ylabel(self.Spectrum['ylabel'])
         if doTitle:
-            plt.title(title, fontsize=fs)
+            plt.title(title)
 
         if doLabel:
             useFilter = self.Spectrum['filter']
@@ -534,12 +513,10 @@ class specTrails(object):
                 plt.plot([awvl,  awvl], [0.,  1.2*spIntens], 'k',  lw=lw)
                 ypos = 1.25*spIntens
                 lbl = lineIonSpectr[iwvl] + ' %8.3f'%(awvl)
-                plt.text(awvl,  ypos, lbl, va='bottom', ha='center',rotation='vertical',  fontsize=lfs)
+                plt.text(awvl,  ypos, lbl, va='bottom', ha='center',rotation='vertical')
 
         wdx = util.between(self.Spectrum['wavelength'],  wvlRange)
         ymax = spectrum[wdx].max()
-#        plt.xlim(wvlRange)
-#        plt.ylim([0., ylim[1]])
         if doLabel:
             plt.axis([wvlRange[0],  wvlRange[1],  0., 1.8*ymax])
         else:

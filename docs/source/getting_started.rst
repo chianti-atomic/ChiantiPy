@@ -9,7 +9,7 @@ Prerequisites
 
 .. _CHIANTI: http://www.chiantidatabase.org/
 
-* Python3_ (3.8 is the current development version)
+* Python3_ (3.13 is the current development version)
 
 .. _PYTHON3:  http://www.python.org
 
@@ -21,7 +21,7 @@ Prerequisites
 
 .. _Scipy:  http://www.scipy.org/
 
-* Matplotlib_ (currently developed with 3.3.4)
+* Matplotlib_ (currently developed with 3.10)
 
 .. _Matplotlib:  http://matplotlib.sourceforge.net/
 

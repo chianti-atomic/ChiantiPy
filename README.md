@@ -9,30 +9,8 @@ ChiantiPy is the Python interface to the [CHIANTI atomic database](http://www.ch
 CHIANTI provides a database of atomic data that can be used to interpret the emission of spectral lines and continua emitted from high-temperature, optically-thin astrophysical sources.  The CHIANTI project provides a suite of routines written in Interactive Data Language (IDL) to access the database and calculate various quantities for use in interpreting observed spectra or producing synthetic spectra.  As of ChiantiPy 0.10.0, the CHIANTI database version 10 or later is required
 
 ## Installation
-The following dependencies are required to run ChiantiPy,
 
-* [Python3](https://www.python.org/) (Python 3 is now required as of version 0.8.0)
-* [Numpy](http://www.numpy.org/)
-* [Scipy](https://www.scipy.org/)
-* [Matplotlib](http://matplotlib.org/)
-* [ipyparallel](https://github.com/ipython/ipyparallel)
-
-The following two are extremely useful for running Python programs
-* [IPython](http://ipython.org)
-* [Jupyter](http://jupyter.org/)
-
-
-Optionally, if you'd like to use the GUI dialogs,
-
-* [PyQt5](https://riverbankcomputing.com/software/pyqt/intro)
-
-If you are not familiar with installing Python and the needed dependencies, we recommend the [Anaconda platform](https://www.continuum.io/downloads). Next, download the [CHIANTI database](http://www.chiantidatabase.org/chianti_download.html), version 10.0 or later. Assuming you've placed the CHIANTI tree in `$HOME`, set the environment variable in your `.bashrc` file,
-```Shell
-export XUVTOP=$HOME/MY_CHIANTI_DIRECTORY
-```
-should point to the top directory of your CHIANTI distribution
-
-The release is also available on [PyPI](https://pypi.org/project/ChiantiPy/)
+ChiantiPy is available on [PyPI](https://pypi.org/project/ChiantiPy/)
 
 ```Shell
 $ python3 -m pip install ChiantiPy
@@ -44,6 +22,19 @@ $ git clone --recursive https://github.com/chianti-atomic/ChiantiPy.git
 $ cd ChiantiPy
 $ python setup.py install
 ```
+
+Another method is to use the [Anaconda platform](https://www.continuum.io/downloads). Next, download the [CHIANTI database](http://www.chiantidatabase.org/chianti_download.html), version 10.0 or later. Assuming you've placed the CHIANTI tree in `$HOME`, set the environment variable in your `.bashrc` file,
+
+```Shell
+setenv XUVTOP $HOME/MY_CHIANTI_DIRECTORY
+
+or
+
+export XUVTOP=$HOME/MY_CHIANTI_DIRECTORY
+```
+should point to the top directory of your CHIANTI distribution
+
+
 
 ## Usage
 As a quick example, we'll calculate the populations of the top 10 levels of Fe XIV as a function of temperature at constant density and plot them:

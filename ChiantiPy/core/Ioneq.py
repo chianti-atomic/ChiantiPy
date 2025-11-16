@@ -245,10 +245,8 @@ class ioneq(object):
 
         if bw:
             linestyle = ['k-','k--', 'k-.', 'k:']
-            lw = 2
         else:
             linestyle = ['b-','r--', 'g-.', 'm:']
-            lw = 2
         #
         xrange = list(tRange)
         yrange = yr
@@ -256,9 +254,9 @@ class ioneq(object):
         fig, ax = plt.subplots(tight_layout = True)
         iz = stages[0]
         if semilogx:
-            ax.semilogx(self.Temperature, ioneq[iz-1], linestyle[0], lw=lw)
+            ax.semilogx(self.Temperature, ioneq[iz-1], linestyle[0])
         else:
-            ax.loglog(self.Temperature, ioneq[iz-1], linestyle[0], lw=lw)
+            ax.loglog(self.Temperature, ioneq[iz-1], linestyle[0])
 
         if label:
             idx = self.Ioneq[iz-1] == self.Ioneq[iz-1].max()
@@ -271,9 +269,9 @@ class ioneq(object):
 
         for iz in stages[1:]:
             if semilogx:
-                ax.semilogx(self.Temperature, ioneq[iz-1], linestyle[0], lw=lw)
+                ax.semilogx(self.Temperature, ioneq[iz-1], linestyle[0])
             else:
-                ax.loglog(self.Temperature, ioneq[iz-1], linestyle[0], lw=lw)
+                ax.loglog(self.Temperature, ioneq[iz-1], linestyle[0])
             if label:
                 idx = ioneq[iz-1] == ioneq[iz-1].max()
                 if idx.sum() > 1:
@@ -300,13 +298,13 @@ class ioneq(object):
                     atitle += '  & '+ result['ioneqname'].replace('.ioneq', '')
                     atitle += ' '+linestyle[0]
                     for iz in stages:
-                        ax.plot(result['ioneqTemperature'], result['ioneqAll'][self.Z-1, iz-1],linestyle[1], lw=lw)
+                        ax.plot(result['ioneqTemperature'], result['ioneqAll'][self.Z-1, iz-1],linestyle[1])
             elif type(oplot) == type('string'):
                 atitle += '  & ' + oplot
                 result = io.ioneqRead(ioneqName=oplot)
                 if result != False:
                     for iz in stages:
-                        ax.plot(result['ioneqTemperature'], result['ioneqAll'][self.Z-1, iz-1],linestyle[1], lw=lw)
+                        ax.plot(result['ioneqTemperature'], result['ioneqAll'][self.Z-1, iz-1],linestyle[1])
             elif type(oplot) == type([]):
                 for iplot in range(len(oplot)):
                     result = io.ioneqRead(ioneqName=oplot[iplot])
@@ -314,7 +312,7 @@ class ioneq(object):
                     if result != False:
                         atitle += '  & '+oplot[iplot]+' '+linestyle[iplot%3]
                         for iz in stages:
-                            ax.plot(result['ioneqTemperature'], result['ioneqAll'][self.Z-1, iz-1],linestyle[1], lw=lw)
+                            ax.plot(result['ioneqTemperature'], result['ioneqAll'][self.Z-1, iz-1],linestyle[1])
             else:
                 print(' oplot file not understood %s'%(oplot))
         if title:
@@ -359,10 +357,8 @@ class ioneq(object):
 
         if bw:
             linestyle = ['k-','k--', 'k-.', 'k:']
-            lw = 2
         else:
             linestyle = ['b-','r--', 'g-.', 'm:']
-            lw = 2
         #
         xrange = list(tRange)
         yrange = yr
@@ -370,9 +366,9 @@ class ioneq(object):
         fig, ax = plt.subplots(tight_layout = True)
         iz = stages[0]
         if semilogx:
-            ax.semilogx(self.Temperature, ioneq[iz-1], linestyle[0], lw=lw)
+            ax.semilogx(self.Temperature, ioneq[iz-1], linestyle[0])
         else:
-            ax.loglog(self.Temperature, ioneq[iz-1], linestyle[0], lw=lw)
+            ax.loglog(self.Temperature, ioneq[iz-1], linestyle[0])
 
         if label:
             idx = self.Ioneq[iz-1] == self.Ioneq[iz-1].max()
@@ -384,9 +380,9 @@ class ioneq(object):
 
         for iz in stages[1:]:
             if semilogx:
-                ax.semilogx(self.Temperature, ioneq[iz-1], linestyle[0], lw=lw)
+                ax.semilogx(self.Temperature, ioneq[iz-1], linestyle[0])
             else:
-                ax.loglog(self.Temperature, ioneq[iz-1], linestyle[0], lw=lw)
+                ax.loglog(self.Temperature, ioneq[iz-1], linestyle[0])
             if label:
                 idx = ioneq[iz-1] == ioneq[iz-1].max()
                 if idx.sum() > 1:
@@ -413,13 +409,13 @@ class ioneq(object):
                     atitle += '  & '+ result['ioneqname'].replace('.ioneq', '')
                     atitle += ' '+linestyle[0]
                     for iz in stages:
-                        ax.plot(result['ioneqTemperature'], result['ioneqAll'][self.Z-1, iz-1],linestyle[1], lw=lw)
+                        ax.plot(result['ioneqTemperature'], result['ioneqAll'][self.Z-1, iz-1],linestyle[1])
             elif type(oplot) == type('string'):
                 atitle += '  & ' + oplot
                 result = io.ioneqRead(ioneqName=oplot)
                 if result != False:
                     for iz in stages:
-                        ax.plot(result['ioneqTemperature'], result['ioneqAll'][self.Z-1, iz-1],linestyle[1], lw=lw)
+                        ax.plot(result['ioneqTemperature'], result['ioneqAll'][self.Z-1, iz-1],linestyle[1])
             elif type(oplot) == type([]):
                 for iplot in range(len(oplot)):
                     result = io.ioneqRead(ioneqName=oplot[iplot])
@@ -427,7 +423,7 @@ class ioneq(object):
                     if result != False:
                         atitle += '  & '+oplot[iplot]+' '+linestyle[iplot%3]
                         for iz in stages:
-                            ax.plot(result['ioneqTemperature'], result['ioneqAll'][self.Z-1, iz-1],linestyle[1], lw=lw)
+                            ax.plot(result['ioneqTemperature'], result['ioneqAll'][self.Z-1, iz-1],linestyle[1])
             else:
                 print(' oplot file not understood %s'%(oplot))
         if title:
@@ -462,10 +458,8 @@ class ioneq(object):
 
         if bw:
             linestyle = ['k-','k--', 'k-.', 'k:']
-            lw = 2
         else:
             linestyle = ['b-','r--', 'g-.', 'm:']
-            lw = 2
         #
         goodTn = self.Ioneq[stageN - 1, :] > 0.
         goodTd = self.Ioneq[stageD -1, : ] > 0.
@@ -480,9 +474,9 @@ class ioneq(object):
         xyr.extend(list(yr))
         #
         if semilogx:
-            plt.semilogx(goodT, goodR, linestyle[0], lw=lw, label=alabel)
+            plt.semilogx(goodT, goodR, linestyle[0],  label=alabel)
         else:
-            plt.loglog(goodT, goodR, linestyle[0], lw=lw, label=alabel)
+            plt.loglog(goodT, goodR, linestyle[0], label=alabel)
         plt.xlabel('Temperature (K)')
         plt.ylabel('Ratio')
         if title:

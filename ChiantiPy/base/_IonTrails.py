@@ -342,7 +342,7 @@ class ionTrails(object):
 
 
     def intensityPlot(self, wvlRange=None, index=None, top=10, integrated=False,  linLog='lin',
-        relative=False, doLabel=True, doTitle=True, lw=1,  verbose=False, plotFile=False, em=None):
+        relative=False, doLabel=True, doTitle=True, verbose=False, plotFile=False, em=None):
         """
         Plot the line intensities. Uses `Intensity` if it already exists. If
         not, calls the `intensity` method.
@@ -366,9 +366,8 @@ class ionTrails(object):
             values
         doLabel:  = True, then lines are labeled with ion and wavelength (default=True)
         doTitle:  = True, then a title is applied to the plot (default=True)
-        lw:  `int`, width of the label line in matplotlib units (default=1)
         plotFile:
-            default=0, the plot is not saved to a file
+            default=False, the plot is not saved to a file
             othewise, the plot is saved to the 'plotFile'
         em:  emission measure
             if an Intensity attribute needs be created, then the emission measure is applied
@@ -510,14 +509,14 @@ class ionTrails(object):
             lbl = ionSpectr[idx] + ' %7.3f'%(wvl[idx])
             if linLog == 'lin':
                 yy=[0., intensity[idx]]
-                plt.plot(xx, yy,  'k',  lw=lw)
+                plt.plot(xx, yy,  'k')
                 if doLabel:
                     ypos = intensity[idx] + offset
                     plt.text(wvl[idx],  ypos, lbl, va='bottom', ha='center',
                         rotation='vertical')
             else:
                 yy=[ymin/10., intensity[idx]]
-                plt.semilogy(xx, yy,  'k',  lw=lw)
+                plt.semilogy(xx, yy,  'k')
                 if doLabel:
                     ypos = 1.1*intensity[idx]
                     plt.text(wvl[idx],  ypos, lbl, va='bottom', ha='center',

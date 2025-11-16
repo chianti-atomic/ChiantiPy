@@ -1544,7 +1544,7 @@ class ion(ioneqOne, ionTrails, specTrails):
                 # for some low temperature, populations can not be calculated
                 good = pop[:, lvl-1] > 0
                 if pub:
-                    plt.loglog(temperature[good],pop[good,lvl-1], 'k',lw=2, label=str(lvl))
+                    plt.loglog(temperature[good],pop[good,lvl-1], 'k', label=str(lvl))
                 else:
                     plt.loglog(temperature[good],pop[good,lvl-1], label=str(lvl))
                 skip = 3
@@ -1598,9 +1598,9 @@ class ion(ioneqOne, ionTrails, specTrails):
                  # for some low temperature, populations can not be calculated
                 good = pop[:, lvl-1] > 0.
                 if scale:
-                    plt.loglog(eDensity[good],pop[good,lvl-1]/eDensity[good], lw=1.5, label=str(lvl))
+                    plt.loglog(eDensity[good],pop[good,lvl-1]/eDensity[good], label=str(lvl))
                 elif pub:
-                    plt.loglog(eDensity[good],pop[good,lvl-1], 'k', lw=2, label=str(lvl))
+                    plt.loglog(eDensity[good],pop[good,lvl-1], 'k', label=str(lvl))
                 else:
                     plt.loglog(eDensity[good],pop[good,lvl-1], label=str(lvl))
                 skip = 3
@@ -1661,7 +1661,7 @@ class ion(ioneqOne, ionTrails, specTrails):
                 # for some low temperature, populations can not be calculated
                 good = pop[:, lvl-1] > 0
                 if pub:
-                    plt.loglog(temperature[good],pop[good,lvl-1], 'k', lw=2)
+                    plt.loglog(temperature[good],pop[good,lvl-1], 'k')
                 else:
                     plt.loglog(temperature[good],pop[good,lvl-1])
                 skip = 3

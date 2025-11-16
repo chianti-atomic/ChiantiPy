@@ -349,7 +349,7 @@ class specTrails(object):
 
 
     def spectrumPlot(self,  wvlRange=None, index=None, integrated=False, saveFile=False, linLog = 'lin',
-        doLabel=True, lw=1, doTitle=True, top=10):
+        doLabel=True, doTitle=True, top=10):
         '''
         to plot the spectrum as a function of wavelength
 
@@ -372,8 +372,6 @@ class specTrails(object):
 
         doLabel: `bool`
             if set to True, labels of the top spectral lines are added
-
-        lw:  `int`, width of the label line in matplotlib units (default=1)
 
         doTitle:  `bool` if True, then a title is applied to the plot (default=True)
 
@@ -510,7 +508,7 @@ class specTrails(object):
                 # need to take into account the continuum
                 idx = np.argmin(np.abs(lineWvl[iwvl] - self.Wavelength))
                 spIntens = filterFactor*lineIntensity[iwvl] + continuum[idx]
-                plt.plot([awvl,  awvl], [0.,  1.2*spIntens], 'k',  lw=lw)
+                plt.plot([awvl,  awvl], [0.,  1.2*spIntens], 'k')
                 ypos = 1.25*spIntens
                 lbl = lineIonSpectr[iwvl] + ' %8.3f'%(awvl)
                 plt.text(awvl,  ypos, lbl, va='bottom', ha='center',rotation='vertical')

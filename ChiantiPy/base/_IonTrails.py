@@ -77,7 +77,7 @@ class ionTrails(object):
 
 
     def intensityList(self, index=None, wvlRange=None, wvlRanges=None, top=10, integrated=False,
-        relative=0, outFile=0, rightDigits=4):
+        relative=False, outFile=False, rightDigits=4):
         """
         List the line intensities. Checks to see if there is an existing Intensity attribute.
         If it exists, then those values are used.
@@ -223,7 +223,7 @@ class ionTrails(object):
                 self.Message = 'using index =%5i specifying eDensity = %10.2e'%(index, eDensity[index])
                 intensity = self.Intensity['intensity'][index]
             else:
-                print('using index = %5i specifying temperature =  %10.2e'%(index, temperature[index]))
+                print('using index = %5i specifying temperature =  %10.2e and eDensity = %10.2e'%(index, temperature[index], eDensity[index]))
                 self.Message = 'using index = %5i specifying temperature =  %10.2e'%(index, temperature[index])
                 intensity=self.Intensity['intensity'][index]
 

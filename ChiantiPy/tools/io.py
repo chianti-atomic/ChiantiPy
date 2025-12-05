@@ -1481,7 +1481,7 @@ def ioneqRead(ioneqName='', minIoneq=1.e-20, verbose=False):
         nlines += 1
     nlines -= 1
     if verbose:
-        print('nlines:  %i'%(nlines))
+        print('nlines:  %i %s'%(nlines,  aline))
     #
     #
     header_lineq = FortranRecordReader('2i3,'+str(nTemperature)+'e10.2')

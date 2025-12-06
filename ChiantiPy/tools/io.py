@@ -8,6 +8,7 @@ from datetime import date
 import pickle
 import configparser
 from fnmatch import fnmatch
+from math import log10, floor
 
 import numpy as np
 
@@ -2332,7 +2333,7 @@ def wgfaRead(ions, filename=None, elvlcname=0, total=False, getLatex = False, ve
     return Wgfa
 
 
-def wgfaWrite(info, filename = None, minBranch = 1.e-5, rightDigits = 4, maxLvl1 = None,  comment=None):
+def wgfaWrite(info, filename = None, minBranch = 1.e-5, sig_fig = 6, maxLvl1 = None,  comment=None):
     """
     Write data to a CHIANTI .wgfa file
 
@@ -2356,9 +2357,9 @@ def wgfaWrite(info, filename = None, minBranch = 1.e-5, rightDigits = 4, maxLvl1
         The transition must have a branching ratio greater than the specified minBranch
             to be written to the file.  default = 1.e-5
 
-    rightDigits :  `int`
-        the number of digits to the right of the decimal point in the wavelength
-        default = 5
+    sig_fig :  `int`
+        the number of significant figures for the output wavelength
+        default = 6
 
     maxLvl1 : `int`
         the largest level to be written. default is None
@@ -2386,9 +2387,9 @@ def wgfaWrite(info, filename = None, minBranch = 1.e-5, rightDigits = 4, maxLvl1
         nlvl = max(info['lvl2'])
         totalAvalue = np.zeros(nlvl, np.float64)
         if 'pretty1' in info:
-            pformat = '%5i%5i%15.' + str(rightDigits) + 'f%15.3e%15.3e%30s - %30s'
+            pformat = '%5i%5i%15s%15.3e%15.3e%30s - %30s'
         else:
-            pformat = '%5i%5i%15.' + str(rightDigits) + 'f%15.3e%15.3e'
+            pformat = '%5i%5i%15.s%15.3e%15.3e'
         for itrans, avalue in enumerate(info['avalue']):
             # for autoionization transitions, lvl1 can be less than zero
             if abs(info['lvl1'][itrans]) > 0 and info['lvl2'][itrans] > 0:
@@ -2409,6 +2410,10 @@ def wgfaWrite(info, filename = None, minBranch = 1.e-5, rightDigits = 4, maxLvl1
             else:
                 test4 = True
             if test1 and test2 and test3 and test4:
+                # get the wavelength with the correct number of significant digits
+                def round_sig(x, sig=2):
+                    return round(x, sig-int(floor(log10(abs(x))))-1)
+                wvlStr = str(round_sig(info['wvl'][itrans], sig_fig))
                 if 'pretty1' in info:
                     # generally only useful with NIST data
                     if 'transType' in info:
@@ -2416,10 +2421,11 @@ def wgfaWrite(info, filename = None, minBranch = 1.e-5, rightDigits = 4, maxLvl1
                             lbl2 = info['pretty2']+'  ' + info['transType'][itrans]
                     else:
                         lbl2 =  info['pretty2'][itrans]
-                    pstring = pformat%(info['lvl1'][itrans], info['lvl2'][itrans], info['wvl'][itrans], info['gf'][itrans], avalue, info['pretty1'][itrans].rjust(30), lbl2.ljust(30))
+
+                    pstring = pformat%(info['lvl1'][itrans], info['lvl2'][itrans], wvlStr, info['gf'][itrans], avalue, info['pretty1'][itrans].rjust(30), lbl2.ljust(30))
                     outpt.write(pstring+'\n')
                 else:
-                    pstring = pformat%(info['lvl1'][itrans], info['lvl2'][itrans], info['wvl'][itrans], info['gf'][itrans], avalue)
+                    pstring = pformat%(info['lvl1'][itrans], info['lvl2'][itrans], wvlStr, info['gf'][itrans], avalue)
                     outpt.write(pstring+'\n')
         outpt.write(' -1 \n')
         # if filename in ref, do not repeat

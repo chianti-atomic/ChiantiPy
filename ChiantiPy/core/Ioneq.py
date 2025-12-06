@@ -47,7 +47,7 @@ def ioneqMake(filename, directory = None, temperature = None,  reference = None,
             print('putting file in HOME directory %s'%(os.environ['HOME']))
             fullFilename = os.path.join(os.environ['HOME'])
     nIons = 30
-    z = range(1,  nIons)
+    z = range(1,  nIons + 1)
 
     if temperature is None:
         nT =  50*2 + 1
@@ -64,7 +64,9 @@ def ioneqMake(filename, directory = None, temperature = None,  reference = None,
             pstring += '%6.2f'%(atemp)
         pstring += '\n'
         outpt.write(pstring)
-        for z in range(1, nIons):
+        for z in range(1, nIons + 1):
+            if verbose:
+                print('Z = %i'%(z))
             anioneq = ioneq(z)
             anioneq.calculate(temperature)
             for istage in range(anioneq.Ioneq.shape[0]):

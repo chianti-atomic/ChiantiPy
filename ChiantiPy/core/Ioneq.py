@@ -228,6 +228,8 @@ class ioneq(object):
         or if oplot=True or oplot=1 and a widget will come up so that a file can be selected.
         bw, if True, the plot is made in black and white
         '''
+
+
         if hasattr(self, 'Ioneq'):
             ioneq = getattr(self, 'Ioneq')
         else:
@@ -261,12 +263,16 @@ class ioneq(object):
             ax.loglog(self.Temperature, ioneq[iz-1], linestyle[0])
 
         if label:
-            idx = self.Ioneq[iz-1] == self.Ioneq[iz-1].max()
+            ann = const.Ionstage[iz - 1]
+            idx = self.Ioneq[iz - 1] == self.Ioneq[iz - 1].max()
             if idx.sum() > 1:
                 jdx = np.arange(len(idx))
-                idx = int(jdx[idx].max())
-            ann = const.Ionstage[iz-1]
-            ax.annotate(ann, [self.Temperature[idx], heightAdjust*ioneq[iz-1, idx]], ha='center')  #,
+                kdx = int(jdx[idx].max())
+                ax.annotate(ann, [float(self.Temperature[kdx]), heightAdjust*float(ioneq[iz-1, idx][0])], ha='center')
+#                print('idx:  %i  jdx:  %i   idx:  %i'%(idx,  jdx,  idx))
+            else:
+                ax.annotate(ann, [float(self.Temperature[idx][0]), heightAdjust*float(ioneq[iz-1, idx][0])], ha='center')
+#            ax.annotate(ann, [self.Temperature[idx], heightAdjust*ioneq[iz-1, idx]], ha='center')  #,
 
 
         for iz in stages[1:]:
@@ -275,26 +281,29 @@ class ioneq(object):
             else:
                 ax.loglog(self.Temperature, ioneq[iz-1], linestyle[0])
             if label:
-                idx = ioneq[iz-1] == ioneq[iz-1].max()
-                if idx.sum() > 1:
-                    jdx = np.arange(len(idx))
-                    idx = int(jdx[idx].mean())
-                ann = const.Ionstage[iz-1]
+                idx = ioneq[iz - 1] == ioneq[iz - 1].max()
+#                if idx.sum() > 1:
+#                    jdx = np.arange(len(idx))
+#                    idx = int(jdx[idx].mean())
+#                    print('idx:  %i  jdx:  %i   idx:  %i'%(idx,  jdx,  idx))
+                ann = const.Ionstage[iz - 1]
 
                 tst1 = self.Temperature[idx] > tRange[0]
                 tst2 = self.Temperature[idx] < tRange[1]
                 tst = np.logical_and(tst1,  tst2)
-                if tst:
-                    ax.annotate(ann, [self.Temperature[idx], heightAdjust*ioneq[iz-1, idx]], ha='center')  #,
-
+                if np.any(tst):
+                    #print('idx shape:   %i'%(idx.shape))
+#                    print('ann:  %s'%(ann))
+                    ax.annotate(ann, [float(self.Temperature[idx][0]), heightAdjust*float(ioneq[iz-1, idx][0])], ha='center')  #,
+#
         ax.set_xlabel('Temperature (K)')
         ax.set_ylabel('Ion Fraction')
         aname = self.IoneqName.replace('.ioneq',  '')
         atitle = '%s Ionization Equilibrium for '%(aname)+const.El[self.Z-1].capitalize()
         #
         if oplot:
-            if isinstance(oplot,int):
-                result = io.ioneqRead(ioneqName='')
+            if isinstance(oplot, int):
+                result = io.ioneqRead(ioneqName = '')
 #                print('keys = ', result.keys()
                 if result != False:
                     atitle += '  & '+ result['ioneqname'].replace('.ioneq', '')
@@ -373,12 +382,15 @@ class ioneq(object):
             ax.loglog(self.Temperature, ioneq[iz-1], linestyle[0])
 
         if label:
-            idx = self.Ioneq[iz-1] == self.Ioneq[iz-1].max()
+            ann = const.Ionstage[iz - 1]
+            idx = self.Ioneq[iz - 1] == self.Ioneq[iz - 1].max()
             if idx.sum() > 1:
                 jdx = np.arange(len(idx))
-                idx = int(jdx[idx].max())
-            ann = const.Ionstage[iz-1]
-            ax.annotate(ann, [self.Temperature[idx], heightAdjust*ioneq[iz-1, idx]], ha='center')
+                kdx = int(jdx[idx].max())
+                ax.annotate(ann, [float(self.Temperature[kdx]), heightAdjust*float(ioneq[iz-1, idx][0])], ha='center')
+#                print('idx:  %i  jdx:  %i   idx:  %i'%(idx,  jdx,  idx))
+            else:
+                ax.annotate(ann, [float(self.Temperature[idx][0]), heightAdjust*float(ioneq[iz-1, idx][0])], ha='center')
 
         for iz in stages[1:]:
             if semilogx:
@@ -395,8 +407,8 @@ class ioneq(object):
                 tst1 = self.Temperature[idx] > tRange[0]
                 tst2 = self.Temperature[idx] < tRange[1]
                 tst = np.logical_and(tst1,  tst2)
-                if tst:
-                    ax.annotate(ann, [self.Temperature[idx], heightAdjust*ioneq[iz-1, idx]], ha='center') #,
+                if np.any(tst):
+                    ax.annotate(ann, [float(self.Temperature[idx][0]), heightAdjust*float(ioneq[iz-1, idx][0])], ha='center') #,
 
         ax.set_xlabel('Temperature (K)')
         ax.set_ylabel('Ion Fraction')
@@ -435,7 +447,7 @@ class ioneq(object):
         ax.set_ylim(bottom = yrange[0], top = yrange[1])
         self.IoneqPlotObj = {'fig':fig, 'ax':ax}
 
-    def plotRatio(self, stageN, stageD, tRange=0, yr=0, label=1, title=1,  bw=0, semilogx = 1, verbose=0):
+    def plotRatio(self, stageN, stageD, tRange=False, yr=False, label=True, title=True,  bw=False, semilogx = True, verbose=False):
         '''
         Plots the ratio of the ionization equilibria of two stages of a given element
 

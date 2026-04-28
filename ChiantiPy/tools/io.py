@@ -665,7 +665,7 @@ def eaRead(ions, filename=None):
 
 
 
-def elvlcRead(ions, filename=None, getExtended=False, getLatex=False, verbose=False, useTh=True):
+def elvlcRead(ions, filename=None, getExtended=False, getLatex=False, verbose=False, useTh=False):
     """
     Reads the new format elvlc files.
 
@@ -860,6 +860,8 @@ def elvlcWrite(info, outfile=None, round=0, addLvl=0, includeRyd=False, includeE
             return
         elvlcName = gname + '.elvlc'
     print((' elvlc file name = ', elvlcName))
+    if verbose:
+        print('pretty in info: %s'%('pretty' in info))
     #
 #    if not info.has_key('ecmx'):
 #        info['ecmx'] = np.zeros_like(info['ecm'])
@@ -880,14 +882,24 @@ def elvlcWrite(info, outfile=None, round=0, addLvl=0, includeRyd=False, includeE
     out = open(elvlcName, 'w')
 #    pformat = '%7i%30s%5s%5i%5s%5.1f%15.3f%15.3f'
     pformat = '%7i%30s%5s%5i%5s%5.1f'
+    pformat1 = '%7i%30s%5s%5i%5s%5.1f'
     pformat += '%' + '15.%if'%(round)
     pformat += '%' + '15.%if'%(round)
 
     for i,  aterm in enumerate(info['term']):
         thisTerm = aterm.ljust(29)
         thisLabel = info['label'][i].ljust(4)
-        pstring = pformat%(i+1+addLvl, thisTerm, thisLabel, info['spin'][i], info['spd'][i],
-            info['j'][i], np.round(info['ecm'][i], round), np.round(info['ecmth'][i], round))
+        if 'pretty' not in info:
+            pstring = pformat%(info['lvl'][i] + addLvl, thisTerm, thisLabel, info['spin'][i], info['spd'][i],
+                info['j'][i], np.round(info['ecm'][i], round), np.round(info['ecmth'][i], round))
+        else:
+            term = info['pretty'][i].split()[0]
+            for one in info['pretty'][i].split()[1:-1]:
+                term += ' ' + one
+            thisTerm = term.ljust(29)
+            pstring = pformat%(info['lvl'][i] + addLvl, thisTerm, thisLabel, info['spin'][i], info['spd'][i],
+                info['j'][i], np.round(info['ecm'][i], round), np.round(info['ecmth'][i], round))
+
         if includeRyd:
             pstring += ' , %15.8f , %15.8f'%(info['eryd'][i], info['erydth'][i])
         if includeEv:
@@ -2378,7 +2390,7 @@ def wgfaWrite(info, filename = None, minBranch = 1.e-5, sig = 7, maxLvl1 = None,
     print((' wgfa file name = ', wgfaname))
     if minBranch > 0.:
         info['ref'].append(' minimum branching ratio = %10.2e'%(minBranch))
-    info['ref'].extend([" ", " wavlengths have %i significant figures"%(sig),  " "])
+    info['ref'].extend([" ", "wavelengths displayed with %i significant figures"%(sig),  " "])
     if comment is not None:
         info['ref'].append(comment)
 

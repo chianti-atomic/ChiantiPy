@@ -38,7 +38,7 @@ class ioneqOne(object):
         y2 = splrep(np.log(ioneqTemperature[gioneq]),np.log(thisIoneq[gioneq]),s=0)
         #
         if goodt.sum() > 0:
-            if self.Temperature.size > 1:
+            if self.Ntemp > 1:
                 gIoneq = splev(np.log(self.Temperature[goodt]),y2)   #,der=0)
                 ioneqOne[goodt] = np.exp(gIoneq)
             else:

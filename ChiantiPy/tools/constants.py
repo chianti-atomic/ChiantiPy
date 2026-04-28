@@ -40,6 +40,7 @@ emass = 9.10938215e-28  #  electron mass in gram
 bohr = 0.52917720859e-8  # bohr radius in cm
 hartree = 4.35974434e-11 #  erg
 hartreeEv = 27.21138505
+amu = 1.66053906892e-27   # kg
 #
 # derived constants
 hc = planck*light

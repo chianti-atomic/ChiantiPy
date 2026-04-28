@@ -9,11 +9,66 @@ some functions using os.walk can be replaced by os.path
 import os
 import fnmatch
 from math import trunc, modf
+import builtins
+import array
 import numpy as np
 from scipy import interpolate
 from scipy.special import exp1
 import ChiantiPy.tools.constants as const
 
+
+def attr_check(name, value):
+    """
+
+    :param name: name of the attribute to be created
+    :type name: 'str'
+    :param value: the value of the attribute to be created
+    :type value: 'int', 'float', 'tuple', 'list', 'array', np.ndarray'
+    :return: dict with keys of the name and the returned value
+    :rtype: 'dict'
+
+    """
+    match type(value):
+        case v if v is None:
+            out = value
+            nvalue = 0
+        case v if v is int:
+            out = float(value)
+            nvalue = 1
+        case v if v is float:
+            out = value
+            nvalue = 1
+        case v if v is np.float64:
+            out = float(value)
+            nvalue = 1
+        case builtins.list:
+            if len(value) == 1:
+                out = float(value[0])
+                nvalue = 1
+            else:
+                out = np.asarray(value, np.float64)
+                nvalue = out.size
+        case builtins.tuple:
+            out = np.asarray(value, np.float64)
+            out = value
+            nvalue = out.size
+        case array.array:
+            if value.size == 1:
+                out = np.asarray([value], np.float64)
+            else:
+                out = np.asarray(value, np.float64)
+            nvalue = out.size
+        case np.ndarray:
+            if value.size == 1:
+                out = np.asarray([value], np.float64)
+            else:
+                out = value
+            nvalue = value.size
+        case _:
+            out = None
+            nvalue = 0
+
+    return {'name': name, 'new_value':out, 'nvalue':nvalue}
 
 def between(array, limits):
     """
@@ -272,7 +327,6 @@ def zion2spectroscopic(z,ion, dielectronic=False):
             spect += ' d'
     else:  spect = ''
     return spect
-
 
 def convertName(name):
     """

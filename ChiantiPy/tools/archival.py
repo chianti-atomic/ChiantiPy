@@ -151,7 +151,7 @@ def elvlcWrite(info, outfile=None, addLvl=0):
     out.write(' -1\n')
     out.close()
 
-def wgfaRead(ions, filename=None, elvlcname=-1, total=False, verbose=False):
+def wgfaRead(ions, filename=None, elvlcname=None, total=False, verbose=False):
     """
     Read CHIANTI data from a .wgfa file.
 
@@ -184,9 +184,8 @@ def wgfaRead(ions, filename=None, elvlcname=-1, total=False, verbose=False):
     #
     if filename:
         wgfaname = filename
-        if elvlcname < 0:
-            elvlcname = 0
-            elvlc = 0
+        if elvlcname is not None:
+            elvlc = elvlcRead('',  elvlcname)
         elif not elvlcname:
             elvlcname = os.path.splitext(wgfaname)[0] + '.elvlc'
             if os.path.isfile(elvlcname):
@@ -236,8 +235,11 @@ def wgfaRead(ions, filename=None, elvlcname=-1, total=False, verbose=False):
         print(' nwvl = %10i'%(nwvl))
     #
     wgfaFormat='(2i5,f15.3,2e15.3)'
+    header_line = FortranRecordReader(wgfaFormat) #',f4.1')
     for ivl in range(nwvl):
-        inpt=FortranLine(s1[ivl],wgfaFormat)
+        inpt  =  header_line.read(s1[ivl])
+
+#        inpt=FortranLine(s1[ivl],wgfaFormat)
         lvl1[ivl]=inpt[0]
         lvl2[ivl]=inpt[1]
         wvl[ivl]=inpt[2]

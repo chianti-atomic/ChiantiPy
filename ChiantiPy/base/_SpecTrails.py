@@ -47,6 +47,14 @@ class specTrails(object):
                 print(' need a wavelength range in ionGate ')
         #
         temperature = self.Temperature
+        if temperature is not None:
+            out = util.attr_check('Temperature',  temperature)
+            setattr(self, out['name'],  out['new_value'])
+            if out['new_value'] is None:
+                raise ValueError(' temperature can not be None')
+            self.Ntemp = out['nvalue']
+        else:
+            raise ValueError('temperature not defined')
         #
         #
         todo = {}
@@ -125,7 +133,11 @@ class specTrails(object):
                 print(' \n in ioneq test \n')
             toPop = []
             for ionS in todo.keys():
-                ioneqTest = (temperature.max() >= ionInfo[ionS]['tmin']) and (temperature.min() <= ionInfo[ionS]['tmax'])
+#                ioneqTest = (temperature.max() >= ionInfo[ionS]['tmin']) and (temperature.min() <= ionInfo[ionS]['tmax'])
+                try:
+                    ioneqTest = (temperature.max() >= ionInfo[ionS]['tmin']) and (temperature.min() <= ionInfo[ionS]['tmax'])
+                except:
+                    ioneqTest = (temperature >= ionInfo[ionS]['tmin']) or (temperature <= ionInfo[ionS]['tmax'])
                 if not ioneqTest:
                     toPop.append(ionS)
                 else:
@@ -213,7 +225,7 @@ class specTrails(object):
                                 else:
                                     wvlTestMin = 1
                                     wvlTestMax = 1
-                            if temperature.size == 1:
+                            if self.Ntemp == 1:
                                 ioneqTest = (temperature >= ionInfo[ionS]['tmin']) and (temperature <= ionInfo[ionS]['tmax'])
                             else:
                                 ioneqTest = (temperature.max() >= ionInfo[ionS]['tmin']) and (temperature.min() <= ionInfo[ionS]['tmax'])
@@ -228,7 +240,10 @@ class specTrails(object):
                             else:
                                 wvlTestMinD = 1
                                 wvlTestMaxD = 1
-                            ioneqTestD = (temperature.max() >= ionInfo[ionSd]['tmin']) and (temperature.min() <=ionInfo[ionSd]['tmax'])
+                            if self.Ntemp > 1:
+                                ioneqTestD = (temperature.max() >= ionInfo[ionSd]['tmin']) and (temperature.min() <=ionInfo[ionSd]['tmax'])
+                            else:
+                                ioneqTestD = (temperature >= ionInfo[ionSd]['tmin']) and (temperature <=ionInfo[ionSd]['tmax'])
                             #
                         if masterListTest and wvlTestMin and wvlTestMax and ioneqTest and doLines:
                             if verbose:
@@ -252,7 +267,10 @@ class specTrails(object):
                     for ionstage in range(2, iz+2):
                         ionS = util.zion2name(iz, ionstage)
                         if ionS in ionInfo.keys():
-                            ioneqTest = (temperature.max() >= ionInfo[ionS]['tmin']) and (temperature.min() <= ionInfo[ionS]['tmax'])
+                            if self.Ntemp > 1:
+                                ioneqTest = (temperature.max() >= ionInfo[ionS]['tmin']) and (temperature.min() <= ionInfo[ionS]['tmax'])
+                            else:
+                                ioneqTest = (temperature >= ionInfo[ionS]['tmin']) and (temperature <= ionInfo[ionS]['tmax'])
                         else:
                             ioneqTest = 1
                         # construct similar test for the dielectronic files
@@ -394,8 +412,8 @@ class specTrails(object):
             if hasattr(self, 'WvlRange'):
                 wvlRange = self.WvlRange
             else:
-                wvlRange = [self.Intensity['wvl'].min(),  self.Intensity['wvl'].max()]
-                print(' wvlRange should be specified')
+                wvlRange = [self.Spectrum['wavelength'].min(),  self.Intensity['wavelength'].max()]
+#                print(' wvlRange should be specified')
 
 
         nTempDens = self.NTempDens
@@ -409,7 +427,10 @@ class specTrails(object):
             lineIonS = self.Intensity['ionS']
             wvlIndex = util.between(lineWvl, wvlRange)
             if hasattr(self, 'Continuum'):
-                continuum = self.Continuum['intensity'].sum(axis=0)
+                if self.Ntemp > 1:
+                    continuum = self.Continuum['intensity'].sum(axis=0)
+                else:
+                    continuum = self.Continuum['intensity']
             else:
                 continuum = np.zeros_like(lineIntensity)
 
@@ -418,7 +439,7 @@ class specTrails(object):
             lineIonS = lineIonS[wvlIndex]
         elif nTempDens == 1:
             index = 0
-            lineIntensity = self.Intensity['intensity'][0]
+            lineIntensity = self.Intensity['intensity']
             if hasattr(self, 'Continuum'):
                 continuum = self.Continuum['intensity']
             else:
@@ -440,6 +461,7 @@ class specTrails(object):
         lineIntensity = lineIntensity[wvlIndex]
         lineWvl = lineWvl[wvlIndex]
         lineIonS = lineIonS[wvlIndex]
+
         lineIonSpectr = []
         for anion in lineIonS:
             nameDict = util.convertName(anion)
@@ -514,7 +536,10 @@ class specTrails(object):
                 plt.text(awvl,  ypos, lbl, va='bottom', ha='center',rotation='vertical')
 
         wdx = util.between(self.Spectrum['wavelength'],  wvlRange)
-        ymax = spectrum[wdx].max()
+        if len(spectrum.shape) == 1:
+            ymax = spectrum[wdx].max()
+        else:
+            ymax = spectrum[:, wdx].max()
         if doLabel:
             plt.axis([wvlRange[0],  wvlRange[1],  0., 1.8*ymax])
         else:

@@ -124,11 +124,12 @@ class ipymspectrum(ionTrails, specTrails):
         nWvl = wavelength.size
         self.Wavelength = wavelength
         self.WvlRange = [wavelength[0],  wavelength[-1]]
-        ntemp = self.Ntemp
+        nTemp = self.Ntemp
         #
         #
-        freeFree = np.zeros((ntemp, nWvl), np.float64).squeeze()
-        freeBound = np.zeros((ntemp, nWvl), np.float64).squeeze()
+
+        freeFree = np.zeros((nTemp, nWvl), np.float64).squeeze()
+        freeBound = np.zeros((nTemp, nWvl), np.float64).squeeze()
         twoPhoton = np.zeros((self.NTempDens, nWvl), np.float64).squeeze()
         lineSpectrum = np.zeros((self.NTempDens, nWvl), np.float64).squeeze()
         #
@@ -197,7 +198,7 @@ class ipymspectrum(ionTrails, specTrails):
                         print(thisFb['errorMessage'])
             elif calcType == 'line':
                 thisIon = out[2]
-                if 'errorMessage' not in sorted(thisIon.Intensity.keys()):
+                if 'errorMessage' not in sorted(thisIon.Spectrum.keys()):
                     if keepIons:
                         self.IonInstances[ionS] = thisIon
                     thisIntensity = thisIon.Intensity
@@ -209,7 +210,8 @@ class ipymspectrum(ionTrails, specTrails):
                         setupIntensity = 1
                         self.Intensity  = thisIntensity
                     #
-                    lineSpectrum += thisIon.Spectrum['intensity']
+                    if 'errorMessage' not in sorted(thisIon.Spectrum.keys()):
+                        lineSpectrum += thisIon.Spectrum['intensity']
                    # check for two-photon emission
                     if len(out) == 4:
                         tp = out[3]

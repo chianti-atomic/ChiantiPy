@@ -22,59 +22,95 @@ class ionTrails(object):
         and put them into numpy arrays of atleast_1d
         and create attributes to the object
         '''
-        if temperature is not None:
-            self.Temperature = np.atleast_1d(temperature)
-            if isinstance(self.Temperature[0], str):
-                raise ValueError(' temperature can not be a string')
-            if np.any(self.Temperature <= 0.):
-                raise ValueError(' all temperatures must be positive')
-            self.Ntemp = self.Temperature.size
+        if np.all(temperature) != None:
+            out = util.attr_check('Temperature',  temperature)
+            setattr(self, out['name'],  out['new_value'])
+            if out['new_value'] is None:
+                raise ValueError(' temperature can not be None')
+            self.Ntemp = out['nvalue']
         else:
             raise ValueError('temperature not defined')
+        if verbose:
+            print('self.Ntemp  %1i'%(self.Ntemp))
 
         if pDensity == 'default':
             self.p2eRatio()
 
         if eDensity is not None:
-            self.EDensity = np.atleast_1d(eDensity)
-            if isinstance(self.EDensity[0], str):
-                raise ValueError(' EDensity can not be a string')
-            if np.any(self.EDensity <= 0.):
-                raise ValueError(' all densities must be positive')
-            self.Ndens = self.EDensity.size
+#            self.EDensity = np.atleast_1d(eDensity)
+            out = util.attr_check('EDensity', eDensity)
+            if out['nvalue'] == 1:
+                if self.Ntemp > 1:
+                    self.EDensity = out['new_value']*np.ones_like(self.Temperature)
+                else:
+                    self.EDensity = out['new_value']
+            else:
+                setattr(self, out['name'],  out['new_value'])
+                self.Ndens = out['nvalue']
+#            if isinstance(self.EDensity[0], str):
+#                raise ValueError(' EDensity can not be a string')
+            if out['new_value'] is None:
+#            if isinstance(self.Temperature[0], str):
+                raise ValueError(' eDensity can not be None')
+#            if np.any(self.EDensity <= 0.):
+#                raise ValueError(' all densities must be positive')
+            self.Ndens = out['nvalue']
         # needed when doing ioneq.calculate()
         else:
             self.Ndens = 0
 
         self.NTempDens = max(self.Ndens,self.Ntemp)
-        if self.Ndens > 1 and self.Ntemp == 1:
-            self.Temperature = np.tile(self.Temperature, self.NTempDens)
-        elif self.Ndens == 1 and self.Ntemp > 1:
-            self.EDensity = np.tile(self.EDensity, self.NTempDens)
+#        if self.Ndens > 1 and self.Ntemp == 1:
+#            self.Temperature = np.tile(self.Temperature, self.NTempDens)
+#        elif self.Ndens == 1 and self.Ntemp > 1:
+#            self.EDensity = np.tile(self.EDensity, self.NTempDens)
 
-        if hasattr(self,'EDensity') and hasattr(self,'Temperature') and self.Temperature.size != self.EDensity.size:
-            raise ValueError('Temperature and density must be the same size.')
+#        if hasattr(self,'EDensity') and hasattr(self,'Temperature') and self.Temperature.size != self.EDensity.size:
+#        if hasattr(self,'EDensity') and hasattr(self,'Temperature') and self.Ntemp != self.Ndens:
+#            raise ValueError('Temperature and density must be the same size.')
         if pDensity is not None:
             if pDensity == 'default' and eDensity is not None:
                 self.PDensity = self.ProtonDensityRatio*self.EDensity
-            else:
-                self.PDensity = np.atleast_1d(pDensity)
-                if self.PDensity.size < self.Ndens:
-                    np.tile(self.PDensity, self.Ndens)
-                    self.NpDens = self.NpDens.size
+            elif eDensity is None:
+                self.PDensity = None
+                self.NpDensity = 0
+#            else:
+##                self.PDensity = np.atleast_1d(pDensity)
+#                out = util.attr_check('PDensity', pDensity)
+#                setattr(self, out['name'],  out['new_value'])
+#                self.NpDens = out['nvalue']
+#            if self.PDensity.size == 1:
+#                self.PDensity = self.PDensity*np.ones_like(self.Temperature)
+#                self.NpDens = self.NpDens.size
 
-
+#
         if em is not None:
-            em = np.atleast_1d(em)
-            self.Em = em
-            if em.size == 1:
-                self.Em = np.tile(em,self.NTempDens)
-
-            elif em.size != self.NTempDens:
+#            em = np.atleast_1d(em)
+            out = util.attr_check('Em', em)
+            if out['nvalue'] == 1 and self.NTempDens == 1:
+                out['new_value'] = em
+                setattr(self, out['name'], out['new_value'])
+            elif out['nvalue'] == 1 and self.NTempDens > 1:
+                setattr(self, out['name'], em*np.ones(self.Ntemp, np.float64))
+            elif out['nvalue'] > 1 and self.NTempDens > 1:
+                setattr(self, out['name'], out['new_value'])
+            else:
                 raise ValueError('the size of em must be either 1 or the size of the larger of temperature or density %5i'%(self.NTempDens))
-        else:
-            self.Em = np.ones_like(self.Temperature, np.float64)
 
+        else:
+            if self.Ntemp == 1:
+                self.Em = 1.
+            else:
+                self.Em = np.ones_like(self.Temperature, np.float64)
+        if verbose:
+            if self.Ntemp > 1:
+                pstring = 'Em:  '
+                for itemp in range(self.Ntemp):
+                    pstring += ' %10.2e'%(self.Em[itemp])
+                print(pstring)
+            else:
+                print('Em:  %10.2e'%(self.Em))
+        return
 
     def intensityList(self, index=None, wvlRange=None, wvlRanges=None, top=10, integrated=False,
         relative=False, outFile=False, rightDigits=4):
@@ -196,10 +232,8 @@ class ionTrails(object):
                 print(' wvlRange should be specified')
 
         if ndens == 1 and ntemp == 1:
-            if index is None:
-                index = 0
-            intensity = self.Intensity['intensity'][index]
-            print('using index = %5i specifying temperature = %10.2e, eDensity =  %10.2e'%(index, temperature[index], eDensity[index]))
+            intensity = self.Intensity['intensity']
+            print('temperature = %10.2e, eDensity =  %10.2e'%(temperature, eDensity))
         elif ndens == 1 and ntemp > 1:
             if integrated:
                 intensity=self.Intensity['integrated']
@@ -223,8 +257,8 @@ class ionTrails(object):
                 self.Message = 'using index =%5i specifying eDensity = %10.2e'%(index, eDensity[index])
                 intensity = self.Intensity['intensity'][index]
             else:
-                print('using index = %5i specifying temperature =  %10.2e and eDensity = %10.2e'%(index, temperature[index], eDensity[index]))
-                self.Message = 'using index = %5i specifying temperature =  %10.2e'%(index, temperature[index])
+                print('using index = %5i specifying temperature =  %10.2e and eDensity = %10.2e'%(index, temperature, eDensity[index]))
+                self.Message = 'using index = %5i specifying temperature =  %10.2e'%(index, temperature)
                 intensity=self.Intensity['intensity'][index]
 
         elif ndens > 1 and ntemp > 1:
@@ -405,9 +439,9 @@ class ionTrails(object):
         if ndens == 1 and ntemp == 1:
             if index is None:
                 index = 0
-            intensity = self.Intensity['intensity'][index]
-            dstr = ' -  Density = %10.2e (cm$^{-3}$)' %(eDensity[index])
-            tstr = ' -  T = %10.2e (K)' %(temperature[index])
+            intensity = self.Intensity['intensity']
+            dstr = ' -  Density = %10.2e (cm$^{-3}$)' %(eDensity)
+            tstr = ' -  T = %10.2e (K)' %(temperature)
         elif ndens == 1 and ntemp > 1:
             if integrated:
                 intensity=self.Intensity['integrated']
@@ -585,13 +619,13 @@ class ionTrails(object):
 
         eDensity = self.EDensity
         temperature = self.Temperature
-        ntemp = temperature.size
+        ntemp = self.Ntemp
 
-        if ntemp > 0:
+        if ntemp > 1:
             if temperature[0] == temperature[-1]:
                 ntemp = 1
-        ndens = eDensity.size
-        if ndens > 0:
+        ndens = self.Ndens
+        if ndens > 1:
             if eDensity[0] == eDensity[-1]:
                 ndens = 1
         print(' ndens = %5i ntemp = %5i'%(ndens, ntemp))

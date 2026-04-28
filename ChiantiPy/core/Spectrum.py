@@ -1,6 +1,7 @@
 import copy
 from datetime import datetime
 import numpy as np
+
 import ChiantiPy
 import ChiantiPy.tools.data as chdata
 import ChiantiPy.tools.constants as const
@@ -149,7 +150,7 @@ class spectrum(ionTrails, specTrails):
         self.Wavelength = np.asarray(wavelength,  np.float64)
         self.WvlRange = np.asarray([self.Wavelength.min(),  self.Wavelength.max()],  np.float64)
         #
-        self.argCheck(temperature=temperature, eDensity=eDensity, pDensity=None,  em=em)
+        self.argCheck(temperature = temperature, eDensity =  eDensity,  pDensity = None,  em = em,  verbose=True)
 
         nTempDens = self.NTempDens
 
@@ -229,19 +230,20 @@ class spectrum(ionTrails, specTrails):
                 thisIon = ChiantiPy.core.ion(akey, temperature, eDensity, pDensity='default', abundance=abundance, em=em, verbose=verbose)
                 thisIon.intensity(allLines=allLines)
                 self.IonsCalculated.append(akey)
-                if 'errorMessage' not in  list(thisIon.Intensity.keys()):
+                if 'errorMessage' not in thisIon.Intensity.keys():
                     self.Finished.append(akey)
                     thisIon.spectrum(wavelength, filter=filter, allLines=allLines)
-                    if keepIons:
-                        self.IonInstances[akey] = copy.deepcopy(thisIon)
-                    if setupIntensity:
-                        for bkey in self.Intensity:
-                            self.Intensity[bkey] = np.hstack((copy.copy(self.Intensity[bkey]),
-                                thisIon.Intensity[bkey]))
-                    else:
-                        setupIntensity = True
-                        self.Intensity  = thisIon.Intensity
-                    lineSpectrum += thisIon.Spectrum['intensity'].squeeze()
+                    if 'errorMessage' not in thisIon.Spectrum.keys():
+                        if keepIons:
+                            self.IonInstances[akey] = copy.deepcopy(thisIon)
+                        if setupIntensity:
+                            for bkey in self.Intensity:
+                                self.Intensity[bkey] = np.hstack((copy.copy(self.Intensity[bkey]),
+                                    thisIon.Intensity[bkey]))
+                        else:
+                            setupIntensity = True
+                            self.Intensity  = thisIon.Intensity
+                        lineSpectrum += thisIon.Spectrum['intensity']
                 else:
                     if verbose:
                         print(thisIon.Intensity['errorMessage'])

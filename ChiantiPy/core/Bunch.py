@@ -255,12 +255,16 @@ class bunch(ionTrails, specTrails):
         t1 = datetime.now()
 
         # unicode character for angstrom is \u212B
-        if self.Em.max() == 1.:
-            ylabel = self.Labels['spectrumYlabel'] + r' ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
-        else:
-            ylabel = self.Labels['spectrumYlabel']
-
+#        try:
+#            if max(self.Em) == 1.:
+#                ylabel = self.Labels['spectrumYlabel'] + r' ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
+#            elif self.Em.max() == 1.:
+#                ylabel = self.Labels['spectrumYlabel'] + r' ($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
+#        except:
+#            ylabel = self.Labels['spectrumYlabel']
+#
         xlabel = self.Labels['xlabel']
+        ylabel = self.Labels['intensityYlabel']
 
         #:
         if hasattr(self, 'Wavelength'):
@@ -299,11 +303,16 @@ class bunch(ionTrails, specTrails):
                         if 'errorMessage' in sorted(self.IonInstances[akey].Intensity.keys()):
                             print(self.IonInstances[akey].Intensity['errorMessage'])
 
-        bspectrum = np.zeros((self.NTempDens, wavelength.size), np.float64)
         if hasattr(self, 'Intensity'):
-            for itemp in range(self.NTempDens):
+            if self.NTempDens > 1:
+                bspectrum = np.zeros((self.NTempDens, wavelength.size), np.float64)
+                for itemp in range(self.NTempDens):
+                    for iwvl, awvl in enumerate(self.Intensity['wvl']):
+                        bspectrum[itemp] += useFilter(wavelength, awvl, factor=useFactor)*self.Intensity['intensity'][itemp, iwvl]
+            else:
+                bspectrum = np.zeros((wavelength.size), np.float64)
                 for iwvl, awvl in enumerate(self.Intensity['wvl']):
-                    bspectrum[itemp] += useFilter(wavelength, awvl, factor=useFactor)*self.Intensity['intensity'][itemp, iwvl]
+                    bspectrum += useFilter(wavelength, awvl, factor=useFactor)*self.Intensity['intensity'][iwvl]
 
 #        self.LineSpectrum = {'wavelength':wavelength, 'intensity':aspectrum.squeeze()}
         #

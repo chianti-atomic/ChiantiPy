@@ -34,9 +34,9 @@ class ion(ioneqOne, ionTrails, specTrails):
     ----------
     ionStr : `str`
         CHIANTI notation for the given ion, e.g. 'fe_12' that corresponds to the `Fe XII` ion.
-    temperature : `float` , `tuple`, `list`, `~numpy.ndarray`, optional
+    temperature : `float` , `tuple`, `list`, `~numpy.ndarray`, 'array', optional
         Temperature array (Kelvin)
-    eDensity : `float` , `tuple`, `list`, or `~numpy.ndarray`, optional
+    eDensity : `float` , `tuple`, `list`, or `~numpy.ndarray`, 'array', optional
         Electron density array (:math:r`\\mathrm{cm^{-3}}` )
     pDensity : `float`, `tuple`, `list` or `~numpy.ndarray`, optional
         Proton density (:math:r`\\mathrm{cm}^{-3}` )
@@ -118,7 +118,6 @@ class ion(ioneqOne, ionTrails, specTrails):
         self.FileName = _tmp_convert_name['filename']
         self.Defaults = chdata.Defaults
         self.Labels = util.units(chdata.Defaults)
-
         if abundance is not None:
             if isinstance(abundance,  float):
                 self.Abundance = abundance
@@ -165,8 +164,8 @@ class ion(ioneqOne, ionTrails, specTrails):
             if verbose and (self.IonStr not in chdata.MasterList):
                 print(' ion %s not in masterlist, just various attributes, ionization, recombination rates'%(self.IonStr))
             if temperature is not None:
-                self.Temperature = np.atleast_1d(temperature)
-                self.Ntemp = self.Temperature.size
+#                self.Temperature = np.atleast_1d(temperature)
+#                self.Ntemp = self.Temperature.size
                 self.IoneqAll = chdata.IoneqAll
                 self.argCheck(temperature, eDensity, pDensity, em)
                 self.ioneqOne()
@@ -285,8 +284,8 @@ class ion(ioneqOne, ionTrails, specTrails):
         Allows a bare-bones ion object to be setup up with just the ionization and recombination
         rates. For ions without a complete set of files - one that is not in the MasterList.
         """
-        if hasattr(self, 'Temperature'):
-            self.NTempDens = self.Temperature.size
+#        if hasattr(self, 'NTempDens'):
+#            self.NTempDens = self.Temperature.size
         if alternate_dir:
             fileName = os.path.join(alternate_dir, self.IonStr)
         else:
@@ -457,12 +456,11 @@ class ion(ioneqOne, ionTrails, specTrails):
         alpha = 5.287e+13
         tev = const.boltzmannEv*temperature
 
-        nTempDens = self.NTempDens
+        nTemp = self.Ntemp
 
-        rate = np.zeros(nTempDens, np.float64)
-        tset = set(temperature)
-        if len(tset) == 1:
-            t1 = temperature[0]
+#        tset = set(temperature)
+        if type(temperature) is float:
+            t1 = temperature
             tev1 = const.boltzmannEv*t1
             x0 = self.Ip/tev1 # Ip in eV
             beta = np.sqrt(const.boltzmann*t1)
@@ -472,11 +470,12 @@ class ion(ioneqOne, ionTrails, specTrails):
             term1 = wgl*xgl*crossgl
             term2 = wgl*crossgl
             newcross = alpha*beta*np.exp(-x0)*(term1.sum()+x0*term2.sum())
-            rate1 = newcross
-            for itemp in range(nTempDens):
-                rate[itemp] = rate1
-        else:
-            for itemp in range(nTempDens):
+            rate = newcross
+#            for itemp in range(nTempDens):
+#                rate[itemp] = rate1
+        elif type(temperature) is np.ndarray:
+            rate = np.zeros(nTemp, np.float64)
+            for itemp in range(nTemp):
                 x0 = self.Ip/tev[itemp]  # Ip in eV
                 beta = np.sqrt(const.boltzmann*temperature[itemp])
                 egl = self.Ip+xgl*tev[itemp]
@@ -506,7 +505,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         else:
             print(' temperature is not defined in eaDescale')
             return
-        ntemp = temperature.size
+        ntemp = self.Ntemp
         nsplups = len(eaparams['de'])
         if ntemp > 1:
             ups = np.zeros((nsplups,ntemp),np.float64)
@@ -647,9 +646,13 @@ class ion(ioneqOne, ionTrails, specTrails):
             #  need to replicate neaev
             nups = len(eaparams['de'])
             tev = const.boltzmannEv*temperature
-            ntemp = temperature.size
-            partial = np.zeros((nups, ntemp), np.float64)
-            earate = np.zeros(temperature.size, np.float64)
+            ntemp = self.Ntemp
+            if ntemp == 1:
+                partial = np.zeros(nups, np.float64)
+                earate = 0.
+            else:
+                partial = np.zeros((nups, ntemp), np.float64)
+                earate = np.zeros(ntemp, np.float64)
             eaev = self.DiParams['eaev']
             if len(eaev) == 1:
                 for iups in range(nups):
@@ -774,22 +777,31 @@ class ion(ioneqOne, ionTrails, specTrails):
             self.Rrlvl = io.cireclvlRead(self.IonStr, '.'+ 'rrlvl')
             lvl = self.Rrlvl
         else:
-            self.RrlvlRate = {'rate':np.zeros_like(temperature)}
+            self.RrlvlRate = {'rate':np.zeros_like(temperature), 'error message':'rrlvl file does not exist'}
             return
 
         #  the rates and temperatures in rrlvl are not necessarily all the same
         nlvl = len(lvl['lvl1'])
 
 #        rate = np.zeros(( nlvl, self.Ntemp), np.float64)
-        rate = []
-        for itrans in range(nlvl):
-#            lvl2 = lvl['lvl2'][itrans]
-            nTemp = lvl['ntemp'][itrans]
-            y2 = splrep(np.log(lvl['temperature'][itrans, :nTemp-1]), np.log(lvl['rate'][itrans, :nTemp-1]))
-            rr = np.exp(splev(np.log(self.Temperature),y2))
-            rate.append(rr)
-        rate = np.asarray(rate, np.float64)
-
+        if self.Ntemp > 1:
+            rate = np.zeros(( nlvl, self.Ntemp), np.float64)
+#            rate = []
+            for itrans in range(nlvl):
+    #            lvl2 = lvl['lvl2'][itrans]
+                nTemp = lvl['ntemp'][itrans]
+                y2 = splrep(np.log(lvl['temperature'][itrans, :nTemp-1]), np.log(lvl['rate'][itrans, :nTemp-1]))
+                rr = np.exp(splev(np.log(self.Temperature), y2))
+                rate[itrans] += rr
+#                rate = np.asarray(rate, np.float64)
+#            rate = rr
+        else:
+            rate = np.zeros(nlvl, np.float64)
+            for itrans in range(nlvl):
+                nTemp = lvl['ntemp'][itrans]
+                y2 = splrep(np.log(lvl['temperature'][itrans, :nTemp-1]), np.log(lvl['rate'][itrans, :nTemp-1]))
+                rr = np.exp(splev(np.log(self.Temperature),y2))
+                rate[itrans] += rr
 
         self.RrlvlRate = {'rate':rate, 'lvl1':lvl['lvl1'], 'lvl2':lvl['lvl2'], 'temperature':temperature, 'type':'rrlvl'}
 
@@ -819,11 +831,16 @@ class ion(ioneqOne, ionTrails, specTrails):
             drcoef = drparams['cparams']
             gcoef = drenergy > 0.
             ncoef = gcoef.sum()
-            rate = np.zeros(temperature.size, np.float64)
-            for icoef in range(ncoef):
-                rate += drcoef[icoef]*np.exp(-drenergy[icoef]/temperature)
-            rate = rate/temperature**1.5
-            self.DrRate = {'temperature':temperature, 'rate':rate}
+            if self.Ntemp > 1:
+                rate = np.zeros(self.Ntemp, np.float64)
+                for icoef in range(ncoef):
+                    rate += drcoef[icoef]*np.exp(-drenergy[icoef]/temperature)
+                rate = rate/temperature**1.5
+            else:
+                rate = 0.
+                for icoef in range(ncoef):
+                    rate += drcoef[icoef]*np.exp(-drenergy[icoef]/temperature)
+                rate = rate/temperature**1.5
         elif drparams['drtype'] == 2:
             # shull type
             params = drparams['params']
@@ -832,7 +849,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             t0 = params[2]
             t1 = params[3]
             rate = adi*np.exp(-t0/temperature)*(1.+bdi*np.exp(-t1/temperature))/temperature**1.5
-            self.DrRate = {'temperature':temperature, 'rate':rate}
+        self.DrRate = {'temperature':temperature, 'rate':rate}
 
 
     def drRateLvl(self, verbose=0):
@@ -856,7 +873,7 @@ class ion(ioneqOne, ionTrails, specTrails):
 #        coef2 = (const.planck)**3/(2.*const.pi*const.emass*const.boltzmann*self.Temperature)**1.5
         coef3 = (const.bohrCross*4.*const.ryd2erg/(const.boltzmann*self.Temperature))**1.5
         coef = coef3
-        nt = self.Temperature.size
+        ntemp = self.Ntemp
         allRate = []
         effRate = []
         de = []
@@ -865,7 +882,10 @@ class ion(ioneqOne, ionTrails, specTrails):
         lvl = []
         branch = []
         dekt = []
-        totalRate = np.zeros(nt, np.float64)
+        if ntemp == 1:
+            totalRate = 0.
+        else:
+            totalRate = np.zeros(ntemp, np.float64)
         for i, avalue in enumerate(self.Auto['avalue']):
             elvl1idx = self.Elvlc['lvl'].index(self.Auto['lvl1'][i])
             if elvl1idx == 1:
@@ -907,14 +927,17 @@ class ion(ioneqOne, ionTrails, specTrails):
             return
         self.rrRate()
         self.drRate()
-        rate = np.zeros_like(temperature)
+        if self.Ntemp == 1:
+            rate = 0.
+        else:
+            rate = np.zeros_like(temperature)
         if hasattr(self, 'DrRate'):
             rate += self.DrRate['rate']
         if hasattr(self, 'RrRate'):
             rate += self.RrRate['rate']
         self.RecombRate = {'rate':rate, 'temperature':temperature}
 
-    def upsilonDescale(self, prot=0):
+    def upsilonDescale(self, prot=False):
         """
         Provides the temperatures and effective collision strengths (upsilons)
         set prot for proton rates
@@ -958,15 +981,17 @@ class ion(ioneqOne, ionTrails, specTrails):
         erydth = np.asarray(self.Elvlc["erydth"])
         elvlc = np.where(eryd >= 0.,eryd,erydth)
         temp = np.asarray(temperature)
-        ntemp = temp.size
+#        ntemp = temp.size
+        ntemp = self.Ntemp
+        nTempDens = self.NTempDens
         if ntemp > 1:
             ups = np.zeros((nscups,ntemp),np.float64)
             exRate = np.zeros((nscups,ntemp),np.float64)
             dexRate = np.zeros((nscups,ntemp),np.float64)
         else:
-            ups = np.zeros(nscups,np.float64)
-            exRate = np.zeros((nscups,ntemp),np.float64)
-            dexRate = np.zeros((nscups,ntemp),np.float64)
+            ups = np.zeros(nscups, np.float64)
+            exRate = np.zeros(nscups, np.float64)
+            dexRate = np.zeros(nscups, np.float64)
         deAll = []
         lvl1 = []
         lvl2 = []
@@ -1128,22 +1153,36 @@ class ion(ioneqOne, ionTrails, specTrails):
 #        else:
 #            xlabel = 'Wavelength ('+self.Defaults['wavelength'] +')'
 
-
-        aspectrum = np.zeros((self.NTempDens, wavelength.size), np.float64)
+        nTemp = self.Ntemp
+        nDens = self.Ndens
         if 'errorMessage' not in self.Intensity.keys():
             idx = util.between(self.Intensity['wvl'], wvlRange)
             if len(idx) == 0:
 #                    print(' no lines in wavelength range %12.2f - %12.2f'%(wavelength.min(), wavelength.max()))
 #                    self.Spectrum = {'errorMessage':' no lines in wavelength range %12.2f - %12.2f'%(wavelength.min(), wavelength.max())}
                 errorMessage =  '%s no lines in wavelength range %12.2f - %12.2f'%(self.IonStr, wavelength.min(), wavelength.max())
-            else:
+                aspectrum = None
+                integrated = None
+            elif nTemp > 1:
+                aspectrum = np.zeros((self.NTempDens, wavelength.size), np.float64)
                 for itemp in range(self.NTempDens):
                     for iwvl in idx:
                         wvlCalc = self.Intensity['wvl'][iwvl]
-                        aspectrum[itemp] += useFilter(wavelength, wvlCalc, factor=useFactor)*self.Intensity['intensity'][itemp, iwvl]
+                        aspectrum[itemp] += useFilter(wavelength, wvlCalc, \
+                            factor=useFactor)*self.Intensity['intensity'][itemp, iwvl]
                     if useEm:
                         aspectrum[itemp] *= em[itemp]
-        integrated = aspectrum.sum(axis=0)
+                integrated = aspectrum.sum(axis=0)
+
+            elif nTemp == 1 and nDens == 1:
+                aspectrum = 0.
+                for iwvl in idx:
+                    wvlCalc = self.Intensity['wvl'][iwvl]
+                    aspectrum += useFilter(wavelength, wvlCalc, factor=useFactor)*self.Intensity['intensity'][iwvl]
+                if useEm:
+                    aspectrum *= em
+
+                integrated = aspectrum
 
         if type(label) == type(''):
             if hasattr(self, 'Spectrum'):
@@ -1159,17 +1198,302 @@ class ion(ioneqOne, ionTrails, specTrails):
                 if errorMessage is not None:
                     self.Spectrum[label]['errorMessage'] = errorMessage
         else:
-            self.Spectrum = {'intensity':aspectrum.squeeze(), 'integrated':integrated,
+            self.Spectrum = {'intensity':aspectrum, 'integrated':integrated,
                 'wavelength':wavelength, 'filter':useFilter, 'filterWidth':useFactor,
                 'allLines':allLines, 'em':em, 'xlabel':xlabel, 'ylabel':ylabel}
             if errorMessage is not None:
                 self.Spectrum['errorMessage'] = errorMessage
 
+    def populate(self,  popCorrect = True,  verbose=False):
+        """
+
+        :param popCorrect: whether ot correct level populations for recombination, defaults to True
+        :type popCorrect: bool, optional
+        :param verbose: whether to print out various information, defaults to False
+        :type verbose: bool, optional
+
+        """
+        nTemp = self.Ntemp
+        nDens = self.Ndens
+
+        if nTemp == 1 and nDens == 1:
+            self.populateSingle(popCorrect = popCorrect,  verbose=verbose)
+        elif nTemp >1 and nDens == 1:
+            self.populateTemp(popCorrect = popCorrect,  verbose=verbose)
+        elif nTemp == 1 and nDens >1:
+            self.populateDens(popCorrect = popCorrect,  verbose=verbose)
+        elif nTemp > 1 and nDens > 1:
+            self.populateBoth(popCorrect = popCorrect,  verbose=verbose)
+        else:
+            print('error:  dont understand values of nTemp:  %i and/or nDens %i'%(nTemp,  nDens))
+            return
 
 
-    def populate(self, popCorrect=True, verbose=False):
+
+
+    def populateBoth(self, popCorrect=True, verbose=False):
         """
         Calculate level populations for specified ion.
+        possible keyword arguments include temperature, eDensity, pDensity, radTemperature and rStar
+        populate assumes that all of the population in the higher ionization stages exists only
+        in the ground level
+        use drPopulate() for cases where the population of various levels in the higher ionization stage
+        figure into the calculation
+        """
+        nlvls = self.Nlvls
+
+        nwgfa = self.Nwgfa
+        nscups = self.Nscups
+        npsplups = self.Npsplups
+        nauto = self.Nauto
+        # the following is the number of lower levels to ionize the current ion  from
+        #  fixes the problem that the ionization rates are really just strictly for the ground leve
+        # which can become depopulated with increased density
+
+
+        if hasattr(self, 'PDensity'):
+            protonDensity = self.PDensity
+        else:
+            self.p2eRatio()
+            self.PDensity = self.ProtonDensityRatio*self.EDensity
+            protonDensity = self.PDensity
+            print(' proton density not specified, set to \"default\" ')
+        #
+#        if hasattr(self, 'RadTemperature') and hasattr(self, 'RStar'):
+#            radTemperature = self.RadTemperature
+#            rStar = self.RStar
+        rec = 0
+        ci = 0
+        if self.Nrrlvl or self.Nauto:
+            rec = 1
+        elif not popCorrect:
+            rec = 0
+        if verbose:
+            print('rec = %5i'%(rec))
+        if self.Nrrlvl:
+            rrlvl = self.Rrlvl
+            if hasattr(self, 'RrlvlRate'):
+                rrlvlRate = self.RrlvlRate['rate']
+            else:
+                self.rrlvlDescale('rrlvl')
+#                rrlvlRate = self.RrlvlRate
+            rrLvlIdx =[i for i,lvl1 in enumerate(self.Rrlvl['lvl1']) if lvl1 == 1]
+            self.RrLvlIdx = rrLvlIdx
+        temperature = self.Temperature
+        eDensity = self.EDensity
+        if rec:
+            # get ionization rate of this current ion
+            self.ionizRate()
+            self.recombRate()
+            #  get the higher ionization stage and its recombination rates to this ion
+            highers = util.zion2name(self.Z, self.Ion+1)
+            higher = ion(highers, temperature, abundance=self.Abundance, setup=0)
+            higher.setupIonrec()
+            higher.recombRate()
+        #  the populating matrix for radiative transitions and autoionization transitions
+        rad = np.zeros((nlvls+ci+rec,nlvls+ci+rec),np.float64)
+
+        for iwgfa in range(nwgfa):
+            l1 = self.Wgfa["lvl1"][iwgfa]-1
+            l2 = self.Wgfa["lvl2"][iwgfa]-1
+            rad[l1+ci,l2+ci] += self.Wgfa["avalue"][iwgfa]
+            rad[l2+ci,l2+ci] -= self.Wgfa["avalue"][iwgfa]
+            # photo-excitation and stimulated emission
+            if self.RadTemperature:
+                if not self.RStar:
+                    dilute = 0.5
+                else:
+                    dilute = util.dilute(self.RStar)
+                # next - don't include autoionization lines
+                if abs(self.Wgfa['wvl'][iwgfa]) > 0.:
+                    de = const.invCm2Erg*(self.Elvlc['ecm'][l2] - self.Elvlc['ecm'][l1])
+                    dekt = de/(const.boltzmann*self.RadTemperature)
+                    # photoexcitation
+                    phexFactor = dilute*(float(self.Elvlc['mult'][l2])/float(self.Elvlc['mult'][l1]))/(np.exp(dekt) -1.)
+                    rad[l2+ci,l1+ci] += self.Wgfa["avalue"][iwgfa]*phexFactor
+                    rad[l1+ci,l1+ci] -= self.Wgfa["avalue"][iwgfa]*phexFactor
+                    # stimulated emission
+                    stemFactor = dilute/(np.exp(-dekt) -1.)
+                    rad[l1+ci,l2+ci] += self.Wgfa["avalue"][iwgfa]*stemFactor
+                    rad[l2+ci,l2+ci] -= self.Wgfa["avalue"][iwgfa]*stemFactor
+
+        # autoionization rates
+        for iauto in range(nauto):
+            l1 = self.Auto["lvl1"][iauto] - 1
+            l2 = self.Auto["lvl2"][iauto] - 1
+            # all autoionization eventually goes to the ground level of the higher ion
+            rad[l1+ci+rec,l2+ci] += self.Auto["avalue"][iauto]
+            rad[l2+ci,l2+ci] -= self.Auto["avalue"][iauto]
+
+
+        if self.Nscups:
+            self.upsilonDescale()
+            #ups = self.Upsilon['upsilon']
+            exRate = self.Upsilon['exRate']
+            dexRate = self.Upsilon['dexRate']
+
+        if self.Npsplups:
+            self.upsilonDescale(prot=1)
+            pexRate = self.PUpsilon['exRate']
+            pdexRate = self.PUpsilon['dexRate']
+
+
+#        temp = self.Temperature
+        ntemp = self.Ntemp
+        eDensity = self.EDensity
+        ndens = self.Ndens
+        nscups = self.Nscups
+#        cc = const.collision*self.EDensity
+        #
+        # (4 pi a0^2)^(3/2) = 6.6011e-24 (Badnell et al, 2003, A&A 406, 1151
+        # coef1 = 6.6011e-24*(const.hartree/(2.*const.boltzmann*self.Temperature))**1.5
+        coef2 = (const.planck)**3/(2.*const.pi*const.emass*const.boltzmann*self.Temperature)**1.5
+
+        #
+#        if npsplups:
+#            cp = const.collision*protonDensity
+        #
+        # get corrections for recombination and excitation
+        #
+        #
+        # the way temperature and density are now (9/2015) handled as arrays of the same size
+        # one the ndens == ntemp =1 case and the ndens >1 and ntemp>1 case are really needed
+        #
+        errorMessage = []
+        # ---------------------------------------------------------------------------------
+        #  --------------now for all values of ntemp and ndens -------------------------------
+        # --------------------------------------------------------------------------------
+
+        if verbose:
+            print(' doing both ntemp: %5i  ndens:  %5i'%(ntemp, ndens))
+        pop = np.zeros((self.NTempDens, nlvls), np.float64)
+#            drPop = np.zeros((ntemp,nlvls),np.float64)
+        fullPop = np.zeros((self.NTempDens, ci + nlvls + rec), np.float64)
+        if self.Nrrlvl:
+            rrTot = np.zeros(self.NTempDens, np.float64)
+#            recRate = np.zeros((ntemp,nlvls),np.float64)
+        #drEffRateTot = np.zeros(ntemp, np.float64)
+        rrTot = np.zeros(self.NTempDens, np.float64)
+        recTot = np.zeros(self.NTempDens, np.float64)
+#
+#
+        higherPop = []
+        for itemp in range(self.NTempDens):
+            popmat = np.copy(rad)
+            # temp = self.Temperature[itemp]
+            # dens = self.EDensity[itemp]
+
+            for iscups in range(nscups):
+                l1 = self.Scups["lvl1"][iscups]-1
+                l2 = self.Scups["lvl2"][iscups]-1
+                popmat[l1+ci,l2+ci] += self.EDensity[itemp]*dexRate[iscups, itemp]
+                popmat[l2+ci,l1+ci] += self.EDensity[itemp]*exRate[iscups, itemp]
+                popmat[l1+ci,l1+ci] -= self.EDensity[itemp]*exRate[iscups, itemp]
+                popmat[l2+ci,l2+ci] -= self.EDensity[itemp]*dexRate[iscups, itemp]
+
+            # proton rates
+            for ipslups in range(npsplups):
+                l1 = self.Psplups["lvl1"][ipslups]-1
+                l2 = self.Psplups["lvl2"][ipslups]-1
+                popmat[l1+ci,l2+ci] += self.PDensity[itemp]*pdexRate[ipslups, itemp]
+                popmat[l2+ci,l1+ci] += self.PDensity[itemp]*pexRate[ipslups, itemp]
+                popmat[l1+ci,l1+ci] -= self.PDensity[itemp]*pexRate[ipslups, itemp]
+                popmat[l2+ci,l2+ci] -= self.PDensity[itemp]*pdexRate[ipslups, itemp]
+
+            if rec:
+                for ilvl in range(0, self.GrndLevels):
+                    popmat[-1,  ci + ilvl] += self.EDensity[itemp]*self.IonizRate['rate'][itemp]
+                    popmat[ci + ilvl, ci + ilvl] -= self.EDensity[itemp]*self.IonizRate['rate'][itemp]
+
+                if self.Nrrlvl:
+#                    rrlvl = self.Rrlvl
+#                    if hasattr(self, 'RrlvlRate'):
+#                        rrlvl = self.Rrlvl
+                    if not hasattr(self, 'RrlvlRate'):
+                        self.rrlvlDescale()
+                        # only include rr from ground level
+                    for itrans in rrLvlIdx:
+                        # lvl1 = rrlvl['lvl1'][itrans]-1
+                        lvl2 = rrlvl['lvl2'][itrans]-1
+                        popmat[lvl2+ci, -1] += self.EDensity[itemp]*self.RrlvlRate['rate'][itrans, itemp]
+                        popmat[-1, -1] -= self.EDensity[itemp]*self.RrlvlRate['rate'][itrans, itemp]
+                        rrTot[itemp] += self.RrlvlRate['rate'][itrans, itemp]
+                else:
+                    rrTot[itemp] = 0.
+                if self.Nauto:
+                    autoLvl2 = []
+                    for i, avalue in enumerate(self.Auto['avalue']):
+                        l1 = self.Auto['lvl1'][i] - 1
+                        l2 = self.Auto['lvl2'][i] - 1
+                        autoLvl2.append(l2)
+                        # upperIdx = higher.Elvlc['lvl'].index(self.Auto['lvl1'][i])
+                        gUpper = float(higher.Elvlc['mult'][l1])
+                        gLower = float(self.Elvlc['mult'][l2])
+
+                        ecm2 = self.Elvlc['ecm'][l2]
+                        if ecm2 < 0.:
+                            ecm2 = self.Elvlc['ecmth'][l2]
+                        de1 = ecm2*const.invCm2Erg - self.Ip*const.ev2Erg
+                        dekt1 = de1/(const.boltzmann*self.Temperature[itemp])
+                        expkt = np.exp(-dekt1)
+
+                        # only including dielectronic recombination from the lowest level
+                        if l1 == 0:
+                            dielRate = coef2[itemp]*gLower*expkt*avalue/(2.*gUpper)
+                            popmat[ci + l2, -1] += self.EDensity[itemp]*dielRate
+                            popmat[-1, -1] -= self.EDensity[itemp]*dielRate
+
+
+
+
+                recTot[itemp] = rrTot[itemp]
+                if recTot[itemp] < higher.RecombRate['rate'][itemp]:
+                    popmat[ci, -1] += self.EDensity[itemp]*(higher.RecombRate['rate'][itemp] - recTot[itemp])
+                    popmat[-1, -1] -= self.EDensity[itemp]*(higher.RecombRate['rate'][itemp] - recTot[itemp])
+                if verbose:
+                    print('itemp  rrTot         %5i %10.2e '%(itemp, rrTot[itemp]))
+                    print('itemp, recTot RecombRate  %5i %10.2e %10.2e'%(itemp, recTot[itemp], higher.RecombRate['rate'][itemp]))
+            else:
+                recTot[itemp] = 0.
+
+            # in this case, haven't completely accounted for recombination
+
+
+#                    if verbose:
+#                        print(' T recombRate, rrTot, rrTot %10.2e %10.2e %10.2e %10.2e'%(temp, higher.RrRate['rate'][itemp], rrTot[itemp], higher.DrRate['rate'][itemp]))
+
+            norm = np.ones(nlvls+ci+rec,np.float64)
+            self.popmat = np.copy(popmat)
+            if ci:
+                norm[0] = 0.
+            if rec:
+                norm[-1] = 0.
+            popmat[nlvls+ci+rec-1] = norm
+            b = np.zeros(nlvls+ci+rec,np.float64)
+            b[nlvls+ci+rec-1] = 1.
+            try:
+                thispop = np.linalg.solve(popmat,b)
+                if rec:
+                    higherPop.append(thispop[ci+nlvls])
+                else:
+                    higherPop.append(-1)
+                pop[itemp] = thispop[ci:ci+nlvls]
+                fullPop[itemp] = thispop
+            except np.linalg.LinAlgError:
+                pop[itemp] = np.zeros(nlvls, np.float64)
+                errorMessage.append('linealgError for T index %5i'%(itemp))
+        #
+            pop = np.where(pop > 0., pop, 0.)
+        self.Population = {"temperature":temperature,"eDensity":eDensity,"population":pop,
+            "protonDensity":protonDensity, "ci":ci, "rec":rec, 'popmat':popmat, 'fullPop':fullPop,
+            'method':'populate',  'higherPop':higherPop, 'rrTot':rrTot}
+        if len(errorMessage) > 0:
+            self.Population['errorMessage'] = errorMessage
+
+
+    def populateDens(self, popCorrect=True, verbose=False):
+        """
+        Calculate level populations for specified ion for a single temperature and multiple densities
         possible keyword arguments include temperature, eDensity, pDensity, radTemperature and rStar
         populate assumes that all of the population in the higher ionization stages exists only
         in the ground level
@@ -1302,19 +1626,539 @@ class ion(ioneqOne, ionTrails, specTrails):
 
         if verbose:
             print(' doing both ntemp: %5i  ndens:  %5i'%(ntemp, ndens))
-        pop = np.zeros((self.NTempDens,nlvls),np.float64)
+        pop = np.zeros((self.NTempDens, nlvls), np.float64)
 #            drPop = np.zeros((ntemp,nlvls),np.float64)
         fullPop = np.zeros((self.NTempDens, ci + nlvls + rec), np.float64)
         if self.Nrrlvl:
             rrTot = np.zeros(self.NTempDens, np.float64)
 #            recRate = np.zeros((ntemp,nlvls),np.float64)
         #drEffRateTot = np.zeros(ntemp, np.float64)
-        rrTot = np.zeros(self.NTempDens, np.float64)
-        recTot = np.zeros(self.NTempDens, np.float64)
+#        rrTot = np.zeros(self.NTempDens, np.float64)
+#        recTot = np.zeros(self.NTempDens, np.float64)
+#
+#
+        rrTot = 0.
+        recTot = 0.
+        higherPop = []
+        for idens in range(self.Ndens):
+            popmat = np.copy(rad)
+            # temp = self.Temperature[itemp]
+            # dens = self.EDensity[itemp]
+
+            for iscups in range(nscups):
+                l1 = self.Scups["lvl1"][iscups]-1
+                l2 = self.Scups["lvl2"][iscups]-1
+                popmat[l1+ci,l2+ci] += self.EDensity[idens]*dexRate[iscups]
+                popmat[l2+ci,l1+ci] += self.EDensity[idens]*exRate[iscups]
+                popmat[l1+ci,l1+ci] -= self.EDensity[idens]*exRate[iscups]
+                popmat[l2+ci,l2+ci] -= self.EDensity[idens]*dexRate[iscups]
+
+            # proton rates
+            for ipslups in range(npsplups):
+                l1 = self.Psplups["lvl1"][ipslups]-1
+                l2 = self.Psplups["lvl2"][ipslups]-1
+                popmat[l1+ci,l2+ci] += self.PDensity[idens]*pdexRate[ipslups]
+                popmat[l2+ci,l1+ci] += self.PDensity[idens]*pexRate[ipslups]
+                popmat[l1+ci,l1+ci] -= self.PDensity[idens]*pexRate[ipslups]
+                popmat[l2+ci,l2+ci] -= self.PDensity[idens]*pdexRate[ipslups]
+
+            if rec:
+                for ilvl in range(0, self.GrndLevels):
+                    popmat[-1,  ci + ilvl] += self.EDensity[idens]*self.IonizRate['rate']
+                    popmat[ci + ilvl, ci + ilvl] -= self.EDensity[idens]*self.IonizRate['rate']
+
+                if self.Nrrlvl:
+#                    rrlvl = self.Rrlvl
+#                    if hasattr(self, 'RrlvlRate'):
+#                        rrlvl = self.Rrlvl
+                    if not hasattr(self, 'RrlvlRate'):
+                        self.rrlvlDescale()
+                        # only include rr from ground level
+                    for itrans in rrLvlIdx:
+                        # lvl1 = rrlvl['lvl1'][itrans]-1
+                        lvl2 = rrlvl['lvl2'][itrans]-1
+                        popmat[lvl2+ci, -1] += self.EDensity[idens]*self.RrlvlRate['rate'][itrans]
+                        popmat[-1, -1] -= self.EDensity[idens]*self.RrlvlRate['rate'][itrans]
+                        rrTot += self.RrlvlRate['rate'][itrans]
+                else:
+                    rrTot = 0.
+                if self.Nauto:
+                    autoLvl2 = []
+                    for i, avalue in enumerate(self.Auto['avalue']):
+                        l1 = self.Auto['lvl1'][i] - 1
+                        l2 = self.Auto['lvl2'][i] - 1
+                        autoLvl2.append(l2)
+                        # upperIdx = higher.Elvlc['lvl'].index(self.Auto['lvl1'][i])
+                        gUpper = float(higher.Elvlc['mult'][l1])
+                        gLower = float(self.Elvlc['mult'][l2])
+
+                        ecm2 = self.Elvlc['ecm'][l2]
+                        if ecm2 < 0.:
+                            ecm2 = self.Elvlc['ecmth'][l2]
+                        de1 = ecm2*const.invCm2Erg - self.Ip*const.ev2Erg
+                        dekt1 = de1/(const.boltzmann*self.Temperature)
+                        expkt = np.exp(-dekt1)
+
+                        # only including dielectronic recombination from the lowest level
+                        if l1 == 0:
+                            dielRate = coef2*gLower*expkt*avalue/(2.*gUpper)
+                            popmat[ci + l2, -1] += self.EDensity[idens]*dielRate
+                            popmat[-1, -1] -= self.EDensity[idens]*dielRate
+
+
+
+
+                recTot = rrTot
+                if recTot < higher.RecombRate['rate']:
+                    popmat[ci, -1] += self.EDensity[idens]*(higher.RecombRate['rate'] - recTot)
+                    popmat[-1, -1] -= self.EDensity[idens]*(higher.RecombRate['rate'] - recTot)
+                if verbose:
+                    print('idens  rrTot         %5i %10.2e '%(idens, rrTot))
+                    print('idens, recTot RecombRate  %5i %10.2e %10.2e'%(idens, recTot, higher.RecombRate['rate']))
+            else:
+                recTot = 0.
+
+            # in this case, haven't completely accounted for recombination
+
+
+#                    if verbose:
+#                        print(' T recombRate, rrTot, rrTot %10.2e %10.2e %10.2e %10.2e'%(temp, higher.RrRate['rate'][itemp], rrTot[itemp], higher.DrRate['rate'][itemp]))
+
+            norm = np.ones(nlvls+ci+rec,np.float64)
+            self.popmat = np.copy(popmat)
+            if ci:
+                norm[0] = 0.
+            if rec:
+                norm[-1] = 0.
+            popmat[nlvls + ci + rec -1] = norm
+            b = np.zeros(nlvls+ci+rec,np.float64)
+            b[nlvls+ci+rec-1] = 1.
+            try:
+                thispop = np.linalg.solve(popmat,b)
+                if rec:
+                    higherPop.append(thispop[ci+nlvls])
+                else:
+                    higherPop.append(-1)
+                pop[idens] = thispop[ci:ci+nlvls]
+                fullPop[idens] = thispop
+            except np.linalg.LinAlgError:
+                pop[idens] = np.zeros(nlvls, np.float64)
+                errorMessage.append('linealgError for T index %5i'%(idens))
+        #
+            pop = np.where(pop > 0., pop, 0.)
+        self.Population = {"temperature":temperature,"eDensity":eDensity,"population":pop,
+            "protonDensity":protonDensity, "ci":ci, "rec":rec, 'popmat':popmat, 'fullPop':fullPop,
+            'method':'populate',  'higherPop':higherPop, 'rrTot':rrTot}
+        if len(errorMessage) > 0:
+            self.Population['errorMessage'] = errorMessage
+
+    def populateSingle(self, popCorrect=True, verbose=False):
+        """
+        Calculate level populations for specified ion.
+        calculate the population for a single temperature and density
+        possible keyword arguments include temperature, eDensity, pDensity, radTemperature and rStar
+        populate assumes that all of the population in the higher ionization stages exists only
+        in the ground level
+        use drPopulate() for cases where the population of various levels in the higher ionization stage
+        figure into the calculation
+        """
+        nlvls = self.Nlvls
+
+        nwgfa = self.Nwgfa
+        nscups = self.Nscups
+        npsplups = self.Npsplups
+        nauto = self.Nauto
+        # the following is the number of lower levels to ionize the current ion  from
+        #  fixes the problem that the ionization rates are really just strictly for the ground leve
+        # which can become depopulated with increased density
+
+
+        if hasattr(self, 'PDensity'):
+            protonDensity = self.PDensity
+        else:
+            self.p2eRatio()
+            self.PDensity = self.ProtonDensityRatio*self.EDensity
+            protonDensity = self.PDensity
+            print(' proton density not specified, set to \"default\" ')
+        #
+#        if hasattr(self, 'RadTemperature') and hasattr(self, 'RStar'):
+#            radTemperature = self.RadTemperature
+#            rStar = self.RStar
+        rec = 0
+        ci = 0
+        if self.Nrrlvl or self.Nauto:
+            rec = 1
+        elif not popCorrect:
+            rec = 0
+        if verbose:
+            print('rec = %5i'%(rec))
+        if self.Nrrlvl:
+            rrlvl = self.Rrlvl
+            if hasattr(self, 'RrlvlRate'):
+                rrlvlRate = self.RrlvlRate
+            else:
+                self.rrlvlDescale('rrlvl')
+#                rrlvlRate = self.RrlvlRate
+            rrLvlIdx =[i for i,lvl1 in enumerate(self.Rrlvl['lvl1']) if lvl1 == 1]
+            self.RrLvlIdx = rrLvlIdx
+
+        temperature = self.Temperature
+        eDensity = self.EDensity
+        if rec:
+            # get ionization rate of this current ion
+            self.ionizRate()
+            self.recombRate()
+            #  get the higher ionization stage and its recombination rates to this ion
+            highers = util.zion2name(self.Z, self.Ion+1)
+            higher = ion(highers, temperature, abundance=self.Abundance, setup=0)
+            higher.setupIonrec()
+            higher.recombRate()
+        #  the populating matrix for radiative transitions and autoionization transitions
+        rad = np.zeros((nlvls+ci+rec,nlvls+ci+rec),np.float64)
+
+        for iwgfa in range(nwgfa):
+            l1 = self.Wgfa["lvl1"][iwgfa]-1
+            l2 = self.Wgfa["lvl2"][iwgfa]-1
+            rad[l1+ci,l2+ci] += self.Wgfa["avalue"][iwgfa]
+            rad[l2+ci,l2+ci] -= self.Wgfa["avalue"][iwgfa]
+            # photo-excitation and stimulated emission
+            if self.RadTemperature:
+                if not self.RStar:
+                    dilute = 0.5
+                else:
+                    dilute = util.dilute(self.RStar)
+                # next - don't include autoionization lines
+                if abs(self.Wgfa['wvl'][iwgfa]) > 0.:
+                    de = const.invCm2Erg*(self.Elvlc['ecm'][l2] - self.Elvlc['ecm'][l1])
+                    dekt = de/(const.boltzmann*self.RadTemperature)
+                    # photoexcitation
+                    phexFactor = dilute*(float(self.Elvlc['mult'][l2])/float(self.Elvlc['mult'][l1]))/(np.exp(dekt) -1.)
+                    rad[l2+ci,l1+ci] += self.Wgfa["avalue"][iwgfa]*phexFactor
+                    rad[l1+ci,l1+ci] -= self.Wgfa["avalue"][iwgfa]*phexFactor
+                    # stimulated emission
+                    stemFactor = dilute/(np.exp(-dekt) -1.)
+                    rad[l1+ci,l2+ci] += self.Wgfa["avalue"][iwgfa]*stemFactor
+                    rad[l2+ci,l2+ci] -= self.Wgfa["avalue"][iwgfa]*stemFactor
+
+        # autoionization rates
+        for iauto in range(nauto):
+            l1 = self.Auto["lvl1"][iauto] - 1
+            l2 = self.Auto["lvl2"][iauto] - 1
+            # all autoionization eventually goes to the ground level of the higher ion
+            rad[l1+ci+rec,l2+ci] += self.Auto["avalue"][iauto]
+            rad[l2+ci,l2+ci] -= self.Auto["avalue"][iauto]
+
+
+        if self.Nscups:
+            self.upsilonDescale()
+            #ups = self.Upsilon['upsilon']
+            exRate = self.Upsilon['exRate']
+            dexRate = self.Upsilon['dexRate']
+
+        if self.Npsplups:
+            self.upsilonDescale(prot=1)
+            pexRate = self.PUpsilon['exRate']
+            pdexRate = self.PUpsilon['dexRate']
+
+
+#        temp = self.Temperature
+        ntemp = self.Ntemp
+        eDensity = self.EDensity
+        ndens = self.Ndens
+        nscups = self.Nscups
+#        cc = const.collision*self.EDensity
+        #
+        # (4 pi a0^2)^(3/2) = 6.6011e-24 (Badnell et al, 2003, A&A 406, 1151
+        # coef1 = 6.6011e-24*(const.hartree/(2.*const.boltzmann*self.Temperature))**1.5
+        coef2 = (const.planck)**3/(2.*const.pi*const.emass*const.boltzmann*self.Temperature)**1.5
+
+        #
+#        if npsplups:
+#            cp = const.collision*protonDensity
+        #
+        # get corrections for recombination and excitation
+        #
+        #
+        # the way temperature and density are now (9/2015) handled as arrays of the same size
+        # one the ndens == ntemp =1 case and the ndens >1 and ntemp>1 case are really needed
+        #
+        errorMessage = []
+        # ---------------------------------------------------------------------------------
+        #  --------------now for all values of ntemp and ndens -------------------------------
+        # --------------------------------------------------------------------------------
+
+        if verbose:
+            print(' doing both ntemp: %5i  ndens:  %5i'%(ntemp, ndens))
+        pop = np.zeros(nlvls, np.float64)
+#            drPop = np.zeros((ntemp,nlvls),np.float64)
+        fullPop = np.zeros(ci + nlvls + rec, np.float64)
+#            recRate = np.zeros((ntemp,nlvls),np.float64)
+        #drEffRateTot = np.zeros(ntemp, np.float64)
+        rrTot = 0.
+        recTot = 0.
+#
+#
+        higherPop = 0.
+        popmat = np.copy(rad)
+        # temp = self.Temperature[itemp]
+        # dens = self.EDensity[itemp]
+
+        for iscups in range(nscups):
+            l1 = self.Scups["lvl1"][iscups]-1
+            l2 = self.Scups["lvl2"][iscups]-1
+            popmat[l1+ci, l2+ci] += self.EDensity*dexRate[iscups]
+            popmat[l2+ci, l1+ci] += self.EDensity*exRate[iscups]
+            popmat[l1+ci, l1+ci] -= self.EDensity*exRate[iscups]
+            popmat[l2+ci, l2+ci] -= self.EDensity*dexRate[iscups]
+
+        # proton rates
+        for ipslups in range(npsplups):
+            l1 = self.Psplups["lvl1"][ipslups]-1
+            l2 = self.Psplups["lvl2"][ipslups]-1
+            popmat[l1+ci,l2+ci] += self.PDensity*pdexRate[ipslups]
+            popmat[l2+ci,l1+ci] += self.PDensity*pexRate[ipslups]
+            popmat[l1+ci,l1+ci] -= self.PDensity*pexRate[ipslups]
+            popmat[l2+ci,l2+ci] -= self.PDensity*pdexRate[ipslups]
+
+        if rec:
+            for ilvl in range(0, self.GrndLevels):
+                popmat[-1,  ci + ilvl] += self.EDensity*self.IonizRate['rate']
+                popmat[ci + ilvl, ci + ilvl] -= self.EDensity*self.IonizRate['rate']
+
+            if self.Nrrlvl:
+#                    rrlvl = self.Rrlvl
+#                    if hasattr(self, 'RrlvlRate'):
+#                        rrlvl = self.Rrlvl
+                if not hasattr(self, 'RrlvlRate'):
+                    self.rrlvlDescale()
+                    # only include rr from ground level
+                for itrans in rrLvlIdx:
+                    # lvl1 = rrlvl['lvl1'][itrans]-1
+                    lvl2 = rrlvl['lvl2'][itrans]-1
+                    popmat[lvl2+ci, -1] += self.EDensity*self.RrlvlRate['rate'][itrans]
+                    popmat[-1, -1] -= self.EDensity*self.RrlvlRate['rate'][itrans]
+                    rrTot += self.RrlvlRate['rate'][itrans]
+            else:
+                rrTot = 0.
+            if self.Nauto:
+                autoLvl2 = []
+                for i, avalue in enumerate(self.Auto['avalue']):
+                    l1 = self.Auto['lvl1'][i] - 1
+                    l2 = self.Auto['lvl2'][i] - 1
+                    autoLvl2.append(l2)
+                    # upperIdx = higher.Elvlc['lvl'].index(self.Auto['lvl1'][i])
+                    gUpper = float(higher.Elvlc['mult'][l1])
+                    gLower = float(self.Elvlc['mult'][l2])
+
+                    ecm2 = self.Elvlc['ecm'][l2]
+                    if ecm2 < 0.:
+                        ecm2 = self.Elvlc['ecmth'][l2]
+                    de1 = ecm2*const.invCm2Erg - self.Ip*const.ev2Erg
+                    dekt1 = de1/(const.boltzmann*self.Temperature)
+                    expkt = np.exp(-dekt1)
+
+                    # only including dielectronic recombination from the lowest level
+                    if l1 == 0:
+                        dielRate = coef2*gLower*expkt*avalue/(2.*gUpper)
+                        popmat[ci + l2, -1] += self.EDensity*dielRate
+                        popmat[-1, -1] -= self.EDensity*dielRate
+
+
+
+
+            recTot = rrTot
+            if recTot < higher.RecombRate['rate']:
+                popmat[ci, -1] += self.EDensity*(higher.RecombRate['rate'] - recTot)
+                popmat[-1, -1] -= self.EDensity*(higher.RecombRate['rate'] - recTot)
+            if verbose:
+                print('itemp  rrTot          %10.2e '%(rrTot))
+                print('itemp, recTot RecombRate  %10.2e %10.2e'%(recTot, higher.RecombRate['rate']))
+        else:
+            recTot = 0.
+
+        # in this case, haven't completely accounted for recombination
+
+
+#                    if verbose:
+#                        print(' T recombRate, rrTot, rrTot %10.2e %10.2e %10.2e %10.2e'%(temp, higher.RrRate['rate'][itemp], rrTot[itemp], higher.DrRate['rate'][itemp]))
+
+        norm = np.ones(nlvls+ci+rec,np.float64)
+        self.popmat = np.copy(popmat)
+        if ci:
+            norm[0] = 0.
+        if rec:
+            norm[-1] = 0.
+        popmat[nlvls+ci+rec-1] = norm
+        b = np.zeros(nlvls+ci+rec,np.float64)
+        b[nlvls+ci+rec-1] = 1.
+        try:
+            thispop = np.linalg.solve(popmat,b)
+            if rec:
+                higherPop = thispop[ci+nlvls]
+#            else:
+#                higherPop.append(-1)
+            pop = thispop[ci:ci+nlvls]
+            fullPop = thispop
+        except np.linalg.LinAlgError:
+            pop = np.zeros(nlvls, np.float64)
+            errorMessage.append('linealgError for T index %5i'%(itemp))
+    #
+        pop = np.where(pop > 0., pop, 0.)
+        self.Population = {"temperature":temperature,"eDensity":eDensity,"population":pop,
+            "protonDensity":protonDensity, "ci":ci, "rec":rec, 'popmat':popmat, 'fullPop':fullPop,
+            'method':'populate',  'higherPop':higherPop, 'rrTot':rrTot}
+        if len(errorMessage) > 0:
+            self.Population['errorMessage'] = errorMessage
+
+    def populateTemp(self, popCorrect=True, verbose=False):
+        """
+        Calculate level populations for specified ion.
+        for the number of temperature > 1 and the numbers of Density are 1
+        possible keyword arguments include temperature, eDensity, pDensity, radTemperature and rStar
+        populate assumes that all of the population in the higher ionization stages exists only
+        in the ground level
+        use drPopulate() for cases where the population of various levels in the higher ionization stage
+        figure into the calculation
+        """
+        nlvls = self.Nlvls
+
+        nwgfa = self.Nwgfa
+        nscups = self.Nscups
+        npsplups = self.Npsplups
+        nauto = self.Nauto
+        # the following is the number of lower levels to ionize the current ion  from
+        #  fixes the problem that the ionization rates are really just strictly for the ground leve
+        # which can become depopulated with increased density
+
+
+        if hasattr(self, 'PDensity'):
+            protonDensity = self.PDensity
+        else:
+            self.p2eRatio()
+            self.PDensity = self.ProtonDensityRatio*self.EDensity
+            protonDensity = self.PDensity
+            print(' proton density not specified, set to \"default\" ')
+        #
+#        if hasattr(self, 'RadTemperature') and hasattr(self, 'RStar'):
+#            radTemperature = self.RadTemperature
+#            rStar = self.RStar
+        rec = 0
+        ci = 0
+        if self.Nrrlvl or self.Nauto:
+            rec = 1
+        elif not popCorrect:
+            rec = 0
+        if verbose:
+            print('rec = %5i'%(rec))
+        if self.Nrrlvl:
+            rrlvl = self.Rrlvl
+            if hasattr(self, 'RrlvlRate'):
+                rrlvlRate = self.RrlvlRate
+            else:
+                self.rrlvlDescale('rrlvl')
+#                rrlvlRate = self.RrlvlRate
+            rrLvlIdx =[i for i,lvl1 in enumerate(self.Rrlvl['lvl1']) if lvl1 == 1]
+            self.RrLvlIdx = rrLvlIdx
+        temperature = self.Temperature
+        eDensity = self.EDensity
+        if rec:
+            # get ionization rate of this current ion
+            self.ionizRate()
+            self.recombRate()
+            #  get the higher ionization stage and its recombination rates to this ion
+            highers = util.zion2name(self.Z, self.Ion+1)
+            higher = ion(highers, temperature, abundance=self.Abundance, setup=0)
+            higher.setupIonrec()
+            higher.recombRate()
+        #  the populating matrix for radiative transitions and autoionization transitions
+        rad = np.zeros((nlvls+ci+rec,nlvls+ci+rec),np.float64)
+
+        for iwgfa in range(nwgfa):
+            l1 = self.Wgfa["lvl1"][iwgfa]-1
+            l2 = self.Wgfa["lvl2"][iwgfa]-1
+            rad[l1+ci,l2+ci] += self.Wgfa["avalue"][iwgfa]
+            rad[l2+ci,l2+ci] -= self.Wgfa["avalue"][iwgfa]
+            # photo-excitation and stimulated emission
+            if self.RadTemperature:
+                if not self.RStar:
+                    dilute = 0.5
+                else:
+                    dilute = util.dilute(self.RStar)
+                # next - don't include autoionization lines
+                if abs(self.Wgfa['wvl'][iwgfa]) > 0.:
+                    de = const.invCm2Erg*(self.Elvlc['ecm'][l2] - self.Elvlc['ecm'][l1])
+                    dekt = de/(const.boltzmann*self.RadTemperature)
+                    # photoexcitation
+                    phexFactor = dilute*(float(self.Elvlc['mult'][l2])/float(self.Elvlc['mult'][l1]))/(np.exp(dekt) -1.)
+                    rad[l2+ci,l1+ci] += self.Wgfa["avalue"][iwgfa]*phexFactor
+                    rad[l1+ci,l1+ci] -= self.Wgfa["avalue"][iwgfa]*phexFactor
+                    # stimulated emission
+                    stemFactor = dilute/(np.exp(-dekt) -1.)
+                    rad[l1+ci,l2+ci] += self.Wgfa["avalue"][iwgfa]*stemFactor
+                    rad[l2+ci,l2+ci] -= self.Wgfa["avalue"][iwgfa]*stemFactor
+
+        # autoionization rates
+        for iauto in range(nauto):
+            l1 = self.Auto["lvl1"][iauto] - 1
+            l2 = self.Auto["lvl2"][iauto] - 1
+            # all autoionization eventually goes to the ground level of the higher ion
+            rad[l1+ci+rec,l2+ci] += self.Auto["avalue"][iauto]
+            rad[l2+ci,l2+ci] -= self.Auto["avalue"][iauto]
+
+
+        if self.Nscups:
+            self.upsilonDescale()
+            #ups = self.Upsilon['upsilon']
+            exRate = self.Upsilon['exRate']
+            dexRate = self.Upsilon['dexRate']
+
+        if self.Npsplups:
+            self.upsilonDescale(prot=1)
+            pexRate = self.PUpsilon['exRate']
+            pdexRate = self.PUpsilon['dexRate']
+
+
+#        temp = self.Temperature
+        ntemp = self.Ntemp
+        eDensity = self.EDensity
+ #        ndens = self.Ndens
+        nscups = self.Nscups
+#        cc = const.collision*self.EDensity
+        #
+        # (4 pi a0^2)^(3/2) = 6.6011e-24 (Badnell et al, 2003, A&A 406, 1151
+        # coef1 = 6.6011e-24*(const.hartree/(2.*const.boltzmann*self.Temperature))**1.5
+        coef2 = (const.planck)**3/(2.*const.pi*const.emass*const.boltzmann*self.Temperature)**1.5
+
+        #
+#        if npsplups:
+#            cp = const.collision*protonDensity
+        #
+        # get corrections for recombination and excitation
+        #
+        #
+        # the way temperature and density are now (9/2015) handled as arrays of the same size
+        # one the ndens == ntemp =1 case and the ndens >1 and ntemp>1 case are really needed
+        #
+        errorMessage = []
+        # ---------------------------------------------------------------------------------
+        #  --------------now for all values of ntemp and ndens -------------------------------
+        # --------------------------------------------------------------------------------
+
+        if verbose:
+            print(' doing temp: %5i '%(ntemp))
+        pop = np.zeros((self.Ntemp, nlvls), np.float64)
+#            drPop = np.zeros((ntemp,nlvls),np.float64)
+        fullPop = np.zeros((self.Ntemp, ci + nlvls + rec), np.float64)
+        if self.Nrrlvl:
+            rrTot = np.zeros(self.Ntemp, np.float64)
+#            recRate = np.zeros((ntemp,nlvls),np.float64)
+        #drEffRateTot = np.zeros(ntemp, np.float64)
+        rrTot = np.zeros(self.Ntemp, np.float64)
+        recTot = np.zeros(self.Ntemp, np.float64)
 #
 #
         higherPop = []
-        for itemp in range(self.NTempDens):
+        for itemp in range(self.Ntemp):
             popmat = np.copy(rad)
             # temp = self.Temperature[itemp]
             # dens = self.EDensity[itemp]
@@ -1352,7 +2196,7 @@ class ion(ioneqOne, ionTrails, specTrails):
                         # lvl1 = rrlvl['lvl1'][itrans]-1
                         lvl2 = rrlvl['lvl2'][itrans]-1
                         popmat[lvl2+ci, -1] += self.EDensity[itemp]*self.RrlvlRate['rate'][itrans, itemp]
-                        popmat[-1, -1] -= self.EDensity[itemp]*self.RrlvlRate['rate'][itrans,itemp]
+                        popmat[-1, -1] -= self.EDensity[itemp]*self.RrlvlRate['rate'][itrans, itemp]
                         rrTot[itemp] += self.RrlvlRate['rate'][itrans, itemp]
                 else:
                     rrTot[itemp] = 0.
@@ -1426,7 +2270,6 @@ class ion(ioneqOne, ionTrails, specTrails):
         if len(errorMessage) > 0:
             self.Population['errorMessage'] = errorMessage
 
-
     def p2eRatio(self):
         """
         Calculates the proton density to electron density ratio using Eq. 7 of [1]_.
@@ -1457,8 +2300,8 @@ class ion(ioneqOne, ionTrails, specTrails):
                 denominator += z*self.IoneqAll['ioneqAll'][i,z,:]*abundance[i]
 
         p2eratio = abundance[0]*self.IoneqAll['ioneqAll'][0,1,:]/denominator
-        nots = splrep(np.log10(self.IoneqAll['ioneqTemperature']),p2eratio,s=0)
-        self.ProtonDensityRatio = splev(np.log10(temperature),nots,der=0,ext=1)
+        nots = splrep(np.log10(self.IoneqAll['ioneqTemperature']), p2eratio, s=0)
+        self.ProtonDensityRatio = splev(np.log10(temperature), nots, der=0, ext=1)
 
 
 
@@ -1563,7 +2406,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             xlabel = 'Temperature (K)'
             plt.xlabel(xlabel)
             plt.ylabel(ylabel)
-            if addTitle is None:
+            if addTitle is False:
                 dstr = ' -  Density = %10.2e (cm$^{-3}$)' % eDensity[0]
             else:
                 dstr = ' -  Density = %10.2e (cm$^{-3}$) %s' %(eDensity[0], addTitle)
@@ -1621,10 +2464,10 @@ class ion(ioneqOne, ionTrails, specTrails):
                         plt.text(eDensity[idens],pop[idens, lvl-1],str(lvl))
             plt.xlabel(xlabel)
             plt.ylabel(ylabel)
-            if addTitle is None:
-                tstr = ' -  T = %10.2e (K)' % temperature[0]
+            if addTitle is False:
+                tstr = ' -  T = %10.2e (K)' % temperature
             else:
-                tstr = ' -  T = %10.2e (K) %s' % (temperature[0] , addTitle)
+                tstr = ' -  T = %10.2e (K) %s' % (temperature , addTitle)
             plt.title(title+tstr)
             plt.xlim(eDensity[eDensity.nonzero()].min(),eDensity.max())
             if doTop:
@@ -1770,7 +2613,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             em = np.zeros((nwvl, ntempden),np.float64)
         except:
             ntempden = 1
-            em = np.zeros(nwvl,np.float64)
+            em = np.zeros(nwvl, np.float64)
 
 #        plotLabels = {}
 #        if self.Defaults['wavelength'] == 'angstrom':
@@ -1788,15 +2631,15 @@ class ion(ioneqOne, ionTrails, specTrails):
             factor = np.ones((nwvl),np.float64)/(4.*const.pi)
 #            plotLabels["yLabel"] = "photons cm^-3 s^-1"
         ylabel = self.Labels['emissYlabel']
-#        if ntempden > 1:
-        for itempden in range(ntempden):
-            for iwvl in range(nwvl):
-                p = pop[itempden,l2[iwvl]-1]
-                em[iwvl, itempden] = factor[iwvl]*p*avalue[iwvl]
-#        else:
-#            for iwvl in range(0,nwvl):
-#                p = pop[l2[iwvl]-1]
-#                em[iwvl] = factor[iwvl]*p*avalue[iwvl]
+        if ntempden > 1:
+            for itempden in range(ntempden):
+                for iwvl in range(nwvl):
+                    p = pop[itempden, l2[iwvl]-1]
+                    em[iwvl, itempden] = factor[iwvl]*p*avalue[iwvl]
+        else:
+            for iwvl in range(0,nwvl):
+                p = pop[l2[iwvl] -1]
+                em[iwvl] = factor[iwvl]*p*avalue[iwvl]
 #            if self.Defaults['wavelength'] == 'kev':
 #                wvl = const.ev2Ang/np.asarray(wvl)
 #            elif self.Defaults['wavelength'] == 'nm':
@@ -2097,7 +2940,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             em = self.Emiss
         eDensity = self.EDensity
         temperature = self.Temperature
-        ntemp = temperature.size
+        ntemp = self.Ntemp
 
         if ntemp > 0:
             if temperature[0] == temperature[-1]:
@@ -2378,8 +3221,16 @@ class ion(ioneqOne, ionTrails, specTrails):
                 return
             else:
                 thisIoneq = self.IoneqOne
+                if type(self.Em) is float:
+                    new_em = self.Em * np.ones_like(emissivity[0])
+                elif type(self.Em) is np.ndarray:
+                    if self.Em.shape[0] == 1:
+                        new_em = self.Em[0] * np.ones_like(emissivity[0])
+                    else:
+                        new_em = self.Em
+                self.New_em = new_em
                 for it in range(ntempden):
-                    intensity[it] = ab*thisIoneq[it]*emissivity[:, it]*self.Em[it]/self.EDensity[it]
+                    intensity[it] = ab*thisIoneq[it]*emissivity[:, it]*new_em[it]/self.EDensity[it]
         else:
             thisIoneq = self.IoneqOne
             nwvl = len(emissivity)
@@ -2692,7 +3543,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             return
         elif ndens == 1:
             xlabel = 'Temperature (K)'
-            ngofnt = temperature.size
+            ngofnt = self.Ntemp
             xvalues = temperature
             outTemperature = temperature
             outDensity = eDensity
@@ -2827,13 +3678,13 @@ class ion(ioneqOne, ionTrails, specTrails):
         else:
             if hasattr(self, 'Population'):
                 pop = self.Population['population']
-                nTempDens = max(self.Temperature.size, self.EDensity.size)
+#                nTempDens = max(self.Temperature.size, self.EDensity.size)
             else:
                 self.populate()
                 pop = self.Population['population']
-                nTempDens = max(self.Temperature.size, self.EDensity.size)
-            if nTempDens > 1:
-                emiss = np.zeros((nTempDens, nWvl), np.float64)
+#                nTempDens = max(self.Temperature.size, self.EDensity.size)
+            if self.NTempDens > 1:
+                emiss = np.zeros((self.Ntemp, nWvl), np.float64)
 #                if self.EDensity.size == 1:
 #                    eDensity = np.repeat(self.EDensity, nTempDens)
 #                else:
@@ -2911,6 +3762,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         #
         #
         nWvl = wvl.size
+        nTemp = self.Ntemp
         if self.Z - self.Ion > 1 or self.Dielectronic:
             # this is not a hydrogen-like or helium-like ion
             if verbose:
@@ -2930,20 +3782,24 @@ class ion(ioneqOne, ionTrails, specTrails):
                 thisIoneq = self.IoneqOne
             if hasattr(self, 'Population'):
                 pop = self.Population['population']
-                nTempDens = max(self.Temperature.size, self.EDensity.size)
+#                nTempDens = max(self.NTemp, self.Ndens)
             else:
                 self.populate()
                 pop = self.Population['population']
-                nTempDens = max(self.Temperature.size, self.EDensity.size)
-#            if nTempDens > 1:
-            rate = np.zeros((nTempDens, nWvl), np.float64)
-            if self.EDensity.size == 1:
-                eDensity = np.repeat(self.EDensity, nTempDens)
+#                nTempDens = max(self.Temperature.size, self.EDensity.size)
+
+            if nTemp > 1:
+                rate = np.zeros((nTemp, nWvl), np.float64)
             else:
-                eDensity = self.EDensity
-            if self.Temperature.size == 1:
-                # temperature = np.repeat(self.Temperature, nTempDens)
-                thisIoneq = np.repeat(thisIoneq, nTempDens)
+                rate = np.zeros(nWvl,  np.float64)
+            eDensity = self.EDensity
+#            if self.Ndens == 1:
+#                eDensity = np.repeat(self.EDensity, nTempDens)
+#            else:
+#                eDensity = self.EDensity
+#            if self.Temperature.size == 1:
+#                # temperature = np.repeat(self.Temperature, nTempDens)
+#                thisIoneq = np.repeat(thisIoneq, nTempDens)
             # else:
             #     temperature = self.Temperature
 #            else:
@@ -2968,8 +3824,12 @@ class ion(ioneqOne, ionTrails, specTrails):
                         f = (const.light*const.planck*1.e+8)/(4.*const.pi*wvl[goodWvl])
                     else:
                         f = 1./(4.*const.pi)
-                    for it in range(nTempDens):
-                        rate[it, goodWvl] = f*pop[it, l2]*distr*ab*thisIoneq[it]*self.Em[it]/eDensity[it]
+                    if nTemp > 1:
+                        for it in range(nTemp):
+                            rate[it, goodWvl] = f*pop[it, l2]*distr*ab*thisIoneq[it]*self.Em[it]/eDensity[it]
+                    else:
+                        rate[goodWvl] = f*pop[l2]*distr*ab*thisIoneq*self.Em/eDensity
+
                 self.TwoPhoton = {'wvl':wvl, 'intensity':rate.squeeze(), 'em':self.Em, 'xlabel':xlabel,
                 'ylabel':ylabel}
 
@@ -2991,8 +3851,12 @@ class ion(ioneqOne, ionTrails, specTrails):
                         f = (const.light*const.planck*1.e+8)/(4.*const.pi*wvl[goodWvl])
                     else:
                         f = 1./(4.*const.pi)
-                    for it in range(nTempDens):
-                        rate[it, goodWvl] = f*pop[it, l2]*distr*ab*thisIoneq[it]*self.Em[it]/eDensity[it]
+                    if nTemp > 1:
+                        for it in range(nTemp):
+                            rate[it, goodWvl] = f*pop[it, l2]*distr*ab*thisIoneq[it]*self.Em[it]/eDensity[it]
+                    else:
+                        rate[goodWvl] = f*pop[l2]*distr*ab*thisIoneq*self.Em/eDensity
+
                 self.TwoPhoton = {'wvl':wvl, 'intensity':rate.squeeze(), 'em':self.Em, 'xlabel':xlabel,
                 'ylabel':ylabel}
 
@@ -3008,7 +3872,7 @@ class ion(ioneqOne, ionTrails, specTrails):
 
         if self.Z -self.Ion > 1 or self.Dielectronic:
             # this is not a hydrogen-like or helium-like ion
-            nTempDens = max(self.Temperature.size, self.EDensity.size)
+            nTempDens = self.NTempDens
 #            if nTempDens > 1:
             rate = np.zeros((nTempDens), np.float64)
             self.TwoPhotonLoss = {'rate':rate}
@@ -3025,11 +3889,11 @@ class ion(ioneqOne, ionTrails, specTrails):
                 thisIoneq = self.IoneqOne
             if hasattr(self, 'Population'):
                 pop = self.Population['population']
-                nTempDens = max(self.Temperature.size, self.EDensity.size)
+                nTempDens = self.NTempDens
             else:
                 self.populate()
                 pop = self.Population['population']
-                nTempDens = max(self.Temperature.size, self.EDensity.size)
+                nTempDens  = self.NTempDens
             rate = np.zeros((nTempDens), np.float64)
             eDensity = self.EDensity
 #            else:

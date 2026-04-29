@@ -1,6 +1,6 @@
 name: chiantipy
 dependencies:
-  - python>=3.6
+  - python>=3.10
   - numpy>=1.14
   - scipy
   - matplotlib

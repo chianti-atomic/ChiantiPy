@@ -14,7 +14,9 @@ import ChiantiPy.tools.data as chdata
 from .Ion import ion
 
 def ioneqMake(filename, directory = None, temperature = None,  reference = None, verbose = False):
-    """a function  to create a chianti .ioneq style ionization equilibrium
+    """
+    a function  to create a chianti .ioneq style ionization equilibrium
+
     Parameters
     ----------
 

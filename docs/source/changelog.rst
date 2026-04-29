@@ -1,8 +1,7 @@
 ===========
 Changelog
 ===========
-
-Changes from 0.15.2 to 0.15.3
+Changes from 0.15.2 to 0.16.0
 =============================
 
 bug fix for:  only 0-dimensional arrays can be converted to Python scalars

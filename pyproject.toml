@@ -4,3 +4,29 @@ requires = [
     "wheel"
 ]
 build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "ChiantiPy"
+version = "0.16.0"
+authors = [
+  { name="Ken Dere", email="kdere@gmu.edu" },
+]
+
+description = "A Python interface to the CHIANTI atomic database"
+readme = "README.md"
+requires-python = ">=3.10"
+
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+
+license = "ISC"
+license-files = ["licenses"]
+
+[project.urls]
+Homepage = "https://github.com/chianti-atomic/ChiantiPy"
+Issues = "https://github.com/chianti-atomic/ChiantiPy/issues"
+
+

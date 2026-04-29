@@ -127,8 +127,8 @@ class spectrum(ionTrails, specTrails):
 
     '''
     def __init__(self, temperature, eDensity, wavelength, filter=(chfilters.gaussianR, 1000.), label=None,
-        elementList = None, ionList = None, minAbund=None, doLines = True, doContinuum = True, em=None, keepIons=0,
-        abundance=None, verbose=0, allLines=1):
+        elementList = None, ionList = None, minAbund=None, doLines = True, doContinuum = True, em=None, keepIons=False,
+        abundance=None, verbose=False, allLines=1):
         #
         self.Defaults=chdata.Defaults
 
@@ -150,7 +150,7 @@ class spectrum(ionTrails, specTrails):
         self.Wavelength = np.asarray(wavelength,  np.float64)
         self.WvlRange = np.asarray([self.Wavelength.min(),  self.Wavelength.max()],  np.float64)
         #
-        self.argCheck(temperature = temperature, eDensity =  eDensity,  pDensity = None,  em = em,  verbose=True)
+        self.argCheck(temperature = temperature, eDensity =  eDensity,  pDensity = None,  em = em)
 
         nTempDens = self.NTempDens
 

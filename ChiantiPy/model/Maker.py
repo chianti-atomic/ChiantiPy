@@ -39,7 +39,7 @@ def doDemGofntQ(inQueue, outQueue):
     # ---------------------------------------------------------
     #
 def emPlot(matchDict, vs='T', loc='upper right', lw=2,  adjust=None, position='both', legend = True, verbose=False):
-    '''
+    """
     to plot line intensities divided by gofnt
     adjust is to provide an adjustment to the position of the labels
     position : one of 'both', 'right', 'left', or 'none'
@@ -78,7 +78,7 @@ def emPlot(matchDict, vs='T', loc='upper right', lw=2,  adjust=None, position='b
         if True, additional output is sent to the terminal
 
 
-    '''
+    """
     match = matchDict['match']
     temp = matchDict['Temperature']
     dens = matchDict['EDensity']
@@ -2187,31 +2187,31 @@ class maker(ionTrails,  specTrails):
         #-----------------------------------------------------
         #
     def search1tSpace(self, initialEM, indexLimits=None, logname=None, verbose=False, maxfev=0):
-        '''conduct a brute force search of 2 temperature space and find the
+        """
+
+        conduct a brute force search of 2 temperature space and find the
         best fit
 
-        Parameters
-        ----------
+        :param initialEM: the initial trial value for the log10 emission measure
+        :type initialEM: `float`
 
-        initialEm:  `float`
-            the initial trial value for the log10 emission measure
-
-
-        Keyword Arguments
-        -----------------
-
-       indexLimits:  2 dimensional array type
-            the lower an upper limits of the temperature to be searched
+        :param indexLimits: the lower an upper limits of the temperature to be searched
             the default is None and them the whole temperature array is searched
+            defaults to None
+        :type indexLimits: 2 dimensional array type, optional
 
-        logname:  `str`
-            the name of the file were the search log is written
-            the default is None and no log will be written
+        :param logname: the name of the file were the search log is written
+            the default is None and no log will be written, defaults to None
+        :type logname: `str`, optional
 
-        verbose:  `bool`
-            if True, additional output is sent to the terminal
+        :param verbose: if True, additional output is sent to the terminal, defaults to False
+        :type verbose: `bool`, optional
 
-        '''
+        :param maxfev: for fitting, defaults to 0.
+        :type maxfev: `float`, optional
+
+        """
+
         self.Nparams = 2. + 1.
 #        if not hasattr(self, 'SearchData'):
 #            print(' dem has not been searched yet')

@@ -14,7 +14,8 @@ import ChiantiPy.tools.mputil as mputil
 
 
 class mspectrum(ionTrails, specTrails):
-    ''' this is the multiprocessing version of spectrum
+    """
+    this is the multiprocessing version of spectrum
     set proc to the desired number of processors, default=3
 
     Calculate the emission spectrum as a function of temperature and density.
@@ -110,7 +111,7 @@ class mspectrum(ionTrails, specTrails):
 
     verbose:  `bool`
         verbose:  whether to allow certain print statements
-    '''
+    """
     def __init__(self, temperature, eDensity, wavelength, filter=(chfilters.gaussianR, 1000.), label=0,
         elementList = None, ionList = None, minAbund=None, keepIons=0, abundance=None,  doLines=True,
         doContinuum=True, allLines = True, em=None,  proc=3, verbose = False,  timeout=0.1):

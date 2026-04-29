@@ -8,7 +8,7 @@ ChiantiPy's API documentation
 
 .. toctree::
    :glob:
-   :maxdepth: 4
+   :maxdepth: 2
    :caption: Contents:
 
    ChiantiPy

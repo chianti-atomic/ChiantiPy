@@ -11,12 +11,10 @@ ChiantiPy's API documentation
    :maxdepth: 2
    :caption: Contents:
 
-   ChiantiPy
+   ChiantiPy.core
+   ChiantiPy.tools
+   ChiantiPy.Gui
+   ChiantiPy.model
+   ChiantiPy.base
 
 
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

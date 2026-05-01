@@ -66,55 +66,64 @@ class mspectrum(ionTrails, specTrails):
     If set to a blank (''), a gui selection menu will popup and allow the selection of an
     set of abundances
 
-    Parameters
-    --------------
-
-    temperature: `float`, `list`, `ndarray`
-        the temperature(s) in K
-
-    eDensity: float, ndarray
-        eDensity: electron density in :math:`\mathrm{cm^{-3}}`
-
-    wavelength:  `list` or `ndarray`
-        wavelength:  array of  wavelengths, generally in Angstroms
-
-    elementList:  `list`
-        elementList:  list of elements to include, such as 'fe', 'ne', 's'
-
-    ionList:  `list`
-        ionList:  list of ions to include, such as 'fe_16', 'ne_10'
-
-    minAbund:  `float`
-        minAbund:  minimum abundance (relative to H) to include
-
-    doLines:  `bool1
-        doLines: if true, line intensities are calculated
-
-    doContinuum:  `bool`
-        doContinuum:  if true, continuum intensities are calculated only if wavelengths are in angstroms
-
-    keepIons:  `bool`
-        keepIons:  keep the ion instances used in the calculation
-            should be used with caution otherwise the bunch instance
-            can become quite large
-
-    em:  `float`, `list`, `ndarray`
-        em:  the emission measure - the integral of the electron density times the hydrogen density
-        along the line of sight
-
-    abundance:  `str`
-        abuncance:  the file name of the abuncance set to be used
-            must be one in the $XUVTOP/abund directory
-
-    allLInes:  `bool`
-        allLines:  whether or not to include unobserved lines
-
-    verbose:  `bool`
-        verbose:  whether to allow certain print statements
     """
-    def __init__(self, temperature, eDensity, wavelength, filter=(chfilters.gaussianR, 1000.), label=0,
-        elementList = None, ionList = None, minAbund=None, keepIons=0, abundance=None,  doLines=True,
+    def __init__(self, temperature, eDensity, wavelength, filter=(chfilters.gaussianR, 1000.), label=False,
+        elementList = None, ionList = None, minAbund=None, keepIons=False, abundance=None,  doLines=True,
         doContinuum=True, allLines = True, em=None,  proc=3, verbose = False,  timeout=0.1):
+        """
+
+        :param temperature: the temperature(s) in K
+        :type temperature: `float`, `list`, `ndarray`
+
+        :param eDensity: electron density in :math:`\\mathrm{cm^{-3}}`
+        :type eDensity: `float`, `list`, `ndarray`
+
+        :param wavelength: array of  wavelengths, generally in Angstroms
+        :type wavelength: `list`, `ndarray`
+
+        :param filter: list containing the filter function and parameters, defaults to (chfilters.gaussianR, 1000.)
+        :type filter: list, optional
+
+        :param label: DESCRIPTION, defaults to 0
+        :type label: TYPE, optional
+
+        :param elementList:   list of elements to include, such as 'fe', 'ne', 's', defaults to None
+        :type elementList: `list`, optional
+
+        :param ionList: list of ions to include, such as 'fe_16', 'ne_4', defaults to None
+        :type ionList: `list`, optional
+
+        :param minAbund: the minimum abundance of elements ot include (relative to H), defaults to None
+        :type minAbund: float, optional
+
+        :param keepIons: whether or not to keep the ions created, defaults to 0
+        :type keepIons: `bool1, optional
+
+        :param abundance: the abundance file to use, defaults to None
+        :type abundance: str, optional
+
+        :param doLines: whether or not to calculate the spectral lines, defaults to True
+        :type doLines: `bool`, optional
+
+        :param doContinuum: whether to calculate the continuum, defaults to True
+        :type doContinuum: `bool`, optional
+
+        :param allLines: to include all lines, even the 'unobserved', defaults to True
+        :type allLines: `bool`, optional
+
+        :param em: the value of the emission measure, defaults to None
+        :type em: `float`, `list`, `ndarray`, optional
+
+        :param proc: the number of processor cores to use, defaults to 3
+        :type proc: `int`, optional
+
+        :param verbose: whether to print messages to the terminal, defaults to False
+        :type verbose: `bool`, optional
+
+        :param timeout: used in the multiprocessing module, defaults to 0.1
+        :type timeout: float, optional
+
+        """
         #
         wavelength = np.atleast_1d(wavelength)
         if wavelength.size < 2:
@@ -142,7 +151,7 @@ class mspectrum(ionTrails, specTrails):
         ylabel = self.Labels['spectrumYlabel']
 
         if np.array_equal(self.Em, np.ones_like(self.Em)):
-            ylabel += '($\int\,$ N$_e\,$N$_H\,$d${\it l}$)$^{-1}$'
+            ylabel += '($\\int\\,$ N$_e\\,$N$_H\\,$d${\\it l}$)$^{-1}$'
         #
         #
         self.AllLines = allLines

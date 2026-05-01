@@ -47,43 +47,47 @@ class mradLoss(ionTrails, specTrails):
         If set to a blank (''), a gui selection menu will popup and allow the
         selection of an set of abundances
 
-    Parameters
-    --------------
-
-    temperature: `float`, `list`, `ndarray`
-        the temperature(s) in K
-
-    eDensity: float, ndarray
-        eDensity: electron density in :math:`\mathrm{cm^{-3}}`
-
-    elementList:  `list`
-        elementList:  list of elements to include, such as 'fe', 'ne', 's'
-
-    ionList:  `list`
-        ionList:  list of ions to include, such as 'fe_16', 'ne_10'
-
-    minAbund:  `float`
-        minAbund:  minimum abundance (relative to H) to include
-
-    doLines:  `bool1
-        doLines: if true, line intensities are calculated
-
-    doContinuum:  `bool`
-        doContinuum:  if true, continuum intensities are calculated only if wavelengths are in angstroms
-
-    abundance:  `str`
-        abuncance:  the file name of the abuncance set to be used
-            must be one in the $XUVTOP/abund directory
-
-    allLInes:  `bool`
-        allLines:  whether or not to include unobserved lines
-
-    verbose:  `bool`
-        verbose:  whether to allow certain print statements
 
     """
     def __init__(self, temperature, eDensity, elementList=None, ionList = None, minAbund=None,
-        doContinuum=True, doLines=True, abundance=None, verbose=0, allLines=1,  proc=4):
+        doContinuum=True, doLines=True, abundance=None, verbose=False, allLines=True,  proc=4):
+        """
+
+        :param temperature: the temperature(s) in K
+        :type temperature: `float`, `list`, `ndarray`
+
+        :param eDensity: electron density in :math:`\\mathrm{cm^{-3}}`
+        :type eDensity: `float`, `list`, `ndarray`
+
+       :param elementList:   list of elements to include, such as 'fe', 'ne', 's', defaults to None
+        :type elementList: `list`, optional
+
+        :param ionList: list of ions to include, such as 'fe_16', 'ne_4', defaults to None
+        :type ionList: `list`, optional
+
+        :param minAbund: the minimum abundance of elements ot include (relative to H), defaults to None
+        :type minAbund: float, optional
+
+        :param doLines: whether or not to calculate the spectral lines, defaults to True
+        :type doLines: `bool`, optional
+
+        :param doContinuum: whether to calculate the continuum, defaults to True
+        :type doContinuum: `bool`, optional
+
+        :param abundance: the abundance file to use, defaults to None
+        :type abundance: str, optional
+
+       :param verbose: whether to print messages to the terminal, defaults to False
+        :type verbose: `bool`, optional
+
+        :param allLines: to include all lines, even the 'unobserved', defaults to True
+        :type allLines: `bool`, optional
+
+        :param proc: the number of processor cores to use, defaults to 3
+        :type proc: `int`, optional
+
+
+        """
 
         timeout = 0.01
         t1 = datetime.now()

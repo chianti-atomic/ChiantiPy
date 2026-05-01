@@ -6,7 +6,7 @@ Subpackages
 
 .. toctree::
 
-    ChiantiPy.core.tests
+
 
 Submodules
 ----------

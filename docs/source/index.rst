@@ -21,14 +21,8 @@ CHIANTI is developed and maintained by scientists at George Mason University (US
 
    getting_started
    quick_start
-   tutorial
-   api/ChiantiPy
-   api/ChiantiPy.base
-   api/ChiantiPy.core
-   api/ChiantiPy.tools
-   api/ChiantiPy.model
+   api/index
    notes
-   IDL_intro
    resources
    changelog
    bugs

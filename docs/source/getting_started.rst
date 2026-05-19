@@ -9,15 +9,15 @@ Prerequisites
 
 .. _CHIANTI: http://www.chiantidatabase.org/
 
-* Python3_ (3.13 is the current development version)
+* Python3_ (3.10 or later)
 
 .. _PYTHON3:  http://www.python.org
 
-* Numpy_ (currently developed with 1.20)
+* Numpy_ (currently developed with 2.4)
 
 .. _Numpy:  http://www.scipy.org/
 
-* Scipy_ (currently developed with 1.6)
+* Scipy_ (currently developed with 1.17)
 
 .. _Scipy:  http://www.scipy.org/
 
@@ -25,18 +25,14 @@ Prerequisites
 
 .. _Matplotlib:  http://matplotlib.sourceforge.net/
 
-* Matplotlib requires a GUI library
+* PyQt5
 
-  PyQt5_
-
-  Once one of these is installed, it must be set as the backend in your matplotlibrc file, e.g., backend:  Qt5Agg
-
-.. _PyQt5: http://www.riverbankcomputing.co.uk/
+* Roman
 
 
 * ipyparallel (required for multiprocessing with ipymspectrum)
 
-* (not really a prerequisite but **extremely** useful) IPython_ version 7.21 and Jupyter_
+* (not really a prerequisite but **extremely** useful) IPython_ and Jupyter_
 
 .. _IPython:  http://ipython.org
 
@@ -109,7 +105,7 @@ I have not tried this with ChiantiPy, myself.
 
 The ChiantiPy package can be downloaded from the ChiantiPy_ project page at Sourceforge, untar it, cd to the directory where it was unpacked, and then, as root
 
-.. _ChiantiPy:  http://sourceforge.net/projects/chiantipy/
+.. _ChiantiPy:  https://github.com/chianti-atomic/ChiantiPy/
 
 ::
 

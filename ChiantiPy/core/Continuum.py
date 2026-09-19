@@ -292,7 +292,7 @@ class continuum(ioneqOne, ionTrails):
         else:
             tst1 = np.log10(self.Temperature) >= 6.0
             tst2 = np.log10(self.Temperature) <= 8.5
-            if not tst1 and not tst2:
+            if not (tst1 and tst2):
                  gf.fill(np.nan)
 
         return gf

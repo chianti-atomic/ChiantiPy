@@ -696,7 +696,7 @@ def scale_bti(evin,crossin,f,ev1):
     btx = u*crossin*(ev1**2)/(np.log(u)+1.)
     return [bte,btx]
 
-def descale_bt(bte,btomega,f,ev1):
+def descale_bt(bte, btomega, f, ev1):
     """
     Apply excitation descaling of [3]_ to energy and collision strength
 

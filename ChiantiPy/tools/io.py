@@ -290,7 +290,7 @@ def autoWrite(info, filename = None, minBranch = None):
         if 'pretty1' in info:
             pformat = '%7i%7i%12.2e%30s - %30s'
         else:
-            pformat = '%%7i%7i%12.2e'
+            pformat = '%7i%7i%12.2e'
         for itrans, avalue in enumerate(info['avalue']):
             # for autoionization transitions, lvl1 can be less than zero???
             if abs(info['lvl1'][itrans]) > 0 and info['lvl2'][itrans] > 0:
@@ -316,6 +316,7 @@ def autoWrite(info, filename = None, minBranch = None):
                 cnt += 1
         if cnt == 0:
             out.write('%filename:  ' + filename + '\n')
+
         for one in info['ref']:
             out.write(one+'\n')
 
@@ -2403,7 +2404,7 @@ def wgfaWrite(info, filename = None, minBranch = 1.e-5, sig = 7, maxLvl1 = None,
         if 'pretty1' in info:
             pformat = '%5i%5i%15s%15.3e%15.3e%30s - %30s'
         else:
-            pformat = '%5i%5i%15.s%15.3e%15.3e'
+            pformat = '%5i%5i%15s%15.3e%15.3e'
         for itrans, avalue in enumerate(info['avalue']):
             # for autoionization transitions, lvl1 can be less than zero
             if abs(info['lvl1'][itrans]) > 0 and info['lvl2'][itrans] > 0:
@@ -2448,8 +2449,7 @@ def wgfaWrite(info, filename = None, minBranch = 1.e-5, sig = 7, maxLvl1 = None,
         if cnt == 0:
             outpt.write('%filename:  ' + wgfaname + '\n')
         ref = info['ref']
-        newref = [aref.strip() for aref in ref if aref.strip() != '-1']
-        for one in newref:
+        for one in ref:
             outpt.write(one+'\n')
 
 #        outpt.write(today.strftime('%Y %B %d') +'\n')

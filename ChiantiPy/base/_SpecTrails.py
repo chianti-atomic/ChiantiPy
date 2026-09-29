@@ -88,6 +88,13 @@ class specTrails(object):
                                     todo[ion] += '_ff_fb'
                         if verbose:
                             print(' %s  %s '%(ion,  todo[ion]))
+                        # add bare nuclei
+                if doContinuum:
+                    zSet = set(zTodo)
+                    for z in zSet:
+                        gname = util.zion2name(z, z+1)
+                        todo[gname] = 'ff_fb'
+
         if verbose:
             print(' \n after elementList \n')
             for anion in todo.keys():
@@ -114,12 +121,12 @@ class specTrails(object):
                     else:
                         todo[one] += '_ff_fb'
 
-        # add bare nuclei
-        if doContinuum:
-            zSet = set(zTodo)
-            for z in zSet:
-                gname = util.zion2name(z, z+1)
-                todo[gname] = 'ff_fb'
+#        # add bare nuclei
+#        if doContinuum:
+#            zSet = set(zTodo)
+#            for z in zSet:
+#                gname = util.zion2name(z, z+1)
+#                todo[gname] = 'ff_fb'
 
 
         if verbose:

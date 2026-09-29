@@ -1084,8 +1084,11 @@ class continuum(ioneqOne, ionTrails):
             fb *= abund
 
         if includeIoneq:
-            for itemp, one in enumerate(self.IoneqOne):
-                fb[itemp] *= one
+            if self.NTempDens == 1:
+                fb *= self.IoneqOne
+            else:
+                for itemp, one in enumerate(self.IoneqOne):
+                    fb[itemp] *= one
         #
         self.FreeBound = {'intensity':fb.squeeze(), 'temperature':temperature,'wvl':wvl, 'em':em, \
             'abund':abund, 'ioneq':self.IoneqOne, 'gf':mygf, 'edgeLvlAng':edgeLvlAng,  'fbn':fbn.squeeze(),

@@ -339,6 +339,7 @@ class maker(ionTrails,  specTrails):
 
         allLines = self.AllLines
         mlInfo = self.MlInfo
+        allWvldiff = []
         for thision in self.Todo:
             if verbose:
 #                print(' - - - - - - - - - - - ')
@@ -357,7 +358,7 @@ class maker(ionTrails,  specTrails):
                     wgfa['pretty2'].pop(idx)
                 thesewvl = np.asarray(wgfa['wvl'])
                 nonzed = thesewvl != 0.
-                thesewvl =thesewvl[nonzed]
+                thesewvl = thesewvl[nonzed]
                 if allLines:
                     thesewvl = np.abs(thesewvl)
     #            matches[iwvl]['lvl1'] = []
@@ -1272,7 +1273,7 @@ class maker(ionTrails,  specTrails):
                     print('no values for idx = %5i wvl = %8.2f'%(idx, match[idx]['wvl']))
                     print(' nonzed = %i'%(nonzed.sum()))
                     print('intensity = %10.2e'%(match[idx]['obsIntensity']))
-            if legend:
+            if legend and label:
                 ax.legend(loc=loc)
             ax.set_ylabel('Emission Measure (cm$^{-5}$)')
             ax.set_xlabel('Electron Density (cm$^{-3}$)')
@@ -1439,6 +1440,7 @@ class maker(ionTrails,  specTrails):
         'wvl' = observed wavelength (A)
         'relDiff' = (I_obs - I_pred)/(I_obs)
         'ionS' the CHIANTI type name for an ion
+        'wvl'
 
 
         Keyword Arguments
@@ -1548,15 +1550,18 @@ class maker(ionTrails,  specTrails):
                 amatch = self.Match[iwvl]
                 if amatch['predicted'] > 0. :
                     wvlDiff.append(amatch['obsWvl'])
-                    diff.append(self.Intensity[iwvl]-amatch['predicted'])
-                    chi = np.abs(self.Intensity[iwvl]-amatch['predicted'])/(wghtFactor*self.Intensity[iwvl])
+                    diff.append(self.Intensity[iwvl] - amatch['predicted'])
+                    chi = np.abs(self.Intensity[iwvl] - amatch['predicted'])/(wghtFactor*self.Intensity[iwvl])
                     wDiff.append(chi)
                     intOverPred.append(self.Intensity[iwvl]/amatch['predicted'])
                     predOverInt.append(amatch['predicted']/self.Intensity[iwvl])
                     diffOverInt.append((self.Intensity[iwvl]-amatch['predicted'])/self.Intensity[iwvl])
-                    pstring = pformat1%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'], self.Intensity[iwvl]/amatch['predicted'], chi, intOverPred[-1],  diffOverInt[-1] )
+                    pstring = pformat1%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl],
+                        amatch['predicted'], self.Intensity[iwvl]/amatch['predicted'], chi, intOverPred[-1],
+                        diffOverInt[-1] )
                 else:
-                    pstring = pformat1a%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl], amatch['predicted'])
+                    pstring = pformat1a%(iwvl, self.IonS[iwvl],  self.Wvl[iwvl], self.Intensity[iwvl],
+                        amatch['predicted'])
                     noPredIdx.append(iwvl)
 #                    noPredWvl.append(self.Match[iwvl]['wvl'])
 #                    noPredIon.append(self.Match[iwvl]['ions'])
@@ -1602,7 +1607,10 @@ class maker(ionTrails,  specTrails):
             outpt.write('           Chisq = %10.3f \n'%(chisq))
             outpt.write('Normalized Chisq = %10.3f chisq/(nobs) \n'%(normChisq))
             outpt.write('Reduced Chisq    = %10.3f chisq/(nobs - nparams)\n'%(chisq/(nMatch - self.Nparams)))
-            better = np.sqrt(chisq/(nMatch - self.Nparams))*self.WghtFactor
+            if self.Nparams < nMatch:
+                better = np.sqrt(chisq/(nMatch - self.Nparams))*self.WghtFactor
+            else:
+                better = -1.
             outpt.write('current wghtFactor is:  %10.3f  better:  %10.3f \n'%(self.WghtFactor, better))
             print('current wghtFactor is:  %10.3f  better:  %10.3f'%(self.WghtFactor, better))
             poor = np.abs(diffOverIntNp) > threeSig
@@ -1748,6 +1756,10 @@ class maker(ionTrails,  specTrails):
                                 outpt.write(pformat3%(awvl, amatch['lvl1'][jon][iline], amatch['lvl2'][jon][iline], amatch['pretty1'][jon][iline], amatch['pretty2'][jon][iline].ljust(20), amatch['lineIdx'][jon][iline], amatch['predictedLine'][jon][iline], contrib)+'\n')
                                 print(dash)
                                 outpt.write(dash +'\n')
+#                                thesewvl = amatch['wvldiff']
+                                thesewvlList =  [item for sublist in amatch['wvldiff'] for item in sublist]
+                                if verbose:
+                                    print('len of wvldiff  %i'%(len(thesewvlList)))
                     print(dash)
                 outpt.write(dash +'\n')
         #

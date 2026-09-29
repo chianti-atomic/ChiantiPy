@@ -1,6 +1,15 @@
 ===========
 Changelog
 ===========
+
+Changes from 0.16.0 to 0.16.1
+=============================
+
+this version fixes bugs in continuum.freeFree and continuum.freeBound
+
+and in io.twophotonHRead and io.twophotonHeRead
+
+
 Changes from 0.15.2 to 0.16.0
 =============================
 

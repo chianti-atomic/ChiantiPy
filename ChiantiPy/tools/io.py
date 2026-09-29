@@ -2090,22 +2090,21 @@ def twophotonHRead():
     """
     xuvtop = os.environ['XUVTOP']
     fName = os.path.join(xuvtop, 'continuum', 'hseq_2photon.dat')
-    dFile = open(fName, 'r')
-    a = dFile.readline()
-    y0 = np.asarray(a.split())
-    a = dFile.readline()
-    z0 = np.asarray(a.split())
+    with open(fName,  'r') as inpt:
+        lines = inpt.readlines()
+
+    y0 = np.asarray(lines[0].strip().split(), np.float64)
+    z0 = np.asarray(lines[1].strip().split(), np.float64)
     nz = 30
     avalue = np.zeros(nz, np.float64)
     asum = np.zeros(nz, np.float64)
     psi0 = np.zeros((nz, 17), np.float64)
     for iz in range(nz):
-        a = dFile.readline().split()
+        a = lines[2 + iz].strip().split()
         avalue[iz] = float(a[1])
         asum[iz] = float(a[2])
         psi = np.asarray(a[3:])
         psi0[iz] = psi
-    dFile.close()
     return {'y0':y0, 'z0':z0, 'avalue':avalue, 'asum':asum, 'psi0':psi0.reshape(30, 17)}
 
 
@@ -2119,18 +2118,20 @@ def twophotonHeRead():
     """
     xuvtop = os.environ['XUVTOP']
     fName = os.path.join(xuvtop, 'continuum', 'heseq_2photon.dat')
-    dFile = open(fName, 'r')
-    a = dFile.readline()
-    y0 = np.asarray(a.split())
+    with open(fName,  'r') as inpt:
+        lines = inpt.readlines()
+    y0 = np.asarray(lines[0].strip().split(), np.float64)
+
     nz = 30
     avalue = np.zeros(nz, np.float64)
     psi0 = np.zeros((nz, 41), np.float64)
     for iz in range(1, nz):
-        a = dFile.readline().split()
+        a = lines[iz].strip().split()
+
         avalue[iz] = float(a[1])
         psi = np.asarray(a[2:])
         psi0[iz] = psi
-    dFile.close()
+
     return {'y0':y0, 'avalue':avalue, 'psi0':psi0.reshape(30, 41)}
 
 

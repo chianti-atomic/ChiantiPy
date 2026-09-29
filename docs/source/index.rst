@@ -8,7 +8,7 @@ ChiantiPy Documentation
 
 Welcome to the ChiantiPy documentation. ChiantiPy is a pure Python package for performing calculations of astrophysical spectra using the `CHIANTI atomic database <http://www.chiantidatabase.org/>`_.
 
-The latest version of ChiantiPy is 0.16.0 and is compatible with CHIANTI database version 11.0. It is not compatible with versions prior to 10.0.X.
+The latest version of ChiantiPy is 0.16.1 and is compatible with CHIANTI database version 11.0. It is not compatible with versions prior to 10.0.X.
 
 ChiantiPy v0.16.0 is released under the OSI approved ISC license. From `Wikipedia <https://en.wikipedia.org/w/index.php?title=ISC_license&oldid=664696993>`_: The ISC license is a permissive free software license written by the Internet Software Consortium (ISC). It is functionally equivalent to the simplified BSD and MIT/Expat licenses, ...
 

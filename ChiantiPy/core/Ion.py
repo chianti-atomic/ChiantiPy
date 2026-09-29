@@ -3815,9 +3815,9 @@ class ion(ioneqOne, ionTrails, specTrails):
                 if goodWvl.sum() > 0:
                     y = wvl0/wvl[goodWvl]
                     dist = io.twophotonHRead()
-                    avalue = dist['avalue'][self.Z-1]
-                    asum = dist['asum'][self.Z-1]
-                    distr1 = splrep(dist['y0'], dist['psi0'][self.Z-1], s=0)
+                    avalue = dist['avalue'][self.Z - 1]
+                    asum = dist['asum'][self.Z - 1]
+                    distr1 = splrep(dist['y0'], dist['psi0'][self.Z  -1], s=0)
                     #  distr is normalized to 2.0
                     distr = avalue*y*splev(y, distr1)/(asum*wvl[goodWvl])
                     if self.Defaults['flux'] == 'energy':
@@ -3844,8 +3844,8 @@ class ion(ioneqOne, ionTrails, specTrails):
                 if goodWvl.sum() > 0:
                     y = wvl0/wvl[goodWvl]
                     dist = io.twophotonHeRead()
-                    avalue = dist['avalue'][self.Z-1]
-                    distr1 = splrep(dist['y0'], dist['psi0'][self.Z-1], s=0)
+                    avalue = dist['avalue'][self.Z - 1]
+                    distr1 = splrep(dist['y0'], dist['psi0'][self.Z - 1], s=0)
                     distr = avalue*y*splev(y, distr1)/wvl[goodWvl]
                     if self.Defaults['flux'] == 'energy':
                         f = (const.light*const.planck*1.e+8)/(4.*const.pi*wvl[goodWvl])

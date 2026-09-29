@@ -1,4 +1,4 @@
-name: chiantipy
+name: ChiantiPy
 dependencies:
   - python>=3.10
   - numpy>=1.14

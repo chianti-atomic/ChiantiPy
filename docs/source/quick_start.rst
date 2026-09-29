@@ -4,7 +4,7 @@ Quick Start
 
 This short tutorial will demonstrate some of the capabilities of ChiantiPy and the CHIANTI database.  It assumes that you know what the CHIANTI database provides and why you want to use it.  It is useful to begin by exploring the properties of the **ion class**, as much of ChiantiPy is based on it.  An ion such as Fe XIV is specified by the string 'fe_14', in the usual CHIANTI notation.
 
-Perhaps the easiest way is to use a jupyter-notebook is to load the quick start notebook file QuickStart.ipynb in the directory jupyter_notebooks.  Then, just run each cell step by step.  If you are not familiar with notebooks, then you can cut and paste the following code into a Python/IPython session.
+Perhaps the easiest way is to load the quick start notebook file QuickStart.ipynb in the directory jupyter_notebooks.  Then, just run each cell step by step.  If you are not familiar with notebooks, then you can cut and paste the following code into a Python/IPython session.  As it is easier to update, the notebook contains more recent examples than in this web page.
 
 N.B.:  in the time some of the plots and data were produced, there have been some changes to ChiantiPy and CHIANTI.  It is possible that you might find differences (hopefully small).
 
@@ -484,14 +484,14 @@ Spectra of a single ion
 
 ::
 
-  fe14 = ch.ion('fe_14', temperature = 2.e+6, density = 1.e+9)
+  fe14 = ch.ion('fe_14', temperature = 2.e+6, eDensity = 1.e+9, em=1.e+27)
 
 ::
 
-  wvl = wvl=200. + 0.125*arange(801)
+  wvl = wvl=200. + 0.125*np.arange(801)
 
 ::
-  fe14.spectrum(wvl, em=1.e+27)
+  fe14.spectrum(wvl)
 
 ::
 
@@ -1084,155 +1084,6 @@ yields
     :align:  center
 
 
-another example
-
-Using differential emission measures (DEM)
-------------------------------------------
-
-
-Beginning with CHIANTI version 14.1, the io.demRead function has been added to read dem file in the existing XUVTOP/dem directory
-
-
-::
-
-  demDir = os.path.join(os.environ['XUVTOP'], 'dem')
-  demList = os.listdir(demDir)
-
-::
-
-  for idx, demFile in enumerate(demList):
-      print('%i  %s'%(idx, demFile))
-
-produces
-
-| 0  quiet_sun_eis.dem
-| 1  version_3
-| 2  coronal_hole.dem
-| 3  flare.dem
-| 4  flare_ext.dem
-| 5  AU_Mic.dem
-| 6  quiet_sun.dem
-| 7  active_region.dem
-| 8  prominence.dem
-
-
-select the desired file by index
-
-::
-
-  flDict = chio.demRead(demList[3])
-
-
-::
-
-  flDict.keys()
-
-
-dict_keys(['temperature', 'density', 'dem', 'em', 'dt', 'ref', 'filename'])
-
-
-since we will be looking at X-ray wavelengths, select only the highest temperatures
-
-::
-
-  flTemp = flDict['temperature'][20:]
-  flDens = flDict['density'][20:]
-  flEm = flDict['em'][20:]
-
-
-::
-
-  wvl = 1. + 0.002*np.arange(4501)
-  core = 6
-
-::
-
-  s3 = ch.mspectrum(flTemp, flDens, wvl, filter = (chfilters.gaussian,.015), em=flEm, minAbund=1.e-5, proc=core, verbose=0)
-
-
-save the calculations
-=====================
-
-::
-
-  saveName = 'mspectrum3_dem.pkl'
-  s3.saveData(saveName)
-
-::
-
-  plt.figure()
-  plt.plot(wvl, s3.Spectrum['intensity'].sum(axis=0))
-  plt.xlabel(s3.Spectrum['xlabel'], fontsize=14)
-  plt.ylabel(s3.Spectrum['ylabel'], fontsize=14)
-  plt.ylim(bottom = 0.)
-  plt.xlim([0., wvl[-1]])
-  plt.tight_layout()
-
-
-.. image:: _static/mspectrum_1_10.png
-    :align:  center
-
-The spectrumPlot method can also be used
-
-::
-
-  s3.spectrumPlot(top=6)
-
-
-.. image:: _static/mspectrum_spectrumPlot_1_10.png
-    :align:  center
-
-
-the default value for doContinuum is True, so, the continuum can be plotted separately
-
-::
-
-  plt.figure()
-  plt.plot(wvl, s3.FreeFree['intensity'], label='FF')
-  plt.plot(wvl, s3.FreeBound['intensity'], label='FB')
-  plt.plot(wvl, s3.TwoPhoton['intensity'], label='2 Photon')
-  plt.plot(wvl, s3.Continuum['intensity'].sum(axis=0), 'k', label='Total')
-  plt.xlabel(s3.Spectrum['xlabel'], fontsize=14)
-  plt.ylabel(s3.Spectrum['ylabel'], fontsize=14)
-  plt.ylim(bottom = 0.)
-  plt.xlim([0., wvl[-1]])
-  plt.legend(loc='upper right', fontsize=14)
-  plt.tight_layout()
-
-
-
-produces
-
-.. image:: _static/continuum_flare_dem_1_10.png
-    :align:  center
-
-::
-
-  s3.spectrumPlot(wvlRange=[4., 9.], top=6, integrated=True)
-
-produces
-
-.. image:: _static/mspectrum_spectrumPlot_4_9.png
-    :align:  center
-
-With the redux class, the save calculations can be restored
-===========================================================
-
-::
-
-  s3r = ch.redux(saveName, verbose=True)
-
-
-the redux class inherits the intensityPlot and spectrumPlot methods as well as a few others
-
-::
-
-  s3r.spectrumPlot(wvlRange=[6., 7.], integrated=True, top=5)
-
-
-.. image:: _static/mspectrum_spectrumPlot_6_7.png
-    :align:  center
-
 
 
 The multiple processor ipymspectrum class
@@ -1306,11 +1157,17 @@ produces
 
 It is also possible to specify a selection of ions by means of the *ionList* keyword, for example, *ionList=['fe_11','fe_12','fe_13']*
 
+::
+
+  temp = [1.e+6, 2.e+6]
+  dens = 1.e+9
+  wvl = 200. + 0.05*np.arange(2001)
+  emeasure = [1.e+27 ,1.e+27]
 
 ::
 
   s2 = ch.ipymspectrum(temp, dens, wvl, filter = (chfilters.gaussian,.2), \
-    em = emeasure, doContinuum=0, keepIons=1, elementList=['si'])
+    em = emeasure, doContinuum=False, keepIons=True, elementList=['si'])
 
 ::
 

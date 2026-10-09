@@ -2001,7 +2001,7 @@ class ion(ioneqOne, ionTrails, specTrails):
             fullPop = thispop
         except np.linalg.LinAlgError:
             pop = np.zeros(nlvls, np.float64)
-            errorMessage.append('linealgError for T index %5i'%(itemp))
+            errorMessage.append('linalgError in populateSingle')
     #
         pop = np.where(pop > 0., pop, 0.)
         self.Population = {"temperature":temperature,"eDensity":eDensity,"population":pop,

@@ -15,3 +15,4 @@ from .MradLoss import mradLoss
 from .Ion import ion
 from .Ioneq import ioneq
 from .Redux import redux
+from .FreeFree import freeFree

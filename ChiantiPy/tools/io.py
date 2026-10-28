@@ -18,7 +18,9 @@ import ChiantiPy.Gui as chgui
 from  ChiantiPy.fortranformat import FortranRecordReader
 
 today = date.today()
-chRef = ['produced as a part of the \'CHIANTI\' atomic database for astrophysical spectroscopy', ' K. Dere (GMU) - ' + today.strftime('%Y %B %d')]
+chRef = [" ",
+    "produced as a part of the \'CHIANTI\' atomic database for astrophysical spectroscopy",
+    "K. Dere (GMU) - " + today.strftime('%Y %B %d')]
 
 
 def abundanceRead(abundancename=None, verbose=False):
@@ -1278,6 +1280,57 @@ def gffintRead():
         ivalue += 1
     #
     return {'g2':g2, 'gffint':gffint, 's1':s1, 's2':s2, 's3':s3}
+
+def gff_vanHoofRead(Z, verbose=False):
+    """
+
+    :param Z: the nuclear charge of the element
+    :type Z: int
+    :param verbose: whether or not to print various information, defaults to False
+    :type verbose: `bool`, optional
+
+    """
+    filename = f"gauntff_merged_Z{int(Z):0>2}.dat"
+    directory = os.path.join(os.environ['XUVTOP'],  "continuum")
+    if verbose:
+        print('filename:  %s  directory:  %s'%(filename,  directory))
+    fullFilename = os.path.join(directory, filename)
+
+    with open(fullFilename,  'r') as inpt:
+        lines = inpt.readlines()
+
+    nGam2 = int(lines[29].strip().split()[0])
+    nU = int(lines[29].strip().split()[1])
+    if verbose:
+        print('nGam2:  %5i   nU:  %5i'%(nGam2, nU))
+    minLogGam2 = int(lines[30].strip().split()[0])
+    minLogU = int(lines[31].strip().split()[0])
+    if verbose:
+        print('minLogGam2:  %5i  minLogU:  %5i'%(minLogGam2, minLogU))
+    incr = float(lines[32].strip().split()[0])
+    if verbose:
+        print('increment for logGam2 and logU:  %10.2f'%(incr))
+    Z = int(lines[33].strip().split()[0])
+    if verbose:
+        print('Z:  %5i'%(Z))
+    gff = np.zeros((nU, nGam2), np.float64)
+    for irow, aline in enumerate(lines[43:]):
+        sline = aline.strip().split()
+        for icol, one in enumerate(sline):
+            gff[irow,  icol] = float(one)
+    logGam2 = minLogGam2 + incr*np.arange(nGam2)
+    logU = minLogU + incr*np.arange(nU)
+
+    ref = ["van Hoof, P. A. M., Ferland, G. J., Williams, R. J. R., Volk, K.",
+        "Chatzikos, M., Lykins, M. and Porter, R. L.",
+        "Accurate determination of the free-free Gaunt factor - II. Relativistic \
+        Gaunt factors",
+        "2015,  MNRAS, 449, 2112",
+        "doi = 10.1093/mnras/stv404" ]
+
+    ref.extend(chRef)
+
+    return {'logGam2':logGam2, 'logU':logU, 'gff':gff, 'ref':ref}
 
 
 def itohRead():

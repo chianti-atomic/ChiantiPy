@@ -17,7 +17,8 @@ class ionTrails(object):
     Base class for `ChiantiPy.core.ion` and `ChiantiPy.core.spectrum`
     """
 
-    def argCheck(self, temperature=None, eDensity=None, pDensity='default', em = None,  verbose=False):
+    def argCheck(self, temperature=None, eDensity=None, pDensity='default', em = None,
+        verbose=True):
         ''' to check the compatibility of the three arguments
         and put them into numpy arrays of atleast_1d
         and create attributes to the object

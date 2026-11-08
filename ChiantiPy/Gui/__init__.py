@@ -20,19 +20,19 @@ except (KeyError,configparser.NoSectionError) as e:
     use_gui=True
 
 #check for available gui
-hasPyQt5=False
+hasPyQt6=False
 try:
-    import PyQt5
-    hasPyQt5 = True
-    print(' found PyQt5 widgets')
-    del PyQt5
+    import PyQt6
+    hasPyQt6 = True
+    print(' found PyQt6 widgets')
+    del PyQt6
 except ImportError:
     print(' using cli')
 
 #set gui
-if hasPyQt5 and use_gui:
-    from .gui_qt5 import gui
-    print(' using PyQt5 widgets')
+if hasPyQt6 and use_gui:
+    from .gui_qt6 import gui
+    print(' using PyQt6 widgets')
 else:
     from .gui_cl import gui
     print(' using CLI for selections')

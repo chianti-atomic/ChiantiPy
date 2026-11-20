@@ -60,7 +60,11 @@ def attr_check(name, value):
             nvalue = out.size
         case np.ndarray:
             if value.size == 1:
-                out = np.asarray([value], np.float64)
+                # reduce single-point input to a float, as in the scalar and list
+                # cases; wrapping it as np.asarray([value]) keeps a (1, 1) array
+                # whose elements cannot be assigned to scalar array elements on
+                # NumPy >= 1.25 ("setting an array element with a sequence")
+                out = float(value.flat[0])
             else:
                 out = value
             nvalue = value.size

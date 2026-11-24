@@ -3489,7 +3489,7 @@ class ion(ioneqOne, ionTrails, specTrails):
         if not hasattr(self, 'Abundance'):
             self.Abundance = io.abundanceRead()
 
-
+        print(' use Ctrl-c to select multiple lines')
         emiss = em["emiss"]
         wvl = em["wvl"]
         pretty1 = em['pretty1']
@@ -3599,10 +3599,14 @@ class ion(ioneqOne, ionTrails, specTrails):
         wvlChoices = []
         for iline in range(top):
             tline = topLines[iline]
-            wvlChoices.append('%12.4f %4i %4i %s - %s'%(wvl[tline], lvl1[tline], lvl2[tline], pretty1[tline], pretty2[tline]))
-#        if plot:
-        gline = chGui.gui.selectorDialog(wvlChoices,label='Select line(s)')
-        gline_idx = gline.selectedIndex
+            wvlChoices.append('%5i %12.4f %4i %4i %s - %s'%(tline,  wvl[tline], lvl1[tline], lvl2[tline], pretty1[tline], pretty2[tline]))
+        gline = chGui.gui.selectorDialog(wvlChoices, label='Select a line or use ctrl c to select several')
+#        gline = chGui.gui.selectorDialog(wvlChoices, text='Select line(s)')
+        out = gline.get_values()
+        gline_idx = []
+        for one in out.keys():
+            adx = int(one.split()[0])
+            gline_idx.append(adx)
         #
         #
         gAbund = self.Abundance

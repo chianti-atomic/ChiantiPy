@@ -2,15 +2,23 @@
 PyQt6 widget selection dialogs
 '''
 import os
-from PyQt6 import QtGui, QtWidgets
+from PyQt6.QtWidgets import (
+    QDialog,
+    QDialogButtonBox,
+    QLabel,
+    QListWidget,
+    QVBoxLayout,
+    QAbstractItemView,
+    QWidget
+)
+from PyQt6.QtGui import QFont
 
-
-import ChiantiPy
-from ChiantiPy.Gui.gui_qt6.ui import *
-''' qt5 selection dialogs
+#import ChiantiPy
+#from ChiantiPy.Gui.gui_qt6.ui import *
+''' qt6 selection dialogs
 '''
 
-class chpicker(QtWidgets.QWidget):
+class chpicker(QWidget):
     ''' dialog to select a single file name under the directory
     code largely taken from pythonspot.com
     '''
@@ -48,89 +56,54 @@ class chpicker(QtWidgets.QWidget):
         self.baseName = os.path.split(fileName)[1]
         self.rootName = os.path.splitext(self.baseName)[0]
 
-class selectorDialog(QtWidgets.QDialog):
-    '''Make a single or multiple selection from a list of items.
+class selectorDialog(QDialog):
+    def __init__(self, items, label=None,  parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Select or Enter Item")
+        self.resize(640, 480)
 
-    expects the input of an array of items, will select one or more'''
-    def __init__(self, items, label=None ,  parent=None, multiChoice=False):
-        QtWidgets.QDialog.__init__(self)
-        self.ui = Ui_selectorDialogForm()
-        self.ui.setupUi(self)
-        if multiChoice:
-            self.ui.listWidget.setSelectionMode(QtWidgets.QListWidget.MultiSelection)
+        # 1. Create the widgets
+        if label is not None:
+            self.label = QLabel(label)
         else:
-            self.ui.listWidget.setSelectionMode(QtWidgets.QListWidget.SingleSelection)
-        if label is None:
-            self.setWindowTitle('ChiantiPy')
-        else:
-            self.setWindowTitle('ChiantiPy - '+label)
-        imagefile = os.path.join(ChiantiPy.__path__[0], "images/chianti2.png")
-        self.setWindowIcon(QtGui.QIcon(imagefile))
-        for anitem in items:
-            self.ui.listWidget.addItem(str(anitem))
-        self.exec_()
+            self.label = QLabel("Select a line or use ctrl c to select several")
+#        self.text_box = QLineEdit()
+#        self.text_box.setPlaceholderText("Type something here...")
 
-    def accept(self):
-        nitems = self.ui.listWidget.count()
-        self.selectedIndex=[]
-        self.selectedText=[]
-        for i in range(nitems):
-            anitem = self.ui.listWidget.item(i)
-            if anitem.isSelected():
-                self.selectedText.append(str(anitem.text()))
-                self.selectedIndex.append(i)
-        self.done(1)
+        self.list_widget = QListWidget()
+        self.list_widget.setSelectionMode(
+            QAbstractItemView.SelectionMode.ExtendedSelection)
+        font = QFont("DejaVu Sans Mono", 14)
+        self.list_widget.setFont(font)
+        self.list_widget.addItems(items)
 
-    def reject(self):
-        self.selectedIndex = None
-        self.selectedText = None
-        self.done(1)
+        # Optional: Update text box when a list item is clicked
+#        self.list_widget.currentTextChanged.connect(self.text_box.setText)
 
-class choice2Dialog(QtWidgets.QDialog):
-    '''Make a single or multiple selection from a list of items and another
-    single or multiple selection from the same list.
+        # 2. Create Accept (OK) and Reject (Cancel) buttons
+        self.button_box = QDialogButtonBox(
+            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
+        )
+        self.button_box.accepted.connect(self.accept)
+        self.button_box.rejected.connect(self.reject)
 
-    Useful for picking numerators and denominators.
+        # 3. Arrange widgets in a vertical layout
+        layout = QVBoxLayout()
+        layout.addWidget(self.label)
+#        layout.addWidget(self.text_box)
+        layout.addWidget(self.list_widget)
+        layout.addWidget(self.button_box)
+        self.setLayout(layout)
+        self.exec()
 
-    expects the input of an array of items, will select one or more from both widgets.'''
-    def __init__(self, items,  label=None ,  parent=None, multi=True):
-#       if using the Qt5Agg backend for matplotlib, the following line needs to be comment out
-#        app=QtGui.QApplication(sys.argv)
-        QtWidgets.QDialog.__init__(self)
-#        app=QtGui.QApplication(sys.argv)
-        self.ui = Ui_choice2DialogForm()
-        self.ui.setupUi(self)
-        if label is None:
-            self.setWindowTitle('ChiantiPy')
-        else:
-            self.setWindowTitle('ChiantiPy - '+label)
-        self.setWindowIcon(QtGui.QIcon('images/chianti2.png'))
-        if multi:
-            self.ui.numListWidget.setSelectionMode(QtWidgets.QListWidget.MultiSelection)
-            self.ui.denListWidget.setSelectionMode(QtWidgets.QListWidget.MultiSelection)
-        for anitem in items:
-            self.ui.numListWidget.addItem(str(anitem))
-            self.ui.denListWidget.addItem(str(anitem))
-        self.exec_()
-        #
-    def accept(self):
-        nitems = self.ui.numListWidget.count()
-        self.numIndex=[]
-        self.numText=[]
-        for i in range(nitems):
-            anitem = self.ui.numListWidget.item(i)
-            if anitem.isSelected():
-                self.numText.append(str(anitem.text()))
-                self.numIndex.append(i)
-        self.denIndex=[]
-        self.denText=[]
-        for i in range(nitems):
-            anitem = self.ui.denListWidget.item(i)
-            if anitem.isSelected():
-                self.denText.append(str(anitem.text()))
-                self.denIndex.append(i)
-        self.done(1)
+    def get_values(self):
+        """Helper method to retrieve the entered text and selected list item."""
+#        selected_item = self.list_widget.currentItem()
+        selected_items = self.list_widget.selectedItems()
+#        self.selected_items = selected_items
+#        selected_texts = [item.text() for item in selected_items]
+        outpt = {}
+        for i,  anitem in enumerate(selected_items):
+            outpt['%i'%(i)] = anitem.text()
+        return outpt
 
-    def reject(self):
-        print(' cancel button pushed')
-        self.done(1)

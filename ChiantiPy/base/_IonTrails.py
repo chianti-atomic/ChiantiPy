@@ -18,7 +18,7 @@ class ionTrails(object):
     """
 
     def argCheck(self, temperature=None, eDensity=None, pDensity='default', em = None,
-        verbose=True):
+        verbose=False):
         ''' to check the compatibility of the three arguments
         and put them into numpy arrays of atleast_1d
         and create attributes to the object
@@ -630,6 +630,7 @@ class ionTrails(object):
             if eDensity[0] == eDensity[-1]:
                 ndens = 1
         print(' ndens = %5i ntemp = %5i'%(ndens, ntemp))
+        print(' use Ctrl-C for multiple selections')
 
         ionS = self.Intensity['ionS']
         #  see if we are dealing with more than a single ion
@@ -751,7 +752,7 @@ class ionTrails(object):
                     text = '%s '%(ionS[tline]) + alabel
                 plt.text(xvalues[ixvalue], intensity[ixvalue, tline]/maxAll[ixvalue], text)
 
-            print(alabel + ' %s - %s'%(p1[tline], p2[tline]))
+#            print(alabel + ' %s - %s'%(p1[tline], p2[tline]))
 #        print(' ymin:  %10.2e  ymax:  %10.2e'%(ymin, ymax))
         if ndens == 1:
             plt.xlim(xvalues.min(),xvalues.max())
@@ -770,12 +771,14 @@ class ionTrails(object):
         plt.tight_layout()
         plt.draw()
         selectTags = []
+        selectLabels = []
 
 
 #            selectTags.append(ionS[itop]+ ' '+ str(wvl[itop]))
 #        selectTags.append(alabel)
 
-        for itop in topLines:
+        for iline in range(top):
+            itop = topLines[iline]
 
             if ionNum > 1:
                 if self.Defaults['wavelength'] == 'angstrom':
@@ -796,25 +799,54 @@ class ionTrails(object):
                 elif self.Defaults['wavelength'] == 'kev':
                     alabel = '%10.3f'%(wvl[itop])
 
-            selectTags.append(alabel)
-        numden = chGui.gui.choice2Dialog(selectTags)
+#            selectTags.append('%10i %s %20s - %20s'%(itop,  alabel, self.Intensity['pretty1'][itop],
+#                self.Intensity['pretty2'][itop]))
+            ktop = int(itop)
+            p1 = self.Intensity['pretty2'][itop]
+            p2 = self.Intensity['pretty1'][itop]
+#            selectTags.append(f"{ktop:<12} {alabel:^10} {p1:^25} - {p2:^25}")
+            selectTags.append('%5i %10s %25s - %25s'%(ktop, alabel,  p1,  p2))
+            selectLabels.append(alabel)
+#        numden = chGui.gui.choice2Dialog(selectTags)
+#        for itag, atag in enumerate(selectTags):
+#            print('%5i %s'%(itag, atag))
+        num = chGui.gui.selectorDialog(selectTags, label = 'Select the numerator(s)')
+        out = num.get_values()
+        num_idx = []
+        for akey in sorted(out.keys()):
+            adx = int(out[akey].split()[0])
+#            print('%5i %5i %5i %s'%(int(akey),  topLines[int(akey)],  adx, out[akey]))
+            num_idx.append(adx)
 
         # num_idx and den_idx are tuples
-        num_idx=numden.numIndex
-        if len(num_idx) == 0:
+#        num_idx=numden.numIndex
+        if num_idx == {}:
             print(' no numerator lines were selected')
             return
-        den_idx=numden.denIndex
-        if len(den_idx) == 0:
-            print(' no denominator lines were selected')
+
+#        den_idx=numden.denIndex
+        den = chGui.gui.selectorDialog(selectTags, label = 'Select the denominator(s)')
+        out = den.get_values()
+        den_idx = []
+        for akey in out.keys():
+            adx = int(out[akey].split()[0])
+#            print('%i %s'%(adx, out[akey]))
+            den_idx.append(adx)
+
+        # num_idx and den_idx are tuples
+#        num_idx=numden.numIndex
+        if den_idx == {}:
+            print(' no numerator lines were selected')
             return
+
         numIntens=np.zeros(len(xvalues),np.float64)
         for aline in num_idx:
-            numIntens += intensity[:, topLines[aline]]
+#            numIntens += intensity[:, topLines[aline]]
+            numIntens += intensity[:, aline]
 
         denIntens = np.zeros(len(xvalues),np.float64)
         for aline in den_idx:
-            denIntens += intensity[:, topLines[aline]]
+            denIntens += intensity[:, aline]
 
         # plot the desired ratio
         #  maxAll is an array
@@ -831,10 +863,15 @@ class ionTrails(object):
         else:
             desc = ''
         for aline in num_idx:
-            desc += selectTags[aline]
+            idx = topLines.tolist().index(aline)
+            desc += selectTags[idx].split()[1]
         desc += ' / '
         for aline in den_idx:
-            desc += selectTags[aline]
+            idx = topLines.tolist().index(aline)
+
+#            desc += selectTags[aline]
+#            desc += selectTags[topLines[aline]]
+            desc += selectTags[idx].split()[1]
 
         if ndens == ntemp and ntemp > 1:
             plt.text(0.07, 0.5,desc, horizontalalignment='left', verticalalignment='center',  transform = ax.transAxes)
@@ -852,7 +889,8 @@ class ionTrails(object):
         intensityRatioFileName = desc.replace(' ', '_', cnt) + '.rat'
         intensityRatioFileName = intensityRatioFileName.lstrip('_').replace('_/_','-')
         self.IntensityRatio={'ratio':numIntens/denIntens,'desc':desc,
-                'temperature':outTemperature,'eDensity':outDensity,'filename':intensityRatioFileName, 'numIdx':num_idx, 'denIdx':den_idx}
+                'temperature':outTemperature,'eDensity':outDensity,'filename':intensityRatioFileName,
+                'numIdx':num_idx, 'denIdx':den_idx, 'topLines':topLines}
 
     def intensityRatioSave(self,outFile=False):
         """

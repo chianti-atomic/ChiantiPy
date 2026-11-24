@@ -7,6 +7,7 @@ import os
 
 import numpy as np
 from scipy.interpolate import splev, splrep
+from scipy.interpolate import interpn
 from scipy import special
 from scipy.ndimage import map_coordinates
 #import matplotlib.pyplot as plt
@@ -71,6 +72,7 @@ class continuum(ioneqOne, ionTrails):
     .. [107] Rybicki and Lightman, 1979, Radiative Processes in Astrophysics,
             `(Wiley-VCH) <http://adsabs.harvard.edu/abs/1986rpa..book.....R>`_
     .. [109] Mao, J., Kaastra, J., Badlell, N., 2017, A&A,  A&A, 599, A10 _
+    .. [110] van Hoof, P. A. M., et al., 2015,  MNRAS, 449, 2112 _
     """
 
     def __init__(self, ionStr,  temperature, abundance=None, em=None, verbose=False):
@@ -91,7 +93,7 @@ class continuum(ioneqOne, ionTrails):
             print(' the continuum can only be calculated for wavelengths in angstroms')
             return
 
-        self.argCheck(temperature=temperature, eDensity=None, pDensity=None, em=em, verbose=verbose)
+        self.argCheck(temperature=temperature, eDensity=None, pDensity=None, em=em)
 
         self.Labels = util.units(chdata.Defaults)
 
@@ -119,7 +121,7 @@ class continuum(ioneqOne, ionTrails):
         self.ioneqOne()
 
 
-    def freeFree(self, wavelength, includeAbund=True, includeIoneq=True, **kwargs):
+    def freeFree(self, wavelength, includeAbund=True, includeIoneq=False, **kwargs):
         """
         Calculates the free-free emission for a single ion. The result is returned as a dict to
         the `FreeFree` attribute.  The dict has the keywords `intensity`, `wvl`, `temperature`, `em`.
@@ -185,9 +187,11 @@ class continuum(ioneqOne, ionTrails):
 #        exp_factor = exp_factor.squeeze()
 
         # calculate gaunt factor
-        gf_itoh = self.itoh_gaunt_factor(wavelength)
-        gf_sutherland = self.sutherland_gaunt_factor(wavelength)
-        gf = np.where(np.isnan(gf_itoh), gf_sutherland, gf_itoh)
+        gf = self.vanhoof_gaunt_factor(wavelength)
+#        gf_itoh = self.itoh_gaunt_factor(wavelength)
+#        gf_sutherland = self.sutherland_gaunt_factor(wavelength)
+#        gf = np.where(np.isnan(gf_itoh), gf_sutherland, gf_itoh)
+
         # express in units of ergs or photons
         energy_factor = 1.0
         if chdata.Defaults['flux'] == 'photon':
@@ -199,7 +203,7 @@ class continuum(ioneqOne, ionTrails):
             free_free_emission = (prefactor*exp_factor*gf/energy_factor).squeeze()
         self.FreeFree = {'intensity':free_free_emission, 'temperature':self.Temperature, 'wvl':wavelength,
             'em':self.Em, 'ions':self.IonStr, 'xlabel':xlabel,  'ylabel':ylabel,  'gf':gf, 'prefactor':prefactor,
-            'exp_factor':exp_factor,  'gf':gf}
+            'exp_factor':exp_factor}
 
     def freeFreeLoss(self, includeAbund=True, includeIoneq=True,  **kwargs):
         """
@@ -325,6 +329,39 @@ class continuum(ioneqOne, ionTrails):
 
         return np.where(gf_sutherland < 0., 0., gf_sutherland)
 
+    def vanhoof_gaunt_factor(self, wavelength):
+        """
+        Calculates the free-free gaunt factor calculations of [101]_.
+
+        The Gaunt factors of [110]_ are read in using `ChiantiPy.tools.io.gff_vanHoofRead`
+        as a function of :math:`u` and :math:`\\gamma^2`. The data are interpolated
+        to the appropriate wavelength and temperature values using
+        `~scipy.interpolate.interpn`.
+
+        """
+
+        vanHoof = io.gff_vanHoofRead(self.Zion)
+        gffVanHoof = vanHoof['gff']
+        logU = vanHoof['logU']
+        logGam2 = vanHoof['logGam2']
+
+        if self.Temperature.shape[0] == 1:
+            myGam2 = self.Z**2*const.rydbergErg/(const.boltzmann*self.Temperature)
+            myLogGam2 = np.log10(myGam2)
+            myU = const.planck*(1.e8*const.light)/(const.boltzmann*self.Temperature*wavelength)
+            myLogU = np.log10(myU)
+            gff = interpn((logU, logGam2), gffVanHoof, (myLogU, myLogGam2), method = "cubic", bounds_error = False, fill_value = 1.)
+        else:
+            gff = np.zeros((self.Temperature.shape[0], wavelength.shape[0]), np.float64)
+            for itemp, atemp in enumerate(self.Temperature):
+                myGam2 = self.Z**2*const.rydbergErg/(const.boltzmann*atemp)
+                myLogGam2 = np.log10(myGam2)
+                myU = const.planck*(1.e8*const.light)/(const.boltzmann*atemp*wavelength)
+                myLogU = np.log10(myU)
+                gff[itemp] = interpn((logU, logGam2), gffVanHoof, (myLogU, myLogGam2), method = "cubic",
+                    bounds_error = False, fill_value = 1.)
+
+        return gff
 
     def freeBoundLossMao(self,  includeAbund=False,  includeIoneq=False):
         """

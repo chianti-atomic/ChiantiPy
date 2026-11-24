@@ -50,38 +50,3 @@ class selectorDialog:
             self.selectedIndex.append(int(one))
             self.selectedText.append(items[int(one)])
     #
-class choice2Dialog:
-    '''Make a single or multiplee selection from a list of items and another
-    single or multiple selection from the same list.
-
-    Useful for picking numerators and denominators.
-
-    expects the input of an array of items, will select one or more from both widgets
-    the keywords label and parent are there for consistency with real gui dialogs'''
-    def __init__(self, items,  label=None ,  parent=None):
-        #
-        print(' - select the numerator line(s) from these - ')
-        for i, one in enumerate(items):
-            print('%6i %s ' %( i, one))
-        print(' type the comma-separated index/indices of your selection')
-        raw = input('>>> ')
-        #
-        sraw = list(raw.split(','))
-        self.numIndex = []
-        self.numText = []
-        for one in sraw:
-            self.numIndex.append(int(one))
-            self.numText.append(items[int(one)])
-        #
-        print(' - select the denominator line(s) from these - ')
-        for i, one in enumerate(items):
-            print('%6i %s ' %( i, one))
-        print(' type the comma-separated index/indices of your selection')
-        raw = input('>>> ')
-        #
-        sraw = list(raw.split(','))
-        self.denIndex = []
-        self.denText = []
-        for one in sraw:
-            self.denIndex.append(int(one))
-            self.denText.append(items[int(one)])

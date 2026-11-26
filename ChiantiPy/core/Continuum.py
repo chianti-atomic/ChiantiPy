@@ -121,7 +121,7 @@ class continuum(ioneqOne, ionTrails):
         self.ioneqOne()
 
 
-    def freeFree(self, wavelength, includeAbund=True, includeIoneq=False, **kwargs):
+    def freeFree(self, wavelength, includeAbund=True, includeIoneq=True, **kwargs):
         """
         Calculates the free-free emission for a single ion. The result is returned as a dict to
         the `FreeFree` attribute.  The dict has the keywords `intensity`, `wvl`, `temperature`, `em`.
@@ -345,7 +345,7 @@ class continuum(ioneqOne, ionTrails):
         logU = vanHoof['logU']
         logGam2 = vanHoof['logGam2']
 
-        if self.Temperature.shape[0] == 1:
+        if self.Ntemp == 1:
             myGam2 = self.Z**2*const.rydbergErg/(const.boltzmann*self.Temperature)
             myLogGam2 = np.log10(myGam2)
             myU = const.planck*(1.e8*const.light)/(const.boltzmann*self.Temperature*wavelength)

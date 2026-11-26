@@ -199,6 +199,21 @@ class spectrum(ionTrails, specTrails):
         self.ionGate(elementList = elementList, ionList = ionList, minAbund=minAbund, doLines=doLines,
             doContinuum=doContinuum)
         #
+        # calculate the free-free for each element in list
+        ff_z = []
+        for akey in self.Todo:
+            nameDict = util.convertName(akey)
+            Z = nameDict['Z']
+            ff_z.append(Z)
+        ff_todo = list(set(ff_z))
+        for aZ in ff_todo:
+            if verbose:
+                print('calculating free free for Z = %i'%(aZ))
+            FF = ChiantiPy.core.freeFree(aZ)
+            FF.freeFree(temperature, wavelength)
+            freeFree += FF.FreeFree['intensity'].squeeze()
+            if keepIons:
+                self.FfInstances[akey] = copy.deepcopy(FF)
         for akey in sorted(self.Todo.keys()):
             zStuff = util.convertName(akey)
             Z = zStuff['Z']
@@ -208,14 +223,6 @@ class spectrum(ionTrails, specTrails):
             if verbose:
                 print(' %5i %5s abundance = %10.2e '%(Z, const.El[Z-1],  abundance))
                 print(' doing ion %s for the following processes %s'%(akey, self.Todo[akey]))
-            if 'ff' in self.Todo[akey]:
-                if verbose:
-                    print(' calculating ff continuum for :  %s'%(akey))
-                FF = ChiantiPy.core.continuum(akey, temperature, abundance=abundance, em=em,  verbose=verbose)
-                FF.freeFree(wavelength)
-                freeFree += FF.FreeFree['intensity'].squeeze()
-                if keepIons:
-                    self.FfInstances[akey] = copy.deepcopy(FF)
 
             if 'fb' in self.Todo[akey]:
                 if verbose:
@@ -232,7 +239,8 @@ class spectrum(ionTrails, specTrails):
             if 'line' in self.Todo[akey]:
                 if verbose:
                     print(' calculating spectrum for  :  %s'%(akey))
-                thisIon = ChiantiPy.core.ion(akey, temperature, eDensity, pDensity='default', abundance=abundance, em=em, verbose=verbose)
+                thisIon = ChiantiPy.core.ion(akey, temperature, eDensity, pDensity='default', abundance=abundance,
+                    em=em, verbose=verbose)
                 thisIon.intensity(allLines=allLines)
                 self.IonsCalculated.append(akey)
                 if 'errorMessage' not in thisIon.Intensity.keys():

@@ -4,6 +4,7 @@ Functions needed for standard Python multiprocessing module mspectrum
 import numpy as np
 import ChiantiPy
 
+
 def doFfQ(inQ, outQ):
     """
     Multiprocessing helper for `ChiantiPy.core.continuum.freeFree`
@@ -16,13 +17,13 @@ def doFfQ(inQ, outQ):
         Finished free-free emission jobs
     """
     for inputs in iter(inQ.get, 'STOP'):
-        ionS = inputs[0]
+        Z = inputs[0]
         temperature = inputs[1]
         wavelength = inputs[2]
         abund = inputs[3]
         em = inputs[4]
-        ff = ChiantiPy.core.continuum(ionS, temperature, abundance=abund, em=em)
-        ff.freeFree(wavelength)
+        ff = ChiantiPy.core.freeFree(Z, abundance=abund)
+        ff.freeFree(temperature, wavelength, em=em)
         outQ.put(ff.FreeFree)
     return
 

@@ -4,6 +4,8 @@ import multiprocessing as mp
 
 import numpy as np
 
+import ChiantiPy
+
 import ChiantiPy.tools.data as chdata
 import ChiantiPy.tools.util as util
 import ChiantiPy.tools.filters as chfilters
@@ -141,7 +143,7 @@ class mspectrum(ionTrails, specTrails):
             print(' set doContuum = False to continue')
             return
 
-        self.argCheck(temperature=temperature, eDensity=eDensity, pDensity=None, em=em,  verbose=verbose)
+        self.argCheck(temperature=temperature, eDensity=eDensity, pDensity=None, em=em,  verbose=False)
 
         nTempDens = self.NTempDens
 
@@ -203,26 +205,36 @@ class mspectrum(ionTrails, specTrails):
 
         self.ionGate(elementList = elementList, ionList = ionList, minAbund=minAbund, doLines=doLines,
             doContinuum=doContinuum, verbose = False)
-#        print(' \n in mspectrum \n')
-#        for one in self.Todo.keys():
-#            print(' %s  %s'%(one, self.Todo[one]))
         #
+        ff_z = []
+        for akey in self.Todo:
+            if 'ff' in self.Todo[akey]:
+                aname = akey
+                nameDict = util.convertName(aname)
+                Z = nameDict['Z']
+                ff_z.append(Z)
+        self.Ff_todo = list(set(ff_z))
+
+#        calculate free-free for each element
+        for akey in self.Ff_todo:
+            Z = int(akey)
+            abundance = self.Abundance[Z - 1]
+            ffWorkerQ.put((Z, temperature, wavelength, abundance, em))
         for akey in sorted(self.Todo.keys()):
             zStuff = util.convertName(akey)
             Z = zStuff['Z']
             abundance = self.Abundance[Z - 1]
-#            if verbose:
-#                print(' %5i %5s abundance = %10.2e '%(Z, const.El[Z-1],  abundance))
+            if verbose:
+                print(' %5i abundance = %10.2e '%(Z,  abundance))
             if verbose:
                 if self.Todo[akey] != '':
                     print(' doing ion %s for the following processes %s'%(akey, self.Todo[akey]))
-            if 'ff' in self.Todo[akey]:
-                ffWorkerQ.put((akey, temperature, wavelength, abundance, em))
             if 'fb' in self.Todo[akey]:
                 fbWorkerQ.put((akey, temperature, wavelength, abundance, em))
             if 'line' in self.Todo[akey]:
                 ionWorkerQ.put((akey, temperature, eDensity, wavelength, filter, allLines, abundance, em, doContinuum))
         #
+
         ffWorkerQSize = ffWorkerQ.qsize()
         fbWorkerQSize = fbWorkerQ.qsize()
         ionWorkerQSize = ionWorkerQ.qsize()
@@ -248,6 +260,7 @@ class mspectrum(ionTrails, specTrails):
             for p in ffProcesses:
                 if not isinstance(p, str):
                     p.terminate()
+            self.FreeFree = {'wavelength':wavelength, 'intensity':freeFree.squeeze()}
         #
             fbProcesses = []
             for i in range(proc):
@@ -314,7 +327,6 @@ class mspectrum(ionTrails, specTrails):
         #
         #
         #
-        self.FreeFree = {'wavelength':wavelength, 'intensity':freeFree.squeeze()}
         self.FreeBound = {'wavelength':wavelength, 'intensity':freeBound.squeeze()}
         self.LineSpectrum = {'wavelength':wavelength, 'intensity':lineSpectrum.squeeze()}
         self.TwoPhoton = {'wavelength':wavelength, 'intensity':twoPhoton.squeeze()}

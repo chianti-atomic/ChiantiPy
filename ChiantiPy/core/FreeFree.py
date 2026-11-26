@@ -102,7 +102,7 @@ class freeFree(ionTrails):
 
         self.Gff = np.zeros((temperature.shape[0], wavelength.shape[0]), np.float64)
 
-        if temperature.shape[0] == 1:
+        if self.Ntemp == 1:
             myGam2 = self.Z**2*const.rydbergErg/(const.boltzmann*temperature)
             myLogGam2 = np.log10(myGam2)
             myU = const.planck*(1.e8*const.light)/(const.boltzmann*temperature*wavelength)

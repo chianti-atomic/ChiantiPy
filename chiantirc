@@ -9,4 +9,4 @@ abundfile:   sun_photospheric_2021_asplund
 ioneqfile:  chianti
 #    to use use gui dialogs to make selection, set to true,
 #    to make selections from the shell set to false
-gui:	false
+gui:	True

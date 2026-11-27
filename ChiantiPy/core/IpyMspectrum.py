@@ -23,7 +23,7 @@ class ipymspectrum(ionTrails, specTrails):
 
     be for creating an instance, it is necessary to type something like the following into a console
 
-    > ipcluster start   --n=3
+    > ipcluster start   --n=4
 
     this is the way to invoke things under the IPython 6 notation
 
@@ -65,10 +65,10 @@ class ipymspectrum(ionTrails, specTrails):
     timeout - a small but non-zero value seems to be necessary
     '''
     def __init__(self, temperature, eDensity, wavelength, filter=(chfilters.gaussianR, 1000.), label=None,
-        elementList = None, ionList = None, minAbund=None, keepIons=0, doLines=1, doContinuum=1,
-        allLines = 1, em=None, abundance=None, verbose=0,  timeout=0.1):
+        elementList = None, ionList = None, minAbund=None, keepIons=False, doLines=True, doContinuum=True,
+        allLines = True, em=None, abundance=None, verbose=False,  timeout=0.1):
         #
-        print('in some terminal \n >ipcluster start --n=4 , or some other integer')
+        print('in some terminal \n >ipcluster start --n=4 , or the number of cores to use')
         wavelength = np.atleast_1d(wavelength)
         if wavelength.size < 2:
             print(' wavelength must have at least two values, current length %3i'%(wavelength.size))
@@ -133,7 +133,8 @@ class ipymspectrum(ionTrails, specTrails):
         twoPhoton = np.zeros((self.NTempDens, nWvl), np.float64).squeeze()
         lineSpectrum = np.zeros((self.NTempDens, nWvl), np.float64).squeeze()
         #
-         #
+        #
+
         allInpt = []
         #
         if keepIons:
@@ -146,6 +147,27 @@ class ipymspectrum(ionTrails, specTrails):
         self.ionGate(elementList = elementList, ionList = ionList, minAbund=minAbund, doLines=doLines,
             doContinuum=doContinuum, verbose = False)
         #
+        ff_ions = []
+        ff_el = []
+        for akey in self.Todo:
+            if 'ff' in self.Todo[akey]:
+                aname = akey
+                nameDict = util.convertName(aname)
+                Z = nameDict['Z']
+                el = nameDict['Element']
+                if el not in ff_el:
+                    ff_el.append(el)
+                    ff_ions.append(akey)
+#        self.Ff_todo = list(set(ff_ions))
+        self.Ff_todo = ff_ions
+
+
+        # set up freefree
+
+        for anion in self.Ff_todo:
+            allInpt.append([anion, 'ff', temperature, wavelength, abundance, em])
+
+
         for akey in sorted(self.Todo.keys()):
             zStuff = util.convertName(akey)
             Z = zStuff['Z']
@@ -154,12 +176,11 @@ class ipymspectrum(ionTrails, specTrails):
 #                print(' %5i %5s abundance = %10.2e '%(Z, const.El[Z-1],  abundance))
                 if self.Todo[akey] != '':
                     print(' doing ion %s for the following processes %s'%(akey, self.Todo[akey]))
-            if 'ff' in self.Todo[akey]:
-                allInpt.append([akey, 'ff', temperature, wavelength, abundance, em])
             if 'fb' in self.Todo[akey]:
                 allInpt.append([akey, 'fb', temperature, wavelength, abundance, em])
             if 'line' in self.Todo[akey]:
-                allInpt.append([akey, 'line', temperature, eDensity, wavelength, filter, allLines, abundance, em, doContinuum])
+                allInpt.append([akey, 'line', temperature, eDensity, wavelength, filter, allLines,
+                    abundance, em, doContinuum])
         #
         result = lbvAll.map_sync(doAll, allInpt)
         if verbose:
@@ -272,14 +293,16 @@ def doAll(inpt):
     to process ff, fb and line inputs
     '''
     ionS = inpt[0]
+    nameDict = util.convertName(ionS)
+    Z = nameDict['Z']
     calcType = inpt[1]
     if calcType == 'ff':
         temperature = inpt[2]
         wavelength = inpt[3]
         abund = inpt[4]
         em = inpt[5]
-        FF = ChiantiPy.core.continuum(ionS, temperature, abundance=abund, em=em)
-        FF.freeFree(wavelength)
+        FF = ChiantiPy.core.freeFree(Z, abundance=abund)
+        FF.freeFree(temperature,  wavelength, em=em)
         # can not do a deep copy of
 #        return [ionS, calcType, copy.deepcopy(cont)]
         return [ionS, calcType, copy.copy(FF.FreeFree)]
